@@ -10,7 +10,7 @@ import subprocess
 import platform
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-gpuload = os.path.join(plugin_dir, "gpuload")
+gpuload = os.path.join(plugin_dir, "gpuload.bin")
 kernel_str = os.uname().release
 python_str = f"{platform.python_version()} {platform.python_implementation()}[{platform.python_compiler()}]"
 idhagnbot_str = "0.0.1-IDontKnow"
@@ -49,13 +49,21 @@ async def handle_uptime():
   cpu_freq = round(psutil.cpu_freq().current * 1024)
   cpu_temp = round(psutil.sensors_temperatures()['k10temp'][0].current)
   cpu_str = f"{cpu_util}% {cpu_freq}MHz {cpu_temp}°C"
-  proc = await asyncio.create_subprocess_exec(gpuload, "{load}% {clock}MHz {temp}°C (VRAM: {memload}%)", stdout=subprocess.PIPE)
-  gpu_str = (await proc.stdout.read()).decode().rstrip()
+  gpu_str = ""
+  try:
+    # 这个gpuload实现只适用于Linux+AMD
+    proc = await asyncio.create_subprocess_exec(gpuload, "{load}% {clock}MHz {temp}°C (VRAM: {memload}%)", stdout=subprocess.PIPE)
+    gpu_str = (await proc.stdout.read()).decode().rstrip()
+  except:
+    pass
+  if gpu_str == "":
+    gpu_str = "unknown"
   ram_info = psutil.virtual_memory()
   ram_str = f"{round(ram_info.used / MEGA)}MiB / {round(ram_info.total / MEGA)}MiB ({round(ram_info.percent)}%)"
   swap_info = psutil.swap_memory()
   swap_str = f"{round(swap_info.used / MEGA)}MiB / {round(swap_info.total / MEGA)}MiB ({round(swap_info.percent)}%)"
   botuptime_str = format_seconds(cur_time - bot_start_time)
+  # CPU、GPU和发行版我偷懒了，直接写了我自己的电脑配置，有需要记得把template.png改了
   im = Image.open(os.path.join(plugin_dir, "template.png"))
   draw = ImageDraw.Draw(im)
   draw.text((441, 80), kernel_str, color, font)
