@@ -6,6 +6,8 @@
 ## 功能
 详见[我的博客](https://su226.tk/2022/01/12/idhagn-bot/)
 
+提示：部分功能，如沙箱执行Python，需安装第三方软件
+
 ## 安装
 本项目使用Python 3.10.2开发，不保证兼容旧版Python
 ```shell
@@ -51,3 +53,11 @@ IdhagnBot
 |- 📄 README.md
 |- 📄 LICENSE
 ```
+
+## 特别感谢
+* [Nonebot2](https://v2.nonebot.dev/)
+* [go-cqhttp](https://docs.go-cqhttp.org/)
+* [人生重开模拟器](https://github.com/VickScarlet/lifeRestart)
+* 部分资源来自[nonebot-plugin-petpet](https://github.com/MeetWq/nonebot-plugin-petpet)
+* [emojimix](https://tikolu.net/emojimix/)
+* 以及其他参考过的Nonebot2插件
