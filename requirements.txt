@@ -1,0 +1,9 @@
+nonebot2
+python-dotenv
+nonebot-plugin-apscheduler
+nonebot-adapter-onebot
+psutil
+PyYAML
+Pillow
+numpy
+aiohttp
