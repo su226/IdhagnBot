@@ -79,7 +79,7 @@ async def handle_context(bot: Bot, event: PrivateMessageEvent, args = CommandArg
 @event_preprocessor
 async def pre_event(event: Event):
   if hasattr(event, "group_id"):
-    if event.group_id not in group_to_name or event.user_id == ***REMOVED***:
+    if event.group_id not in group_to_name:
       raise IgnoredException("机器人在当前上下文不可用")
   elif hasattr(event, "user_id"):
     refresh_context(event.user_id)
