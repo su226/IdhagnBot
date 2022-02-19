@@ -1,7 +1,7 @@
 from typing import Any, Callable, Iterable, Literal, TypeVar, Generator
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from core_plugins.context.typing import Context
+from util import context
 from plugins.liferestart.game.config import StatRarityItem
 from .game.data import ACHIEVEMENT, CHARACTER, EVENT, TALENT
 from .game.struct.commons import Rarity
@@ -31,7 +31,6 @@ class State(BaseState):
 
 CONFIG = Config.load()
 STATE = State.load()
-context: Context = nonebot.require("context")
 
 def find_character(name: str) -> Character | None:
   for i in CHARACTER.values():
@@ -407,7 +406,7 @@ def leaderboard_factory(getter: Callable[[Statistics], int], rarities: list[Stat
   async def handler(bot: Bot, event: Event, **_):
     leaderboard = sorted(((id, getter(st)) for id, st in STATE.statistics.items()), key=lambda x: x[1], reverse=True)
     segments = []
-    ctx = context.get_context(event)
+    ctx = context.get_event_context(event)
     if ctx == -1:
       members: dict[int, str] = {}
     else:

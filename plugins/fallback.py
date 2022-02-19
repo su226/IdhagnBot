@@ -1,5 +1,5 @@
 from util.config import BaseState, Field
-from core_plugins.context.typing import Context
+from util import context
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
 from nonebot.message import run_preprocessor, run_postprocessor, event_postprocessor
 from nonebot.params import State as BotState, CommandArg
@@ -11,7 +11,6 @@ class State(BaseState):
 
 STATE = State.load()
 
-context: Context = nonebot.require("context")
 driver = nonebot.get_driver()
 
 @run_preprocessor
@@ -36,7 +35,7 @@ async def post_event(bot: Bot, event: MessageEvent, state = BotState()):
     elif event.is_tome():
       await bot.send(event, "本帐号为机器人，请发送 /帮助 查看可用命令（不需要@）")
 
-suppress = nonebot.on_command("suppress", context.in_context_rule(context.ANY_GROUP), permission=context.ADMIN)
+suppress = nonebot.on_command("suppress", context.in_context_rule(context.ANY_GROUP), permission=context.Permission.ADMIN)
 suppress.__cmd__ = "suppress"
 suppress.__brief__ = "暂时禁用错误消息"
 suppress.__doc__ = '''\
@@ -44,11 +43,11 @@ suppress.__doc__ = '''\
 /suppress true - 禁用本群错误消息
 /suppress false - 重新启用本群错误消息'''
 suppress.__ctx__ = [context.ANY_GROUP]
-suppress.__perm__ = context.ADMIN
+suppress.__perm__ = context.Permission.ADMIN
 @suppress.handle()
 async def handle_suppress(bot: Bot, event: MessageEvent, args = CommandArg()):
   value = str(args).rstrip()
-  ctx = context.get_context(event)
+  ctx = context.get_event_context(event)
   if not value:
     suppressed = "已" if ctx in STATE.suppress else "未"
     await suppress.send(f"本群错误消息{suppressed}被禁用")
@@ -63,12 +62,12 @@ async def handle_suppress(bot: Bot, event: MessageEvent, args = CommandArg()):
   else:
     await suppress.send(suppress.__doc__)
 
-raise_ = nonebot.on_command("raise", permission=context.ADMIN)
+raise_ = nonebot.on_command("raise", permission=context.Permission.ADMIN)
 raise_.__cmd__ = "raise"
 raise_.__brief__ = "手动触发一个错误"
 raise_.__doc__ = "/raise confirm - 手动触发一个错误"
 raise_.__ctx__ = [context.ANY_GROUP]
-raise_.__perm__ = context.ADMIN
+raise_.__perm__ = context.Permission.ADMIN
 @raise_.handle()
 async def handle_raise(args = CommandArg()):
   if str(args).rstrip() == "confirm":

@@ -43,7 +43,7 @@ class BaseConfig(BaseModel):
       else:
         logger.info(f"{name}文件不存在: {file}")
     except:
-      logger.warning(f"无法读取{name}：{file}")
+      logger.opt(exception=True).warning(f"无法读取{name}：{file}")
     return cls()
 
   def dump(self):
@@ -54,7 +54,7 @@ class BaseConfig(BaseModel):
       with open(file, "w") as f:
         yaml.dump(data, f, yaml.CDumper)
     except:
-      logger.warning(f"无法记录{name}：{file}")
+      logger.opt(exception=True).warning(f"无法记录{name}：{file}")
 
 class BaseState(BaseConfig):
   __state__ = True

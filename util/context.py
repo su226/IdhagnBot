@@ -1,14 +1,69 @@
-from .config import STATE, Context
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Any
 from apscheduler.schedulers.base import BaseScheduler
 from datetime import datetime, timedelta
+from util.config import BaseConfig, BaseModel, BaseState, Field
 from enum import Enum
 from nonebot.adapters.onebot.v11 import Bot, Event
 from nonebot.rule import Rule
 from nonebot.log import logger
 from nonebot.permission import Permission as BotPermission, SUPERUSER
+from nonebot.exception import IgnoredException
+from nonebot.message import event_preprocessor
 import nonebot
+
+class Config(BaseConfig):
+  __file__ = "context"
+  groups: dict[int, list[str]] = Field(default_factory=dict)
+
+class Context(BaseModel):
+  group: int
+  expire: datetime
+
+class State(BaseState):
+  __file__ = "context"
+  contexts: dict[int, Context] = Field(default_factory=dict)
+
+@dataclass
+class Group:
+  id: int
+  name: str
+  aliases: list[str]
+
+CONFIG = Config.load()
+STATE = State.load()
+GROUP_IDS: dict[int, Group] = {}
+GROUP_NAMES: dict[str, Group] = {}
+
+now = datetime.now()
+expired = []
+for user, context in STATE.contexts.items():
+  if context.expire <= now:
+    expired.append(user)
+for user in expired:
+  del STATE.contexts[user]
+
+for id, aliases in CONFIG.groups.items():
+  group = Group(id, f"未知_{id}", aliases)
+  GROUP_IDS[id] = group
+  for alias in aliases:
+    GROUP_NAMES[alias] = group
+
+driver = nonebot.get_driver()
+@driver.on_bot_connect
+async def bot_connect(bot: Bot):
+  for info in await bot.call_api("get_group_list"):
+    if info["group_id"] in GROUP_IDS:
+      GROUP_IDS[info["group_id"]].name = info["group_name"]
+
+@event_preprocessor
+async def pre_event(event: Event):
+  if hasattr(event, "group_id"):
+    if event.group_id not in GROUP_IDS:
+      raise IgnoredException("机器人在当前上下文不可用")
+  elif hasattr(event, "user_id"):
+    refresh_context(event.user_id)
 
 def format_duration(seconds: int) -> str:
   minutes, seconds = divmod(seconds, 60)
@@ -67,7 +122,7 @@ def enter_context(uid: int, gid: int):
   STATE.contexts[uid] = Context(group=gid, expire=0)
   return refresh_context(uid)
 
-def get_context(uid: int) -> int:
+def get_uid_context(uid: int) -> int:
   context = STATE.contexts.get(uid, None)
   return context.group if context else PRIVATE
 
@@ -99,7 +154,7 @@ async def timeout_exit(uid: int):
 def get_event_context(event: Event) -> int:
   if hasattr(event, "group_id"):
     return event.group_id
-  return get_context(event.user_id)
+  return get_uid_context(event.user_id)
 
 def in_context(ctx: int, *contexts: int) -> bool:
   for i in contexts:

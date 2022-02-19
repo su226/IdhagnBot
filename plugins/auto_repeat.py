@@ -1,10 +1,8 @@
-from core_plugins.context.typing import Context
+from util import context
 from nonebot.adapters.onebot.v11 import MessageEvent, Message
 from nonebot.rule import Rule
 import nonebot
 import re
-
-context: Context = nonebot.require("context")
 
 last_message: dict[int, Message] = {}
 repeated: set[int] = set()
@@ -18,7 +16,7 @@ def is_original_emote(event: MessageEvent) -> bool:
   return ORIGINAL_EMOTE_RE.match(event.raw_message)
 
 async def can_repeat(event: MessageEvent) -> bool:
-  ctx = context.get_context(event)
+  ctx = context.get_event_context(event)
   result = False
   if event.raw_message == last_message.get(ctx, None):
     result = ctx not in repeated and not (is_command(event) or is_original_emote(event))
@@ -34,4 +32,4 @@ async def handle_auto_repeat(event: MessageEvent):
     if seg.type == "image":
       seg.data["file"] = seg.data["url"]
   await auto_repeat.send(event.message)
-  repeated.add(context.get_context(event))
+  repeated.add(context.get_event_context(event))

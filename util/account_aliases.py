@@ -1,13 +1,8 @@
 from util.config import BaseModel, BaseConfig, BaseState, Field
-from core_plugins.context.typing import Context
+from util import context
 from dataclasses import dataclass
-from nonebot.adapters.onebot.v11 import Bot, Event
-from nonebot.params import CommandArg
-import nonebot
+from nonebot.adapters import Bot, Event
 import re
-
-context: Context = nonebot.require("context")
-exports = nonebot.export()
 
 class Trap(BaseModel):
   reason: str = "无原因"
@@ -46,25 +41,22 @@ class Match:
       return f"{self.uids[0]} 等 {len(self.uids)} 个成员"
     return str(self.uids[0])
 
-@exports
 class MatchException(Exception):
   def __init__(self, errors: list[str]) -> None:
     super().__init__("这个异常没有被正确捕获")
     self.errors = errors
 
-config = Config.load()
-state = State.load()
+CONFIG = Config.load()
+STATE = State.load()
 
 CHINESE_RE = re.compile(r"[a-zA-Z0-9\u4e00-\u9fa5]+")
-@exports
 def to_identifier(data: str) -> str:
   return "".join(CHINESE_RE.findall(data)).lower()
 
-@exports
 async def get_aliases(bot: Bot, event: Event) -> dict[int, Alias]:
-  ctx = context.get_context(event)
+  ctx = context.get_event_context(event)
   aliases: dict[int, Alias] = {}
-  for i in config.aliases:
+  for i in CONFIG.aliases:
     if not context.in_context(ctx, *i.contexts):
       continue
     for alias in i.aliases:
@@ -85,7 +77,6 @@ async def get_aliases(bot: Bot, event: Event) -> dict[int, Alias]:
     }))
   return aliases
 
-@exports
 def match(aliases: dict[int, Alias], pattern: str) -> tuple[dict[int, Match], dict[int, Match], dict[int, Match]]:
   all: dict[int, Match] = {}
   exact: dict[int, Match] = {}
@@ -108,7 +99,6 @@ def match(aliases: dict[int, Alias], pattern: str) -> tuple[dict[int, Match], di
 
 AMBIGUOUS_LIMIT = 5
 
-@exports
 def try_match(aliases: dict[int, Alias], pattern: str, multiple: bool = False, trap: bool = False) -> int | list[int]:
   pattern = to_identifier(pattern)
   all, exact, inexact = match(aliases, pattern)
@@ -134,8 +124,8 @@ def try_match(aliases: dict[int, Alias], pattern: str, multiple: bool = False, t
     errors.append(f"{matches[0].items[0]}{comment}包含多个成员")
   if trap:
     for user in matches[0].uids:
-      for id, t in config.traps.items():
-        if state.traps_enabled.get(id, False) and user in t.users:
+      for id, t in CONFIG.traps.items():
+        if STATE.traps_enabled.get(id, False) and user in t.users:
           errors.append(f"发现包含 {user} 的 trap，理由为 {t.reason}")
           break
   if len(errors):
@@ -144,46 +134,3 @@ def try_match(aliases: dict[int, Alias], pattern: str, multiple: bool = False, t
     return matches[0].uids
   else:
     return matches[0].uids[0]
-
-def parse_boolean(value: str) -> bool:
-  if value in ("true", "t", "1", "yes", "y", "on"):
-    return True
-  if value in ("false", "f", "0", "no", "n", "off"):
-    return False
-  raise ValueError("Not a vaild truthy or falsy")
-
-trap = nonebot.on_command("trap", permission=context.SUPER)
-trap.__cmd__ = "trap"
-trap.__brief__ = "开启或关闭 trap"
-trap.__doc__ = '''\
-/trap - 列出所有trap
-/trap <id> - 查看该trap是否开启
-/trap <id> true|false - 开启或关闭trap'''
-trap.__perm__ = context.SUPER
-@trap.handle()
-async def handle_trapcmd(msg = CommandArg()):
-  args = str(msg).lower().split()
-  if len(args) == 2:
-    id, enabled = args
-    if id not in config.traps:
-      await trap.send(f"id 为 {id} 的 trap 不存在")
-      return
-    try:
-      enabled = parse_boolean(enabled)
-    except:
-      await trap.send("/trap <id> true|false - 开启或关闭trap")
-      return
-    state.traps_enabled[id] = enabled
-    state.dump()
-    state_str = "启用" if enabled else "禁用"
-    await trap.send(f"已{state_str} id 为 {id} 的 trap")
-  elif len(args) == 1:
-    id = args[0]
-    if id not in config.traps:
-      await trap.send(f"id 为 {id} 的 trap 不存在")
-      return
-    state_str = "启用" if state.traps_enabled.get(id, False) else "禁用"
-    await trap.send(f"id 为 {id} 的 trap 已{state_str}")
-  else:
-    traps = "\n".join(map(lambda x: f"{'✓' if state.traps_enabled.get(x[0], False) else '✗'} {x[0]}: {x[1].reason}", config.traps.items()))
-    await trap.send("trap 列表：\n" + traps)
