@@ -4,13 +4,12 @@ from util import context
 import math
 import nonebot
 
-PermissionStr = Literal["member", "admin", "owner", "super"]
-
 class UserCommons(BaseModel):
+  category: str = ""
   priority: int = 0
   private: bool | None = None
   contexts: list[int] = Field(default_factory=list)
-  permission: PermissionStr = "member"
+  permission: context.Permission = context.Permission.MEMBER
 
 class UserString(UserCommons):
   string: str
@@ -22,19 +21,15 @@ class UserCommand(UserCommons):
 
 class Config(BaseConfig):
   __file__ = "help"
-  force_show: PermissionStr = "member"
+  force_show: context.Permission = context.Permission.MEMBER
   page_size: int = 10
-  blacklist: list[str] = Field(default_factory=list)
+  blacklist: set[str] = Field(default_factory=set)
   user_helps: list[str | UserString | UserCommand] = Field(default_factory=list)
+  category_brief: dict[str, str] = Field(default_factory=dict)
 
 CONFIG = Config.load()
 
-
 class Item:
-  force_show = context.Permission.MEMBER
-  blacklist: set[str] = set()
-  items: list["Item"] = []
-
   def __init__(self, id: str, priority: int = 0, contexts: list[int] | int = [], private: bool = None, permission: context.Permission | str = context.Permission.MEMBER):
     self.id = id
     self.priority = priority
@@ -51,9 +46,11 @@ class Item:
   def __call__(self) -> str:
     raise NotImplementedError
 
-  def register(self) -> "Item":
-    Item.items.append(self)
+  def register(self):
     return self
+
+  def get_order(self) -> int:
+    return self.priority
   
   def can_show(self, current_context: int, private: bool, permission: context.Permission) -> bool:
     if self.private is not None and private != self.private:
@@ -62,7 +59,7 @@ class Item:
       return False
     if permission < self.permission:
       return False
-    return self.id not in Item.blacklist
+    return self.id not in CONFIG.blacklist
 
 class StringItem(Item):
   def __init__(self, id: str, string: str, **kw):
@@ -71,6 +68,9 @@ class StringItem(Item):
 
   def __call__(self) -> str:
     return self.string
+
+  def get_order(self) -> int:
+    return -1
 
 class CommandItem(Item):
   commands: dict[str, "CommandItem"] = {}
@@ -81,99 +81,163 @@ class CommandItem(Item):
     context.Permission.SUPER: "[超管] ",
   }
 
-  def __init__(self, name: str, aliases: list[str] = [], brief: str = "", usage: list[str] | str = "", **kw):
-    super().__init__(name, **kw)
-    self.name = name
-    self.aliases = aliases
-    if isinstance(usage, list):
-      self._usage = "\n".join(usage)
-    else:
-      self._usage = usage
-    self.brief = f"{CommandItem.prefixes[self.permission]}/{self.name}"
-    if brief:
-      self.brief += f" - {brief}"
+  def __init__(self, names: list[str] = [], brief: str = "", usage: str = "", **kw):
+    super().__init__(names[0], **kw)
+    self.names = names
+    self._usage = usage
+    self.brief = brief
   
-  def register(self) -> Item:
-    CommandItem.commands[self.name] = self
-    for i in self.aliases:
+  def register(self) -> "CommandItem":
+    for i in self.names:
       CommandItem.commands[i] = self
     return super().register()
+
+  @staticmethod
+  def find(name: str, private: bool, current_context: int, permission: context.Permission) -> "CommandItem | None":
+    if name in CommandItem.commands:
+      item = CommandItem.commands[name]
+      if item.can_show(current_context, private, max(permission, CONFIG.force_show)):
+        return item
+    return None
   
   def __call__(self) -> str:
-    return self.brief
+    brief = ""
+    if self.brief:
+      brief = f" - {self.brief}"
+    return f"{CommandItem.prefixes[self.permission]}/{self.names[0]}{brief}"
   
   @property
   def usage(self) -> str:
-    segments = [self.brief]
+    segments = [f"{CommandItem.prefixes[self.permission]}{self.names[0]}"]
+    if self.brief:
+      segments[0] += f" - {self.brief}"
     if len(self._usage) == 0:
       segments.append("没有用法说明")
     else:
       segments.append(self._usage)
-    if len(self.aliases) != 0:
-      segments.append("该命令有以下别名：" + "、".join(self.aliases))
+    if len(self.names) > 1:
+      segments.append("该命令有以下别名：" + "、".join(self.names[1:]))
     return "\n".join(segments)
 
-def add_string(id: str, string: str, **kw) -> StringItem:
-  return StringItem(id, string, **kw).register()
+class CategoryItem(Item):
+  ROOT: "CategoryItem"
 
-user_string_count = 0
-def add_user_string(string: str, **kw) -> StringItem:
-  global user_string_count
-  user_string_count += 1
-  return StringItem(f"user_string_{user_string_count}", string, **kw).register()
+  def __init__(self, name: str, brief: str = "", **kw):
+    super().__init__(name, **kw)
+    self.brief = brief
+    self.items: list[Item] = []
+    self.items_dict: dict[str, Item] = {}
+    self.string_count = 0
+  
+  def __call__(self) -> str:
+    brief = ""
+    if self.brief:
+      brief = f" - {self.brief}"
+    return f".{self.id}{brief}"
 
-def add_command(names: str | list[str], brief: str = "", usage: list[str] | str = "", **kw) -> CommandItem:
-  if isinstance(names, str):
-    name = names
-    aliases = []
-  else:
-    name = names[0]
-    aliases = names[1:]
-  return CommandItem(name, aliases, brief, usage, **kw).register()
+  def get_order(self) -> int:
+    return -2
 
-def format_page(i: int, current_context: int, private: bool, permission: context.Permission) -> str:
-  show_permission = max(permission, Item.force_show)
-  # show_permission = max(permission, Item.force_show) if private else Item.force_show
-  vaild_items = ["使用 /帮助 <命令名> 查看详细用法"]
-  if current_context == context.PRIVATE:
-    vaild_items.append("请进入上下文查看群聊命令")
-  # elif permission > show_permission and not private:
-  #   vaild_items.append("请私聊查看高权限命令")
-  vaild_items.extend(sorted(map(lambda x: x(), filter(lambda x: x.can_show(current_context, private, show_permission), Item.items))))
-  pages = math.ceil(1.0 * len(vaild_items) / CONFIG.page_size)
-  if i < 1 or i > pages:
-    return f"页码范围从 1 到 {pages}"
-  start = (i - 1) * CONFIG.page_size
-  end = min(i * CONFIG.page_size, len(vaild_items))
-  pageid = f"第 {i} 页，共 {pages} 页\n"
-  return pageid + "\n".join(vaild_items[start:end])
+  @staticmethod
+  def find(path: str | list[str], create: bool = False) -> "CategoryItem":
+    cur = CategoryItem.ROOT
+    if isinstance(path, str):
+      path = [x for x in path.split(".") if x]
+    for i, id in enumerate(path, 1):
+      if id not in cur.items_dict:
+        if not create:
+          raise KeyError(f"子分类 {'.'.join(path[:i])} 不存在")
+        sub = CategoryItem(id)
+        cur.items.append(sub)
+        cur.items_dict[id] = sub
+      cur = cur.items_dict[id]
+      if not isinstance(cur, CategoryItem):
+        raise TypeError(f"{'.'.join(path[:i])} 不是一个子分类")
+    return cur
 
-def find_command(name: str, private: bool, current_context: int, permission: context.Permission) -> CommandItem | None:
-  show_permission = max(permission, Item.force_show) if private else Item.force_show
-  if name not in CommandItem.commands:
+  def add_item(self, item: Item):
+    if item.id in self.items_dict:
+      raise KeyError(f"已有ID为\"{item.id}\"的帮助项")
+    self.items.append(item)
+    self.items_dict[item.id] = item
+    return item.register()
+
+  def get_item(self, name: str, private: bool, current_context: int, permission: context.Permission) -> Item | None:
+    if name in self.items_dict:
+      item = self.items_dict[name]
+      if item.can_show(current_context, private, max(permission, CONFIG.force_show)):
+        return item
     return None
-  command = CommandItem.commands[name]
-  if command.can_show(current_context, private, show_permission):
-    return command
-  return None
 
-Item.force_show = context.Permission.parse(CONFIG.force_show)
-Item.blacklist.update(CONFIG.blacklist)
+  def add_string(self, string: str, **kw) -> StringItem:
+    self.string_count += 1
+    return self.add_item(StringItem(f"string_{self.string_count}", string, **kw))
 
-for command in CONFIG.user_helps:
-  if isinstance(command, str):
-    add_user_string(command)
-  elif isinstance(command, UserString):
-    add_user_string(command.string, priority=command.priority, private=command.private, contexts=command.contexts, permission=command.permission)
+  def add_command(self, names: str | list[str], brief: str = "", usage: list[str] | str = "", **kw) -> CommandItem:
+    if isinstance(names, str):
+      names = [names]
+    return self.add_item(CommandItem(names, brief, usage, **kw))
+
+  def format_page(self, page_id: int, current_context: int, private: bool, permission: context.Permission) -> str:
+    permission = max(permission, CONFIG.force_show)
+    vaild_items = ["使用 /帮助 <命令名> 查看详细用法"]
+    if current_context == context.PRIVATE:
+      vaild_items.append("请进入上下文查看群聊命令")
+    vaild_items.extend(x[-1] for x in sorted((-x.priority, x.get_order(), x())
+      for x in self.items if x.can_show(current_context, private, permission)))
+    pages = math.ceil(len(vaild_items) / CONFIG.page_size)
+    if page_id < 1 or page_id > pages:
+      return f"页码范围从 1 到 {pages}"
+    start = (page_id - 1) * CONFIG.page_size
+    end = min(page_id * CONFIG.page_size, len(vaild_items))
+    pageid = f"第 {page_id} 页，共 {pages} 页\n"
+    return pageid + "\n".join(vaild_items[start:end])
+
+CategoryItem.ROOT = CategoryItem("root")
+
+for item in CONFIG.user_helps:
+  if isinstance(item, str):
+    CategoryItem.ROOT.add_string(item)
+  elif isinstance(item, UserString):
+    CategoryItem.find(item.category, True).add_string(item.string, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
   else:
-    add_command(command.command, command.brief, command.usage, priority=command.priority, private=command.private, contexts=command.contexts, permission=command.permission)
+    CategoryItem.find(item.category, True).add_command(item.command, item.brief, item.usage, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
 
-def add_commands():
+for path, brief in CONFIG.category_brief.items():
+  CategoryItem.find(path, True).brief = brief
+
+def add_all_from_plugins():
   for plugin in nonebot.get_loaded_plugins():
+    for name, data in getattr(plugin.module, "__cat__", {}).items():
+      category = CategoryItem.find(name, True)
+      category.brief = data.get("brief", category.brief)
+      category.priority = data.get("priority", category.priority)
+      category.private = data.get("private", category.private)
+      category.contexts = data.get("contexts", category.contexts)
+      category.permission = data.get("permission", category.permission)
+      for extra in data.get("extras", []):
+        try:
+          item = UserString.parse_obj(extra)
+        except:
+          pass
+        else:
+          category.add_string(item.string, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
+          continue
+        try:
+          item = UserCommand.parse_obj(extra)
+        except:
+          pass
+        else:
+          category.add_command(item.command, item.brief, item.usage, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
+          continue
+        if isinstance(extra, str):
+          category.add_string(extra)
+        else:
+          raise ValueError("无效的帮助项")
     for matcher in plugin.matcher:
       if not hasattr(matcher, "__cmd__"):
         continue
-      add_command(
+      CategoryItem.find(getattr(matcher, "__cat__", ""), True).add_command(
         matcher.__cmd__,
         getattr(matcher, "__brief__", ""),
         getattr(matcher, "__doc__", ""),

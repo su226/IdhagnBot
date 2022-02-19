@@ -10,8 +10,8 @@ nonebot.get_driver().register_adapter(Adapter)
 nonebot.load_plugins("plugins")
 nonebot.load_plugins("user_plugins")
 
-from util.help import add_commands
-add_commands()
+from util.help import add_all_from_plugins
+add_all_from_plugins()
 
 if __name__ == "__main__":
   nonebot.run()
