@@ -1,13 +1,11 @@
 from typing import Awaitable, Callable, TypeVar
 from core_plugins.context.typing import Context
-from core_plugins.help.typing import Help
 from nonebot.params import CommandArg
 from nonebot.matcher import Matcher
 import nonebot
 import random
 
 context: Context = nonebot.require("context")
-help: Help = nonebot.require("help")
 exports = nonebot.export()
 
 class Arguments(list[str]):
@@ -25,7 +23,10 @@ def command(names: str | list[str], brief: str = "", usage: str | list[str] = ""
     async def handler(args = CommandArg()):
       await func(matcher, Arguments(str(args).split()))
     matcher = nonebot.on_command(names[0], context.in_context_rule(*contexts), set(names[1:]), handlers=[handler])
-    help.add_command(names, brief, usage, contexts=contexts)
+    matcher.__cmd__ = names
+    matcher.__brief__ = brief
+    matcher.__doc__ = usage
+    matcher.__ctx__ = contexts
     return func
   return decorator
 
