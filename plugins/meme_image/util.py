@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from util.config import BaseConfig
-from core_plugins.context.typing import Context
+from util import context, account_aliases
 from typing import Callable, TypeVar, Awaitable
 from PIL import Image, ImageDraw, ImageFilter
 from io import BytesIO
@@ -19,10 +19,8 @@ class Config(BaseConfig):
 
 CONFIG = Config.load()
 
-context: Context = nonebot.require("context")
 exports = nonebot.export()
 resources_dir = os.path.abspath("resources/meme_image") + os.sep
-account_aliases = nonebot.require("account_aliases")
 
 @exports
 @dataclass

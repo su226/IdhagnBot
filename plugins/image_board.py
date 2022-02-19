@@ -1,5 +1,5 @@
 from util.config import BaseModel, BaseConfig, Field
-from core_plugins.context.typing import Context
+from util import context
 from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientConnectionError, ClientProxyConnectionError
 from aiohttp.http import SERVER_SOFTWARE
@@ -92,8 +92,6 @@ class Config(BaseConfig):
 
 CONFIG = Config.load()
 presets.update(CONFIG.presets)
-
-context: Context = nonebot.require("context")
 
 T = TypeVar("T")
 class ParseFailed(Exception): pass

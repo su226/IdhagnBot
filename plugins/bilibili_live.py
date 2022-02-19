@@ -2,7 +2,7 @@ from collections import defaultdict
 from aiohttp import ClientSession
 from util.config import BaseModel, BaseConfig
 from apscheduler.schedulers.base import BaseScheduler
-from core_plugins.context.typing import Context
+from util import context
 from nonebot.log import logger
 import nonebot
 
@@ -36,19 +36,18 @@ def format_duration(seconds: int) -> str:
   return " ".join(segments)
 
 config = Config.load()
-context: Context = nonebot.require("context")
 scheduler: BaseScheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 driver = nonebot.get_driver()
 API_URL = "https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomBaseInfo?req_biz=link-center"
 streaming: dict[int, bool] = defaultdict(lambda: False)
 
-check_live = nonebot.on_command("检查直播", permission=context.ADMIN)
+check_live = nonebot.on_command("检查直播", permission=context.Permission.ADMIN)
 check_live.__cmd__ = "检查直播"
 check_live.__brief__ = "立即检查直播间状态"
 check_live.__usage__ = f'''\
 立即检查直播间是否开播
 每 {format_duration(config.interval)}会自动检查'''
-check_live.__perm__ = context.ADMIN
+check_live.__perm__ = context.Permission.ADMIN
 @check_live.handle()
 async def handle_check_live():
   await check_live.send("正在检查直播间")

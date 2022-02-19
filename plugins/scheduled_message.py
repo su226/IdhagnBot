@@ -1,8 +1,8 @@
 from util.config import BaseModel, BaseState, Field
+from util import context
 from datetime import datetime
 from apscheduler.schedulers.base import BaseScheduler, Job
 from apscheduler.triggers.date import DateTrigger
-from core_plugins.context.typing import Context
 from nonebot.adapters.onebot.v11 import Event, Message, GroupMessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
 from nonebot.params import CommandArg
@@ -64,7 +64,6 @@ class State(BaseState):
     scheduled.schedule(ctx, id)
 
 driver = nonebot.get_driver()
-context: Context = nonebot.require("context")
 scheduler: BaseScheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 STATE = State.load()
 
@@ -91,7 +90,7 @@ def get_message(msg: Message) -> str:
     texts.append(seg.data["text"] if seg.is_text() else str(seg))
   return "".join(texts)
 
-schedule = nonebot.on_command("定时", context.in_context_rule(context.ANY_GROUP), {"schedule"}, permission=context.SUPER)
+schedule = nonebot.on_command("定时", context.in_context_rule(context.ANY_GROUP), {"schedule"}, permission=context.Permission.SUPER)
 schedule.__cmd__ = ["定时", "schedule"]
 schedule.__brief__ = "设置定时任务"
 schedule.__doc__ = '''\
@@ -100,11 +99,11 @@ schedule.__doc__ = '''\
 /定时 预览|preview <任务ID> - 预览定时任务
 /定时 取消|cancel <任务ID> - 取消定时任务'''
 schedule.__ctx__ = [context.ANY_GROUP]
-schedule.__perm__ = context.SUPER
+schedule.__perm__ = context.Permission.SUPER
 @schedule.handle()
 async def handle_schedule(event: Event, msg: Message = CommandArg()):
   args = get_message(msg).rstrip().split(None, 1)
-  ctx = context.get_context(event)
+  ctx = context.get_event_context(event)
   if len(args) == 0:
     await schedule.send("运行 /帮助 定时 查看使用说明")
   elif args[0] in ("列表", "list"):

@@ -1,21 +1,18 @@
-from core_plugins.context.typing import Context
+from util import context, account_aliases
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import CommandArg
 import random
 import nonebot
 
-context: Context = nonebot.require("context")
-account_aliases = nonebot.require("account_aliases")
-
-super_poke = nonebot.on_command("戳亿戳", context.in_context_rule(context.ANY_GROUP), {"poke", "superpoke"}, permission=context.SUPER)
+super_poke = nonebot.on_command("戳亿戳", context.in_context_rule(context.ANY_GROUP), {"poke", "superpoke"}, permission=context.Permission.SUPER)
 super_poke.__cmd__ = ["戳亿戳", "poke", "superpoke"]
 super_poke.__brief__ = "发送多次戳一戳"
 super_poke.__doc__ = "/戳亿戳 <总次数> <QQ号列表>"
 super_poke.__ctx__ = context.ANY_GROUP
-super_poke.__perm__ = context.SUPER
+super_poke.__perm__ = context.Permission.SUPER
 @super_poke.handle()
 async def handle_super_poke(bot: Bot, event: Event, args: Message = CommandArg()):
-  ctx = context.get_context(event)
+  ctx = context.get_event_context(event)
   args = str(args).split()
   if len(args) < 2:
     await super_poke.send("/戳亿戳 <总次数> <QQ号列表>")

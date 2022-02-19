@@ -1,9 +1,34 @@
-from core_plugins.context.typing import Context
-from .config import CONFIG, UserString
+from typing import Literal
+from util.config import BaseConfig, BaseModel, Field
+from util import context
 import math
 import nonebot
 
-context: Context = nonebot.require("context")
+PermissionStr = Literal["member", "admin", "owner", "super"]
+
+class UserCommons(BaseModel):
+  priority: int = 0
+  private: bool | None = None
+  contexts: list[int] = Field(default_factory=list)
+  permission: PermissionStr = "member"
+
+class UserString(UserCommons):
+  string: str
+
+class UserCommand(UserCommons):
+  command: list[str]
+  brief: str = ""
+  usage: str = ""
+
+class Config(BaseConfig):
+  __file__ = "help"
+  force_show: PermissionStr = "member"
+  page_size: int = 10
+  blacklist: list[str] = Field(default_factory=list)
+  user_helps: list[str | UserString | UserCommand] = Field(default_factory=list)
+
+CONFIG = Config.load()
+
 
 class Item:
   force_show = context.Permission.MEMBER
@@ -155,4 +180,4 @@ def add_commands():
         priority=getattr(matcher, "__priority__", 1 - matcher.priority),
         contexts=getattr(matcher, "__ctx__", []),
         private=getattr(matcher, "__priv__", None),
-        permission=getattr(matcher, "__perm__", context.MEMBER))
+        permission=getattr(matcher, "__perm__", context.Permission.MEMBER))

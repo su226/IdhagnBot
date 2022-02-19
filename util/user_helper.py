@@ -1,12 +1,9 @@
 from typing import Awaitable, Callable, TypeVar
-from core_plugins.context.typing import Context
+from util import context
 from nonebot.params import CommandArg
 from nonebot.matcher import Matcher
 import nonebot
 import random
-
-context: Context = nonebot.require("context")
-exports = nonebot.export()
 
 class Arguments(list[str]):
   def get(self, index: int, default: str = "") -> str:
@@ -15,7 +12,6 @@ class Arguments(list[str]):
     return self[index]
 
 CallbackType = Callable[[Matcher, Arguments], Awaitable[None]]
-@exports
 def command(names: str | list[str], brief: str = "", usage: str | list[str] = "", contexts: int | list[int] = []) -> Callable[[CallbackType], CallbackType]:
   if not isinstance(names, list):
     names = [names]
@@ -31,7 +27,6 @@ def command(names: str | list[str], brief: str = "", usage: str | list[str] = ""
   return decorator
 
 T = TypeVar("T")
-@exports
 def weighted_choice(choices: list[T | tuple[T, int]]) -> T:
   raw_choices = []
   weights = []
