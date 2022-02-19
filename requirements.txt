@@ -7,3 +7,5 @@ PyYAML
 Pillow
 numpy
 aiohttp
+pyppeteer
+libzim
