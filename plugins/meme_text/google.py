@@ -1,14 +1,13 @@
 from io import BytesIO
-import random
-from PIL import Image, ImageDraw, ImageFont, ImageChops
+from PIL import Image, ImageDraw
+from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
+import random
 import nonebot
 
-FONT = ImageFont.truetype("/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc", 64)
 COLORS = [(66, 133, 244), (234, 67, 53), (251, 188, 5), (52, 168, 83)]
 PADDING = 32
-LINE_HEIGHT = FONT.getsize("A")[1] + 4
 
 tiktok = nonebot.on_command("谷歌", aliases={"google"})
 tiktok.__cmd__ = ["谷歌", "google"]
@@ -17,8 +16,10 @@ tiktok.__doc__ = "/谷歌 <文本>"
 @tiktok.handle()
 async def handle_tiktok(args: Message = CommandArg()):
   text = args.extract_plain_text().rstrip()
-  w, h = FONT.getsize_multiline(text)
-  h += FONT.getmetrics()[1]
+  font = resources.font("sans-bold", 64)
+  line_height = font.getsize("A")[1] + 4
+  w, h = font.getsize_multiline(text)
+  h += font.getmetrics()[1]
   im = Image.new("RGB", (w + PADDING * 2, h + PADDING * 2), (255, 255, 255))
   draw = ImageDraw.Draw(im)
   x = 0
@@ -28,13 +29,13 @@ async def handle_tiktok(args: Message = CommandArg()):
   for ch in text:
     if ch == "\n":
       x = 0
-      y += LINE_HEIGHT
+      y += line_height
       continue
     # 防止两个相同的颜色挨在一起
     i = random.randrange(len(colors) - 1)
-    draw.text((PADDING + x, PADDING + y), ch, colors[i], FONT)
+    draw.text((PADDING + x, PADDING + y), ch, colors[i], font)
     colors[i], colors[-1] = colors[-1], colors[i]
-    x += FONT.getsize(ch)[0]
+    x += font.getsize(ch)[0]
   f = BytesIO()
   im.save(f, "png")
   await tiktok.finish(MessageSegment.image(f))

@@ -1,12 +1,12 @@
 from typing import Literal
 from .config import CONFIG
 from aiohttp.web import Server, ServerRunner, TCPSite, Request, Response
+from util import resources
 from libzim.reader import Archive
 from libzim.search import Query, Searcher
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg, ArgStr, State
 from nonebot.typing import T_State
-import pyppeteer
 import nonebot
 import socket
 import math
@@ -14,8 +14,7 @@ import re
 
 ZIM = Archive(CONFIG.zim)
 # 简繁转换代码来自 https://github.com/nk2028/opencc-js ，MIT协议
-OPENCC_SCRIPT = '''\
-function () {
+OPENCC_SCRIPT = '''function () {
   const OpenCCJSData = {
     HKVariants: "僞 偽|兌 兑|叄 叁|喫 吃|囪 囱|媼 媪|嬀 媯|悅 悦|慍 愠|戶 户|挩 捝|搵 揾|擡 抬|敓 敚|敘 敍|柺 枴|梲 棁|棱 稜|榲 榅|檯 枱|氳 氲|涗 涚|溫 温|溼 濕|潙 溈|潨 潀|熅 煴|爲 為|癡 痴|皁 皂|祕 秘|稅 税|竈 灶|糉 粽|縕 緼|纔 才|脣 唇|脫 脱|膃 腽|臥 卧|臺 台|菸 煙|蒕 蒀|蔥 葱|蔿 蒍|蘊 藴|蛻 蜕|衆 眾|衛 衞|覈 核|說 説|踊 踴|轀 輼|醞 醖|鉢 缽|鉤 鈎|銳 鋭|鍼 針|閱 閲|鰮 鰛",
     HKVariantsRev: "偽 僞|兑 兌|卧 臥|叁 叄|台 臺|吃 喫|唇 脣|啟 啓|囱 囪|媪 媼|媯 嬀|悦 悅|愠 慍|户 戶|抬 擡|捝 挩|揾 搵|敍 敘|敚 敓|枱 檯|枴 柺|棁 梲|榅 榲|氲 氳|涚 涗|温 溫|溈 潙|潀 潨|濕 溼|灶 竈|為 爲|煴 熅|痴 癡|皂 皁|眾 衆|秘 祕|税 稅|稜 棱|粧 妝|粽 糉|糭 糉|緼 縕|缽 鉢|脱 脫|腽 膃|葱 蔥|蒀 蒕|蒍 蔿|藴 蘊|蜕 蛻|衞 衛|衹 只|説 說|踴 踊|輼 轀|醖 醞|針 鍼|鈎 鉤|鋭 銳|閲 閱|鰛 鰮",
@@ -174,9 +173,11 @@ function () {
     }
   }
   convert(document.querySelector("#bodyContent"));
+}'''
+COMMON_SCRIPT = '''function() {
   for (const elem of document.querySelectorAll("details")) {
     elem.open = true;
-  }
+  } 
 }'''
 
 CHARSET_RE = re.compile(";\s*charset=([^;]*)")
@@ -205,11 +206,12 @@ async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: 
     port = s.getsockname()[1]
   site = TCPSite(runner, "localhost", port)
   await site.start()
-  browser = await pyppeteer.launch(executablePath=CONFIG.chrome)
+  browser = await resources.launch_pyppeteer(executablePath=CONFIG.chrome)
   try:
     page = await browser.newPage()
     await page.setViewport({"width": CONFIG.width, "height": 0, "deviceScaleFactor": CONFIG.scale})
     await page.goto(f"http://localhost:{port}/{path}")
+    await page.evaluate(COMMON_SCRIPT)
     if CONFIG.use_opencc:
       await page.evaluate(OPENCC_SCRIPT)
     return await page.screenshot(fullPage=True, format=format, quality=quality)

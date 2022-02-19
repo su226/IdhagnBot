@@ -1,7 +1,7 @@
 from typing import Any, Callable, Iterable, Literal, TypeVar, Generator
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from util import context
+from util import context, resources
 from plugins.liferestart.game.config import StatRarityItem
 from .game.data import ACHIEVEMENT, CHARACTER, EVENT, TALENT
 from .game.struct.commons import Rarity
@@ -63,12 +63,11 @@ def groupbyn(iterable: Iterable[TItem], n: int, fill: Any = NO_FILL) -> Generato
     yield result
 
 WIDTH = 576
-FONT = ImageFont.truetype("/usr/share/fonts/noto-cjk/NotoSansCJK-Medium.ttc", 32)
-def wrap(text: str) -> Generator[str, None, None]:
+def wrap(font: ImageFont.FreeTypeFont, text: str) -> Generator[str, None, None]:
   cur = []
   curwidth = 0
   for ch in text:
-    chwidth, _ = FONT.getsize(ch)
+    chwidth, _ = font.getsize(ch)
     if curwidth + chwidth > WIDTH:
       yield "".join(cur)
       cur.clear()
@@ -84,8 +83,8 @@ RARITY_COLOR = {
   Rarity.RARE: (234, 128, 252),
   Rarity.LEGENDARY: (255, 209, 128),
 }
-LINE_HEIGHT = FONT.getsize("A")[1] + 4
-def make_image(messages: Iterable[tuple[Rarity, str] | str]) -> Image.Image:
+def make_image(font: ImageFont.FreeTypeFont, messages: Iterable[tuple[Rarity, str] | str]) -> Image.Image:
+  line_height = font.getsize("A")[1] + 4
   lines = []
   for line in messages:
     if isinstance(line, tuple):
@@ -93,11 +92,11 @@ def make_image(messages: Iterable[tuple[Rarity, str] | str]) -> Image.Image:
     else:
       rarity = Rarity.COMMON
       text = line
-    lines.extend((rarity, i) for i in wrap(text))
-  im = Image.new("RGB", (640, LINE_HEIGHT * len(lines) + 32 + FONT.getmetrics()[1]), (38, 50, 56))
+    lines.extend((rarity, i) for i in wrap(font, text))
+  im = Image.new("RGB", (640, line_height * len(lines) + 32 + font.getmetrics()[1]), (38, 50, 56))
   draw = ImageDraw.Draw(im)
   for i, (rarity, text) in enumerate(lines):
-    draw.text((16, 16 + i * LINE_HEIGHT), text, RARITY_COLOR[rarity], FONT)
+    draw.text((16, 16 + i * line_height), text, RARITY_COLOR[rarity], font)
   f = BytesIO()
   im.save(f, "jpeg")
   return im
@@ -258,9 +257,10 @@ async def handle_classic(event: Event, seed: list[int], prompt: PromptFunc, **_)
   game.statistics.inherited_talent = talents[0].id
   STATE.dump()
 
+  font = resources.font("sans-medium", 32)
   for part in groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
-    make_image(itertools.chain.from_iterable(part)).save(f, "png")
+    make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
 command.next(Keyword("经典", "c")).next(Argument("seed", int, (0, 1))).next(Execute(handle_classic))
@@ -298,9 +298,10 @@ async def handle_character_list(**_):
   for i in STATE.statistics.values():
     if ch := i.character:
       messages.append(get_character_segments(ch))
+  font = resources.font("sans-medium", 32)
   for part in groupbyn(messages, CONFIG.character_group_by):
     f = BytesIO()
-    make_image(itertools.chain.from_iterable(part)).save(f, "png")
+    make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
 character.next(Keyword("列表")).next(Execute(handle_character_list))
@@ -361,10 +362,10 @@ async def handle_character_play(event: Event, name: list[str], seed: list[str], 
 
   messages = get_messages(game)
   STATE.dump()
-
+  font = resources.font("sans-medium", 32)
   for part in groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
-    make_image(itertools.chain.from_iterable(part)).save(f, "png")
+    make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
 character.next(Argument("name", str, (0, 1))).next(Argument("seed", int, (0, 1))).next(Execute(handle_character_play))
@@ -395,7 +396,7 @@ async def handle_achievements(event: Event, **_):
     description = "隐藏成就" if hidden else achievement.description
     segments.append((achievement.rarity, f"{symbol} {name} - {description}"))
   f = BytesIO()
-  make_image(segments).save(f, "png")
+  make_image(resources.font("sans-medium", 32), segments).save(f, "png")
   await liferestart.send(MessageSegment.image(f))
 
 command.next(Keyword("成就")).next(Execute(handle_achievements))
@@ -419,7 +420,7 @@ def leaderboard_factory(getter: Callable[[Statistics], int], rarities: list[Stat
         name = (await bot.get_stranger_info(user_id=id))["nickname"]
       segments.append((judge.rarity, f"{name} - {v}{suffix}"))
     f = BytesIO()
-    make_image(segments).save(f, "png")
+    make_image(resources.font("sans-medium", 32), segments).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
   return handler
 

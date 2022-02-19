@@ -1,11 +1,10 @@
 from dataclasses import dataclass
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
+from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 import nonebot
-
-FONT = ImageFont.truetype("/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc", 64)
 
 Color = tuple[int, int, int]
 @dataclass
@@ -42,15 +41,16 @@ def register(names: list[str], brief: str, theme: Theme):
     if len(text) != 2:
       await matcher.finish("请刚好输入两段空格分割的文字")
     left, right = text
-    lw, lh = FONT.getsize(left)
-    rw, rh = FONT.getsize(right)
-    h = max(lh, rh) + FONT.getmetrics()[1]
+    font = resources.font("sans-bold", 64)
+    lw, lh = font.getsize(left)
+    rw, rh = font.getsize(right)
+    h = max(lh, rh) + font.getmetrics()[1]
     im = Image.new("RGB", (lw + rw + theme.margin_text + theme.margin_outer * 2 + theme.padding_h * 2, h + theme.padding_v * 2 + theme.margin_outer * 2), theme.bg1)
     draw = ImageDraw.Draw(im)
     rounded_rect(draw, (lw + theme.margin_outer + theme.margin_text, theme.margin_outer, rw + theme.padding_h * 2, h + theme.padding_v * 2), theme.radius, theme.bg2)
     text_y = theme.margin_outer + theme.padding_v
-    draw.text((theme.margin_outer, text_y), left, theme.fg1, FONT)
-    draw.text((theme.margin_outer + lw + theme.margin_text + theme.padding_h, text_y), right, theme.fg2, FONT)
+    draw.text((theme.margin_outer, text_y), left, theme.fg1, font)
+    draw.text((theme.margin_outer + lw + theme.margin_text + theme.padding_h, text_y), right, theme.fg2, font)
     f = BytesIO()
     im.save(f, "png")
     await matcher.finish(MessageSegment.image(f))

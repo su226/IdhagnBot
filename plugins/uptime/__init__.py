@@ -1,5 +1,6 @@
 from io import BytesIO
-from PIL import Image, ImageFont, ImageDraw
+from PIL import Image, ImageDraw
+from util import resources
 from nonebot.adapters.onebot.v11 import MessageSegment
 import asyncio
 import os
@@ -14,7 +15,6 @@ gpuload = os.path.join(plugin_dir, "gpuload.bin")
 kernel_str = os.uname().release
 python_str = f"{platform.python_version()} {platform.python_implementation()}[{platform.python_compiler()}]"
 idhagnbot_str = "0.0.1-IDontKnow"
-font = ImageFont.truetype(os.path.join(plugin_dir, "Iosevka Term Extended.ttf"), 15)
 color = (250, 250, 250)
 
 KILO = 1024
@@ -66,6 +66,7 @@ async def handle_uptime():
   # CPU、GPU和发行版我偷懒了，直接写了我自己的电脑配置，有需要记得把template.png改了
   im = Image.open(os.path.join(plugin_dir, "template.png"))
   draw = ImageDraw.Draw(im)
+  font = resources.font("terminal", 15)
   draw.text((441, 80), kernel_str, color, font)
   draw.text((441, 100), uptime_str, color, font)
   draw.text((468, 140), cpu_str, color, font)

@@ -1,12 +1,12 @@
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
+from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 import os
 import nonebot
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-font = ImageFont.truetype(os.path.join(plugin_dir, "unifont-14.0.01.ttf"), 32)
 HELP = '''\
 /诺基亚 <文本>
 自动换行，文本不能超过 6 行'''
@@ -22,6 +22,7 @@ async def handle_nokia(args: Message = CommandArg()):
   draw = ImageDraw.Draw(layer)
   lines = []
   cur_line = ""
+  font = resources.font("pixel", 32)
   for ch in text:
     if ch == "\n" or font.getsize(cur_line + ch)[0] > layer.width:
       lines.append(cur_line)
