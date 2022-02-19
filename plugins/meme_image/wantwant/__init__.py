@@ -1,10 +1,10 @@
 from ..util import register
-from PIL import Image, ImageDraw, ImageFont
+from util import resources
+from PIL import Image, ImageDraw
 import os
 import nonebot
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-font = ImageFont.truetype("/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc", 80)
 
 @register(["旺仔", "旺旺", "我爱"], "制作旺旺牛奶包装盒", '''\
 /旺仔 - 机器人奶（？）
@@ -13,6 +13,7 @@ font = ImageFont.truetype("/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc", 80)
 async def handler(user: int, avatar: Image.Image) -> Image.Image:
   username = (await nonebot.get_bot().call_api("get_stranger_info", user_id=user))["nickname"]
   im = Image.open(os.path.join(plugin_dir, "template.png"))
+  font = resources.font("cute", 80)
   w, h = font.getsize(username)
   h += font.getmetrics()[1]
   text = Image.new("RGBA", (w, h))

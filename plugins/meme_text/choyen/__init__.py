@@ -1,8 +1,7 @@
-from ..config import CONFIG
+from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 import nonebot
-import pyppeteer
 import os
 
 PAGE = "file://" + os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
@@ -21,7 +20,7 @@ async def handle_choyen(args: Message = CommandArg()):
   else:
     top = text[0]
     bottom = ""
-  browser = await pyppeteer.launch(executablePath=CONFIG.chrome)
+  browser = await resources.launch_pyppeteer()
   try:
     page = await browser.newPage()
     await page.goto(PAGE)

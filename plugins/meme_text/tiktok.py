@@ -1,10 +1,10 @@
 from io import BytesIO
-from PIL import Image, ImageDraw, ImageFont, ImageChops
+from PIL import Image, ImageDraw, ImageChops
+from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 import nonebot
 
-FONT = ImageFont.truetype("/usr/share/fonts/noto-cjk/NotoSansCJK-Bold.ttc", 64)
 BG = (28, 11, 27)
 FG1 = (0, 242, 234)
 FG2 = (255, 255, 255)
@@ -19,11 +19,12 @@ tiktok.__doc__ = "/抖音 <文本>"
 @tiktok.handle()
 async def handle_tiktok(args: Message = CommandArg()):
   text = args.extract_plain_text().rstrip()
-  w, h = FONT.getsize_multiline(text)
-  h += FONT.getmetrics()[1]
+  font = resources.font("sans-bold", 64)
+  w, h = font.getsize_multiline(text)
+  h += font.getmetrics()[1]
   original = Image.new("L", (w, h))
   draw = ImageDraw.Draw(original)
-  draw.multiline_text((0, 0), text, 255, FONT)
+  draw.multiline_text((0, 0), text, 255, font)
   shifted = Image.new("L", (w, h))
   shifted.paste(original, (-DISPERSION, -DISPERSION))
   subtract = ImageChops.subtract(original, shifted)
