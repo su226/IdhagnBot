@@ -17,9 +17,9 @@ context.__cmd__ = ["上下文", "context", "ctx"]
 context.__brief__ = "进入或退出上下文"
 context.__priv__ = True
 context.__doc__ = '''\
-{cmd} - 查看当前上下文
-{cmd} <群号或别名> - 进入群聊上下文
-{cmd} 退出 - 退出群聊上下文'''
+/上下文 - 查看当前上下文
+/上下文 <群号或别名> - 进入群聊上下文
+/上下文 退出 - 退出群聊上下文'''
 @context.handle()
 async def handle_context(bot: Bot, event: PrivateMessageEvent, args = CommandArg()):
   args: str = str(args).rstrip()

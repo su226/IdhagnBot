@@ -46,7 +46,7 @@ HTTP_RE = re.compile("^https?://")
 
 TFactory = TypeVar("TFactory", bound=Callable[..., Awaitable[Image.Image | Animated]])
 @exports
-def register(names: str | list[str], brief: str = "", usage: str = "", *, user: bool = False, has_self: bool = False, swap: bool = False, contexts: int | list[int] = []) -> Callable[[TFactory], TFactory]:
+def register(names: str | list[str], brief: str = "", usage: str = "", *, category: str = "", user: bool = False, has_self: bool = False, swap: bool = False, contexts: int | list[int] = []) -> Callable[[TFactory], TFactory]:
   if not isinstance(names, list):
     names = [names]
   max_args = 2 if has_self else 1
@@ -119,6 +119,7 @@ def register(names: str | list[str], brief: str = "", usage: str = "", *, user: 
       await matcher.finish(MessageSegment.image(f))
     matcher = nonebot.on_command(names[0], context.in_context_rule(*contexts), set(names[1:]), handlers=[handler])
     matcher.__cmd__ = names
+    matcher.__cat__ = category
     matcher.__brief__ = brief
     matcher.__doc__ = usage
     matcher.__ctx__ = contexts
