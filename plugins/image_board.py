@@ -1,6 +1,5 @@
 from util.config import BaseModel, BaseConfig, Field
 from core_plugins.context.typing import Context
-from core_plugins.help.typing import Help
 from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientConnectionError, ClientProxyConnectionError
 from aiohttp.http import SERVER_SOFTWARE
@@ -95,7 +94,6 @@ CONFIG = Config.load()
 presets.update(CONFIG.presets)
 
 context: Context = nonebot.require("context")
-help: Help = nonebot.require("help")
 
 T = TypeVar("T")
 class ParseFailed(Exception): pass
@@ -162,7 +160,6 @@ def register(command: Command):
         await matcher.send("没有结果")
         return
       segments = []
-      temps = []
       for post in posts:
         url = POST_URL.format(id=get_by_path(post, site.id_path))
         segments.append(url)

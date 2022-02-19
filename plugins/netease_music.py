@@ -29,8 +29,8 @@ async def get_prompt(state: CmdState):
   async with ClientSession() as http:
     response = await http.get(API.format(keyword=quote(state["keyword"]), offset=offset, limit=LIMIT))
     data = await response.json(content_type=None)
-  print(data["result"]["songCount"])
-  pages = math.ceil(data["result"]["songCount"] / LIMIT)
+  songs = data["result"]["songCount"]
+  pages = math.ceil(songs / LIMIT)
   if pages == 0:
     await netease.finish(f"搜索结果为空")
   prompt = []
@@ -45,7 +45,7 @@ async def get_prompt(state: CmdState):
       prefix = "[VIP] "
       has_vip = True
     prompt.append(f"{i}: {prefix}{name} - {artists} - {album}")
-  prompt.append(f"第 {state['page'] + 1} 页，共 {pages} 页")
+  prompt.append(f"第 {state['page'] + 1} 页，共 {pages} 页，{songs} 首歌")
   suffix = ""
   if has_vip:
     suffix = "，VIP歌曲只能查看不能播放"

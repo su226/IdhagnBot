@@ -15,13 +15,6 @@ def lerp(box1: TBox, box2: TBox, r2: float) -> TBox:
   r1 = 1 - r2
   return tuple(map(lambda i: int(i[0] * r1 + i[1] * r2), zip(box1, box2)))
 
-def circle(img: Image.Image) -> Image.Image:
-  mask = Image.new('L', img.size, 0)
-  ImageDraw.Draw(mask).ellipse((1, 1, img.size[0] - 2, img.size[1] - 2), 255)
-  mask = mask.filter(ImageFilter.GaussianBlur(0))
-  img.putalpha(mask)
-  return img
-
 def paste(im: Image.Image, im2: Image.Image, box: tuple[int, int, int, int]):
   im2 = im2.resize((box[2] - box[0], box[3] - box[1]), Image.ANTIALIAS)
   im.paste(im2, box, im2)

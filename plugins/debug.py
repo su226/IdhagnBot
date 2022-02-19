@@ -57,8 +57,9 @@ say.__doc__ = '''\
 say.__perm__ = context.SUPER
 @say.handle()
 async def handle_say(bot: Bot, event: Event, msg: Message = CommandArg()):
-  real_ctx = event.group_id if hasattr(event, "group_id") else -1
+  real_ctx = getattr(event, "group_id", -1)
   ctx = context.get_context(event)
+  msg = Message(get_message(msg))
   if real_ctx == ctx:
     await say.send(msg)
   else:

@@ -65,7 +65,6 @@ def groupbyn(iterable: Iterable[TItem], n: int, fill: Any = NO_FILL) -> Generato
 
 WIDTH = 576
 FONT = ImageFont.truetype("/usr/share/fonts/noto-cjk/NotoSansCJK-Medium.ttc", 32)
-_, LINE_HEIGHT = FONT.getsize("Aa")
 def wrap(text: str) -> Generator[str, None, None]:
   cur = []
   curwidth = 0
@@ -86,6 +85,7 @@ RARITY_COLOR = {
   Rarity.RARE: (234, 128, 252),
   Rarity.LEGENDARY: (255, 209, 128),
 }
+LINE_HEIGHT = FONT.getsize("A")[1] + 4
 def make_image(messages: Iterable[tuple[Rarity, str] | str]) -> Image.Image:
   lines = []
   for line in messages:
@@ -95,7 +95,7 @@ def make_image(messages: Iterable[tuple[Rarity, str] | str]) -> Image.Image:
       rarity = Rarity.COMMON
       text = line
     lines.extend((rarity, i) for i in wrap(text))
-  im = Image.new("RGB", (640, LINE_HEIGHT * len(lines) + 32), (38, 50, 56))
+  im = Image.new("RGB", (640, LINE_HEIGHT * len(lines) + 32 + FONT.getmetrics()[1]), (38, 50, 56))
   draw = ImageDraw.Draw(im)
   for i, (rarity, text) in enumerate(lines):
     draw.text((16, 16 + i * LINE_HEIGHT), text, RARITY_COLOR[rarity], FONT)

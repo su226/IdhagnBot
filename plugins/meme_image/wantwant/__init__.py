@@ -14,6 +14,7 @@ async def handler(user: int, avatar: Image.Image) -> Image.Image:
   username = (await nonebot.get_bot().call_api("get_stranger_info", user_id=user))["nickname"]
   im = Image.open(os.path.join(plugin_dir, "template.png"))
   w, h = font.getsize(username)
+  h += font.getmetrics()[1]
   text = Image.new("RGBA", (w, h))
   draw = ImageDraw.Draw(text)
   draw.text((0, 0), username, (255, 255, 255), font)
