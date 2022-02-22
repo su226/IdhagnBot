@@ -23,7 +23,7 @@ def iter_free_games(games: list[dict]) -> Iterable[str]:
     url = f"https://www.epicgames.com/store/zh-CN/p/{game['urlSlug']}"
     image = ""
     for i in game["keyImages"]:
-      if i["type"] == "DieselStoreFrontWide":
+      if i["type"] in ("DieselStoreFrontWide", "OfferImageWide"):
         image = i["url"]
         break
     for i in iter_promotions(game.get("promotions", None)):
