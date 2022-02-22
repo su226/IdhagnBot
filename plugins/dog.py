@@ -50,7 +50,7 @@ async def handle_cat_gif():
   async with ClientSession() as http:
     try:
       response = await http.get(CAT_GIF_API, proxy=CONFIG.proxy)
-      data = await response.read()
+      data = await asyncio.wait_for(response.read(), CONFIG.timeout)
     except ClientProxyConnectionError:
       await cat_gif.finish("代理连接失败")
     except asyncio.TimeoutError:

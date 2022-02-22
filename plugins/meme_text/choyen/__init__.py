@@ -9,17 +9,17 @@ PAGE = "file://" + os.path.join(os.path.dirname(os.path.abspath(__file__)), "ind
 choyen = nonebot.on_command("5000兆元", aliases={"兆元", "5000choyen", "choyen"})
 choyen.__cmd__ = ["5000兆元", "兆元", "5000choyen", "choyen"]
 choyen.__brief__ = "生成想要5000兆元风格文字"
-choyen.__doc__ = "/5000兆元 <红色文本> <银色文本>"
+choyen.__doc__ = "/5000兆元 <红色文本> [银色文本]"
 @choyen.handle()
 async def handle_choyen(args: Message = CommandArg()):
   text = args.extract_plain_text().split()
-  if len(text) > 2:
-    await choyen.finish("请输入最多两段空格分割的文字")
-  elif len(text) == 2:
+  if len(text) == 2:
     top, bottom = text
-  else:
+  elif len(text) == 1:
     top = text[0]
     bottom = ""
+  else:
+    await choyen.finish(choyen.__doc__)
   browser = await resources.launch_pyppeteer()
   try:
     page = await browser.newPage()
