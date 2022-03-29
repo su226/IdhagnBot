@@ -206,7 +206,7 @@ async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: 
     port = s.getsockname()[1]
   site = TCPSite(runner, "localhost", port)
   await site.start()
-  browser = await resources.launch_pyppeteer(executablePath=CONFIG.chrome)
+  browser = await resources.launch_pyppeteer()
   try:
     page = await browser.newPage()
     await page.setViewport({"width": CONFIG.width, "height": 0, "deviceScaleFactor": CONFIG.scale})
@@ -230,7 +230,7 @@ def format_choices(state: T_State):
   page = state["page"]
   begin = page * CONFIG.page_size
   segments = []
-  for i, v in enumerate(search.getResults(begin, CONFIG.page_size), 1):
+  for i, v in enumerate(search.getResults(begin, CONFIG.page_size), begin + 1):
     segments.append(f"{i}: {v[2:]}")
   pages = math.ceil(count / CONFIG.page_size)
   segments.append(f"第 {page + 1} 页，共 {pages} 页，{count} 个结果")

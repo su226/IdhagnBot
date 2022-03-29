@@ -1,6 +1,6 @@
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Literal
 from apscheduler.schedulers.base import BaseScheduler
 from datetime import datetime, timedelta
 from util.config import BaseConfig, BaseModel, BaseState, Field
@@ -16,6 +16,10 @@ import nonebot
 class Config(BaseConfig):
   __file__ = "context"
   groups: dict[int, list[str]] = Field(default_factory=dict)
+  private_limit: set[int] = Field(default_factory=set)
+  private_limit_whitelist: bool = False
+  # 设置超管请使用Nonebot2的设置，而不是这个
+  permission_override: dict[int, Literal["deny", "member", "admin", "owner"]] = Field(default_factory=dict)
 
 class Context(BaseModel):
   group: int
@@ -59,11 +63,20 @@ async def bot_connect(bot: Bot):
 
 @event_preprocessor
 async def pre_event(event: Event):
+  uid = getattr(event, "user_id", None)
+  if CONFIG.permission_override.get(uid, None) == "deny":
+    raise IgnoredException("该用户的权限已被覆盖为拒绝服务")
   if hasattr(event, "group_id"):
     if event.group_id not in GROUP_IDS:
       raise IgnoredException("机器人在当前上下文不可用")
-  elif hasattr(event, "user_id"):
-    refresh_context(event.user_id)
+  elif uid is not None:
+    if CONFIG.private_limit_whitelist:
+      if uid not in CONFIG.private_limit:
+        raise IgnoredException("私聊用户不在白名单内")
+    else:
+      if uid in CONFIG.private_limit:
+        raise IgnoredException("私聊用户在黑名单内")
+    refresh_context(uid)
 
 def format_duration(seconds: int) -> str:
   minutes, seconds = divmod(seconds, 60)
@@ -171,6 +184,10 @@ members_cache: dict[int, dict[int, dict[str, Any]]] = defaultdict(lambda: {"__ti
 cache_duration = 86400
 
 async def get_permission(bot: Bot, event: Event) -> Permission:
+  try:
+    return Permission.parse(CONFIG.permission_override[event.user_id])
+  except:
+    pass
   if await SUPERUSER(bot, event):
     return Permission.SUPER
   ctx = get_event_context(event)

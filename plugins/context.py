@@ -39,14 +39,14 @@ async def handle_context(bot: Bot, event: PrivateMessageEvent, args = CommandArg
     gid = int(args)
   except:
     if args in GROUP_NAMES:
-      gid = GROUP_NAMES[args]
+      gid = GROUP_NAMES[args].id
     else:
       await context.finish(error_str)
   else:
     if not gid in GROUP_IDS:
       await context.finish(error_str)
   try:
-    await bot.call_api("get_group_member_info", group_id=gid, user_id=uid)
+    await bot.get_group_member_info(group_id=gid, user_id=uid)
   except:
     await context.finish(error_str)
   enter_context(uid, gid)

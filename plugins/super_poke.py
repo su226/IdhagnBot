@@ -38,7 +38,7 @@ async def handle_super_poke(bot: Bot, event: Event, args: Message = CommandArg()
     if len(cur_uids) == 0:
       cur_uids = all_uids[:]
       random.shuffle(cur_uids)
-    await bot.call_api("send_group_msg",
+    await bot.send_group_msg(
       group_id=ctx,
       message=f"[CQ:poke,qq={cur_uids.pop()}]")
   await super_poke.send("戳亿戳完成")

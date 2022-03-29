@@ -15,7 +15,7 @@ class InvaildKeyword(InvaildArgument): pass
 TState = TypeVar("TState", bound=dict[str, Any])
 TResult = TypeVar("TResult")
 class Parser(Generic[TState, TResult]):
-  def match(self, args: list[str]) -> Any:
+  def match(self, args: list[str], state: TState) -> TResult:
     raise NotImplementedError
 
 class Execute(Parser):

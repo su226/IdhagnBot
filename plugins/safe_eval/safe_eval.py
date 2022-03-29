@@ -1,25 +1,20 @@
 from nonebot.log import logger
 import asyncio
-import psutil
 import os
 import pickle
 import venv
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-env_dir = os.path.abspath("states/safe_eval_env")
-if not os.path.exists(env_dir):
-  logger.info("创建Python虚拟环境")
-  venv.create(env_dir)
-
-def kill_tree(pid: int):
-  for child in psutil.Process(pid).children(True):
-    child.kill()
-  psutil.Process(pid).kill()
+# env_dir = os.path.abspath("states/safe_eval_env")
+# if not os.path.exists(env_dir):
+#   logger.info("创建Python虚拟环境")
+#   venv.create(env_dir)
 
 async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: int) -> tuple[bool, int, bytes, bytes]:
   proc = await asyncio.subprocess.create_subprocess_exec("bwrap",
     "--unshare-all",
     "--clearenv",
+    "--die-with-parent",
     "--ro-bind", "/lib64/ld-linux-x86-64.so.2", "/lib64/ld-linux-x86-64.so.2",
     "--ro-bind", "/usr/bin/python", "/usr/bin/python",
     "--ro-bind", "/usr/lib/python3.10", "/usr/lib/python3.10",
@@ -45,7 +40,7 @@ async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: 
   try:
     await asyncio.wait_for(proc.wait(), timeout)
   except asyncio.TimeoutError:
-    kill_tree(proc.pid)
+    proc.kill()
     killed = True
   returncode = await proc.wait()
   stdout = await proc.stdout.read(output)

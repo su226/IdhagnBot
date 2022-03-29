@@ -1,9 +1,11 @@
 from collections import defaultdict
+from typing import cast
 from aiohttp import ClientSession
 from util.config import BaseModel, BaseConfig
 from apscheduler.schedulers.base import BaseScheduler
 from util import context
 from nonebot.log import logger
+from nonebot.adapters.onebot.v11 import Bot
 import nonebot
 
 class Room(BaseModel):
@@ -17,7 +19,7 @@ class Config(BaseConfig):
 📺 {username} 开播了 {category}
 “{title}”
 {link}'''
-  interval: int = 300
+  interval: int = 60
   rooms: list[Room] = []
 
 def format_duration(seconds: int) -> str:
@@ -50,7 +52,6 @@ check_live.__usage__ = f'''\
 check_live.__perm__ = context.Permission.ADMIN
 @check_live.handle()
 async def handle_check_live():
-  await check_live.send("正在检查直播间")
   await check()
   await check_live.send("检查直播间完成")
 
@@ -65,7 +66,7 @@ async def on_startup():
   for id, detail in data["data"]["by_room_ids"].items():
     streaming[id] = bool(detail["live_status"])
     status = "已开播" if detail["live_status"] else "未开播"
-    logger.info(f"B站直播: {detail['uname']} -> {status}")
+    logger.debug(f"B站直播: {detail['uname']} -> {status}")
 
 @scheduler.scheduled_job("interval", seconds=config.interval)
 async def check():
@@ -77,13 +78,13 @@ async def check():
   async with ClientSession() as http:
     response = await http.get(API_URL + "".join(params))
     data = await response.json()
-  bot = nonebot.get_bot()
+  bot = cast(Bot, nonebot.get_bot())
   for id, detail in data["data"]["by_room_ids"].items():
     status = "已开播" if detail["live_status"] else "未开播"
-    logger.info(f"B站直播: {detail['uname']} -> {status}")
+    logger.debug(f"B站直播: {detail['uname']} -> {status}")
     if not streaming[id] and detail["live_status"]:
       logger.info(f"推送 {detail['uname']} 的直播间")
-      await bot.call_api("send_group_msg", group_id=targets[int(id)], message=config.format.format(
+      await bot.send_group_msg(group_id=targets[int(id)], message=config.format.format(
         cover=detail["cover"],
         username=detail["uname"],
         category=detail["area_name"],

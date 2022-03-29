@@ -20,7 +20,7 @@ def iter_free_games(games: list[dict]) -> Iterable[str]:
   now_date = datetime.now(timezone.utc)
   for game in games:
     title = game["title"]
-    url = f"https://www.epicgames.com/store/zh-CN/p/{game['urlSlug']}"
+    url = f"https://www.epicgames.com/store/zh-CN/p/{game['productSlug']}"
     image = ""
     for i in game["keyImages"]:
       if i["type"] in ("DieselStoreFrontWide", "OfferImageWide"):

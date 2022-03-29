@@ -40,13 +40,12 @@ IdhagnBot
 |- 📁 configs (gitignore)配置目录
   |- 📄 nonebot.env Nonebot2配置
   |- 📄 *.yaml 插件配置（如果对应插件没有配置，会在日志中提示）
-|- 📁 core_plugins 核心插件，提供权限管理、帮助文档等功能，是其他插件的依赖
 |- 📁 env (gitignore)Python虚拟环境
-|- 📁 plugins 其他插件及其所需的资源
+|- 📁 plugins Nonebot2插件（含所需的资源）
 |- 📁 resources (gitignore)用户自定义资源
 |- 📁 states (gitignore)状态文件，用于记录缓存、统计数据等（不建议手动编辑）
 |- 📁 user_plugins (gitignore)用户插件，可以根据自己的需要拓展机器人功能
-|- 📁 util 插件之间共用的代码（TODO：将core_plugins中的功能挪到util）
+|- 📁 util 插件之间共用的代码
 |- 📄 .gitignore
 |- 📄 bot.py 机器人主程序
 |- 📄 requirements.txt

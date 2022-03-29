@@ -126,5 +126,7 @@ async def send_video(ext: str, mime: str, vid: bytes):
     port = s.getsockname()[1]
   site = web.TCPSite(runner, "localhost", port)
   await site.start()
-  await dog_gif.send(MessageSegment.video(f"http://127.0.0.1:{port}/video{ext}"))
-  await site.stop()
+  try:
+    await dog_gif.send(MessageSegment.video(f"http://127.0.0.1:{port}/video{ext}"))
+  finally:
+    await site.stop()

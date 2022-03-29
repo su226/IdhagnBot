@@ -1,20 +1,21 @@
 from typing import Any, ClassVar, Type, TypeVar
-from pydantic import Field, BaseModel
-from dataclasses import asdict, is_dataclass
+from pydantic import BaseModel, Field, PrivateAttr
+from pydantic.json import pydantic_encoder
 from loguru import logger
 import os
 import yaml
 
-__all__ = ["Field", "BaseModel", "BaseConfig", "BaseState"]
+__all__ = ["BaseModel", "BaseConfig", "BaseState", "Field", "PrivateAttr"]
 
-def fix_dataclasses(data: dict[str, Any]):
-  for k, v in data.items():
-    if isinstance(v, dict):
-      fix_dataclasses(v)
-    elif is_dataclass(v):
-      v = asdict(v)
-      fix_dataclasses(v)
-      data[k] = v
+def encode(data: Any):
+  if data is None or isinstance(data, (str, int, float, bool)):
+    return data
+  elif isinstance(data, dict):
+    return {k: encode(v) for k, v in data.items()}
+  elif isinstance(data, list):
+    return [encode(v) for v in data]
+  else:
+    return encode(pydantic_encoder(data))
 
 TSelf = TypeVar("TSelf", bound="BaseConfig")
 class BaseConfig(BaseModel):
@@ -48,11 +49,10 @@ class BaseConfig(BaseModel):
 
   def dump(self):
     name, file = self.__get_info()
-    data = self.dict()
-    fix_dataclasses(data)
+    data = encode(self.dict())
     try:
       with open(file, "w") as f:
-        yaml.dump(data, f, yaml.CDumper)
+        yaml.dump(data, f, yaml.CDumper, allow_unicode=True)
     except:
       logger.opt(exception=True).warning(f"无法记录{name}：{file}")
 

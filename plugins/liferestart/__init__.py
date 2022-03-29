@@ -257,7 +257,7 @@ async def handle_classic(event: Event, seed: list[int], prompt: PromptFunc, **_)
   game.statistics.inherited_talent = talents[0].id
   STATE.dump()
 
-  font = resources.font("sans-medium", 32)
+  font = resources.font("sans", 32)
   for part in groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
     make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
@@ -298,7 +298,7 @@ async def handle_character_list(**_):
   for i in STATE.statistics.values():
     if ch := i.character:
       messages.append(get_character_segments(ch))
-  font = resources.font("sans-medium", 32)
+  font = resources.font("sans", 32)
   for part in groupbyn(messages, CONFIG.character_group_by):
     f = BytesIO()
     make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
@@ -362,7 +362,7 @@ async def handle_character_play(event: Event, name: list[str], seed: list[str], 
 
   messages = get_messages(game)
   STATE.dump()
-  font = resources.font("sans-medium", 32)
+  font = resources.font("sans", 32)
   for part in groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
     make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
@@ -396,7 +396,7 @@ async def handle_achievements(event: Event, **_):
     description = "隐藏成就" if hidden else achievement.description
     segments.append((achievement.rarity, f"{symbol} {name} - {description}"))
   f = BytesIO()
-  make_image(resources.font("sans-medium", 32), segments).save(f, "png")
+  make_image(resources.font("sans", 32), segments).save(f, "png")
   await liferestart.send(MessageSegment.image(f))
 
 command.next(Keyword("成就")).next(Execute(handle_achievements))
@@ -420,7 +420,7 @@ def leaderboard_factory(getter: Callable[[Statistics], int], rarities: list[Stat
         name = (await bot.get_stranger_info(user_id=id))["nickname"]
       segments.append((judge.rarity, f"{name} - {v}{suffix}"))
     f = BytesIO()
-    make_image(resources.font("sans-medium", 32), segments).save(f, "png")
+    make_image(resources.font("sans", 32), segments).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
   return handler
 
