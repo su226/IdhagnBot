@@ -21,7 +21,10 @@ async def pre_run(state = BotState()):
 async def post_run(bot: Bot, event: MessageEvent, _: Exception):
   group_id = getattr(event, "group_id", None)
   if group_id is None:
-    await bot.send(event, "机器人出错，请尝试联系开发者")
+    user_id = getattr(event, "user_id", -1)
+    str_user_id = str(user_id)
+    if not any(i in (user_id, str_user_id) for i in driver.config.superusers):
+      await bot.send(event, "机器人出错，请尝试联系开发者")
   elif group_id not in STATE.suppress:
     await bot.send(event, "机器人出错，请尝试联系开发者（如果本消息刷屏，群管理员可发送 /suppress true 来禁用）")
   for user in driver.config.superusers:

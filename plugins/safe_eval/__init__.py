@@ -3,7 +3,7 @@ import nonebot
 from .lisp import parse, format, eval, math_env
 from .safe_eval import safe_eval
 
-usage = "/calc <数学表达式>\n“不保证”结果可靠"
+usage = "/calc <数学表达式>\n“不保证”结果可靠\n本命令已不进行维护"
 calc = nonebot.on_command("calc")
 calc.__cmd__ = "calc"
 calc.__brief__ = "计算数学表达式"
@@ -19,6 +19,7 @@ async def handle_calc(args = CommandArg()):
 lisp = nonebot.on_command("lisp")
 lisp.__cmd__ = "lisp"
 lisp.__brief__ = "计算Lisp风格的数学表达式"
+lisp.__doc__ = "请自行了解什么是S-Expression\n本命令已不进行维护"
 @lisp.handle()
 async def handle_lisp(args = CommandArg()):
   try:
@@ -26,6 +27,8 @@ async def handle_lisp(args = CommandArg()):
   except Exception as e:
     await lisp.send(f"无效的Lisp: {e}")
     return
+  if len(codes) == 0:
+    await lisp.finish("表达式为空")
   segments = []
   env = math_env()
   for code in codes:

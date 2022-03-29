@@ -150,4 +150,4 @@ async def handle_schedule(event: Event, msg: Message = CommandArg()):
       return
     id = format(random.randint(0, 0xffffffff), "08x")
     STATE.set_scheduled(ctx, id, event.user_id, args[1], date)
-    await schedule.send(f"已设置在 {date} 时在 {context.get_group_name(ctx)} 中执行的定时任务，ID 为 {id}")
+    await schedule.send(f"已设置在 {date} 时在 {context.GROUP_IDS.get(ctx).name} 中执行的定时任务，ID 为 {id}")

@@ -1,6 +1,8 @@
+from typing import cast
 from ..util import register
 from util import resources
 from PIL import Image, ImageDraw
+from nonebot.adapters.onebot.v11 import Bot
 import os
 import nonebot
 
@@ -11,7 +13,8 @@ plugin_dir = os.path.dirname(os.path.abspath(__file__))
 /旺仔 <某人> - 某人的奶（？？）
 只能使用头像''', user=True)
 async def handler(user: int, avatar: Image.Image) -> Image.Image:
-  username = (await nonebot.get_bot().call_api("get_stranger_info", user_id=user))["nickname"]
+  bot = cast(Bot, nonebot.get_bot())
+  username = (await bot.get_stranger_info(user_id=user))["nickname"]
   im = Image.open(os.path.join(plugin_dir, "template.png"))
   font = resources.font("cute", 80)
   w, h = font.getsize(username)

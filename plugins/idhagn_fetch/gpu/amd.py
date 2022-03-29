@@ -1,0 +1,36 @@
+from .common import Info
+import subprocess as sp
+import re
+
+PERCENT_FILE = "gpu_busy_percent"
+MEM_PERCENT_FILE = "mem_busy_percent"
+CLK_FILE = "hwmon/hwmon2/freq1_input"
+MEM_CLK_FILE = "hwmon/hwmon2/freq2_input"
+TEMP_FILE = "hwmon/hwmon2/temp1_input"
+JUNCTION_TEMP_FILE = "hwmon/hwmon2/temp2_input"
+MEM_TEMP_FILE = "hwmon/hwmon2/temp3_input"
+VDD_FILE = "hwmon/hwmon2/in0_input"
+UEVENT_FILE = "uevent"
+
+@staticmethod
+def read(card: str) -> Info:
+  root = f"/sys/class/drm/{card}/device/"
+  with open(root + UEVENT_FILE) as f:
+    for i in f:
+      if i.startswith("PCI_SLOT_NAME="):
+        pci = i[14:-1]
+        break
+  proc = sp.run(["lspci", "-s", pci], capture_output=True, text=True)
+  model = proc.stdout
+  model = model[model.rfind("[") + 1:model.rfind("]")]
+  model = model.replace("OEM", "")
+  model = re.sub(r"\s*/\s*", "/", model)
+  with open(root + PERCENT_FILE) as f:
+    percent = int(f.read())
+  with open(root + MEM_PERCENT_FILE) as f:
+    mem_percent = int(f.read())
+  with open(root + CLK_FILE) as f:
+    clk = int(f.read())
+  with open(root + TEMP_FILE) as f:
+    temp = int(f.read()) // 1000
+  return Info(False, "AMD/ATI " + model, percent, mem_percent, clk, temp)
