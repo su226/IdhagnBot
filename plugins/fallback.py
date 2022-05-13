@@ -39,7 +39,8 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception):
   if group_id is None:
     await bot.send(event, result)
   elif group_id not in STATE.suppress:
-    await bot.send(event, result + "\n[群管] /suppress true - 禁用错误消息")
+    # await bot.send(event, result + "\n[群管] /suppress true - 禁用错误消息")
+    await bot.send(event, result + "\n/report [可选说明] - 反馈Bug")
   user_id = getattr(event, "user_id", None)
   str_user_id = str(user_id)
   if not any(i in (user_id, str_user_id) for i in driver.config.superusers):

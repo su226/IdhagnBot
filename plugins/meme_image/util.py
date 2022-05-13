@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import random
 from util.config import BaseConfig
 from util import context, account_aliases
 from typing import Callable, TypeVar, Awaitable
@@ -29,7 +30,8 @@ class Animated:
   duration: int
 
 async def get_avatar(http: ClientSession, uid: int) -> Image.Image:
-  response = await http.get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=640")
+  # s 有 100, 160, 640 分别对应最大 3 个尺寸（可以小）和 0 对应原图（不能不填）
+  response = await http.get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0")
   return Image.open(BytesIO(await response.read())).convert("RGBA")
 
 async def get_image(http: ClientSession, url: str) -> Image.Image:
@@ -65,9 +67,8 @@ def register(names: str | list[str], brief: str = "", usage: str = "", *, catego
       args.extend(text.split())
       if len(args) > max_args:
         await matcher.finish(f"最多只能有 {max_args} 个参数")
-      aliases = await account_aliases.get_aliases(bot, event)
       call_args = []
-      errors = []
+      all_errors = []
 
       async def add_args(is_self: bool):
         pos = 0 if is_self else -1
@@ -77,39 +78,36 @@ def register(names: str | list[str], brief: str = "", usage: str = "", *, catego
           try:
             call_args.append(await get_image(http, args[pos]))
           except:
-            errors.append(f"下载 {args[pos]} 失败")
+            all_errors.append(f"下载 {args[pos]} 失败")
           return
         elif not user and args[pos].startswith("file://"):
           path = os.path.abspath(args[pos][7:])
           if not path.startswith(resources_dir):
-            errors.append("你以为你能逃到资源目录外面吗？")
+            all_errors.append("你以为你能逃到资源目录外面吗？")
           elif os.path.isfile(path):
             call_args.append(Image.open(path))
           else:
-            errors.append("路径不存在或不是文件")
+            all_errors.append("路径不存在或不是文件")
           return
         else:
           try:
             uid = int(args[pos])
           except:
-            try:
-              uid = account_aliases.try_match(aliases, args[pos], trap=True)
-            except account_aliases.MatchException as e:
-              errors.extend(e.errors)
-              return
+            errors, uid = await account_aliases.match_uid(bot, event, args[pos])
+            all_errors.extend(errors)
         if user:
           call_args.append(uid)
         try:
           call_args.append(await get_avatar(http, uid))
         except:
-          errors.append(f"下载 {uid} 的头像失败")
+          all_errors.append(f"下载 {uid} 的头像失败")
 
       async with ClientSession() as http:
         if has_self:
           await add_args(True)
         await add_args(False)
-      if len(errors):
-        await matcher.finish("\n".join(errors))
+      if len(all_errors):
+        await matcher.finish("\n".join(all_errors))
       f = BytesIO()
       im = await factory(*call_args)
       if isinstance(im, Animated):
@@ -117,7 +115,7 @@ def register(names: str | list[str], brief: str = "", usage: str = "", *, catego
       else:
         im.save(f, CONFIG.static_format)
       await matcher.finish(MessageSegment.image(f))
-    matcher = nonebot.on_command(names[0], context.in_context_rule(*contexts), set(names[1:]), handlers=[handler])
+    matcher = nonebot.on_command(names[0], context.in_group_rule(*contexts), set(names[1:]), handlers=[handler])
     matcher.__cmd__ = names
     matcher.__cat__ = category
     matcher.__brief__ = brief
