@@ -1,25 +1,34 @@
 from typing import Any, cast
 from datetime import datetime, timedelta
+import asyncio
+import time
+
 from apscheduler.schedulers.base import BaseScheduler
 from nonebot.adapters.onebot.v11 import Bot, Event, MessageEvent, NoticeEvent, GroupRecallNoticeEvent, FriendRecallNoticeEvent, Message, MessageSegment
+from nonebot.adapters.onebot.v11.event import Reply
 from nonebot.params import EventMessage
 from nonebot.matcher import current_event
-import asyncio
+from nonebot.typing import T_State
 import nonebot
-import time
 
 scheduler = cast(BaseScheduler, nonebot.require("nonebot_plugin_apscheduler").scheduler)
 
 async def manual_recall_rule(event: MessageEvent, msg: Message = EventMessage()) -> bool:
-  return event.reply and event.reply.sender.user_id == event.self_id and msg.extract_plain_text().strip() == "撤"
+  if event.reply is None:
+    return False
+  return event.reply.sender.user_id == event.self_id and msg.extract_plain_text().strip() in ("撤", "撤回")
 
 manual_recall = nonebot.on_message(manual_recall_rule)
 @manual_recall.handle()
-async def handle_manual_recall(bot: Bot, event: MessageEvent):
+async def handle_manual_recall(bot: Bot, event: MessageEvent, state: T_State):
+  state["_prefix"]["special"] = True
   try:
-    await bot.delete_msg(message_id=event.reply.message_id)
+    await bot.delete_msg(message_id=cast(Reply, event.reply).message_id)
   except:
     await manual_recall.send("撤回失败，可能已超过两分钟、已经被撤回，或者不支持这种消息")
+  else:
+    try: await bot.delete_msg(message_id=event.message_id)
+    except: pass
 
 messages: dict[int, set[int]] = {}
 
@@ -29,7 +38,6 @@ def remove_message(id: int):
 
 def add_message(event: MessageEvent, api_result: dict[str, Any]):
   recall_remaining = 120 - (time.time() - event.time)
-  print("add mapping", event.message_id, api_result["message_id"])
   if event.message_id not in messages and recall_remaining > 0:
     messages[event.message_id] = set()
     scheduler.add_job(remove_message, "date", (event.message_id,), run_date=datetime.now() + timedelta(seconds=recall_remaining))
@@ -42,7 +50,7 @@ def on_bot_connect(bot: Bot):
   async def on_called_api(bot: Bot, e: Exception | None, api: str, params: dict[str, Any], result: Any):
     event = current_event.get(None)
     if (
-      isinstance(event, MessageEvent) and event.message_id != 0 and
+      isinstance(event, MessageEvent) and event.message_id != 0 and e is None and
       api in ("send_private_msg", "send_group_msg", "send_group_forward_msg", "send_msg")
     ):
       add_message(event, result)

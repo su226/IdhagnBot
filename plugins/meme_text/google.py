@@ -9,13 +9,13 @@ import nonebot
 COLORS = [(66, 133, 244), (234, 67, 53), (251, 188, 5), (52, 168, 83)]
 PADDING = 32
 
-tiktok = nonebot.on_command("谷歌", aliases={"google"})
-tiktok.__cmd__ = ["谷歌", "google"]
-tiktok.__brief__ = "G,O,O,G,L,E,咕噜咕噜"
-tiktok.__doc__ = "/谷歌 <文本>"
-@tiktok.handle()
-async def handle_tiktok(args: Message = CommandArg()):
-  text = args.extract_plain_text().rstrip()
+google = nonebot.on_command("谷歌", aliases={"google"})
+google.__cmd__ = ["谷歌", "google"]
+google.__brief__ = "G,O,O,G,L,E,咕噜咕噜"
+google.__doc__ = "/谷歌 <文本>"
+@google.handle()
+async def handle_google(args: Message = CommandArg()):
+  text = args.extract_plain_text().rstrip() or google.__doc__
   font = resources.font("sans-bold", 64)
   line_height = font.getsize("A")[1] + 4
   w, h = font.getsize_multiline(text)
@@ -38,4 +38,4 @@ async def handle_tiktok(args: Message = CommandArg()):
     x += font.getsize(ch)[0]
   f = BytesIO()
   im.save(f, "png")
-  await tiktok.finish(MessageSegment.image(f))
+  await google.finish(MessageSegment.image(f))

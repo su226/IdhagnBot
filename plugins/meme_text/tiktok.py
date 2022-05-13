@@ -18,7 +18,7 @@ tiktok.__brief__ = "记录每种生物"
 tiktok.__doc__ = "/抖音 <文本>"
 @tiktok.handle()
 async def handle_tiktok(args: Message = CommandArg()):
-  text = args.extract_plain_text().rstrip()
+  text = args.extract_plain_text().rstrip() or tiktok.__doc__
   font = resources.font("sans-bold", 64)
   w, h = font.getsize_multiline(text)
   h += font.getmetrics()[1]

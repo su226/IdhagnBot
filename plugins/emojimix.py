@@ -234,16 +234,16 @@ emojimix.__cmd__ = ["emojimix", "缝合", "emoji", "mix"]
 emojimix.__brief__ = "缝合两个emoji"
 emojimix.__doc__ = '''\
 /emojimix - 查看支持的emoji
-/emojimix <emoji> <emoji> - 缝合两个emoji
+/emojimix <emoji1>+<emoji2> - 缝合两个emoji
 数据来自 https://tikolu.net/emojimix
 图片来自 Google'''
 @emojimix.handle()
 async def handle_emojimix(args = CommandArg()):
-  emojis = str(args).split()
+  emojis = args.extract_plain_text().split("+")
   if len(emojis) == 0:
     await emojimix.finish(SUPPORTED_STR)
   elif len(emojis) != 2:
-    await emojimix.finish("请输入两个空格分割的 emoji")
+    await emojimix.finish("请输入加号分割的两个 emoji")
   emoji1, emoji2 = emojis
   code1 = get_code(emoji1)
   code2 = get_code(emoji2)

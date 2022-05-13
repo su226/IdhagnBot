@@ -8,7 +8,6 @@ COMMAND = [
 ]
 UEVENT_FILE = "uevent"
 
-@staticmethod
 def read(card: str) -> Info:
   root = f"/sys/class/drm/{card}/device/"
   with open(root + UEVENT_FILE) as f:

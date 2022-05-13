@@ -15,8 +15,8 @@ def get_gpu_info() -> list[Info]:
   for i in gpus:
     with open(f"/sys/class/drm/{i}/device/vendor") as f:
       vendor = int(f.read()[2:-1], 16)
-    if vendor in VENDORS:
+    try:
       result.append(VENDORS[vendor].read(i))
-    else:
+    except:
       result.append(read_unknown(i))
   return result

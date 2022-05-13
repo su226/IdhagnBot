@@ -16,11 +16,21 @@ def iter_promotions(promotions: list[dict]) -> Iterable[dict]:
   for i in promotions["upcomingPromotionalOffers"]:
     yield from i["promotionalOffers"]
 
+def getslug(game: dict) -> str:
+  slug = game['productSlug']
+  if slug:
+    return slug.removesuffix("/home")
+  for i in game["offerMappings"]:
+    if i.get("pageType", None) == "productHome":
+      return i["pageSlug"]
+  return None
+
 def iter_free_games(games: list[dict]) -> Iterable[str]:
   now_date = datetime.now(timezone.utc)
   for game in games:
     title = game["title"]
-    url = f"https://www.epicgames.com/store/zh-CN/p/{game['productSlug']}"
+    slug = getslug(game)
+    url = "获取链接失败，请联系机器人开发者" if slug is None else f"https://www.epicgames.com/store/zh-CN/p/{slug}"
     image = ""
     for i in game["keyImages"]:
       if i["type"] in ("DieselStoreFrontWide", "OfferImageWide"):
