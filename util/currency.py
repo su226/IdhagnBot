@@ -21,5 +21,5 @@ def add_coin(group: int, user: int, amount: int):
   group_data = STATE.groups[group]
   if user not in group_data:
     group_data[user] = 0
-  group_data[user] += amount
+  group_data[user] = max(group_data[user] + amount, 0)
   STATE.dump()
