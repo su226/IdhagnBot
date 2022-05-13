@@ -1,46 +1,7 @@
 from nonebot.params import CommandArg
 import nonebot
-from .lisp import parse, format, eval, math_env
-from .safe_eval import safe_eval
-
-usage = "/calc <数学表达式>\n“不保证”结果可靠\n本命令已不进行维护"
-calc = nonebot.on_command("calc")
-calc.__cmd__ = "calc"
-calc.__brief__ = "计算数学表达式"
-calc.__doc__ = usage
-@calc.handle()
-async def handle_calc(args = CommandArg()):
-  expr = str(args).rstrip()
-  if expr == "":
-    await calc.send(usage)
-  else:
-    await calc.send(expr + "\n=> ⑨")
-
-lisp = nonebot.on_command("lisp")
-lisp.__cmd__ = "lisp"
-lisp.__brief__ = "计算Lisp风格的数学表达式"
-lisp.__doc__ = "请自行了解什么是S-Expression\n本命令已不进行维护"
-@lisp.handle()
-async def handle_lisp(args = CommandArg()):
-  try:
-    codes = parse(str(args))
-  except Exception as e:
-    await lisp.send(f"无效的Lisp: {e}")
-    return
-  if len(codes) == 0:
-    await lisp.finish("表达式为空")
-  segments = []
-  env = math_env()
-  for code in codes:
-    segments.append(format(code))
-    try:
-      result = eval(code, env)
-    except Exception as e:
-      segments.append(f"=> 执行失败: {e}")
-    else:
-      result = "琪露诺" if result == 9 else str(result)
-      segments.append(f"=> {result}")
-  await lisp.send("\n".join(segments))
+from .safe_eval_py import safe_eval as safe_eval_py
+from .safe_eval_js import safe_eval as safe_eval_js
 
 TIMEOUT = 10
 NPROC = 128
@@ -61,10 +22,10 @@ python.__doc__ = f'''\
 输出限制为 {OUTPUT} 字节'''
 @python.handle()
 async def handle_python(args = CommandArg()):
-  code = str(args).rstrip()
+  code = args.extract_plain_text().rstrip()
   if not len(code):
     await python.finish(python.__doc__)
-  killed, returncode, stdout, stderr = await safe_eval(code, TIMEOUT, NPROC, MEMORY, OUTPUT)
+  killed, returncode, stdout, stderr = await safe_eval_py(code, TIMEOUT, NPROC, MEMORY, OUTPUT)
   segments = []
   if killed:
     segments.append(f"退出代码：{returncode}（超时）")
@@ -85,3 +46,44 @@ async def handle_python(args = CommandArg()):
   else:
     segments.append(f"标准错误：（末尾没有换行）\n{stderr}")
   await python.finish("\n".join(segments))
+
+JS_MEMORY = 512 * 1024 * 1024
+js = nonebot.on_command("js", aliases={"node"})
+js.__cmd__ = ["js", "node"]
+js.__brief__ = "在沙箱中运行NodeJS代码"
+js.__doc__ = f'''\
+/node <代码>
+代码可以换行，不会自动输出最后的结果
+限制：
+不能访问沙箱外文件
+只能使用Node标准库
+进程限制为 {NPROC} 个
+时间限制为 {TIMEOUT} 秒
+内存限制为 {JS_MEMORY / 1024 / 1024} M
+输出限制为 {OUTPUT} 字节'''
+@js.handle()
+async def handle_js(args = CommandArg()):
+  code = args.extract_plain_text().rstrip()
+  if not len(code):
+    await js.finish(js.__doc__)
+  killed, returncode, stdout, stderr = await safe_eval_js(code, TIMEOUT, NPROC, JS_MEMORY, OUTPUT)
+  segments = []
+  if killed:
+    segments.append(f"退出代码：{returncode}（超时）")
+  else:
+    segments.append(f"退出代码：{returncode}")
+  stdout = stdout.decode(errors='ignore')
+  if not len(stdout):
+    segments.append(f"标准输出：（空）")
+  elif stdout.endswith("\n"):
+    segments.append(f"标准输出：\n{stdout[:-1]}")
+  else:
+    segments.append(f"标准输出：（末尾没有换行）\n{stdout}")
+  stderr = stderr.decode(errors='ignore')
+  if not len(stderr):
+    segments.append(f"标准错误：（空）")
+  elif stderr.endswith("\n"):
+    segments.append(f"标准错误：\n{stderr[:-1]}")
+  else:
+    segments.append(f"标准错误：（末尾没有换行）\n{stderr}")
+  await js.finish("\n".join(segments))
