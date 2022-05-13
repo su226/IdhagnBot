@@ -1,29 +1,55 @@
-from util import context, help
-from nonebot.adapters.onebot.v11 import Bot, Event, Message
-from nonebot.params import CommandArg
-import nonebot
+import asyncio
 
-help_cmd = nonebot.on_command("帮助", aliases={"help", "?"})
-help_cmd.__cmd__ = ["帮助", "help", "?"]
-help_cmd.__brief__ = "查看所有帮助"
-help_cmd.__doc__ = '''\
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message
+from nonebot.params import CommandArg
+
+from util import context, help, command
+
+async def get_available_groups(bot: Bot, user_id: int) -> list[int]:
+  async def in_group(group_id: int) -> int:
+    try:
+      await bot.get_group_member_info(group_id=group_id, user_id=user_id)
+    except:
+      return 0
+    else:
+      return group_id
+  groups = await asyncio.gather(in_group(group) for group in context.CONFIG.groups)
+  return [group for group in groups if group]
+
+help_cmd = (command.CommandBuilder("help", "帮助", "help", "?")
+  .brief("查看所有帮助")
+  .usage('''\
 /帮助 [...分类] [页码] - 查看帮助页
 /帮助 <命令名> - 查看命令帮助
 帮助页中以点号开头的是分类，以斜线开头的是命令
 分类和命令前面的符号仅用作区分，查看时无需输入
-命令帮助中尖括号里的参数必选，方括号里的参数可选，带...的参数可输入多个'''
+命令帮助中尖括号里的参数必选，方括号里的参数可选，带...的参数可输入多个''')
+  .build())
 @help_cmd.handle()
-async def handle_help(bot: Bot, event: Event, msg: Message = CommandArg()):
-  args = str(msg).split()
+async def handle_help(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
+  args = msg.extract_plain_text().split()
   private = not hasattr(event, "group_id")
-  ctx = context.get_event_context(event)
-  permission = await context.get_permission(bot, event)
+  current_group = context.get_event_context(event)
+  if private:
+    available_groups = await get_available_groups(bot, event.user_id)
+  else:
+    available_groups = [current_group]
+  data = help.ShowData(
+    user_id=event.user_id,
+    current_group=current_group,
+    available_groups=available_groups,
+    private=private,
+    level=await context.get_event_level(bot, event))
   if len(args) == 0:
-    await help_cmd.finish(Message(help.CategoryItem.ROOT.format_page(1, ctx, private, permission)))
+    await help_cmd.finish(Message(help.CategoryItem.ROOT.format(1, data)))
   elif len(args) == 1:
-    command = help.CommandItem.find(args[0], private, ctx, permission)
-    if command:
-      await help_cmd.finish(Message(command.usage))
+    try:
+      command = help.CommandItem.find(args[0])
+    except:
+      pass
+    else:
+      if command.can_show(data):
+        await help_cmd.finish(Message(command.format()))
   try:
     page = int(args[-1])
     path = args[:-1]
@@ -31,7 +57,9 @@ async def handle_help(bot: Bot, event: Event, msg: Message = CommandArg()):
     page = 1
     path = args
   try:
-    result = help.CategoryItem.find(path).format_page(page, ctx, private, permission)
+    category = help.CategoryItem.find(path)
   except:
-    result = "无此条目或分类、权限不足或在当前上下文不可用"
-  await help_cmd.finish(Message(result))
+    await help_cmd.finish("无此条目或分类、权限不足或在当前上下文不可用")
+  else:
+    if category.can_show(data):
+      await help_cmd.finish(Message(category.format(page, data)))

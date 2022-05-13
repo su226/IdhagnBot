@@ -1,12 +1,14 @@
-from util.config import BaseModel, BaseConfig, BaseState, Field
-from util import context
 from dataclasses import dataclass
-from nonebot.adapters import Bot, Event
+from typing import Callable, Literal, overload
+import itertools
 import re
+import time
 
-class Trap(BaseModel):
-  reason: str = "无原因"
-  users: list[int]
+from pydantic import BaseModel, Field
+from nonebot.adapters.onebot.v11 import Bot, Event
+
+from util.config import BaseConfig
+from util import context
 
 class Alias(BaseModel):
   names: list[str]
@@ -16,14 +18,8 @@ class Aliases(BaseModel):
   contexts: list[int] = Field(default_factory=list)
   aliases: list[Alias]
 
-class Config(BaseConfig):
-  __file__ = "account_aliases"
-  traps: dict[str, Trap] = Field(default_factory=dict)
+class Config(BaseConfig, file="account_aliases"):
   aliases: list[Aliases] = Field(default_factory=list)
-
-class State(BaseState):
-  __file__ = "account_aliases"
-  traps_enabled: dict[str, bool] = Field(default_factory=dict)
 
 @dataclass
 class MatchPattern:
@@ -35,29 +31,35 @@ class MatchPattern:
 @dataclass
 class Match:
   uids: tuple[int, ...]
-  items: list[MatchPattern]
+  patterns: list[MatchPattern]
   def __str__(self) -> str:
     if len(self.uids) > 1:
       return f"{self.uids[0]} 等 {len(self.uids)} 个成员"
     return str(self.uids[0])
 
-class MatchException(Exception):
-  def __init__(self, errors: list[str]) -> None:
-    super().__init__("这个异常没有被正确捕获")
-    self.errors = errors
+AliasesDict = dict[int, Alias]
+CACHE: dict[int, tuple[float, AliasesDict]] = {}
 
-CONFIG = Config.load()
-STATE = State.load()
+@Config.reloadable
+def reload_config(config: Config):
+  CACHE.clear()
+  global CONFIG
+  CONFIG = config
 
-CHINESE_RE = re.compile(r"[a-zA-Z0-9\u4e00-\u9fa5]+")
+IDENTIFIER_RE = re.compile(r"[a-zA-Z0-9\u4e00-\u9fa5]+")
 def to_identifier(data: str) -> str:
-  return "".join(CHINESE_RE.findall(data)).lower()
+  return "".join(IDENTIFIER_RE.findall(data)).lower()
 
-async def get_aliases(bot: Bot, event: Event) -> dict[int, Alias]:
+async def get_aliases(bot: Bot, event: Event) -> AliasesDict:
   ctx = context.get_event_context(event)
-  aliases: dict[int, Alias] = {}
+  curtime = time.time()
+  cachetime, aliases = CACHE.get(ctx, (0.0, {}))
+  if cachetime > curtime - 600:
+    return aliases
+  aliases: AliasesDict = {}
+  CACHE[ctx] = (curtime, aliases)
   for i in CONFIG.aliases:
-    if not context.in_context(ctx, *i.contexts):
+    if not context.in_group(ctx, *i.contexts):
       continue
     for alias in i.aliases:
       key = hash(alias.users)
@@ -77,60 +79,54 @@ async def get_aliases(bot: Bot, event: Event) -> dict[int, Alias]:
     }))
   return aliases
 
-def match(aliases: dict[int, Alias], pattern: str) -> tuple[dict[int, Match], dict[int, Match], dict[int, Match]]:
-  all: dict[int, Match] = {}
+async def match(bot: Bot, event: Event, pattern: str) -> tuple[dict[int, Match], dict[int, Match]]:
   exact: dict[int, Match] = {}
   inexact: dict[int, Match] = {}
   def get(matches: dict[int, Match], id: int, alias: Alias) -> Match:
     if id not in matches:
       matches[id] = Match(alias.users, [])
     return matches[id]
-  for id, alias in aliases.items():
+  for id, alias in (await get_aliases(bot, event)).items():
     for name in alias.names:
       if pattern == name:
         matched = MatchPattern(name, True)
-        get(exact, id, alias).items.append(matched)
-        get(all, id, alias).items.append(matched)
+        get(exact, id, alias).patterns.append(matched)
       elif pattern in name:
         matched = MatchPattern(name, False)
-        get(inexact, id, alias).items.append(matched)
-        get(all, id, alias).items.append(matched)
-  return all, exact, inexact
+        get(inexact, id, alias).patterns.append(matched)
+  return exact, inexact
 
 AMBIGUOUS_LIMIT = 5
 
-def try_match(aliases: dict[int, Alias], pattern: str, multiple: bool = False, trap: bool = False) -> int | list[int]:
-  pattern = to_identifier(pattern)
-  all, exact, inexact = match(aliases, pattern)
+@overload
+async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: Literal[False] = False) -> tuple[list[str], int]: ...
+@overload
+async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = True) -> tuple[list[str], list[int]]: ...
+async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: bool = False) -> tuple[list[str], int | list[int]]:
+  pattern = to_identifier(raw_pattern)
+  default = [] if multiple else -1
+  if not pattern:
+    return [f"有效名字为空：{raw_pattern}"], default
+  exact, inexact = await match(bot, event, pattern)
   matches = list((inexact if len(exact) == 0 else exact).values())
   if len(matches) > 1:
     count = len(exact) + len(inexact)
     segments = [f"{pattern} 具有歧义，可以指："]
+    values = itertools.chain(exact.values(), inexact.values())
+    for _, i in zip(range(AMBIGUOUS_LIMIT), values):
+      segments.append(f"{i}（{'、'.join(map(str, i.patterns))}）")
     if count > AMBIGUOUS_LIMIT:
-      for _, i in zip(range(AMBIGUOUS_LIMIT - 1), all.values()):
-        segments.append(f"{i}（{'、'.join(map(str, i.items))}）")
       segments.append(f"等 {count} 个成员或别名")
-    else:
-      for i in all.values():
-        segments.append(f"{i}（{'、'.join(map(str, i.items))}）")
-    raise MatchException(["\n".join(segments)])
+    return ["\n".join(segments)], default
   elif len(matches) == 0:
-    raise MatchException([f"找不到 {pattern}"])
+    return [f"找不到 {pattern}"], default
   errors = []
   if not multiple and len(matches[0].uids) > 1:
     comment = " "
-    if len(matches[0].items) > 1:
-      comment = "（" + "、".join(map(str, match.items[1:])) + "）"
-    errors.append(f"{matches[0].items[0]}{comment}包含多个成员")
-  if trap:
-    for user in matches[0].uids:
-      for id, t in CONFIG.traps.items():
-        if STATE.traps_enabled.get(id, False) and user in t.users:
-          errors.append(f"发现包含 {user} 的 trap，理由为 {t.reason}")
-          break
-  if len(errors):
-    raise MatchException(errors)
+    if len(matches[0].patterns) > 1:
+      comment = "（" + "、".join(map(str, matches[0].patterns[1:])) + "）"
+    errors.append(f"{matches[0].patterns[0]}{comment}包含多个成员")
   if multiple:
-    return matches[0].uids
+    return errors, list(matches[0].uids)
   else:
-    return matches[0].uids[0]
+    return errors, matches[0].uids[0]

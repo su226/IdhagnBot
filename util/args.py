@@ -5,6 +5,9 @@ from nonebot.adapters import Bot, Event, Message, MessageSegment, MessageTemplat
 from nonebot.typing import T_State as TBotState
 import asyncio
 import nonebot
+import warnings
+
+warnings.warn("util.args已被弃用，请使用argparse替代", DeprecationWarning)
 
 class MatchFailed(Exception): pass
 class ExcessArguments(MatchFailed): pass

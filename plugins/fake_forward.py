@@ -25,11 +25,9 @@ async def handle_fake_forward(bot: Bot, event: GroupMessageEvent, msg: Message =
   try:
     uid = int(args[0])
   except:
-    aliases = await account_aliases.get_aliases(bot, event)
-    try:
-      uid = account_aliases.try_match(aliases, args[0], trap=True)
-    except account_aliases.MatchException as e:
-      await fake_forward.finish("\n".join(e.errors))
+    errors, uid = await account_aliases.match_uid(bot, event, args[0])
+    if errors:
+      await fake_forward.finish("\n".join(errors))
   card, bot_card = await asyncio.gather(
     get_card(bot, event.group_id, uid),
     get_card(bot, event.group_id, event.self_id))

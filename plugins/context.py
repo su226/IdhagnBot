@@ -1,9 +1,9 @@
-from util.context import enter_context, get_event_context, get_event_context, exit_context, in_context_rule, PRIVATE, ANY_GROUP, GROUP_IDS, GROUP_NAMES
+from util.context import enter_context, get_event_context, get_event_context, exit_context, in_group_rule, PRIVATE, ANY_GROUP, GROUP_IDS, GROUP_NAMES
 from nonebot.adapters.onebot.v11 import Bot, Event, PrivateMessageEvent
 from nonebot.params import CommandArg
 import nonebot
 
-aliases = nonebot.on_command("别名", in_context_rule(ANY_GROUP), {"alias", "aliases"})
+aliases = nonebot.on_command("别名", in_group_rule(ANY_GROUP), {"alias", "aliases"})
 aliases.__cmd__ = ["别名", "alias", "aliases"]
 aliases.__brief__ = "查看当前群聊上下文的别名"
 aliases.__ctx__ = [ANY_GROUP]

@@ -169,7 +169,7 @@ def register(command: Command):
     await matcher.send(Message("\n".join(segments)))
   matcher = nonebot.on_command(
     command.command[0],
-    context.in_context_rule(*command.contexts),
+    context.in_group_rule(*command.contexts),
     set(command.command[1:]),
     permission=context.Permission.parse(command.permission),
     handlers=[handler]

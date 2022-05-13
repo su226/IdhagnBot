@@ -1,25 +1,28 @@
-from collections import defaultdict
+from typing import cast
 from dataclasses import dataclass
-from typing import Any, Literal
-from apscheduler.schedulers.base import BaseScheduler
 from datetime import datetime, timedelta
-from util.config import BaseConfig, BaseModel, BaseState, Field
-from enum import Enum
-from nonebot.adapters.onebot.v11 import Bot, Event
-from nonebot.rule import Rule
-from nonebot.log import logger
-from nonebot.permission import Permission as BotPermission, SUPERUSER
+import asyncio
+
+from apscheduler.schedulers.base import BaseScheduler
+from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
 from nonebot.exception import IgnoredException
+from nonebot.permission import Permission as BotPermission
+from nonebot.rule import Rule
 from nonebot.message import event_preprocessor
 import nonebot
+
+from . import helper, permission
+from util.config import BaseConfig, BaseModel, BaseState, Field
+
+Permission = permission.Level
+scheduler = cast(BaseScheduler, nonebot.require("nonebot_plugin_apscheduler").scheduler)
 
 class Config(BaseConfig):
   __file__ = "context"
   groups: dict[int, list[str]] = Field(default_factory=dict)
   private_limit: set[int] = Field(default_factory=set)
   private_limit_whitelist: bool = False
-  # 设置超管请使用Nonebot2的设置，而不是这个
-  permission_override: dict[int, Literal["deny", "member", "admin", "owner"]] = Field(default_factory=dict)
+  timeout: int = 600
 
 class Context(BaseModel):
   group: int
@@ -29,16 +32,19 @@ class State(BaseState):
   __file__ = "context"
   contexts: dict[int, Context] = Field(default_factory=dict)
 
+CONFIG = Config.load()
+STATE = State.load()
+
 @dataclass
 class Group:
   id: int
   name: str
   aliases: list[str]
 
-CONFIG = Config.load()
-STATE = State.load()
 GROUP_IDS: dict[int, Group] = {}
 GROUP_NAMES: dict[str, Group] = {}
+PRIVATE = -1
+ANY_GROUP = -2
 
 now = datetime.now()
 expired = []
@@ -63,89 +69,21 @@ async def bot_connect(bot: Bot):
 
 @event_preprocessor
 async def pre_event(event: Event):
-  uid = getattr(event, "user_id", None)
-  if CONFIG.permission_override.get(uid, None) == "deny":
-    raise IgnoredException("该用户的权限已被覆盖为拒绝服务")
-  if hasattr(event, "group_id"):
-    if event.group_id not in GROUP_IDS:
+  if (group_id := getattr(event, "group_id", None)) is not None:
+    if group_id not in GROUP_IDS:
       raise IgnoredException("机器人在当前上下文不可用")
-  elif uid is not None:
+  elif (user_id := getattr(event, "user_id", None)) is not None:
     if CONFIG.private_limit_whitelist:
-      if uid not in CONFIG.private_limit:
+      if user_id not in CONFIG.private_limit:
         raise IgnoredException("私聊用户不在白名单内")
     else:
-      if uid in CONFIG.private_limit:
+      if user_id in CONFIG.private_limit:
         raise IgnoredException("私聊用户在黑名单内")
-    refresh_context(uid)
-
-def format_duration(seconds: int) -> str:
-  minutes, seconds = divmod(seconds, 60)
-  hours,   minutes = divmod(minutes, 60)
-  days,    hours   = divmod(hours, 24)
-  segments = []
-  if days:
-    segments.append(f"{days} 天")
-  if hours:
-    segments.append(f"{hours} 时")
-  if minutes:
-    segments.append(f"{minutes} 分")
-  if seconds:
-    segments.append(f"{seconds} 秒")
-  return " ".join(segments)
-
-class Permission(BotPermission, Enum):
-  MEMBER = 0
-  ADMIN = 1
-  OWNER = 2
-  SUPER = 3
-
-  def __init__(self, value: int):
-    super().__init__(self.check)
-
-  def __lt__(self, other):
-    if self.__class__ is other.__class__:
-      return self.value < other.value
-    return NotImplemented
-
-  def __le__(self, other):
-    if self.__class__ is other.__class__:
-      return self.value <= other.value
-    return NotImplemented
-
-  async def check(self, bot: Bot, event: Event) -> bool:
-    result = await get_permission(bot, event)
-    return result >= self
-
-  @classmethod
-  def parse(cls, value: str) -> "Permission":
-    return {
-      "member": cls.MEMBER,
-      "admin": cls.ADMIN,
-      "owner": cls.OWNER,
-      "super": cls.SUPER
-    }[value]
-
-PRIVATE = -1
-ANY_GROUP = -2
-scheduler: BaseScheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
-timeout = 600
-timeout_str = format_duration(timeout)
+    refresh_context(user_id)
 
 def enter_context(uid: int, gid: int):
-  STATE.contexts[uid] = Context(group=gid, expire=0)
+  STATE.contexts[uid] = Context(group=gid, expire=datetime.min)
   return refresh_context(uid)
-
-def get_uid_context(uid: int) -> int:
-  context = STATE.contexts.get(uid, None)
-  return context.group if context else PRIVATE
-
-def refresh_context(uid: int):
-  if uid not in STATE.contexts:
-    return None
-  date = datetime.now() + timedelta(seconds=timeout)
-  STATE.contexts[uid].expire = date
-  STATE.dump()
-  return scheduler.add_job(timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date)
 
 def exit_context(uid: int) -> bool:
   try:
@@ -158,51 +96,77 @@ def exit_context(uid: int) -> bool:
     return True
   return False
 
+def get_uid_context(uid: int) -> int:
+  context = STATE.contexts.get(uid, None)
+  return context.group if context else PRIVATE
+
+def get_event_context(event: Event) -> int:
+  if (group_id := getattr(event, "group_id", None)) is not None:
+    return group_id
+  if (user_id := getattr(event, "user_id", None)) is not None:
+    return get_uid_context(user_id)
+  return -1
+
+def refresh_context(uid: int):
+  if uid not in STATE.contexts:
+    return None
+  date = datetime.now() + timedelta(seconds=Config.timeout)
+  STATE.contexts[uid].expire = date
+  STATE.dump()
+  return scheduler.add_job(timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date)
+
 async def timeout_exit(uid: int):
   if exit_context(uid):
     await nonebot.get_bot().call_api("send_private_msg", 
       user_id=uid,
-      message=f"由于 {timeout_str}内未操作，已退出上下文")
+      message=f"由于 {helper.format_time(Config.timeout)}内未操作，已退出上下文")
 
-def get_event_context(event: Event) -> int:
-  if hasattr(event, "group_id"):
-    return event.group_id
-  return get_uid_context(event.user_id)
+for user, context in STATE.contexts.items():
+  scheduler.add_job(timeout_exit, "date", (user,), id=f"context_timeout_{user}", replace_existing=True, run_date=context.expire)
 
-def in_context(ctx: int, *contexts: int) -> bool:
+def in_group(ctx: int, *contexts: int) -> bool:
   for i in contexts:
     if i == ctx or (i == ANY_GROUP and ctx != PRIVATE):
       return True
   return len(contexts) == 0
 
-def in_context_rule(*contexts: int) -> Rule:
+def in_group_rule(*contexts: int) -> Rule:
   async def rule(event: Event) -> bool:
-    return in_context(get_event_context(event), *contexts)
+    return in_group(get_event_context(event), *contexts)
   return Rule(rule)
 
-members_cache: dict[int, dict[int, dict[str, Any]]] = defaultdict(lambda: {"__time__": 0})
-cache_duration = 86400
+async def has_group(bot: Bot, user: int, *groups: int) -> bool:
+  tasks = [asyncio.create_task(bot.get_group_member_info(group_id=group, user_id=user)) for group in groups]
+  done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+  return any(i.exception() is None for i in done)
 
-async def get_permission(bot: Bot, event: Event) -> Permission:
-  try:
-    return Permission.parse(CONFIG.permission_override[event.user_id])
-  except:
-    pass
-  if await SUPERUSER(bot, event):
-    return Permission.SUPER
-  ctx = get_event_context(event)
-  if ctx == PRIVATE:
+def has_group_rule(*groups: int) -> Rule:
+  async def check(bot: Bot, event: Event) -> bool:
+    if (group_id := getattr(event, "group_id", None)) is not None:
+      return group_id in groups
+    if (user_id := getattr(event, "user_id", None)) is not None:
+      return await has_group(bot, user_id, *groups)
+    return False
+  return Rule(check)
+
+async def get_event_level(bot: Bot, event: Event) -> Permission:
+  if (user_id := getattr(event, "user_id", None)) is None:
     return Permission.MEMBER
-  try:
+  group_id = get_event_context(event)
+  if (result := permission.get_override_level(bot, user_id, group_id)) is not None:
+    return result
+  if isinstance(event, GroupMessageEvent) and event.sender.role is not None:
     return Permission.parse(event.sender.role)
-  except:
-    pass
-  try:
-    member = await bot.get_group_member_info(group_id=ctx, user_id=event.user_id)
-    return Permission.parse(member["role"])
-  except:
-    logger.exception("获取权限失败，这通常不应该发生！")
-  return Permission.MEMBER
+  return await permission.get_group_level(bot, user_id, group_id) or Permission.MEMBER
 
-for user, context in STATE.contexts.items():
-  scheduler.add_job(timeout_exit, "date", (user,), id=f"context_timeout_{user}", replace_existing=True, run_date=context.expire)
+def build_permission(node: permission.Node, default: permission.Level) -> BotPermission:
+  async def checker(bot: Bot, event: Event) -> bool:
+    if (user_id := getattr(event, "user_id", None)) is None:
+      return False
+    if (result := permission.check(node, user_id, get_event_context(event))) is not None:
+      return result
+    command_level = permission.get_node_level(node) or default
+    if command_level == permission.Level.MEMBER:
+      return True
+    return await get_event_level(bot, event) >= command_level
+  return BotPermission(checker)
