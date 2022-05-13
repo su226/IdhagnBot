@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Any
+import argparse
 import sys
 
 from pydantic import BaseModel, Field
@@ -9,21 +10,21 @@ import nonebot
 if TYPE_CHECKING:
   from loguru import Record
 
-from util.config import BaseConfig
+from util import config_v2
 
 class LogOverride(BaseModel):
   fold_nonebot: bool = True
   format: str = "<g>{time:HH:mm:ss}</g>|<lvl>{level:8}</lvl>| <c>{name}</c> - {message}"
   level: str | int = "INFO"
 
-class Config(BaseConfig, file="bot"):
+class Config(BaseModel):
   nonebot: dict[str, Any] = Field(default_factory=dict)
   log_override: LogOverride | None = LogOverride()
 
-CONFIG = Config.load()
+CONFIG = config_v2.SharedConfig("bot", Config, False)
 
-if CONFIG.log_override is not None:
-  _override = CONFIG.log_override
+_config = CONFIG()
+if (_override := _config.log_override) is not None:
   def loguru_filter(record: "Record") -> bool:
     if _override.fold_nonebot and (record["name"] or "").startswith("nonebot."):
       record["name"] = "nonebot"
@@ -33,17 +34,27 @@ if CONFIG.log_override is not None:
   logger.add(
     sys.stderr,
     filter=loguru_filter,
-    format=CONFIG.log_override.format,
+    format=_override.format,
     colorize=True,
     diagnose=False)
 
-nonebot.init(_env_file="configs/nonebot.env", **CONFIG.nonebot, apscheduler_autostart=True)
+parser = argparse.ArgumentParser()
+parser.add_argument("--export-html")
+args = parser.parse_args()
+
+nonebot.init(_env_file="configs/nonebot.env", **_config.nonebot, apscheduler_autostart=True)
 nonebot.get_driver().register_adapter(Adapter)
 nonebot.load_plugins("plugins")
 nonebot.load_plugins("user_plugins")
 
-from util.help import add_all_from_plugins
-add_all_from_plugins()
+from util import help, permission
+help.add_all_from_plugins()
 
-if __name__ == "__main__":
+if args.export_html:
+  commands = help.CategoryItem.ROOT.html(False)
+  permissions = permission.export_html()
+  with open(args.export_html, "w") as f:
+    f.write(f"<h2>命令帮助</h2>{commands}<h2>已知权限节点</h2>{permissions}")
+  print("已导出所有命令帮助和权限节点")
+else:
   nonebot.run()

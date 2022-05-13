@@ -11,8 +11,6 @@ from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
 import yaml
 
-from . import context
-
 def encode(data: Any) -> Any:
   if data is None or isinstance(data, (str, int, float)):
     return data
@@ -127,6 +125,7 @@ class GroupConfig(BaseConfig[TModel, int]):
     return file
 
   def get_all(self) -> Iterable[tuple[int]]:
+    from . import context
     for i in context.CONFIG.groups:
       yield i,
 

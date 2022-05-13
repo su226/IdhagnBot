@@ -157,3 +157,19 @@ def get_node_level(node: Node, group: int = -1) -> Level | None:
   elif group != -1 and (level_name := GROUP_STATE(group).get_command_level(node)) is not None:
     return Level.parse(level_name)
   return None
+
+EXPORT_LEVELS: dict[Level, str] = {
+  Level.MEMBER: "群员",
+  Level.ADMIN: "群管",
+  Level.OWNER: "群主",
+  Level.SUPER: "超管",
+}
+EXPORT_NODES: list[tuple[Node, Level]] = []
+
+def register_for_export(node: Node, level: Level):
+  EXPORT_NODES.append((node, level))
+
+def export_html() -> str:
+  EXPORT_NODES.sort(key=lambda x: x[0])
+  content = "".join(f"<li>[{EXPORT_LEVELS[level]}] {'.'.join(node)}</li>" for node, level in EXPORT_NODES)
+  return f"<ul>{content}</ul>"
