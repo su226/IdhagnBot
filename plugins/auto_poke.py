@@ -12,7 +12,7 @@ def try_int(value: str) -> str | int:
 
 uids: dict[int, set[str]] = {}
 
-auto_poke = nonebot.on_command("自动戳", context.in_context_rule(context.ANY_GROUP), {"autopoke"}, permission=context.Permission.SUPER)
+auto_poke = nonebot.on_command("自动戳", context.in_group_rule(context.ANY_GROUP), {"autopoke"}, permission=context.Permission.SUPER)
 auto_poke.__cmd__ = ["自动戳", "autopoke"]
 auto_poke.__brief__ = "查看、设置和清除自动戳"
 auto_poke.__doc__ = '''\
@@ -26,26 +26,24 @@ async def handle_auto_poke(bot: Bot, event: Event, args: Message = CommandArg())
   ctx = context.get_event_context(event)
   args = str(args).split()
   if len(args) == 0:
-    await auto_poke.send("当前自动戳：\n" + "\n".join(uids[ctx]))
+    await auto_poke.send("当前自动戳：\n" + "\n".join(map(str, uids.get(ctx, []))))
   elif args == ["clear"] or args == ["清除"]:
     if ctx in uids:
       del uids[ctx]
     await auto_poke.send("已清除自动戳")
   else:
-    errors = []
+    all_errors = []
     all_uids = []
-    aliases = await account_aliases.get_aliases(bot, event)
     for pattern in args:
       try:
-        all_uids = int(pattern)
+        all_uids.append(int(pattern))
         continue
       except: pass
-      try:
-        all_uids.extend(account_aliases.try_match(aliases, pattern, True))
-      except account_aliases.MatchException as e:
-        errors.extend(e.errors)
-    if len(errors):
-      await auto_poke.send("\n".join(errors))
+      errors, cur_uids = await account_aliases.match_uid(bot, event, pattern, True)
+      all_uids.extend(cur_uids)
+      all_errors.extend(errors)
+    if len(all_errors):
+      await auto_poke.send("\n".join(all_errors))
       return
     uids[ctx] = all_uids
     await auto_poke.send("已设置自动戳：\n" + "\n".join(map(str, uids[ctx])))

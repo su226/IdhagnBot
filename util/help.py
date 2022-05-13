@@ -1,69 +1,87 @@
-from typing import Literal
-from util.config import BaseConfig, BaseModel, Field
-from util import context
+from typing import TypeVar
 import math
+
 import nonebot
 
-class UserCommons(BaseModel):
-  category: str = ""
-  priority: int = 0
-  private: bool | None = None
-  contexts: list[int] = Field(default_factory=list)
-  permission: context.Permission = context.Permission.MEMBER
+from util.config import BaseConfig, BaseModel, Field
+from util import context, permission
 
-class UserString(UserCommons):
+class CommonData(BaseModel):
+  priority: int = 0
+  node_str: str = Field(default="", alias="node")
+  has_group: list[int] = Field(default_factory=list)
+  in_group: list[int] = Field(default_factory=list)
+  private: bool | None = None
+  level: permission.Level = permission.Level.MEMBER
+
+  @property
+  def node(self) -> permission.Node | None:
+    if not self.node_str:
+      return None
+    elif self.node_str == ".":
+      return ()
+    return tuple(self.node_str.split("."))
+
+class ShowData(BaseModel):
+  user_id: int
+  current_group: int
+  available_groups: list[int]
+  private: bool
+  level: permission.Level
+
+class UserData(CommonData):
+  category: str = ""
+
+class UserString(UserData):
   string: str
 
-class UserCommand(UserCommons):
+class UserCommand(UserData):
   command: list[str]
   brief: str = ""
   usage: str = ""
 
 class Config(BaseConfig):
   __file__ = "help"
-  force_show: context.Permission = context.Permission.MEMBER
   page_size: int = 10
-  blacklist: set[str] = Field(default_factory=set)
   user_helps: list[str | UserString | UserCommand] = Field(default_factory=list)
   category_brief: dict[str, str] = Field(default_factory=dict)
 
 CONFIG = Config.load()
 
+def check_permission(data: CommonData, show: ShowData) -> bool:
+  node = data.node
+  if node:
+    if (result := permission.check(node, show.user_id, show.current_group)) is not None:
+      return result
+    command_level = permission.get_node_level(node) or data.level
+  else:
+    command_level = data.level
+  return show.level >= command_level
+
 class Item:
-  def __init__(self, id: str, priority: int = 0, contexts: list[int] | int = [], private: bool = None, permission: context.Permission | str = context.Permission.MEMBER):
-    self.id = id
-    self.priority = priority
-    self.private = private
-    if isinstance(contexts, int):
-      self.contexts = [contexts]
-    else:
-      self.contexts = contexts
-    if isinstance(permission, str):
-      self.permission = context.Permission.parse(permission)
-    else:
-      self.permission = permission
+  def __init__(self, data: CommonData | None):
+    self.data = CommonData() if data is None else data
 
   def __call__(self) -> str:
     raise NotImplementedError
 
-  def register(self):
-    return self
-
   def get_order(self) -> int:
-    return self.priority
+    return 0
   
-  def can_show(self, current_context: int, private: bool, permission: context.Permission) -> bool:
-    if self.private is not None and private != self.private:
+  def can_show(self, data: ShowData) -> bool:
+    if not check_permission(self.data, data):
       return False
-    if not context.in_context(current_context, *self.contexts):
+    if self.data.in_group and not context.in_group(data.current_group, *self.data.in_group):
       return False
-    if permission < self.permission:
+    if self.data.has_group and not any(i in self.data.has_group for i in data.available_groups):
       return False
-    return self.id not in CONFIG.blacklist
+    if self.data.private is not None and data.private != self.data.private:
+      return False
+    return True
 
 class StringItem(Item):
-  def __init__(self, id: str, string: str, **kw):
-    super().__init__(id, **kw)
+  def __init__(self, string: str, data: CommonData | None = None):
+    super().__init__(data)
     self.string = string
 
   def __call__(self) -> str:
@@ -81,40 +99,33 @@ class CommandItem(Item):
     context.Permission.SUPER: "[超管] ",
   }
 
-  def __init__(self, names: list[str] = [], brief: str = "", usage: str = "", **kw):
-    super().__init__(names[0], **kw)
+  def __init__(self, names: list[str] = [], brief: str = "", usage: str = "", data: CommonData | None = None):
+    super().__init__(data)
     self.names = names
-    self._usage = usage
+    self.raw_usage = usage
     self.brief = brief
-  
-  def register(self) -> "CommandItem":
     for i in self.names:
-      CommandItem.commands[i] = self
-    return super().register()
+      self.commands[i] = self
+
+  def get_order(self) -> int:
+    return self.data.level.value
 
   @staticmethod
-  def find(name: str, private: bool, current_context: int, permission: context.Permission) -> "CommandItem | None":
-    if name in CommandItem.commands:
-      item = CommandItem.commands[name]
-      if item.can_show(current_context, private, max(permission, CONFIG.force_show)):
-        return item
-    return None
+  def find(name: str) -> "CommandItem":
+    return CommandItem.commands[name]
   
   def __call__(self) -> str:
-    brief = ""
-    if self.brief:
-      brief = f" - {self.brief}"
-    return f"{CommandItem.prefixes[self.permission]}/{self.names[0]}{brief}"
+    brief = f" - {self.brief}" if self.brief else ""
+    return f"{self.prefixes[self.data.level]}/{self.names[0]}{brief}"
   
-  @property
-  def usage(self) -> str:
-    segments = [f"{CommandItem.prefixes[self.permission]}{self.names[0]}"]
+  def format(self) -> str:
+    segments = [f"{self.prefixes[self.data.level]}{self.names[0]}"]
     if self.brief:
       segments[0] += f" - {self.brief}"
-    if len(self._usage) == 0:
+    if len(self.raw_usage) == 0:
       segments.append("没有用法说明")
     else:
-      segments.append(self._usage)
+      segments.append(self.raw_usage)
     if len(self.names) > 1:
       segments.append("该命令有以下别名：" + "、".join(self.names[1:]))
     return "\n".join(segments)
@@ -122,18 +133,16 @@ class CommandItem(Item):
 class CategoryItem(Item):
   ROOT: "CategoryItem"
 
-  def __init__(self, name: str, brief: str = "", **kw):
-    super().__init__(name, **kw)
+  def __init__(self, name: str, brief: str = "", data: CommonData | None = None):
+    super().__init__(data)
+    self.name = name
     self.brief = brief
     self.items: list[Item] = []
-    self.items_dict: dict[str, Item] = {}
-    self.string_count = 0
+    self.subcategories: dict[str, "CategoryItem"] = {}
   
   def __call__(self) -> str:
-    brief = ""
-    if self.brief:
-      brief = f" - {self.brief}"
-    return f".{self.id}{brief}"
+    brief = f" - {self.brief}" if self.brief else ""
+    return f".{self.name}{brief}"
 
   def get_order(self) -> int:
     return -2
@@ -143,48 +152,24 @@ class CategoryItem(Item):
     cur = CategoryItem.ROOT
     if isinstance(path, str):
       path = [x for x in path.split(".") if x]
-    for i, id in enumerate(path, 1):
-      if id not in cur.items_dict:
+    for i, name in enumerate(path, 1):
+      if name not in cur.subcategories:
         if not create:
           raise KeyError(f"子分类 {'.'.join(path[:i])} 不存在")
-        sub = CategoryItem(id)
-        cur.items.append(sub)
-        cur.items_dict[id] = sub
-      cur = cur.items_dict[id]
-      if not isinstance(cur, CategoryItem):
-        raise TypeError(f"{'.'.join(path[:i])} 不是一个子分类")
+        sub = CategoryItem(name)
+        cur.add(sub)
+      cur = cur.subcategories[name]
     return cur
 
-  def add_item(self, item: Item):
-    if item.id in self.items_dict:
-      raise KeyError(f"已有ID为\"{item.id}\"的帮助项")
+  def add(self, item: Item):
     self.items.append(item)
-    self.items_dict[item.id] = item
-    return item.register()
+    if isinstance(item, CategoryItem):
+      self.subcategories[item.name] = item
 
-  def get_item(self, name: str, private: bool, current_context: int, permission: context.Permission) -> Item | None:
-    if name in self.items_dict:
-      item = self.items_dict[name]
-      if item.can_show(current_context, private, max(permission, CONFIG.force_show)):
-        return item
-    return None
-
-  def add_string(self, string: str, **kw) -> StringItem:
-    self.string_count += 1
-    return self.add_item(StringItem(f"string_{self.string_count}", string, **kw))
-
-  def add_command(self, names: str | list[str], brief: str = "", usage: list[str] | str = "", **kw) -> CommandItem:
-    if isinstance(names, str):
-      names = [names]
-    return self.add_item(CommandItem(names, brief, usage, **kw))
-
-  def format_page(self, page_id: int, current_context: int, private: bool, permission: context.Permission) -> str:
-    permission = max(permission, CONFIG.force_show)
+  def format(self, page_id: int, show_data: ShowData) -> str:
     vaild_items = ["使用 /帮助 <命令名> 查看详细用法"]
-    if current_context == context.PRIVATE:
-      vaild_items.append("请进入上下文查看群聊命令")
-    vaild_items.extend(x[-1] for x in sorted((-x.priority, x.get_order(), x())
-      for x in self.items if x.can_show(current_context, private, permission)))
+    vaild_items.extend(x[-1] for x in sorted((-x.data.priority, x.get_order(), x())
+      for x in self.items if x.can_show(show_data)))
     pages = math.ceil(len(vaild_items) / CONFIG.page_size)
     if page_id < 1 or page_id > pages:
       return f"页码范围从 1 到 {pages}"
@@ -197,51 +182,29 @@ CategoryItem.ROOT = CategoryItem("root")
 
 for item in CONFIG.user_helps:
   if isinstance(item, str):
-    CategoryItem.ROOT.add_string(item)
+    CategoryItem.ROOT.add(StringItem(item))
   elif isinstance(item, UserString):
-    CategoryItem.find(item.category, True).add_string(item.string, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
+    CategoryItem.find(item.category, True).add(StringItem(item.string, item))
   else:
-    CategoryItem.find(item.category, True).add_command(item.command, item.brief, item.usage, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
+    CategoryItem.find(item.category, True).add(CommandItem(item.command, item.brief, item.usage, item))
 
 for path, brief in CONFIG.category_brief.items():
   CategoryItem.find(path, True).brief = brief
 
 def add_all_from_plugins():
+  T = TypeVar("T")
+  def ensure_list(value: T | list[T]) -> list[T]:
+    return value if isinstance(value, list) else [value]
   for plugin in nonebot.get_loaded_plugins():
-    for name, data in getattr(plugin.module, "__cat__", {}).items():
-      category = CategoryItem.find(name, True)
-      category.brief = data.get("brief", category.brief)
-      category.priority = data.get("priority", category.priority)
-      category.private = data.get("private", category.private)
-      category.contexts = data.get("contexts", category.contexts)
-      category.permission = data.get("permission", category.permission)
-      for extra in data.get("extras", []):
-        try:
-          item = UserString.parse_obj(extra)
-        except:
-          pass
-        else:
-          category.add_string(item.string, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
-          continue
-        try:
-          item = UserCommand.parse_obj(extra)
-        except:
-          pass
-        else:
-          category.add_command(item.command, item.brief, item.usage, priority=item.priority, private=item.private, contexts=item.contexts, permission=item.permission)
-          continue
-        if isinstance(extra, str):
-          category.add_string(extra)
-        else:
-          raise ValueError("无效的帮助项")
     for matcher in plugin.matcher:
-      if not hasattr(matcher, "__cmd__"):
+      if (cmd := getattr(matcher, "__cmd__", None)) is None:
         continue
-      CategoryItem.find(getattr(matcher, "__cat__", ""), True).add_command(
-        matcher.__cmd__,
+      CategoryItem.find(getattr(matcher, "__cat__", ""), True).add(CommandItem(
+        ensure_list(cmd),
         getattr(matcher, "__brief__", ""),
         getattr(matcher, "__doc__", ""),
-        priority=getattr(matcher, "__priority__", 1 - matcher.priority),
-        contexts=getattr(matcher, "__ctx__", []),
-        private=getattr(matcher, "__priv__", None),
-        permission=getattr(matcher, "__perm__", context.Permission.MEMBER))
+        CommonData(
+          priority=getattr(matcher, "__priority__", 1 - matcher.priority),
+          in_group=ensure_list(getattr(matcher, "__ctx__", [])),
+          private=getattr(matcher, "__priv__", None),
+          level=getattr(matcher, "__perm__", context.Permission.MEMBER))))

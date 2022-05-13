@@ -1,11 +1,11 @@
-from typing import Any, ClassVar, Type, TypeVar
-from pydantic import BaseModel, Field, PrivateAttr
+from typing import Any, Callable, ClassVar, Type, TypeVar
+from pydantic import BaseModel, Field
 from pydantic.json import pydantic_encoder
 from loguru import logger
 import os
 import yaml
 
-__all__ = ["BaseModel", "BaseConfig", "BaseState", "Field", "PrivateAttr"]
+__all__ = ["BaseConfig", "BaseState"]
 
 def encode(data: Any):
   if data is None or isinstance(data, (str, int, float, bool)):
@@ -18,20 +18,23 @@ def encode(data: Any):
     return encode(pydantic_encoder(data))
 
 TSelf = TypeVar("TSelf", bound="BaseConfig")
+LoadHandler = Callable[[TSelf], None]
 class BaseConfig(BaseModel):
   __state__: ClassVar[bool] = False
-  __path__: ClassVar[str] = ""
   __file__: ClassVar[str] = ""
+
+  def __init_subclass__(cls, file: str = ""):
+    super().__init_subclass__()
+    if file:
+      cls.__file__ = file
 
   @classmethod
   def __get_info(cls) -> tuple[str, str]:
     name = "状态" if cls.__state__ else "配置"
-    if cls.__path__:
-      file = cls.__path__
-    elif cls.__file__:
+    if cls.__file__:
       file = ("states" if cls.__state__ else "configs") + f"/{cls.__file__}.yaml"
     else:
-      raise RuntimeError("BaseConfig 的 __file__ 和 __path__ 必须要指定一个")
+      raise RuntimeError("BaseConfig 必须指定 __file__")
     return name, file 
 
   @classmethod
@@ -40,7 +43,7 @@ class BaseConfig(BaseModel):
     try:
       if os.path.exists(file):
         with open(file) as f:
-          return cls.parse_obj(yaml.load(f, yaml.CLoader))
+          return cls.parse_obj(yaml.load(f, yaml.CSafeLoader))
       else:
         logger.info(f"{name}文件不存在: {file}")
     except:
@@ -52,9 +55,15 @@ class BaseConfig(BaseModel):
     data = encode(self.dict())
     try:
       with open(file, "w") as f:
-        yaml.dump(data, f, yaml.CDumper, allow_unicode=True)
+        yaml.dump(data, f, yaml.CSafeDumper, allow_unicode=True)
     except:
       logger.opt(exception=True).warning(f"无法记录{name}：{file}")
+
+  @classmethod
+  def reloadable(cls, load_handler: LoadHandler) -> LoadHandler:
+    load_handler(cls.load())
+    # TODO: 注册load_handler
+    return load_handler
 
 class BaseState(BaseConfig):
   __state__ = True

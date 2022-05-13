@@ -90,7 +90,7 @@ def get_message(msg: Message) -> str:
     texts.append(seg.data["text"] if seg.is_text() else str(seg))
   return "".join(texts)
 
-schedule = nonebot.on_command("定时", context.in_context_rule(context.ANY_GROUP), {"schedule"}, permission=context.Permission.SUPER)
+schedule = nonebot.on_command("定时", context.in_group_rule(context.ANY_GROUP), {"schedule"}, permission=context.Permission.SUPER)
 schedule.__cmd__ = ["定时", "schedule"]
 schedule.__brief__ = "设置定时任务"
 schedule.__doc__ = '''\

@@ -1,12 +1,15 @@
-from collections import defaultdict
 from typing import cast
+from collections import defaultdict
+
 from aiohttp import ClientSession
-from util.config import BaseModel, BaseConfig
 from apscheduler.schedulers.base import BaseScheduler
-from util import context
+from pydantic import BaseModel
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot
 import nonebot
+
+from util import context, helper
+from util.config import BaseConfig
 
 class Room(BaseModel):
   id: int
@@ -22,21 +25,6 @@ class Config(BaseConfig):
   interval: int = 60
   rooms: list[Room] = []
 
-def format_duration(seconds: int) -> str:
-  minutes, seconds = divmod(seconds, 60)
-  hours,   minutes = divmod(minutes, 60)
-  days,    hours   = divmod(hours, 24)
-  segments = []
-  if days:
-    segments.append(f"{days} 天")
-  if hours:
-    segments.append(f"{hours} 时")
-  if minutes:
-    segments.append(f"{minutes} 分")
-  if seconds:
-    segments.append(f"{seconds} 秒")
-  return " ".join(segments)
-
 config = Config.load()
 scheduler: BaseScheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
 driver = nonebot.get_driver()
@@ -48,7 +36,7 @@ check_live.__cmd__ = "检查直播"
 check_live.__brief__ = "立即检查直播间状态"
 check_live.__usage__ = f'''\
 立即检查直播间是否开播
-每 {format_duration(config.interval)}会自动检查'''
+每 {helper.format_time(config.interval)}会自动检查'''
 check_live.__perm__ = context.Permission.ADMIN
 @check_live.handle()
 async def handle_check_live():
