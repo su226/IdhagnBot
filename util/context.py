@@ -110,7 +110,7 @@ def get_event_context(event: Event) -> int:
 def refresh_context(uid: int):
   if uid not in STATE.contexts:
     return None
-  date = datetime.now() + timedelta(seconds=Config.timeout)
+  date = datetime.now() + timedelta(seconds=CONFIG.timeout)
   STATE.contexts[uid].expire = date
   STATE.dump()
   return scheduler.add_job(timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date)
@@ -119,7 +119,7 @@ async def timeout_exit(uid: int):
   if exit_context(uid):
     await nonebot.get_bot().call_api("send_private_msg", 
       user_id=uid,
-      message=f"由于 {helper.format_time(Config.timeout)}内未操作，已退出上下文")
+      message=f"由于 {helper.format_time(CONFIG.timeout)}内未操作，已退出上下文")
 
 for user, context in STATE.contexts.items():
   scheduler.add_job(timeout_exit, "date", (user,), id=f"context_timeout_{user}", replace_existing=True, run_date=context.expire)
@@ -160,6 +160,7 @@ async def get_event_level(bot: Bot, event: Event) -> Permission:
   return await permission.get_group_level(bot, user_id, group_id) or Permission.MEMBER
 
 def build_permission(node: permission.Node, default: permission.Level) -> BotPermission:
+  permission.register_for_export(node, default)
   async def checker(bot: Bot, event: Event) -> bool:
     if (user_id := getattr(event, "user_id", None)) is None:
       return False

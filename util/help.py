@@ -1,4 +1,5 @@
 from typing import TypeVar
+import html
 import math
 
 import nonebot
@@ -65,6 +66,22 @@ class Item:
   def __call__(self) -> str:
     raise NotImplementedError
 
+  def html(self) -> str:
+    segments = []
+    if self.data.node_str:
+      segments.append(f"权限节点: {self.data.node_str}")
+    if self.data.has_group:
+      segments.append(f"加入群聊: {'、'.join(str(x) for x in self.data.has_group)}")
+    if self.data.in_group:
+      segments.append(f"在群聊中: {'、'.join('任意' if x == context.ANY_GROUP else str(x) for x in self.data.in_group)}")
+    if self.data.private is not None:
+      segments.append(f"私聊: {'仅私聊' if self.data.private else '仅群聊'}")
+    if self.data.level != permission.Level.MEMBER:
+      segments.append(f"默认等级: {permission.EXPORT_LEVELS[self.data.level]}")
+    if segments:
+      return "\n".join(segments)
+    return ""
+
   def get_order(self) -> int:
     return 0
   
@@ -87,6 +104,12 @@ class StringItem(Item):
   def __call__(self) -> str:
     return self.string
 
+  def html(self) -> str:
+    summary = html.escape(self.string)
+    if (details := super().html()):
+      return f"<details><summary>{summary}</summary>{details}</details>"
+    return summary
+
   def get_order(self) -> int:
     return -1
 
@@ -107,6 +130,11 @@ class CommandItem(Item):
     for i in self.names:
       self.commands[i] = self
 
+  def html(self) -> str:
+    if (info := super().html()):
+      info = f"\n{info}"
+    return f"<details><summary>{html.escape(self())}</summary><pre>{html.escape(self.format(False))}{info}</pre></details>"
+
   def get_order(self) -> int:
     return self.data.level.value
 
@@ -118,10 +146,10 @@ class CommandItem(Item):
     brief = f" - {self.brief}" if self.brief else ""
     return f"{self.prefixes[self.data.level]}/{self.names[0]}{brief}"
   
-  def format(self) -> str:
-    segments = [f"{self.prefixes[self.data.level]}{self.names[0]}"]
-    if self.brief:
-      segments[0] += f" - {self.brief}"
+  def format(self, brief: bool = True) -> str:
+    segments = []
+    if brief:
+      segments.append(self())
     if len(self.raw_usage) == 0:
       segments.append("没有用法说明")
     else:
@@ -143,6 +171,16 @@ class CategoryItem(Item):
   def __call__(self) -> str:
     brief = f" - {self.brief}" if self.brief else ""
     return f".{self.name}{brief}"
+
+  def html(self, details: bool = True) -> str:
+    content = "".join(f"<li>{x.html()}</li>" for x in sorted(self.items, key=lambda x: (-x.data.priority, x.get_order(), x())))
+    if (info := super().html()):
+      content = f"<pre>{info}</pre><ul>{content}</ul>"
+    else:
+      content = f"<ul>{content}</ul>"
+    if details:
+      return f"<details><summary>{html.escape(self())}</summary>{content}</details>"
+    return f"{content}"
 
   def get_order(self) -> int:
     return -2
@@ -202,7 +240,7 @@ def add_all_from_plugins():
       CategoryItem.find(getattr(matcher, "__cat__", ""), True).add(CommandItem(
         ensure_list(cmd),
         getattr(matcher, "__brief__", ""),
-        getattr(matcher, "__doc__", ""),
+        getattr(matcher, "__doc__", None) or "",
         CommonData(
           priority=getattr(matcher, "__priority__", 1 - matcher.priority),
           in_group=ensure_list(getattr(matcher, "__ctx__", [])),
