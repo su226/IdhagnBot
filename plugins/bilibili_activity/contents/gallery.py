@@ -11,9 +11,11 @@ https://t.bilibili.com/{id}
 
 def handle(content: Any) -> str:
   card = json.loads(content["card"])
+  text = card["item"]["description"]
+  util.check_ignore(False, text)
   return FORMAT.format(
     image=card["item"]["pictures"][0]["img_src"],
     username=content["desc"]["user_profile"]["info"]["uname"],
     id=content["desc"]["dynamic_id_str"],
     image_count=len(card["item"]["pictures"]),
-    summary=util.ellipsis(card["item"]["description"]))
+    summary=util.ellipsis(text))
