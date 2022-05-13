@@ -38,9 +38,11 @@ def rounded_rect(draw: ImageDraw.ImageDraw, xywh: tuple[int, int, int, int], rad
 def register(names: list[str], brief: str, theme: Theme):
   async def handler(args: Message = CommandArg()):
     text = args.extract_plain_text().split()
-    if len(text) != 2:
-      await matcher.finish("请刚好输入两段空格分割的文字")
-    left, right = text
+    if len(text) == 2:
+      left, right = text
+    else:
+      left = f"用法: /{names[0]}"
+      right = f"<左侧文本> <右侧文本>"
     font = resources.font("sans-bold", 64)
     lw, lh = font.getsize(left)
     rw, rh = font.getsize(right)
@@ -57,7 +59,7 @@ def register(names: list[str], brief: str, theme: Theme):
   matcher = nonebot.on_command(names[0], aliases=set(names[1:]), handlers=[handler])
   matcher.__cmd__ = names
   matcher.__brief__ = brief
-  matcher.__doc__ = "/{} <左侧文本> <右侧文本>".format(names[0])
+  matcher.__doc__ = f"/{names[0]} <左侧文本> <右侧文本>"
 
 register(["p站", "ph"], "生成你懂得的logo", Theme(32, 8, 8, 8, 8, (0, 0, 0), (255, 153, 0), (255, 255, 255), (0, 0, 0)))
 register(["油管", "yt", "youtube"], "生成油管logo", Theme(32, 6, 9, 9, 21, (255, 255, 255), (205, 32, 31), (0, 0, 0), (255, 255, 255)))

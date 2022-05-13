@@ -3,7 +3,7 @@ from nonebot.rule import Rule, to_me
 import nonebot
 
 async def is_poke(event: Event) -> bool:
-  return event.notice_type == "notify" and event.sub_type == "poke"
+  return event.notice_type == "notify" and event.sub_type == "poke" and event.user_id != event.self_id
 
 auto_repoke = nonebot.on_notice(Rule(is_poke) & to_me())
 

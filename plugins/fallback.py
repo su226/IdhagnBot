@@ -1,9 +1,12 @@
+from aiohttp.client_exceptions import ClientError
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, ActionFailed
+from nonebot.message import run_preprocessor, run_postprocessor, event_postprocessor
+from nonebot.params import CommandArg
+from nonebot.typing import T_State
+import nonebot
+
 from util.config import BaseState, Field
 from util import context
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent
-from nonebot.message import run_preprocessor, run_postprocessor, event_postprocessor
-from nonebot.params import State as BotState, CommandArg
-import nonebot
 
 class State(BaseState):
   __file__ = "fallback"
@@ -11,34 +14,48 @@ class State(BaseState):
 
 STATE = State.load()
 
+class ManualException(Exception):
+  def __init__(self):
+    super().__init__("管理员使用 /raise 手动触发了错误")
+
 driver = nonebot.get_driver()
 
 @run_preprocessor
-async def pre_run(state = BotState()):
+async def pre_run(state: T_State):
   state["_prefix"]["run"] = True
 
 @run_postprocessor
-async def post_run(bot: Bot, event: MessageEvent, _: Exception):
+async def post_run(bot: Bot, event: MessageEvent, e: Exception):
   group_id = getattr(event, "group_id", None)
+  if isinstance(e, ActionFailed) and e.info.get("msg", None) == "SEND_MSG_API_ERROR":
+    reason = "消息发送失败"
+  elif isinstance(e, ClientError):
+    reason = "网络错误"
+  elif isinstance(e, ManualException):
+    reason = "手动触发"
+  else:
+    reason = "未知内部错误"
+  result = f"机器人出错\n可能原因：{reason}"
   if group_id is None:
-    user_id = getattr(event, "user_id", -1)
-    str_user_id = str(user_id)
-    if not any(i in (user_id, str_user_id) for i in driver.config.superusers):
-      await bot.send(event, "机器人出错，请尝试联系开发者")
+    await bot.send(event, result)
   elif group_id not in STATE.suppress:
-    await bot.send(event, "机器人出错，请尝试联系开发者（如果本消息刷屏，群管理员可发送 /suppress true 来禁用）")
-  for user in driver.config.superusers:
-    await bot.send_private_msg(user_id=user, message=f"机器人出错，请及时查看日志并维修！")
+    await bot.send(event, result + "\n[群管] /suppress true - 禁用错误消息")
+  user_id = getattr(event, "user_id", None)
+  str_user_id = str(user_id)
+  if not any(i in (user_id, str_user_id) for i in driver.config.superusers):
+    for user in driver.config.superusers:
+      await bot.send_private_msg(user_id=user, message=result + f"\n群聊: {group_id}, 用户: {user_id}")
 
 @event_postprocessor
-async def post_event(bot: Bot, event: MessageEvent, state = BotState()):
-  if "run" not in state["_prefix"]:
+async def post_event(bot: Bot, event: MessageEvent, state: T_State):
+  prefix = state["_prefix"]
+  if "special" not in prefix and (prefix["command"] is None or "run" not in prefix):
     if event.message.extract_plain_text().lstrip().startswith("/"):
       await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
     elif event.is_tome():
-      await bot.send(event, "本帐号为机器人，请发送 /帮助 查看可用命令（不需要@）")
+      await bot.send(event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）")
 
-suppress = nonebot.on_command("suppress", context.in_context_rule(context.ANY_GROUP), permission=context.Permission.ADMIN)
+suppress = nonebot.on_command("suppress", context.in_group_rule(context.ANY_GROUP), permission=context.Permission.ADMIN)
 suppress.__cmd__ = "suppress"
 suppress.__brief__ = "暂时禁用错误消息"
 suppress.__doc__ = '''\
@@ -74,5 +91,5 @@ raise_.__perm__ = context.Permission.ADMIN
 @raise_.handle()
 async def handle_raise(args = CommandArg()):
   if str(args).rstrip() == "confirm":
-    raise Exception("管理员使用 /raise 手动触发了错误")
+    raise ManualException
   await raise_.send(raise_.__doc__)

@@ -1,13 +1,14 @@
-from PIL import ImageFont
-from util.config import BaseConfig, BaseModel, Field
+from PIL import ImageFont, features as PILFeatures
+from pydantic import BaseModel, Field
 import pyppeteer
+
+from util.config import BaseConfig
 
 class Font(BaseModel):
   path: str
   index: int
 
-class Config(BaseConfig):
-  __file__ = "resources"
+class Config(BaseConfig, file="resources"):
   default_font: str | Font = "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
   fonts: dict[str, str | Font] = Field(default_factory=dict)
   chromium: str = "/usr/bin/chromium"
@@ -22,7 +23,11 @@ def font(name: str, size: int) -> ImageFont.FreeTypeFont:
   else:
     path = font.path
     index = font.index
-  return ImageFont.truetype(path, size, index)
+  if PILFeatures.check("raqm"):
+    engine = ImageFont.LAYOUT_RAQM
+  else:
+    engine = ImageFont.LAYOUT_BASIC
+  return ImageFont.truetype(path, size, index, layout_engine=engine)
 
 def launch_pyppeteer(**options):
   return pyppeteer.launch(options, executablePath=CONFIG.chromium)

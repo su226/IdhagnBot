@@ -1,16 +1,18 @@
+from typing import Callable, Literal
+from io import BytesIO
+import platform
+import time
+
 from aiohttp import ClientSession
 from PIL import Image, ImageDraw
-from io import BytesIO
-from typing import Callable, Literal
-from util.config import BaseConfig, Field
-from util import resources
-from .gpu import get_gpu_info
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 import nonebot
 import psutil
-import time
-import platform
+
+from util.config import BaseConfig, Field
+from util import resources, helper
+from .gpu import get_gpu_info
 
 Items = Literal[
   "system",
@@ -68,19 +70,6 @@ if nonebot.get_driver().env == "prod":
 else:
   idhagnbot_str += " (开发环境)"
 
-def format_seconds(seconds: int) -> str:
-  minutes, seconds = divmod(seconds, 60)
-  hours,   minutes = divmod(minutes, 60)
-  days,    hours   = divmod(hours, 24)
-  segments = []
-  if days:
-    segments.append(f"{int(days)} 日")
-  if hours:
-    segments.append(f"{int(hours)} 时")
-  if minutes or not len(segments):
-    segments.append(f"{int(minutes)} 分")
-  return ", ".join(segments)
-
 def get_cpu_usage():
   cpu_util = round(psutil.cpu_percent())
   cpu_freq = round(psutil.cpu_freq().current * 1024)
@@ -119,7 +108,7 @@ def get_swap():
 
 ITEMS: dict[Items, Callable[[], list[tuple[str, str]]]] = {
   "system": lambda: [("系统", system_str)],
-  "uptime": lambda: [("系统在线", format_seconds(time.time() - psutil.boot_time()))],
+  "uptime": lambda: [("系统在线", helper.format_time(time.time() - psutil.boot_time()))],
   "cpu": lambda: [("CPU", cpu_model_str)],
   "cpu_usage": get_cpu_usage,
   "gpus_and_usage": get_gpus_and_usage,
@@ -128,7 +117,7 @@ ITEMS: dict[Items, Callable[[], list[tuple[str, str]]]] = {
   "python": lambda: [("Python", python_str)],
   "nonebot": lambda: [("Nonebot", nonebot.__version__)],
   "idhagnbot": lambda: [("IdhagnBot", idhagnbot_str)],
-  "bot_uptime": lambda: [("机器人在线", format_seconds(time.time() - bot_start_time))]
+  "bot_uptime": lambda: [("机器人在线", helper.format_time(time.time() - bot_start_time))]
 }
 
 KILO = 1024
@@ -174,7 +163,7 @@ async def handle_uptime(bot: Bot):
   info = await bot.get_login_info()
   if CONFIG.avatar_size != 0:
     async with ClientSession() as http:
-      response = await http.get(f"https://q1.qlogo.cn/g?b=qq&nk={info['user_id']}&s=640")
+      response = await http.get(f"https://q1.qlogo.cn/g?b=qq&nk={info['user_id']}&s=0")
       avatar = Image.open(BytesIO(await response.read()))
     avatar_size = CONFIG.avatar_size * 2
     avatar = avatar.resize((avatar_size, avatar_size), Image.ANTIALIAS).convert("RGBA")

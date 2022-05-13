@@ -12,7 +12,6 @@ MEM_TEMP_FILE = "hwmon/hwmon2/temp3_input"
 VDD_FILE = "hwmon/hwmon2/in0_input"
 UEVENT_FILE = "uevent"
 
-@staticmethod
 def read(card: str) -> Info:
   root = f"/sys/class/drm/{card}/device/"
   with open(root + UEVENT_FILE) as f:
