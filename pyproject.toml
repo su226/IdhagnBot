@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "idhagn_bot"
+version = "0.0.1"
+description = "Simple chatbot for Tencent QQ."
+authors = ["su226 <1368981939@qq.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+nonebot2 = "^2.0.0-beta.2"
+nonebot-adapter-onebot = "^2.0.0-beta.1"
+nonebot-plugin-apscheduler = "^0.1.2"
+aiohttp = "^3.8.1"
+PyYAML = "^6.0"
+Pillow = "^9.1.0"
+numpy = "^1.22.3"
+pyppeteer = "^1.0.2"
+libzim = "^1.0.0"
+mctools = "^1.1.2"
+pycairo = "^1.21.0"
+PyGObject = "^3.42.1"
+psutil = "^5.9.0"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
