@@ -48,8 +48,12 @@ async def check():
       logger.debug(f"检查 {user._name} 的动态更新")
       async for activity in new_activities(http, user):
         activity_id = activity["desc"]["dynamic_id_str"]
+        try:
+          message = contents.handle(activity)
+        except util.IgnoredException as e:
+          logger.info(f"{user._name} 的动态 {activity_id} 已被忽略: {e}")
+          continue
         logger.info(f"推送 {user._name} 的动态 {activity_id}")
-        message = contents.handle(activity)
         for target in user.targets:
           if isinstance(target, util.GroupTarget):
             await bot.send_group_msg(group_id=target.group, message=message)
@@ -81,15 +85,13 @@ async def handle_force_push(bot: Bot, event: Event, args: Message = CommandArg()
   real_ctx = getattr(event, "group_id", -1)
   if ctx != real_ctx:
     await bot.send_group_msg(group_id=ctx, message=message)
-    await force_push.send(f"已推送到 {context.GROUP_IDS.get(ctx).name}")
+    await force_push.send(f"已推送到 {context.GROUP_IDS[ctx].name}")
   else:
     await force_push.send(Message(message))
 
-contexts = list(util.groups)
-check_now = nonebot.on_command("检查动态", context.in_context_rule(*contexts), permission=context.Permission.ADMIN)
+check_now = nonebot.on_command("检查动态", permission=context.Permission.ADMIN)
 check_now.__cmd__ = "检查动态"
 check_now.__brief__ = "立即检查B站动态更新"
-check_now.__ctx__ = contexts
 check_now.__perm__ = context.Permission.ADMIN
 @check_now.handle()
 async def handle_check_now():

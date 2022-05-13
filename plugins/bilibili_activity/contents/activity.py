@@ -9,7 +9,9 @@ https://t.bilibili.com/{id}
 
 def handle(content: Any) -> str:
   card = json.loads(content["card"])
+  text = card["item"]["content"]
+  util.check_ignore(False, text)
   return FORMAT.format(
     username=content["desc"]["user_profile"]["info"]["uname"],
     id=content["desc"]["dynamic_id_str"],
-    summary=util.ellipsis(card["item"]["content"]))
+    summary=util.ellipsis(text))
