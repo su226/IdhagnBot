@@ -10,6 +10,11 @@ from loguru import logger
 from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
 import yaml
+try:
+  from yaml import CSafeLoader as SafeLoader, CSafeDumper as SafeDumper
+except ImportError:
+  logger.info("似乎没有安装libyaml，YAML将使用纯Python解析器")
+  from yaml import SafeLoader, SafeDumper
 
 def encode(data: Any) -> Any:
   if data is None or isinstance(data, (str, int, float)):
@@ -57,7 +62,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     if os.path.exists(file):
       try:
         with open(file) as f:
-          self.cache[args] = self.model.parse_obj(yaml.load(f, yaml.CSafeLoader))
+          self.cache[args] = self.model.parse_obj(yaml.load(f, SafeLoader))
       except Exception:
         logger.opt(exception=True).warning(f"无法读取{self.category}：{file}")
         self.cache[args] = self.model()
@@ -74,7 +79,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     file = self.get_file(*args)
     try:
       with open(file, "w") as f:
-        yaml.dump(data, f, yaml.CSafeDumper, allow_unicode=True)
+        yaml.dump(data, f, SafeDumper, allow_unicode=True)
     except:
       logger.opt(exception=True).warning(f"无法记录{self.category}：{file}")
 

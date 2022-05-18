@@ -82,7 +82,7 @@ async def handle_api(bot: Bot, raw_arg: Message = CommandArg()):
     data = {}
   else:
     try:
-      data = yaml.load(args[1], yaml.CSafeLoader)
+      data = yaml.load(args[1], config_v2.SafeLoader)
     except yaml.YAMLError as e:
       await api.send(f"YAML无效: {e}")
       return

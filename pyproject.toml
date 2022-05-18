@@ -4,6 +4,8 @@ version = "0.0.1"
 description = "Simple chatbot for Tencent QQ."
 authors = ["su226 <1368981939@qq.com>"]
 license = "MIT"
+homepage = "https://github.com/su226/IdhagnBot"
+repository = "https://github.com/su226/IdhagnBot"
 
 [tool.poetry.dependencies]
 python = "^3.10"
@@ -15,13 +17,16 @@ PyYAML = "^6.0"
 Pillow = "^9.1.0"
 numpy = "^1.22.3"
 pyppeteer = "^1.0.2"
-libzim = "^1.0.0"
-mctools = "^1.1.2"
+libzim = { version = "^1.0.0", optional = true }
+mctools = { version = "^1.1.2", optional = true }
 pycairo = "^1.21.0"
 PyGObject = "^3.42.1"
 psutil = "^5.9.0"
 
 [tool.poetry.dev-dependencies]
+
+[tool.pyright]
+strict = ["plugins/liferestart/game"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
