@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from io import BytesIO
+
 from PIL import Image, ImageDraw
-from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-import nonebot
+
+from util import resources, command
 
 Color = tuple[int, int, int]
 @dataclass
@@ -35,7 +36,7 @@ def rounded_rect(draw: ImageDraw.ImageDraw, xywh: tuple[int, int, int, int], rad
   draw.rectangle((x, y + radius, x + w, y + h - radius), color)
   draw.rectangle((x + radius, y + h - radius, x + w - radius, y + h), color)
 
-def register(names: list[str], brief: str, theme: Theme):
+def register(node: str, names: list[str], brief: str, theme: Theme):
   async def handler(args: Message = CommandArg()):
     text = args.extract_plain_text().split()
     if len(text) == 2:
@@ -56,10 +57,11 @@ def register(names: list[str], brief: str, theme: Theme):
     f = BytesIO()
     im.save(f, "png")
     await matcher.finish(MessageSegment.image(f))
-  matcher = nonebot.on_command(names[0], aliases=set(names[1:]), handlers=[handler])
-  matcher.__cmd__ = names
-  matcher.__brief__ = brief
-  matcher.__doc__ = f"/{names[0]} <左侧文本> <右侧文本>"
+  matcher = (command.CommandBuilder(node, *names)
+    .brief(brief)
+    .usage(f"/{names[0]} <左侧文本> <右侧文本>")
+    .build())
+  matcher.handle()(handler)
 
-register(["p站", "ph"], "生成你懂得的logo", Theme(32, 8, 8, 8, 8, (0, 0, 0), (255, 153, 0), (255, 255, 255), (0, 0, 0)))
-register(["油管", "yt", "youtube"], "生成油管logo", Theme(32, 6, 9, 9, 21, (255, 255, 255), (205, 32, 31), (0, 0, 0), (255, 255, 255)))
+register("meme_text.pornhub", ["p站", "ph"], "生成你懂得的logo", Theme(32, 8, 8, 8, 8, (0, 0, 0), (255, 153, 0), (255, 255, 255), (0, 0, 0)))
+register("meme_text.youtube", ["油管", "yt", "youtube"], "生成油管logo", Theme(32, 6, 9, 9, 21, (255, 255, 255), (205, 32, 31), (0, 0, 0), (255, 255, 255)))

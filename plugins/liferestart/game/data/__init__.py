@@ -1,4 +1,4 @@
-from ..struct.commons import Rarity, Weights, parse_weights
+from ..struct.commons import Weights, parse_weights
 from ..struct.character import Character
 from ..struct.talent import Talent
 from ..struct.achievement import Achievement

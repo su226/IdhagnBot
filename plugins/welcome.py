@@ -1,5 +1,6 @@
-from util.config import BaseConfig, Field
-from nonebot.adapters.onebot.v11 import Bot, Event, Message
+from pydantic import Field
+from util.config import BaseConfig
+from nonebot.adapters.onebot.v11 import Bot, GroupIncreaseNoticeEvent, GroupDecreaseNoticeEvent, Message
 import nonebot
 
 class Config(BaseConfig):
@@ -9,18 +10,18 @@ class Config(BaseConfig):
 
 CONFIG = Config.load()
 
-async def check_welcome(event: Event):
-  return event.notice_type == "group_increase" and event.group_id in CONFIG.welcome
+async def check_welcome(event: GroupIncreaseNoticeEvent):
+  return event.group_id in CONFIG.welcome
 welcome = nonebot.on_notice(check_welcome)
 @welcome.handle()
-async def handle_welcome(event: Event):
+async def handle_welcome(event: GroupIncreaseNoticeEvent):
   await welcome.send(Message(CONFIG.welcome[event.group_id].format(event.user_id)))
 
-async def check_leave(event: Event):
-  return event.notice_type == "group_decrease" and event.group_id in CONFIG.leave
+async def check_leave(event: GroupDecreaseNoticeEvent):
+  return event.group_id in CONFIG.leave
 leave = nonebot.on_notice(check_leave)
 @leave.handle()
-async def handle_leave(bot: Bot, event: Event):
+async def handle_leave(bot: Bot, event: GroupDecreaseNoticeEvent):
   username = (await bot.get_stranger_info(user_id=event.user_id))["nickname"]
   if event.operator_id != event.user_id:
     operator_name = (await bot.get_group_member_info(group_id=event.group_id, user_id=event.operator_id))["nickname"]

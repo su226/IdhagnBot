@@ -1,9 +1,10 @@
 from io import BytesIO
+
 from PIL import Image, ImageDraw, ImageChops
-from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-import nonebot
+
+from util import resources, command
 
 BG = (28, 11, 27)
 FG1 = (0, 242, 234)
@@ -12,13 +13,13 @@ FG3 = (255, 0, 79)
 PADDING = 32
 DISPERSION = 3
 
-tiktok = nonebot.on_command("抖音", aliases={"tiktok"})
-tiktok.__cmd__ = ["抖音", "tiktok"]
-tiktok.__brief__ = "记录每种生物"
-tiktok.__doc__ = "/抖音 <文本>"
+USAGE = "/抖音 <文本>"
+tiktok = (command.CommandBuilder("meme_text.tiktok", "抖音", "tiktok")
+  .brief("记录每种生物")
+  .build())
 @tiktok.handle()
 async def handle_tiktok(args: Message = CommandArg()):
-  text = args.extract_plain_text().rstrip() or tiktok.__doc__
+  text = args.extract_plain_text().rstrip() or USAGE
   font = resources.font("sans-bold", 64)
   w, h = font.getsize_multiline(text)
   h += font.getmetrics()[1]

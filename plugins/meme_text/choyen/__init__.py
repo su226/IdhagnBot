@@ -1,15 +1,18 @@
-from util import resources
+import os
+
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 import nonebot
-import os
+
+from util import resources, command
 
 PAGE = "file://" + os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
+USAGE = "/5000兆元 <红色文本> [银色文本]"
 
-choyen = nonebot.on_command("5000兆元", aliases={"兆元", "5000choyen", "choyen"})
-choyen.__cmd__ = ["5000兆元", "兆元", "5000choyen", "choyen"]
-choyen.__brief__ = "生成想要5000兆元风格文字"
-choyen.__doc__ = "/5000兆元 <红色文本> [银色文本]"
+choyen = (command.CommandBuilder("meme_text.5000choyen", "5000兆元", "兆元", "5000choyen", "choyen")
+  .brief("生成想要5000兆元风格文字")
+  .usage(USAGE)
+  .build())
 @choyen.handle()
 async def handle_choyen(args: Message = CommandArg()):
   text = args.extract_plain_text().split()
@@ -19,7 +22,7 @@ async def handle_choyen(args: Message = CommandArg()):
     top = text[0]
     bottom = ""
   else:
-    await choyen.finish(choyen.__doc__)
+    await choyen.finish(USAGE)
   browser = await resources.launch_pyppeteer()
   try:
     page = await browser.newPage()

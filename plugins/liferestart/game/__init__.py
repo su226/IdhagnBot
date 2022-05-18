@@ -25,7 +25,6 @@ class GeneratedCharacter(Character):
 
   def serialize(self) -> SerializedGeneratedCharacter:
     return {
-      "id": -1,
       "name": self.name,
       "talents": self.talents,
       "charm": self.charm,
@@ -165,7 +164,7 @@ class Game:
       "TMS": self.statistics.finished_games,
     }
 
-  def seed(self, seed: int = None) -> int:
+  def seed(self, seed: int | None = None) -> int:
     if seed is None:
       self._random.seed(None)
       seed = int.from_bytes(self._random.randbytes(4), "little")
@@ -183,7 +182,12 @@ class Game:
     while True:
       result: list[Talent] = []
       while len(result) < self.config.talent.choices:
-        rarities, weights = zip(*((rarity, weight.get(rarity)) for rarity in Rarity if by_rarity[rarity]))
+        rarities: list[Rarity] = []
+        weights: list[float] = []
+        for rarity in Rarity:
+          if by_rarity[rarity]:
+            rarities.append(rarity)
+            weights.append(weight.get(rarity))
         if not len(rarities):
           break
         rarity = self._random.choices(rarities, weights)[0]
@@ -215,15 +219,27 @@ class Game:
   def _get_replacement(self, current: Talent) -> Talent | None:
     if current.replacement == "rarity":
       by_rarity: dict[int, list[Talent]] = {i: [] for i in current.weights}
-      for i in filter(lambda i: not i.exclusive and i.rarity in current.weights and not any(i is j or i.is_imcompatible_with(j) for j in self._talents), TALENT.values()):
-        by_rarity[i.rarity].append(i)
-      rarities, weights = zip(*((i, v) for i, v in current.weights.items() if by_rarity[i]))
+      for talent in TALENT.values():
+        if not talent.exclusive and talent.rarity in current.weights and not any(talent is other or talent.is_imcompatible_with(other) for other in self._talents):
+          by_rarity[talent.rarity].append(talent)
+      rarities: list[int] = []
+      weights: list[float] = []
+      for id, weight in current.weights.items():
+        if by_rarity[id]:
+          rarities.append(id)
+          weights.append(weight)
       if rarities:
         rarity = self._random.choices(rarities, weights)[0]
         talent = self._random.choice(by_rarity[rarity])
         return talent
     elif current.replacement == "talent":
-      choices, weights = zip(*((TALENT[i], v) for i, v in current.weights.items() if not any(TALENT[i] is j or TALENT[i].is_imcompatible_with(j) for j in self._talents)))
+      choices: list[Talent] = []
+      weights: list[float] = []
+      for id, weight in current.weights.items():
+        talent = TALENT[id]
+        if not any(talent is other or talent.is_imcompatible_with(other) for other in self._talents):
+          choices.append(talent)
+          weights.append(weight)
       if choices:
         talent = self._random.choices(choices, weights)[0]
         return talent
@@ -241,7 +257,7 @@ class Game:
     self._update_vars()
   
   def progress(self) -> Generator[Progress, None, None]:
-    self._events = set()
+    self._events: set[int] = set()
     self._condition_vars["EVT"] = self._events
     yield Progress(
       -1,
@@ -267,7 +283,7 @@ class Game:
         self._spirit)
 
   def _execute_talents(self) -> list[Talent]:
-    talents = []
+    talents: list[Talent] = []
     for talent in self._talents:
       if self._talent_executed[talent.id] < talent.max_execute and talent.condition(**self._condition_vars):
         self._add_stats(talent.charm, talent.intelligence,talent.strength, talent.money, talent.spirit, talent.random)
@@ -276,9 +292,15 @@ class Game:
         talents.append(talent)
     return talents
 
-  def _execute_events(self) -> list[Event]:
-    events = []
-    choices, weights = zip(*((EVENT[id], weight) for id, weight in AGE[self._age].items() if not EVENT[id].no_random and not EVENT[id].exclude(**self._condition_vars) and EVENT[id].include(**self._condition_vars)))
+  def _execute_events(self) -> list[tuple[Event, bool]]:
+    events: list[tuple[Event, bool]] = []
+    choices: list[Event] = []
+    weights: list[float] = []
+    for id, weight in AGE[self._age].items():
+      event = EVENT[id]
+      if not event.no_random and not event.exclude(**self._condition_vars) and event.include(**self._condition_vars):
+        choices.append(event)
+        weights.append(weight)
     event = self._random.choices(choices, weights)[0]
     while event is not None:
       self._alive = [False, self._alive, True][event.life + 1]
@@ -297,7 +319,7 @@ class Game:
     return events
 
   def _check_achievements(self, opportunity: Opportunity) -> list[Achievement]:
-    achievements = []
+    achievements: list[Achievement] = []
     for achievement in ACHIEVEMENT.values():
       if achievement.id not in self.statistics.achievements and achievement.opportunity == opportunity and achievement.condition(**self._condition_vars):
         achievements.append(achievement)
@@ -379,7 +401,7 @@ class Game:
         return i
     return standard[0]
 
-  def create_character(self, seed: int | None, name: str = "独一无二的我"):
+  def create_character(self, seed: int | None = None, name: str = "独一无二的我") -> GeneratedCharacter:
     random = Random()
     if seed is None:
       seed = int.from_bytes(random.randbytes(4), "little")
@@ -390,6 +412,7 @@ class Game:
     choices, weights = zip(*self.config.character.stat_value_weight.items())
     charm, intelligence, strength, money = random.choices(choices, weights, k=4)
     self.statistics.character = GeneratedCharacter(-1, name, talents, charm, intelligence, strength, money, seed)
+    return self.statistics.character
 
   def set_character(self, character: Character) -> tuple[list[Talent], list[Talent]]:
     talents = [TALENT[id] for id in character.talents]
