@@ -1,9 +1,11 @@
 from typing import Any, Callable, ClassVar, Type, TypeVar
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
 from loguru import logger
 import os
 import yaml
+
+from util.config_v2 import SafeLoader, SafeDumper
 
 __all__ = ["BaseConfig", "BaseState"]
 
@@ -43,7 +45,7 @@ class BaseConfig(BaseModel):
     try:
       if os.path.exists(file):
         with open(file) as f:
-          return cls.parse_obj(yaml.load(f, yaml.CSafeLoader))
+          return cls.parse_obj(yaml.load(f, SafeLoader))
       else:
         logger.info(f"{name}文件不存在: {file}")
     except:
@@ -55,7 +57,7 @@ class BaseConfig(BaseModel):
     data = encode(self.dict())
     try:
       with open(file, "w") as f:
-        yaml.dump(data, f, yaml.CSafeDumper, allow_unicode=True)
+        yaml.dump(data, f, SafeDumper, allow_unicode=True)
     except:
       logger.opt(exception=True).warning(f"无法记录{name}：{file}")
 
