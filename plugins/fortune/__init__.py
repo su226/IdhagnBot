@@ -1,10 +1,12 @@
-from . import strfile
-from nonebot.adapters import Message
-from nonebot.params import CommandArg
-import nonebot
 import os
 import random
 import re
+
+from nonebot.adapters import Message
+from nonebot.params import CommandArg
+
+from util import command
+from . import strfile
 
 def list_fortunes() -> list[str]:
   return [i.name for i in os.scandir("/usr/share/fortune") if i.is_file() and not i.name.endswith(".dat")]
@@ -13,14 +15,14 @@ RE_033 = re.compile("\033\\[(\\d*;?)*m")
 def strip_033(src: str) -> str:
   return RE_033.sub("", src)
 
-fortune = nonebot.on_command("fortune")
-fortune.__cmd__ = ["fortune"]
-fortune.__brief__ = "随机显示一条希望有用的格言"
-fortune.__doc__ = '''\
+fortune = (command.CommandBuilder("fortune", "fortune")
+  .brief("随机显示一条希望有用的格言")
+  .usage('''\
 /fortune - 显示一条随机格言
 /fortune [...来源] - 显示一条指定来源之一的格言
 /fortune ls - 显示可用的来源
-本命令灵感及数据来自同名UNIX/Linux命令'''
+本命令灵感及数据来自同名UNIX/Linux命令''')
+  .build())
 @fortune.handle()
 async def handle_fortune(arg: Message = CommandArg()):
   fortunes = list_fortunes()

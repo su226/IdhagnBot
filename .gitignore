@@ -3,4 +3,5 @@ resources
 states
 user_plugins
 __pycache__
+.env*
 .vscode

@@ -1,8 +1,9 @@
-from util import account_aliases
+import asyncio
+
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message
 from nonebot.params import CommandArg
-import nonebot
-import asyncio
+
+from util import account_aliases, helper, command
 
 async def get_card(bot: Bot, group: int, user: int) -> str:
   try:
@@ -12,22 +13,20 @@ async def get_card(bot: Bot, group: int, user: int) -> str:
   else:
     return info["card"] or info["nickname"]
 
-fake_forward = nonebot.on_command("我有一个朋友", aliases={"朋友", "吾有一友", "friend"})
-fake_forward.__cmd__ = ["我有一个朋友", "朋友", "吾有一友", "friend"]
-fake_forward.__brief__ = "鲁迅：我没有说过这句话"
-fake_forward.__doc__ = "/我有一个朋友 <用户> <消息>"
-fake_forward.__priv__ = False
+fake_forward = (command.CommandBuilder("fake_forward", "我有一个朋友", "朋友", "吾有一友", "friend")
+  .brief("鲁迅：我没有说过这句话")
+  .usage("/我有一个朋友 <用户> <消息>")
+  .private(False)
+  .build())
 @fake_forward.handle()
 async def handle_fake_forward(bot: Bot, event: GroupMessageEvent, msg: Message = CommandArg()):
   args = str(msg).split(None, 1)
   if len(args) != 2:
     await fake_forward.finish(fake_forward.__doc__)
   try:
-    uid = int(args[0])
-  except:
-    errors, uid = await account_aliases.match_uid(bot, event, args[0])
-    if errors:
-      await fake_forward.finish("\n".join(errors))
+    uid = await account_aliases.match_uid(bot, event, args[0])
+  except helper.AggregateError as e:
+    await fake_forward.finish("\n".join(e))
   card, bot_card = await asyncio.gather(
     get_card(bot, event.group_id, uid),
     get_card(bot, event.group_id, event.self_id))

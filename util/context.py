@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import asyncio
 
 from apscheduler.schedulers.base import BaseScheduler
+from pydantic import Field
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
 from nonebot.exception import IgnoredException
 from nonebot.permission import Permission as BotPermission
@@ -12,9 +13,8 @@ from nonebot.message import event_preprocessor
 import nonebot
 
 from . import helper, permission
-from util.config import BaseConfig, BaseModel, BaseState, Field
+from util.config import BaseConfig, BaseModel, BaseState
 
-Permission = permission.Level
 scheduler = cast(BaseScheduler, nonebot.require("nonebot_plugin_apscheduler").scheduler)
 
 class Config(BaseConfig):
@@ -149,15 +149,15 @@ def has_group_rule(*groups: int) -> Rule:
     return False
   return Rule(check)
 
-async def get_event_level(bot: Bot, event: Event) -> Permission:
+async def get_event_level(bot: Bot, event: Event) -> permission.Level:
   if (user_id := getattr(event, "user_id", None)) is None:
-    return Permission.MEMBER
+    return permission.Level.MEMBER
   group_id = get_event_context(event)
   if (result := permission.get_override_level(bot, user_id, group_id)) is not None:
     return result
   if isinstance(event, GroupMessageEvent) and event.sender.role is not None:
-    return Permission.parse(event.sender.role)
-  return await permission.get_group_level(bot, user_id, group_id) or Permission.MEMBER
+    return permission.Level.parse(event.sender.role)
+  return await permission.get_group_level(bot, user_id, group_id) or permission.Level.MEMBER
 
 def build_permission(node: permission.Node, default: permission.Level) -> BotPermission:
   permission.register_for_export(node, default)

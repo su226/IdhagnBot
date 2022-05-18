@@ -8,7 +8,7 @@ from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot
 import nonebot
 
-from util import context, helper
+from util import helper, command
 from util.config import BaseConfig
 
 class Room(BaseModel):
@@ -31,17 +31,17 @@ driver = nonebot.get_driver()
 API_URL = "https://api.live.bilibili.com/xlive/web-room/v1/index/getRoomBaseInfo?req_biz=link-center"
 streaming: dict[int, bool] = defaultdict(lambda: False)
 
-check_live = nonebot.on_command("检查直播", permission=context.Permission.ADMIN)
-check_live.__cmd__ = "检查直播"
-check_live.__brief__ = "立即检查直播间状态"
-check_live.__usage__ = f'''\
+check_live = (command.CommandBuilder("bilibili_live.check", "检查直播")
+  .level("admin")
+  .brief("立即检查直播间状态")
+  .usage(f'''\
 立即检查直播间是否开播
-每 {helper.format_time(config.interval)}会自动检查'''
-check_live.__perm__ = context.Permission.ADMIN
+每 {helper.format_time(config.interval)}会自动检查''')
+  .build())
 @check_live.handle()
 async def handle_check_live():
-  await check()
-  await check_live.send("检查直播间完成")
+  if not await check():
+    await check_live.send("没有可以推送的内容")
 
 @driver.on_startup
 async def on_startup():
@@ -57,7 +57,7 @@ async def on_startup():
     logger.debug(f"B站直播: {detail['uname']} -> {status}")
 
 @scheduler.scheduled_job("interval", seconds=config.interval)
-async def check():
+async def check() -> bool:
   params: list[str] = []
   targets: dict[int, int] = {}
   for room in config.rooms:
@@ -67,6 +67,7 @@ async def check():
     response = await http.get(API_URL + "".join(params))
     data = await response.json()
   bot = cast(Bot, nonebot.get_bot())
+  result = False
   for id, detail in data["data"]["by_room_ids"].items():
     status = "已开播" if detail["live_status"] else "未开播"
     logger.debug(f"B站直播: {detail['uname']} -> {status}")
@@ -78,4 +79,6 @@ async def check():
         category=detail["area_name"],
         title=detail["title"],
         link=detail["live_url"]))
+      result = True
     streaming[id] = detail["live_status"]
+  return result

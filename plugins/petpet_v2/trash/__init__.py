@@ -7,8 +7,7 @@ from nonebot.exception import ParserExit
 from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
 
-from util import command
-from util.helper import notnone
+from util import command, helper
 from ..util import segment_animated_image, get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +23,7 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help="可
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-webp", action="store_const", dest="format", const="webp", default="gif", help="使用WebP而非GIF格式")
 group.add_argument("-apng", "-png", action="store_const", dest="format", const="png", help="使用APNG而非GIF格式")
-matcher = (command.CommandBuilder("petpet_v2.trash", "垃圾", "trash")
+matcher = (command.CommandBuilder("petpet_v2.trash", "垃圾")
   .category("petpet_v2")
   .shell(parser)
   .build())
@@ -32,10 +31,11 @@ matcher = (command.CommandBuilder("petpet_v2.trash", "垃圾", "trash")
 async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
-  errors, avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  if errors:
-    await matcher.finish("\n".join(errors))
-  avatar = notnone(avatar).resize((79, 79), Image.ANTIALIAS)
+  try:
+    avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
+  except helper.AggregateError as e:
+    await matcher.finish("\n".join(e))
+  avatar = avatar.resize((79, 79), Image.ANTIALIAS)
   frames: list[Image.Image] = []
   for i in range(25):
     template = Image.open(os.path.join(plugin_dir, f"{i}.png"))

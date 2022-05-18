@@ -7,20 +7,20 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 import nonebot
 
-from util import color
+from util import color, command
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 IMAGES = 50
 DURATION = 75
 
-cabbage = nonebot.on_command("菜狗")
-cabbage.__cmd__ = "菜狗"
-cabbage.__brief__ = "生成彩色菜狗GIF"
-cabbage.__doc__ = '''\
+cabbage = (command.CommandBuilder("cabbage_doge", "菜狗")
+  .brief("生成彩色菜狗GIF")
+  .usage('''\
 /菜狗 - 生成随机颜色的菜狗
 /菜狗 <颜色> - 生成指定颜色的菜狗
 /菜狗 <多个颜色> - 生成渐变色的菜狗
-颜色可以是16进制，也可以是CSS颜色'''
+颜色可以是16进制，也可以是CSS颜色''')
+  .build())
 @cabbage.handle()
 async def handle_cabbage(args: Message = CommandArg()):
   colors = []
@@ -40,7 +40,7 @@ async def handle_cabbage(args: Message = CommandArg()):
     else:
       value = color.blend(colors[index + 1], colors[index], ratio)
     im = Image.open(os.path.join(plugin_dir, f"{i}.png"))
-    im = ImageOps.colorize(im, (0, 0, 0), (255, 255, 255), value)
+    im = ImageOps.colorize(im, (0, 0, 0), (255, 255, 255), value) # type: ignore
     frames.append(im)
   f = BytesIO()
   frames[0].save(f, "gif", append_images=frames[1:], save_all=True, duration=DURATION, loop=0)

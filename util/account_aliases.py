@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, Literal, overload
+from typing import Literal, overload
 import itertools
 import re
 import time
@@ -7,8 +7,9 @@ import time
 from pydantic import BaseModel, Field
 from nonebot.adapters.onebot.v11 import Bot, Event
 
-from util.config import BaseConfig
 from util import context
+from util.config import BaseConfig
+from util.helper import AggregateError
 
 class Alias(BaseModel):
   names: list[str]
@@ -99,14 +100,20 @@ async def match(bot: Bot, event: Event, pattern: str) -> tuple[dict[int, Match],
 AMBIGUOUS_LIMIT = 5
 
 @overload
-async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: Literal[False] = False) -> tuple[list[str], int]: ...
+async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: Literal[False] = False) -> int: ...
 @overload
-async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = True) -> tuple[list[str], list[int]]: ...
-async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: bool = False) -> tuple[list[str], int | list[int]]:
+async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = True) -> tuple[int]: ...
+async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: bool = False) -> int | tuple[int]:
+  try:
+    uid = int(raw_pattern)
+    if multiple:
+      return uid,
+    return uid
+  except ValueError:
+    pass
   pattern = to_identifier(raw_pattern)
-  default = [] if multiple else -1
   if not pattern:
-    return [f"有效名字为空：{raw_pattern}"], default
+    raise AggregateError(f"有效名字为空：{raw_pattern}")
   exact, inexact = await match(bot, event, pattern)
   matches = list((inexact if len(exact) == 0 else exact).values())
   if len(matches) > 1:
@@ -117,16 +124,14 @@ async def match_uid(bot: Bot, event: Event, raw_pattern: str, multiple: bool = F
       segments.append(f"{i}（{'、'.join(map(str, i.patterns))}）")
     if count > AMBIGUOUS_LIMIT:
       segments.append(f"等 {count} 个成员或别名")
-    return ["\n".join(segments)], default
+    raise AggregateError("\n".join(segments))
   elif len(matches) == 0:
-    return [f"找不到 {pattern}"], default
-  errors = []
+    raise AggregateError(f"找不到 {pattern}")
   if not multiple and len(matches[0].uids) > 1:
     comment = " "
     if len(matches[0].patterns) > 1:
       comment = "（" + "、".join(map(str, matches[0].patterns[1:])) + "）"
-    errors.append(f"{matches[0].patterns[0]}{comment}包含多个成员")
+    raise AggregateError(f"{matches[0].patterns[0]}{comment}包含多个成员")
   if multiple:
-    return errors, list(matches[0].uids)
-  else:
-    return errors, matches[0].uids[0]
+    return matches[0].uids
+  return matches[0].uids[0]

@@ -1,8 +1,9 @@
 import itertools
-from nonebot.adapters import Bot, Event, Message
+
+from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import CommandArg
-from util import account_aliases
-import nonebot
+
+from util import account_aliases, command
 
 CONFIG = account_aliases.CONFIG
 
@@ -13,15 +14,15 @@ def parse_boolean(value: str) -> bool:
     return False
   raise ValueError("Not a vaild truthy or falsy")
 
-match = nonebot.on_command("匹配", aliases={"match"})
-match.__cmd__ = ["匹配", "match"]
-match.__brief__ = "从名字匹配群成员"
-match.__doc__ = '''\
+match = (command.CommandBuilder("account_aliases.match", "匹配", "match")
+  .brief("从名字匹配群成员")
+  .usage('''\
 /匹配 <QQ号> - 显示成员的所有名字
 /匹配 <昵称、群名片或别名> - 查找名字对应的成员
 只接受中文、英文和数字
 不能有空格，不区分大小写
-特殊符号、emoji等会被忽略'''
+特殊符号、emoji等会被忽略''')
+  .build())
 @match.handle()
 async def handle_match(bot: Bot, event: Event, args: Message = CommandArg()):
   name = args.extract_plain_text().rstrip()

@@ -8,8 +8,7 @@ from nonebot.exception import ParserExit
 from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
 
-from util import resources, text, context, command
-from util.helper import notnone
+from util import resources, text, context, command, helper
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,11 +20,11 @@ GENDERS = {
   "god": "祂",
 }
 
-parser = ArgumentParser("/小天使", add_help=False)
+parser = ArgumentParser(add_help=False)
 parser.add_argument("target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
 parser.add_argument("-name", "-名字", help="自定义名字，对于图片链接必须指定，对于QQ用户默认使用昵称")
 parser.add_argument("-gender", "-性别", help="自定义性别，对于图片链接默认为未知，对于QQ用户默认为资料性别，可以是\"male\"（他）、\"female\"（她）、\"unknown\"（它）、\"animal\"（牠）、\"god\"（祂）")
-matcher = (command.CommandBuilder("petpet_v2.trash", "小天使", "angel")
+matcher = (command.CommandBuilder("petpet_v2.angel", "小天使", "angel")
   .category("petpet_v2")
   .shell(parser)
   .build())
@@ -33,9 +32,10 @@ matcher = (command.CommandBuilder("petpet_v2.trash", "小天使", "angel")
 async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
-  errors, avatar, user = await get_image_and_user(bot, event, args.target, event.self_id)
-  if errors:
-    await matcher.finish("\n".join(errors))
+  try:
+    avatar, user = await get_image_and_user(bot, event, args.target, event.self_id)
+  except helper.AggregateError as e:
+    await matcher.finish("\n".join(e))
   if user is not None:
     try:
       info = await bot.get_group_member_info(group_id=context.get_event_context(event), user_id=user)
@@ -67,7 +67,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = 
     im2 = im2.resize((560, int(height / width * 560)), Image.ANTIALIAS)
   im.paste(im2, (300 - im2.width // 2, 50 - im2.height // 2), im2)
 
-  avatar = notnone(avatar).resize((500, 500), Image.ANTIALIAS)
+  avatar = avatar.resize((500, 500), Image.ANTIALIAS)
   im.paste(avatar, (50, 110), avatar)
 
   font = resources.font("sans-bold", 48)

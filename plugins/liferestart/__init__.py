@@ -1,19 +1,26 @@
-from typing import Any, Callable, Iterable, Literal, TypeVar, Generator
-from PIL import Image, ImageDraw, ImageFont
+from typing import AsyncGenerator, Callable, Iterable, TypeVar, Generator, cast
+from argparse import Namespace
 from io import BytesIO
-from util import context, resources
-from plugins.liferestart.game.config import StatRarityItem
+import itertools
+import random
+import asyncio
+
+from PIL import Image, ImageDraw, ImageFont
+from pydantic import Field
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message, MessageSegment
+from nonebot.exception import ParserExit
+from nonebot.rule import ArgumentParser
+from nonebot.params import ShellCommandArgs
+import nonebot
+
+from util import context, resources, command
+from util.config import BaseConfig, BaseState
+from .game.config import StatRarityItem
 from .game.data import ACHIEVEMENT, CHARACTER, EVENT, TALENT
 from .game.struct.commons import Rarity
 from .game.struct.talent import Talent
 from .game.struct.character import Character
 from .game import Game, GeneratedCharacter, Statistics, Config as GameConfig
-from util.config import BaseConfig, BaseState, Field
-from util.args import Argument, BotCommand, Execute, Keyword, PromptFunc, PromptAgain
-from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
-import nonebot
-import itertools
-import random
 
 class Config(BaseConfig):
   __file__ = "liferestart"
@@ -32,6 +39,16 @@ class State(BaseState):
 CONFIG = Config.load()
 STATE = State.load()
 
+async def prompt(event: MessageEvent) -> AsyncGenerator[Message, None]:
+  async def check_prompt(event2: MessageEvent):
+    return event.user_id == event2.user_id and getattr(event, "group_id", -1) == getattr(event2, "group_id", -1)
+  async def handle_prompt(event2: MessageEvent):
+    future.set_result(event2.get_message())
+  while True:
+    future = asyncio.get_event_loop().create_future()
+    nonebot.on_message(check_prompt, handlers=[handle_prompt], temp=True, priority=-1)
+    yield await future
+
 def find_character(name: str) -> Character | None:
   for i in CHARACTER.values():
     if i.name == name:
@@ -47,19 +64,15 @@ def random_alloc(game: Game, total: int) -> list[int]:
     result[random.choice([i for i, v in enumerate(result) if v < game.config.stat.max])] += 1
   return result
 
-class NoFillType: pass
-NO_FILL = NoFillType()
 TItem = TypeVar("TItem")
-def groupbyn(iterable: Iterable[TItem], n: int, fill: Any = NO_FILL) -> Generator[TItem, None, None]:
-  result = []
+def groupbyn(iterable: Iterable[TItem], n: int) -> Generator[list[TItem], None, None]:
+  result: list[TItem] = []
   for i in iterable:
     result.append(i)
     if len(result) == n:
       yield result
       result.clear()
   if result:
-    if fill != NO_FILL:
-      result.extend([fill] * (n - len(result)))
     yield result
 
 WIDTH = 576
@@ -145,27 +158,12 @@ def get_messages(game: Game) -> list[str]:
   messages.append(segments)
   return messages
 
-liferestart = nonebot.on_command("人生重开", aliases={"liferestart", "life", "restart", "remake", "人生", "重开"})
-liferestart.__cmd__ = ["人生重开", "liferestart", "life", "restart", "remake", "人生", "重开"]
-liferestart.__brief__ = "现可在群里快速重开"
-liferestart.__doc__ = '''\
-/人生重开 c|经典 [种子] - 游玩经典模式
-/人生重开 h|角色 [名字] [种子] - 游玩名人或自定义角色
-/人生重开 角色 查看 [名字] - 查看自己或别人的角色
-/人生重开 角色 列表 - 列出别人的角色
-/人生重开 角色 创建 <名字> [种子] - 创建自己的角色
-/人生重开 角色 重命名 <新名字> - 重命名自己的角色
-/人生重开 成就 - 查看成就和统计
-/人生重开 排行 重开 - 查看重开次数排行
-/人生重开 排行 成就 - 查看成就数排行
-/人生重开 排行 天赋 - 查看天赋游玩率排行
-/人生重开 排行 事件 - 查看事件收集率排行
-自定义角色一旦创建，只有超管能删除，但可以重命名'''
-command = BotCommand(liferestart)
+parser = ArgumentParser(add_help=False)
+subparsers = parser.add_subparsers(required=True)
 
-async def handle_classic(event: Event, seed: list[int], prompt: PromptFunc, **_):
+async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
   game = Game(CONFIG.game, STATE.get_statistics(event.user_id))
-  seed = game.seed(seed[0] if seed else None)
+  seed = game.seed(args.seed)
   seed_shown = False
 
   inherited = None if game.statistics.inherited_talent == -1 else TALENT[game.statistics.inherited_talent]
@@ -185,36 +183,42 @@ async def handle_classic(event: Event, seed: list[int], prompt: PromptFunc, **_)
     segments.append(f"- 发送 “随” 随机选择")
     segments.append(f"- 发送 “换” 重新抽天赋")
     segments.append(f"- 发送 “退” 退出游戏")
-    async def talent_judger(message: Message) -> list[Talent] | Literal["退", "换", "随"]:
-      message: str = str(message)
-      if message in ("退", "换", "随"):
-        return message
+    await liferestart.send("\n".join(segments))
+    choice = ""
+    async for message in prompt(event):
+      choice = message.extract_plain_text()
+      if choice in ("退", "换", "随"):
+        break
       try:
-        selected = [int(i) for i in message.split()]
+        selected = [int(i) for i in choice.split()]
       except ValueError:
-        raise PromptAgain(f"只能输入数字")
+        await liferestart.send(f"只能输入数字")
+        continue
       if any(i < min_choice or i > len(choices) for i in selected):
-        raise PromptAgain(f"只能输入 {min_choice} 和 {len(choices)} 之间的数字")
+        await liferestart.send(f"只能输入 {min_choice} 和 {len(choices)} 之间的数字")
+        continue
       if len(selected) > 0 and len(selected) != game.config.talent.limit:
-        raise PromptAgain(f"只能选择恰好 {game.config.talent.limit} 个天赋")
-      talents = [inherited if i == 0 else choices[i - 1] for i in selected]
+        await liferestart.send(f"只能选择恰好 {game.config.talent.limit} 个天赋")
+        continue
+      talents = [cast(Talent, inherited) if i == 0 else choices[i - 1] for i in selected]
       for i, j in itertools.combinations(talents, 2):
         if i.is_imcompatible_with(j):
-          raise PromptAgain(f"不能同时选择 {i.name} 和 {j.name}")
+          await liferestart.send(f"不能同时选择 {i.name} 和 {j.name}")
+          continue
         elif i is j:
-          raise PromptAgain("每个天赋只能选择一次")
-      return talents
-    talents = await prompt(talent_judger, "\n".join(segments))
-    if talents == "退":
+          await liferestart.send("每个天赋只能选择一次")
+          continue
+      break
+    if choice == "退":
       await liferestart.finish("已退出游戏")
-    elif talents == "换":
+    elif choice == "换":
       continue
-    elif talents == "随":
+    elif choice == "随":
       talents = []
       for _ in range(game.config.talent.limit):
         while True:
           selected = random.randint(min_choice, game.config.talent.limit)
-          talent = inherited if selected == 0 else choices[selected - 1]
+          talent = cast(Talent, inherited) if selected == 0 else choices[selected - 1]
           if not any(talent == x or talent.is_imcompatible_with(x) for x in talents):
             talents.append(talent)
             break
@@ -231,25 +235,31 @@ async def handle_classic(event: Event, seed: list[int], prompt: PromptFunc, **_)
   segments.append(f"- 发送 4 个空格分隔的数字分配颜值、智力、体质和家境")
   segments.append(f"- 发送 “随” 随机分配")
   segments.append(f"- 发送 “退” 退出游戏")
-  async def stat_judger(message: Message) -> list[Talent] | Literal["退", "随"]:
-    message: str = str(message)
-    if message in ("退", "随"):
-      return message
+  await liferestart.send("\n".join(segments))
+  stats: list[int] = []
+  choice = ""
+  async for msg in prompt(event):
+    choice: str = str(msg)
+    if choice in ("退", "随"):
+      break
     try:
-      stats = [int(i) for i in message.split()]
+      stats = [int(i) for i in choice.split()]
     except ValueError:
-      raise PromptAgain(f"只能输入数字")
+      await liferestart.send(f"只能输入数字")
+      continue
     if len(stats) != 4:
-      raise PromptAgain(f"请输入恰好 4 个数字")
+      await liferestart.send(f"请输入恰好 4 个数字")
+      continue
     if any(x < game.config.stat.min or x > game.config.stat.max for x in stats):
-      raise PromptAgain(f"属性必须在 {game.config.stat.min} 和 {game.config.stat.max} 之间")
+      await liferestart.send(f"属性必须在 {game.config.stat.min} 和 {game.config.stat.max} 之间")
+      continue
     if sum(stats) != points:
-      raise PromptAgain(f"必须刚好分配完 {points} 点属性")
-    return stats
-  stats = await prompt(stat_judger, "\n".join(segments))
-  if stats == "退":
+      await liferestart.send(f"必须刚好分配完 {points} 点属性")
+      continue
+    break
+  if choice == "退":
     await liferestart.finish("已退出游戏")
-  elif stats == "随":
+  elif choice == "随":
     stats = random_alloc(game, points)
   game.set_stats(*stats)
 
@@ -263,8 +273,9 @@ async def handle_classic(event: Event, seed: list[int], prompt: PromptFunc, **_)
     make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
-command.next(Keyword("经典", "c")).next(Argument("seed", int, (0, 1))).next(Execute(handle_classic))
-character = command.next(Keyword("角色", "h"))
+classic = subparsers.add_parser("经典", aliases=["c"], help="游玩经典模式")
+classic.add_argument("-seed", "-种子", nargs="?", type=int, metavar="种子")
+classic.set_defaults(func=handle_classic)
 
 def get_character_segments(ch: Character) -> list[str]:
   segments = [f"---- {ch.name} ----"]
@@ -276,9 +287,9 @@ def get_character_segments(ch: Character) -> list[str]:
     segments.append(f"{ta.name} - {ta.description}")
   return segments
 
-async def handle_character_view(event: Event, name: list[str], **_):
-  if name:
-    ch = find_character(name[0])
+async def handle_character_view(bot: Bot, event: MessageEvent, args: Namespace):
+  if args.name:
+    ch = find_character(args.name)
     if ch is None:
       await liferestart.finish("没有这个角色")
   else:
@@ -288,9 +299,11 @@ async def handle_character_view(event: Event, name: list[str], **_):
     ch = st.character
   await liferestart.send("\n".join(get_character_segments(ch)))
 
-character.next(Keyword("查看")).next(Argument("name", str, (0, 1))).next(Execute(handle_character_view))
+character_view = subparsers.add_parser("查看角色", help="查看自己或别人的角色")
+character_view.add_argument("name", nargs="?", metavar="名字")
+character_view.set_defaults(func=handle_character_view)
 
-async def handle_character_list(**_):
+async def handle_character_list(bot: Bot, event: MessageEvent, args: Namespace):
   messages = [["---- 前世名人 ----", ""]]
   for ch in CHARACTER.values():
     messages.append(get_character_segments(ch))
@@ -304,10 +317,15 @@ async def handle_character_list(**_):
     make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
-character.next(Keyword("列表")).next(Execute(handle_character_list))
+character_list = subparsers.add_parser("角色列表", help="列出别人的角色")
+character_list.set_defaults(func=handle_character_list)
 
-async def handle_character_create(event: Event, seed: list[int], prompt: PromptFunc, **_):
-  name = await prompt(None, "一旦创建角色将不能修改或删除，但可重命名，名字中不能有空格\n- 发送“退”取消\n- 发送名字创建角色")
+async def handle_character_create(bot: Bot, event: MessageEvent, args: Namespace):
+  await liferestart.send("一旦创建角色将不能修改或删除，但可重命名，名字中不能有空格\n- 发送“退”取消\n- 发送名字创建角色")
+  name = ""
+  async for msg in prompt(event):
+    name = msg.extract_plain_text()
+    break
   if name == "退":
     await liferestart.finish("创建取消")
   elif " " in name:
@@ -315,29 +333,32 @@ async def handle_character_create(event: Event, seed: list[int], prompt: PromptF
   elif find_character(name):
     await liferestart.finish("创建失败：已有这个名字的角色")
   game = Game(CONFIG.game, STATE.get_statistics(event.user_id))
-  game.create_character(seed[0] if seed else None, name)
+  character = game.create_character()
   STATE.dump()
-  await liferestart.finish(f"已使用种子 {game.statistics.character.seed} 创建角色")
+  await liferestart.finish(f"已创建角色，种子为：{character.seed}")
 
-character.next(Keyword("创建")).next(Argument("seed", int, (0, 1))).next(Execute(handle_character_create))
+character_create = subparsers.add_parser("创建角色", help="创建自己的角色")
+character_create.set_defaults(func=handle_character_create)
 
-async def handle_character_rename(event: Event, name: str, **_):
+async def handle_character_rename(bot: Bot, event: MessageEvent, args: Namespace):
   st = STATE.statistics.get(event.user_id, None)
   if st is None or st.character is None:
     await liferestart.finish("你还没有自定义角色")
-  elif name == st.character.name:
-    await liferestart.finish(f"你的角色已经叫 {name} 了")
-  elif find_character(name):
-    await liferestart.finish(f"已经有叫 {name} 的角色了")
-  st.character.name = name
+  elif args.name == st.character.name:
+    await liferestart.finish(f"你的角色已经叫 {args.name} 了")
+  elif find_character(args.name):
+    await liferestart.finish(f"已经有叫 {args.name} 的角色了")
+  st.character.name = args.name
   STATE.dump()
-  await liferestart.finish(f"你的角色已重命名为 {name}")
+  await liferestart.finish(f"你的角色已重命名为 {args.name}")
 
-character.next(Keyword("重命名")).next(Argument("name", str)).next(Execute(handle_character_rename))
+character_rename = subparsers.add_parser("重命名角色", help="重命名自己的角色")
+character_rename.add_argument("name", nargs="?", metavar="名字")
+character_rename.set_defaults(func=handle_character_rename)
 
-async def handle_character_play(event: Event, name: list[str], seed: list[str], **_):
-  if name:
-    ch = find_character(name[0])
+async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace):
+  if args.name:
+    ch = find_character(args.name)
     if ch is None:
       await liferestart.finish("没有这个角色")
   else:
@@ -346,7 +367,7 @@ async def handle_character_play(event: Event, name: list[str], seed: list[str], 
       await liferestart.finish("你还没有自定义角色")
     ch = st.character
   game = Game(CONFIG.game, STATE.get_statistics(event.user_id))
-  seed = game.seed(seed[0] if seed else None)
+  seed = game.seed(args.seed)
   talents, real_talents = game.set_character(ch)
 
   segments = [f"---- {ch.name} ----"]
@@ -368,9 +389,12 @@ async def handle_character_play(event: Event, name: list[str], seed: list[str], 
     make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
-character.next(Argument("name", str, (0, 1))).next(Argument("seed", int, (0, 1))).next(Execute(handle_character_play))
+character_play = subparsers.add_parser("角色", aliases=["h"], help="游玩名人或自定义角色")
+character_play.add_argument("name", nargs="?", metavar="名字")
+character_play.add_argument("-seed", "-种子", nargs="?", type=int, metavar="种子")
+character_play.set_defaults(func=handle_character_play)
 
-async def handle_achievements(event: Event, **_):
+async def handle_achievements(bot: Bot, event: MessageEvent, args: Namespace):
   st = STATE.statistics.get(event.user_id, None)
   if st is None:
     await liferestart.finish("你还没重开过")
@@ -399,12 +423,11 @@ async def handle_achievements(event: Event, **_):
   make_image(resources.font("sans", 32), segments).save(f, "png")
   await liferestart.send(MessageSegment.image(f))
 
-command.next(Keyword("成就")).next(Execute(handle_achievements))
-
-leaderboard = command.next(Keyword("排行"))
+achievements = subparsers.add_parser("成就", help="查看成就和统计")
+achievements.set_defaults(func=handle_achievements)
 
 def leaderboard_factory(getter: Callable[[Statistics], int], rarities: list[StatRarityItem], suffix: str = ""):
-  async def handler(bot: Bot, event: Event, **_):
+  async def handler(bot: Bot, event: MessageEvent, args: Namespace):
     leaderboard = sorted(((id, getter(st)) for id, st in STATE.statistics.items()), key=lambda x: x[1], reverse=True)
     segments = []
     ctx = context.get_event_context(event)
@@ -424,7 +447,22 @@ def leaderboard_factory(getter: Callable[[Statistics], int], rarities: list[Stat
     await liferestart.send(MessageSegment.image(f))
   return handler
 
-leaderboard.next(Keyword("重开")).next(Execute(leaderboard_factory(lambda x: x.finished_games, CONFIG.game.stat.rarity.finished_games)))
-leaderboard.next(Keyword("成就")).next(Execute(leaderboard_factory(lambda x: len(x.achievements), CONFIG.game.stat.rarity.achievements)))
-leaderboard.next(Keyword("天赋")).next(Execute(leaderboard_factory(lambda x: int(len(x.events) / len(EVENT) * 100), CONFIG.game.stat.rarity.event_percentage, "%")))
-leaderboard.next(Keyword("事件")).next(Execute(leaderboard_factory(lambda x: int(len(x.talents) / len(TALENT) * 100), CONFIG.game.stat.rarity.talent_percentage, "%")))
+finished_leaderboard = subparsers.add_parser("重开排行", help="查看重开次数排行")
+finished_leaderboard.set_defaults(func=leaderboard_factory(lambda x: x.finished_games, CONFIG.game.stat.rarity.finished_games))
+achievements_leaderboard = subparsers.add_parser("成就排行", help="查看成就数排行")
+achievements_leaderboard.set_defaults(func=leaderboard_factory(lambda x: len(x.achievements), CONFIG.game.stat.rarity.achievements))
+events_leaderboard = subparsers.add_parser("事件排行", help="查看天赋游玩率排行")
+events_leaderboard.set_defaults(func=leaderboard_factory(lambda x: int(len(x.events) / len(EVENT) * 100), CONFIG.game.stat.rarity.event_percentage, "%"))
+talents_leaderboard = subparsers.add_parser("天赋排行", help="查看事件收集率排行")
+talents_leaderboard.set_defaults(func=leaderboard_factory(lambda x: int(len(x.talents) / len(TALENT) * 100), CONFIG.game.stat.rarity.talent_percentage, "%"))
+
+liferestart = (command.CommandBuilder("liferestart", "人生重开", "liferestart", "life", "restart", "remake", "人生", "重开")
+  .brief("现可在群里快速重开")
+  .shell(parser)
+  .build())
+
+@liferestart.handle()
+async def handle_liferestart(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
+  if isinstance(args, ParserExit):
+    await liferestart.finish(args.message)
+  await args.func(bot, event, args)

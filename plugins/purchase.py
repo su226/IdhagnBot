@@ -5,13 +5,13 @@ import random
 
 from pydantic import BaseModel, Field
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message, MessageSegment
+from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs, CommandArg, ArgPlainText
-from nonebot.rule import ArgumentParser, ParserExit
+from nonebot.rule import ArgumentParser
 from nonebot.typing import T_State
-import nonebot
 
-from util import context, account_aliases, currency
-from util.config import BaseConfig, BaseState
+from util import context, account_aliases, currency, helper, command
+from util.config import BaseState
 
 class Goods(BaseModel):
   notify: int
@@ -36,12 +36,12 @@ parser_add_goods.add_argument("-desc", "-描述", metavar="内容", default="没
 parser_add_goods.add_argument("-total", "-总限购", metavar="次数", type=int, default=0, help="全部群成员可购买的次数，默认不限购")
 parser_add_goods.add_argument("-single", "-单人限购", metavar="次数", type=int, default=0, help="每个群成员可购买的次数，默认不限购")
 parser_add_goods.add_argument("-notify", "-提醒", metavar="用户", help="设置购买商品后提醒谁")
-add_goods = nonebot.on_shell_command("添加商品", context.in_group_rule(context.ANY_GROUP), parser=parser_add_goods, permission=context.Permission.ADMIN)
-add_goods.__cmd__ = "添加商品"
-add_goods.__ctx__ = context.ANY_GROUP
-add_goods.__perm__ = context.Permission.ADMIN
-add_goods.__brief__ = "添加一个金币商品"
-add_goods.__doc__ = parser_add_goods.format_help()
+add_goods = (command.CommandBuilder("purchase.add_goods", "添加商品")
+  .in_group()
+  .level("admin")
+  .brief("添加一个金币商品")
+  .shell(parser_add_goods)
+  .build())
 @add_goods.handle()
 async def handle_add_goods(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
@@ -50,11 +50,9 @@ async def handle_add_goods(bot: Bot, event: MessageEvent, args: Namespace | Pars
     notify = event.user_id
   else:
     try:
-      notify = int(args.notify)
-    except ValueError:
-      errors, notify = await account_aliases.match_uid(bot, event, args.notify)
-      if errors:
-        await add_goods.finish("\n".join(errors))
+      notify = await account_aliases.match_uid(bot, event, args.notify)
+    except helper.AggregateError as e:
+      await add_goods.finish("\n".join(e))
   ctx = context.get_event_context(event)
   goods = Goods(notify=notify, name=args.name, price=args.price, description=args.desc, total=args.total, single=args.single)
   goods_id = random.randrange(1000000000)
@@ -64,15 +62,15 @@ async def handle_add_goods(bot: Bot, event: MessageEvent, args: Namespace | Pars
   STATE.dump()
   await add_goods.finish(f"已添加ID为 {goods_id} 的商品")
 
-def find_goods(ctx: int, raw_pattern: str) -> tuple[list[str], None] | tuple[None, tuple[int, Goods]]:
+def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
   try:
     id = int(raw_pattern)
-    return None, (id, STATE.goods[ctx][id])
+    return id, STATE.goods[ctx][id]
   except (ValueError, KeyError):
     pass
   pattern = account_aliases.to_identifier(raw_pattern)
   if not pattern:
-    return [f"有效名字为空：{raw_pattern}"], None
+    raise helper.AggregateError(f"有效名字为空：{raw_pattern}")
   all_goods = STATE.goods.get(ctx, {})
   exact: list[tuple[int, Goods]] = []
   inexact: list[tuple[int, Goods]] = []
@@ -84,7 +82,7 @@ def find_goods(ctx: int, raw_pattern: str) -> tuple[list[str], None] | tuple[Non
       inexact.append((id, goods))
   all_goods = exact or inexact
   if not all_goods:
-    return [f"没有找到商品：{raw_pattern}"], None
+    raise helper.AggregateError(f"没有找到商品：{raw_pattern}")
   elif len(all_goods) > 1:
     segments = [f"{raw_pattern} 可以指多个商品，请使用更具体的名字或者商品ID："]
     for id, goods in itertools.chain(exact, inexact):
@@ -93,16 +91,12 @@ def find_goods(ctx: int, raw_pattern: str) -> tuple[list[str], None] | tuple[Non
       else:
         price = f"{goods.price}金币"
       segments.append(f"{id:09} - {goods.name}: {price}")
-    return segments, None
-  return None, all_goods[0]
+    raise helper.AggregateError("\n".join(segments))
+  return all_goods[0]
 
-async def find_user(bot: Bot, event: MessageEvent, pattern: str) -> tuple[list[str], int]:
+async def find_user(bot: Bot, event: MessageEvent, pattern: str) -> int:
   if pattern == "全部":
-    return [], 0
-  try:
-    return [], int(pattern)
-  except ValueError:
-    pass
+    return 0
   return await account_aliases.match_uid(bot, event, pattern)
 
 parser_modify_goods = ArgumentParser("/修改商品")
@@ -120,38 +114,38 @@ parser_modify_goods.add_argument("-delete", "-删除", action="store_true", help
 group = parser_modify_goods.add_mutually_exclusive_group()
 group.add_argument("-disable", "-下架", dest="disabled", action="store_true", default=None, help="下架商品，不会隐藏商品，但是不能购买")
 group.add_argument("-enable", "-上架", dest="disabled", action="store_false", help="重新上架商品")
-modify_goods = nonebot.on_shell_command("修改商品", context.in_group_rule(context.ANY_GROUP), parser=parser_modify_goods, permission=context.Permission.ADMIN)
-modify_goods.__cmd__ = "修改商品"
-modify_goods.__ctx__ = context.ANY_GROUP
-modify_goods.__perm__ = context.Permission.ADMIN
-modify_goods.__brief__ = "修改一个金币商品"
-modify_goods.__doc__ = parser_modify_goods.format_help()
+modify_goods = (command.CommandBuilder("purchase.modify_goods", "修改商品")
+  .in_group()
+  .level("admin")
+  .brief("修改一个金币商品")
+  .shell(parser_modify_goods)
+  .build())
 @modify_goods.handle()
 async def handle_modify_goods(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await modify_goods.finish(args.message)
   ctx = context.get_event_context(event)
-  errors, result = find_goods(ctx, args.goods)
-  if errors:
-    await modify_goods.finish("\n".join(errors))
-  id, goods = result
+  try:
+    id, goods = find_goods(ctx, args.goods)
+  except helper.AggregateError as e:
+    await modify_goods.finish("\n".join(e))
   coros = []
   for pattern in args.reset_single:
     coros.append(find_user(bot, event, pattern))
   errors, reset_single = [], []
-  for i, j in await asyncio.gather(*coros):
-    errors.extend(i)
-    reset_single.append(j)
+  for i in await asyncio.gather(*coros, return_exceptions=True):
+    if isinstance(i, helper.AggregateError):
+      errors.extend(i)
+    else:
+      reset_single.append(i)
   if errors:
     await modify_goods.finish("\n".join(errors))
   notify = args.notify
   if notify is not None:
     try:
-      notify = int(args.notify)
-    except ValueError:
-      errors, notify = await account_aliases.match_uid(bot, event, args.notify)
-      if errors:
-        await modify_goods.finish("\n".join(errors))
+      notify = await account_aliases.match_uid(bot, event, args.notify)
+    except helper.AggregateError as e:
+      await modify_goods.finish("\n".join(e))
   results = []
   if args.name is not None:
     goods.name = args.name
@@ -217,7 +211,7 @@ async def format_goods(bot: Bot, event: MessageEvent, id: int, goods: Goods) -> 
     single = f"{single_purchased}/{goods.single}"
   else:
     single = f"{single_purchased}"
-  return MessageSegment.text(
+  return (
     f"{owner_name}（{goods.notify}）的商品\n"
     f"ID：{id:09}\n"
     f"名字：{name}\n"
@@ -227,14 +221,13 @@ async def format_goods(bot: Bot, event: MessageEvent, id: int, goods: Goods) -> 
     f"简介："
   ) + Message(goods.description)
   
-
-show_goods = nonebot.on_command("商品", context.in_group_rule(context.ANY_GROUP))
-show_goods.__cmd__ = "商品"
-show_goods.__brief__ = "列出所有金币商品或显示详细信息"
-show_goods.__doc__ = '''\
+show_goods = (command.CommandBuilder("purchase.show_goods", "商品")
+  .in_group()
+  .brief("列出所有金币商品或显示详细信息")
+  .usage('''\
 /商品 - 列出所有金币商品
-/商品 <名字或ID> - 显示商品详细信息'''
-show_goods.__ctx__ = context.ANY_GROUP
+/商品 <名字或ID> - 显示商品详细信息''')
+  .build())
 @show_goods.handle()
 async def handle_show_goods(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
   name = arg.extract_plain_text().rstrip()
@@ -252,25 +245,25 @@ async def handle_show_goods(bot: Bot, event: MessageEvent, arg: Message = Comman
       segments.append(f"{id:09} - {goods.name}: {price}")
     await show_goods.finish("\n".join(segments))
   else:
-    errors, result = find_goods(ctx, name)
-    if errors:
-      await show_goods.finish("\n".join(errors))
-    id, goods = result
+    try:
+      id, goods = find_goods(ctx, name)
+    except helper.AggregateError as e:
+      await show_goods.finish("\n".join(e))
     await show_goods.finish(await format_goods(bot, event, id, goods))
 
-purchase = nonebot.on_command("购买", context.in_group_rule(context.ANY_GROUP))
-purchase.__cmd__ = "购买"
-purchase.__brief__ = "购买金币商品"
-purchase.__doc__ = "/购买商品 <名字或ID> - 购买指定商品，购买后会提醒商品的所有人"
-purchase.__ctx__ = context.ANY_GROUP
+purchase = (command.CommandBuilder("purchase.purchase", "购买")
+  .in_group()
+  .brief("购买金币商品")
+  .usage("/购买商品 <名字或ID> - 购买指定商品，购买后会提醒商品的所有人")
+  .build())
 @purchase.handle()
 async def handle_purchase(bot: Bot, event: MessageEvent, state: T_State, arg: Message = CommandArg()):
   name = arg.extract_plain_text().rstrip()
   ctx = context.get_event_context(event)
-  errors, result = find_goods(ctx, name)
-  if errors:
-    await purchase.finish("\n".join(errors))
-  id, goods = result
+  try:
+    id, goods = find_goods(ctx, name)
+  except helper.AggregateError as e:
+    await purchase.finish("\n".join(e))
   state["id"] = id
   formatted = await format_goods(bot, event, id, goods)
   if goods.disabled:
@@ -310,7 +303,7 @@ async def got_purchase(bot: Bot, event: MessageEvent, state: T_State, choice: st
   if ctx == getattr(event, "group_id", -1):
     await purchase.finish(f"你已成功购买该商品，请与商品的主人沟通：" + MessageSegment.at(goods.notify))
   else:
-    info = await bot.get_group_info(group_id=ctx, user_id=event.user_id)
+    info = await bot.get_group_member_info(group_id=ctx, user_id=event.user_id)
     username = info["card"] or info["nickname"]
     await bot.send_group_msg(group_id=ctx, message=MessageSegment.at(goods.notify) + f"{username}（{event.user_id}）购买了你的商品 {goods.name}，请注意！")
     await purchase.finish(f"你已成功购买该商品，请与商品的主人沟通")

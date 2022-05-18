@@ -1,4 +1,5 @@
-from util.config import BaseConfig, BaseState, Field
+from pydantic import Field
+from util.config import BaseConfig, BaseState
 from apscheduler.schedulers.base import BaseScheduler
 from datetime import date, time, datetime
 from nonebot.adapters.onebot.v11 import Bot, Message

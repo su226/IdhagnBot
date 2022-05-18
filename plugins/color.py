@@ -6,12 +6,11 @@ from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 import nonebot
 
-from util import color, resources
+from util import color, resources, command
 
-color_img = nonebot.on_command("色图", aliases={"color"})
-color_img.__cmd__ = ["色图", "color"]
-color_img.__brief__ = "哎哟这个色啊！好色！"
-color_img.__usage__ = '''\
+color_img = (command.CommandBuilder("color", "色图", "color")
+  .brief("哎哟这个色啊！好色！")
+  .usage('''\
 支持多种格式，比如以下均为蓝色
 /色图 #0000ff
 /色图 0000ff
@@ -19,7 +18,8 @@ color_img.__usage__ = '''\
 /色图 00f
 /色图 rgb(0, 0, 255)
 /色图 hsl(240, 100%, 50%)
-/色图 blue'''
+/色图 blue''')
+  .build())
 @color_img.handle()
 async def handle_color_img(arg: Message = CommandArg()):
   color_str = arg.extract_plain_text().rstrip()

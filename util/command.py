@@ -60,6 +60,10 @@ class CommandBuilder:
     self.usage_ = parser.format_help()
     return self
 
+  def private(self, private: bool) -> Self:
+    self.help_data.private = private
+    return self
+
   def build(self) -> type[Matcher]:
     cat = help.CategoryItem.find(self.category_, True)
     cat.add(help.CommandItem(self.names, self.brief_, self.usage_, self.help_data))

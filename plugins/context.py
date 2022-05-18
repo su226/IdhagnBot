@@ -1,31 +1,32 @@
-from util.context import enter_context, get_event_context, get_event_context, exit_context, in_group_rule, PRIVATE, ANY_GROUP, GROUP_IDS, GROUP_NAMES
-from nonebot.adapters.onebot.v11 import Bot, Event, PrivateMessageEvent
+from nonebot.adapters.onebot.v11 import Bot, Event, PrivateMessageEvent, Message
 from nonebot.params import CommandArg
-import nonebot
 
-aliases = nonebot.on_command("别名", in_group_rule(ANY_GROUP), {"alias", "aliases"})
-aliases.__cmd__ = ["别名", "alias", "aliases"]
-aliases.__brief__ = "查看当前群聊上下文的别名"
-aliases.__ctx__ = [ANY_GROUP]
+from util import command
+from util.context import enter_context, get_event_context, exit_context, PRIVATE, ANY_GROUP, GROUP_IDS, GROUP_NAMES
+
+aliases = (command.CommandBuilder("context.alias", "别名", "alias")
+  .in_group(ANY_GROUP)
+  .brief("查看当前群聊上下文的别名")
+  .build())
 @aliases.handle()
 async def handle_aliases(event: Event):
   await aliases.send("当前群聊上下文有以下别名:\n" + ", ".join(GROUP_IDS[get_event_context(event)].aliases))
 
 error_str = "无效的群号或别名、你不是该群的成员，或机器人在该群不可用"
-context = nonebot.on_command("上下文", aliases={"context", "ctx"})
-context.__cmd__ = ["上下文", "context", "ctx"]
-context.__brief__ = "进入或退出上下文"
-context.__priv__ = True
-context.__doc__ = '''\
+context = (command.CommandBuilder("context.ctx", "上下文", "ctx")
+  .brief("进入或退出上下文")
+  .usage('''\
 /上下文 - 查看当前上下文
 /上下文 <群号或别名> - 进入群聊上下文
-/上下文 退出 - 退出群聊上下文'''
+/上下文 退出|exit - 退出群聊上下文''')
+  .private(True)
+  .build())
 @context.handle()
-async def handle_context(bot: Bot, event: PrivateMessageEvent, args = CommandArg()):
-  args: str = str(args).rstrip()
+async def handle_context(bot: Bot, event: PrivateMessageEvent, arg: Message = CommandArg()):
+  args = arg.extract_plain_text().rstrip()
   uid = event.user_id
   if args == "":
-    ctx = get_event_context(uid)
+    ctx = get_event_context(event)
     if ctx == PRIVATE:
       await context.finish("当前为私聊上下文")
     else:

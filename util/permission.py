@@ -2,11 +2,9 @@ from typing import Any, Literal
 from enum import Enum
 
 from pydantic import BaseModel, Field
-from nonebot.adapters.onebot.v11 import Adapter, Bot, Event, GroupMessageEvent
-from nonebot.permission import Permission as BotPermission
+from nonebot.adapters.onebot.v11 import Adapter, Bot
 from nonebot.log import logger
 
-from . import context
 from .config_v2 import GroupState, SharedState
 
 Node = tuple[str, ...]
@@ -52,36 +50,38 @@ class State(BaseModel):
 SHARED_STATE = SharedState("permission_override", State)
 GROUP_STATE = GroupState("permission", State)
 
-class Level(BotPermission, Enum):
-  MEMBER = 0
-  ADMIN = 1
-  OWNER = 2
-  SUPER = 3
+LEVELS: dict[str, "Level"] = {}
+class Level(Enum):
+  MEMBER = "member", 0
+  ADMIN = "admin", 1
+  OWNER = "owner", 2
+  SUPER = "super", 3
 
-  def __init__(self, value: int) -> None:
-    super().__init__(self.check)
+  def __init__(self, key: str, order: int) -> None:
+    self.key = key
+    self.order = order
+    LEVELS[key] = self
 
-  def __lt__(self, other: object) -> bool:
+  def __ge__(self, other: object) -> bool:
     if isinstance(other, Level):
-      return self.value < other.value
+      return self.order >= other.order
     return NotImplemented
-
+  def __gt__(self, other: object) -> bool:
+    if isinstance(other, Level):
+      return self.order > other.order
+    return NotImplemented
   def __le__(self, other: object) -> bool:
     if isinstance(other, Level):
-      return self.value <= other.value
+      return self.order <= other.order
     return NotImplemented
-
-  async def check(self, bot: Bot, event: Event) -> bool:
-    return await context.get_event_level(bot, event) >= self
+  def __lt__(self, other: object) -> bool:
+    if isinstance(other, Level):
+      return self.order < other.order
+    return NotImplemented
 
   @classmethod
   def parse(cls, value: str) -> "Level":
-    return {
-      "member": cls.MEMBER,
-      "admin": cls.ADMIN,
-      "owner": cls.OWNER,
-      "super": cls.SUPER
-    }[value]
+    return LEVELS[value]
 
 def tuple_startswith(value: tuple[Any, ...], prefix: tuple[Any, ...]) -> bool:
   return len(value) >= len(prefix) and value[:len(prefix)] == prefix

@@ -9,8 +9,7 @@ from nonebot.exception import ParserExit
 from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
 
-from util import command
-from util.helper import notnone
+from util import command, helper
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -27,15 +26,13 @@ matcher = (command.CommandBuilder("petpet_v2.cxk", "cxk", "蔡徐坤", "篮球",
 async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
-  errors, avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id, crop=False)
-  if errors:
-    await matcher.finish("\n".join(errors))
-  errors, avatar2, _ = await get_image_and_user(bot, event, args.source, event.user_id)
-  if errors:
-    await matcher.finish("\n".join(errors))
-
-  avatar = notnone(avatar).resize((130, 130), Image.ANTIALIAS).rotate(random.uniform(0, 360), Image.BICUBIC)
-  avatar2 = notnone(avatar2).resize((130, 130), Image.ANTIALIAS)
+  try:
+    avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
+    avatar2, _ = await get_image_and_user(bot, event, args.source, event.user_id)
+  except helper.AggregateError as e:
+    await matcher.finish("\n".join(e))
+  avatar = avatar.resize((130, 130), Image.ANTIALIAS).rotate(random.uniform(0, 360), Image.BICUBIC)
+  avatar2 = avatar2.resize((130, 130), Image.ANTIALIAS)
   im = Image.new("RGB", (830, 830), (255, 255, 255))
   im.paste(avatar2, (382, 59), avatar2)
   im.paste(avatar, (609, 317), avatar)

@@ -1,17 +1,20 @@
-from util.config import BaseModel, BaseState, Field
-from util import context
+from typing import cast
 from datetime import datetime
+import random
+import time
+
+from pydantic import Field
 from apscheduler.schedulers.base import BaseScheduler, Job
 from apscheduler.triggers.date import DateTrigger
-from nonebot.adapters.onebot.v11 import Event, Message, GroupMessageEvent
+from nonebot.adapters.onebot.v11 import MessageEvent, Message, GroupMessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
 from nonebot.params import CommandArg
 from nonebot.message import handle_event
 from nonebot.log import logger
-import random
 import nonebot
-import time
 
+from util.config import BaseModel, BaseState
+from util import context, command
 
 class Scheduled(BaseModel):
   user: int
@@ -23,7 +26,7 @@ class Scheduled(BaseModel):
     message = "/" + self.message
     await handle_event(bot, GroupMessageEvent(
       time=int(time.time()),
-      self_id=bot.self_id,
+      self_id=int(bot.self_id),
       post_type="message",
       sub_type="normal",
       user_id=self.user,
@@ -90,18 +93,18 @@ def get_message(msg: Message) -> str:
     texts.append(seg.data["text"] if seg.is_text() else str(seg))
   return "".join(texts)
 
-schedule = nonebot.on_command("定时", context.in_group_rule(context.ANY_GROUP), {"schedule"}, permission=context.Permission.SUPER)
-schedule.__cmd__ = ["定时", "schedule"]
-schedule.__brief__ = "设置定时任务"
-schedule.__doc__ = '''\
+schedule = (command.CommandBuilder("schedule", "定时", "schedule")
+  .in_group()
+  .level("super")
+  .brief("设置定时任务")
+  .usage('''\
 /定时 <时间> <命令> - 添加定时任务
 /定时 列表|list - 显示定时任务
 /定时 预览|preview <任务ID> - 预览定时任务
-/定时 取消|cancel <任务ID> - 取消定时任务'''
-schedule.__ctx__ = [context.ANY_GROUP]
-schedule.__perm__ = context.Permission.SUPER
+/定时 取消|cancel <任务ID> - 取消定时任务''')
+  .build())
 @schedule.handle()
-async def handle_schedule(event: Event, msg: Message = CommandArg()):
+async def handle_schedule(event: MessageEvent, msg: Message = CommandArg()):
   args = get_message(msg).rstrip().split(None, 1)
   ctx = context.get_event_context(event)
   if len(args) == 0:
@@ -112,8 +115,8 @@ async def handle_schedule(event: Event, msg: Message = CommandArg()):
       return
     segments = ["所有定时任务:"]
     for id, content in STATE.scheduled[ctx].items():
-      job: Job = scheduler.get_job(f"scheduled_message_{id}")
-      trigger: DateTrigger = job.trigger
+      job = cast(Job, scheduler.get_job(f"scheduled_message_{id}"))
+      trigger = cast(DateTrigger, job.trigger)
       segments.append(f"{id} {trigger.run_date.isoformat('T')} {ellipsis(content.message, 16)}")
     await schedule.send("\n".join(segments))
   elif args[0] in ("预览", "preview"):
@@ -150,4 +153,4 @@ async def handle_schedule(event: Event, msg: Message = CommandArg()):
       return
     id = format(random.randint(0, 0xffffffff), "08x")
     STATE.set_scheduled(ctx, id, event.user_id, args[1], date)
-    await schedule.send(f"已设置在 {date} 时在 {context.GROUP_IDS.get(ctx).name} 中执行的定时任务，ID 为 {id}")
+    await schedule.send(f"已设置在 {date} 时在 {context.GROUP_IDS[ctx].name} 中执行的定时任务，ID 为 {id}")

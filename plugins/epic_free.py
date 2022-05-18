@@ -1,14 +1,16 @@
 from typing import Iterable
-from aiohttp import ClientSession
 from datetime import datetime, timedelta, timezone
+
+from aiohttp import ClientSession
 from nonebot.adapters.onebot.v11 import Message
-import nonebot
+
+from util import command
 
 API = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=zh-CN&country=CN&allowCountries=CN"
 FREE = {"discountType": "PERCENTAGE", "discountPercentage": 0}
 ZERO = timedelta()
 
-def iter_promotions(promotions: list[dict]) -> Iterable[dict]:
+def iter_promotions(promotions: dict) -> Iterable[dict]:
   if promotions is None:
     return
   for i in promotions["promotionalOffers"]:
@@ -16,9 +18,9 @@ def iter_promotions(promotions: list[dict]) -> Iterable[dict]:
   for i in promotions["upcomingPromotionalOffers"]:
     yield from i["promotionalOffers"]
 
-def getslug(game: dict) -> str:
+def getslug(game: dict) -> str | None:
   slug = game['productSlug']
-  if slug:
+  if slug and slug != "[]":
     return slug.removesuffix("/home")
   for i in game["offerMappings"]:
     if i.get("pageType", None) == "productHome":
@@ -30,7 +32,7 @@ def iter_free_games(games: list[dict]) -> Iterable[str]:
   for game in games:
     title = game["title"]
     slug = getslug(game)
-    url = "获取链接失败，请联系机器人开发者" if slug is None else f"https://www.epicgames.com/store/zh-CN/p/{slug}"
+    url = "链接未知" if not slug else f"https://www.epicgames.com/store/zh-CN/p/{slug}"
     image = ""
     for i in game["keyImages"]:
       if i["type"] in ("DieselStoreFrontWide", "OfferImageWide"):
@@ -50,12 +52,12 @@ def iter_free_games(games: list[dict]) -> Iterable[str]:
           yield f"[CQ:image,file={image}]{title} 将在 {start_date_str} 免费，截止到 {end_date_str}\n{url}"
           break
 
-epicfree = nonebot.on_command("epicfree", aliases={"epic", "喜加一"})
-epicfree.__cmd__ = ["epicfree", "epic", "喜加一"]
-epicfree.__brief__ = "看看E宝又在送什么"
-epicfree.__doc__ = '''\
+epicfree = (command.CommandBuilder("epicfree", "epicfree", "epic", "喜加一")
+  .brief("看看E宝又在送什么")
+  .usage('''\
 /epicfree - 查看现在的免费游戏
-你送游戏你是我宝，你卖游戏翻脸不认（雾）'''
+你送游戏你是我宝，你卖游戏翻脸不认（雾）''')
+  .build())
 @epicfree.handle()
 async def handle_epicfree():
   async with ClientSession() as http:
