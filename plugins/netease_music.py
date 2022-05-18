@@ -1,10 +1,12 @@
 from typing import TypedDict
-from aiohttp import ClientSession
 from urllib.parse import quote
+import math
+
+from aiohttp import ClientSession
 from nonebot.params import CommandArg, State, ArgStr
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
-import nonebot
-import math
+
+from util import command
 
 API = "https://music.163.com/api/search/get/web?type=1&offset={offset}&limit={limit}&s={keyword}"
 LIMIT = 10
@@ -15,12 +17,12 @@ class CmdState(TypedDict):
   end: bool
   choices: list[int]
 
-netease = nonebot.on_command("网易云", aliases={"netease", "163", "cloudmusic"})
-netease.__cmd__ = ["网易云", "netease", "163", "cloudmusic"]
-netease.__brief__ = "网易云点歌"
-netease.__doc__ = '''\
+netease = (command.CommandBuilder("netease", "网易云", "netease", "163", "cloudmusic")
+  .brief("网易云点歌")
+  .usage('''\
 /网易云 <关键字> - 搜索关键字
-/网易云 <id> - 发送指定ID的歌'''
+/网易云 <id> - 发送指定ID的歌''')
+  .build())
 
 async def get_prompt(state: CmdState):
   if state["end"]:
@@ -83,10 +85,10 @@ async def receive_netease(choice: str = ArgStr(), state = State()):
   elif choice == "下":
     await netease.reject(await get_prompt(state))
   try:
-    choice = int(choice)
+    choice_int = int(choice)
   except:
     await netease.reject("只能输入数字，请重新输入，或发送“取”取消点歌")
   choices = state["choices"]
-  if choice < 1 or choice > len(choices):
+  if choice_int < 1 or choice_int > len(choices):
     await netease.reject(f"只能发送 1 和 {len(choices)} 之间的数字，请重新输入，或发送“取”取消点歌")
-  await netease.finish(MessageSegment.music("163", choices[choice - 1]))
+  await netease.finish(MessageSegment.music("163", choices[choice_int - 1]))

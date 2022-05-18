@@ -1,16 +1,16 @@
 from nonebot.params import CommandArg
-import nonebot
-from .safe_eval_py import safe_eval as safe_eval_py
-from .safe_eval_js import safe_eval as safe_eval_js
+
+from util import command
+from .safe_eval_py import safe_eval as eval_py
+from .safe_eval_js import safe_eval as eval_js
 
 TIMEOUT = 10
 NPROC = 128
 MEMORY = 128 * 1024 * 1024
 OUTPUT = 1024
-python = nonebot.on_command("python")
-python.__cmd__ = "python"
-python.__brief__ = "在沙箱中运行Python代码"
-python.__doc__ = f'''\
+python = (command.CommandBuilder("safe_eval.python", "python")
+  .brief("在沙箱中运行Python代码")
+  .usage(f'''\
 /python <代码>
 代码可以换行，不会自动输出最后的结果
 限制：
@@ -19,13 +19,14 @@ python.__doc__ = f'''\
 进程限制为 {NPROC} 个
 时间限制为 {TIMEOUT} 秒
 内存限制为 {MEMORY / 1024 / 1024} M
-输出限制为 {OUTPUT} 字节'''
+输出限制为 {OUTPUT} 字节''')
+  .build())
 @python.handle()
 async def handle_python(args = CommandArg()):
   code = args.extract_plain_text().rstrip()
   if not len(code):
     await python.finish(python.__doc__)
-  killed, returncode, stdout, stderr = await safe_eval_py(code, TIMEOUT, NPROC, MEMORY, OUTPUT)
+  killed, returncode, stdout, stderr = await eval_py(code, TIMEOUT, NPROC, MEMORY, OUTPUT)
   segments = []
   if killed:
     segments.append(f"退出代码：{returncode}（超时）")
@@ -48,10 +49,9 @@ async def handle_python(args = CommandArg()):
   await python.finish("\n".join(segments))
 
 JS_MEMORY = 512 * 1024 * 1024
-js = nonebot.on_command("js", aliases={"node"})
-js.__cmd__ = ["js", "node"]
-js.__brief__ = "在沙箱中运行NodeJS代码"
-js.__doc__ = f'''\
+js = (command.CommandBuilder("safe_eval.javascript", "javascript", "js", "node")
+  .brief("在沙箱中运行NodeJS代码")
+  .usage(f'''\
 /node <代码>
 代码可以换行，不会自动输出最后的结果
 限制：
@@ -60,13 +60,14 @@ js.__doc__ = f'''\
 进程限制为 {NPROC} 个
 时间限制为 {TIMEOUT} 秒
 内存限制为 {JS_MEMORY / 1024 / 1024} M
-输出限制为 {OUTPUT} 字节'''
+输出限制为 {OUTPUT} 字节''')
+  .build())
 @js.handle()
 async def handle_js(args = CommandArg()):
   code = args.extract_plain_text().rstrip()
   if not len(code):
     await js.finish(js.__doc__)
-  killed, returncode, stdout, stderr = await safe_eval_js(code, TIMEOUT, NPROC, JS_MEMORY, OUTPUT)
+  killed, returncode, stdout, stderr = await eval_js(code, TIMEOUT, NPROC, JS_MEMORY, OUTPUT)
   segments = []
   if killed:
     segments.append(f"退出代码：{returncode}（超时）")

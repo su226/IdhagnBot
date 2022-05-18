@@ -1,30 +1,25 @@
-from util import context, account_aliases
-from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message, MessageSegment
 from nonebot.rule import Rule
 from nonebot.params import CommandArg
 import nonebot
 
-def try_int(value: str) -> str | int:
-  try:
-    return int(value)
-  except:
-    return value
+from util import context, account_aliases, helper, command
 
 uids: dict[int, set[str]] = {}
 
-auto_poke = nonebot.on_command("自动戳", context.in_group_rule(context.ANY_GROUP), {"autopoke"}, permission=context.Permission.SUPER)
-auto_poke.__cmd__ = ["自动戳", "autopoke"]
-auto_poke.__brief__ = "查看、设置和清除自动戳"
-auto_poke.__doc__ = '''\
+auto_poke = (command.CommandBuilder("auto_poke", "自动戳")
+  .level("super")
+  .in_group()
+  .brief("查看、设置和清除自动戳")
+  .usage('''\
 /自动戳 - 查看自动戳
 /自动戳 <QQ号列表> - 设置自动戳
-/自动戳 clear|清除 - 清除自动戳'''
-auto_poke.__perm__ = context.Permission.SUPER
-auto_poke.__ctx__ = context.ANY_GROUP
+/自动戳 clear|清除 - 清除自动戳''')
+  .build())
 @auto_poke.handle()
-async def handle_auto_poke(bot: Bot, event: Event, args: Message = CommandArg()):
+async def handle_auto_poke(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
   ctx = context.get_event_context(event)
-  args = str(args).split()
+  args = arg.extract_plain_text().split()
   if len(args) == 0:
     await auto_poke.send("当前自动戳：\n" + "\n".join(map(str, uids.get(ctx, []))))
   elif args == ["clear"] or args == ["清除"]:
@@ -36,23 +31,20 @@ async def handle_auto_poke(bot: Bot, event: Event, args: Message = CommandArg())
     all_uids = []
     for pattern in args:
       try:
-        all_uids.append(int(pattern))
-        continue
-      except: pass
-      errors, cur_uids = await account_aliases.match_uid(bot, event, pattern, True)
-      all_uids.extend(cur_uids)
-      all_errors.extend(errors)
+        all_uids.extend(await account_aliases.match_uid(bot, event, pattern, True))
+      except helper.AggregateError as e:
+        all_errors.extend(e)
     if len(all_errors):
       await auto_poke.send("\n".join(all_errors))
       return
-    uids[ctx] = all_uids
+    uids[ctx] = set(all_uids)
     await auto_poke.send("已设置自动戳：\n" + "\n".join(map(str, uids[ctx])))
 
-async def has_uid(event: Event) -> bool:
+async def has_uid(event: MessageEvent) -> bool:
   return event.user_id in uids.get(context.get_event_context(event), [])
 
 do_auto_poke = nonebot.on_message(Rule(has_uid), priority=2)
 
 @do_auto_poke.handle()
-async def do_handle_auto_poke(event: Event):
+async def do_handle_auto_poke(event: MessageEvent):
   await do_auto_poke.send(MessageSegment("poke", {"qq": event.user_id}))

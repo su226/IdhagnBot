@@ -1,19 +1,19 @@
 from argparse import Namespace
-from io import BytesIO
 import os
 import random
 
 from PIL import Image
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.rule import ArgumentParser, ParserExit
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent
+from nonebot.exception import ParserExit
+from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
-import nonebot
 
+from util import command, helper
 from ..util import circle, get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
-parser = ArgumentParser("/转", add_help=False)
+parser = ArgumentParser(add_help=False)
 parser.add_argument("target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
 parser.add_argument("-duration", "-时长", type=int, default=50, metavar="毫秒数", help="[1, 200]之间的整数，默认为50")
 parser.add_argument("-original", "-原图", action="store_true", help="使用原图，可能出现文件过大发送失败")
@@ -23,17 +23,18 @@ group.add_argument("-acw", "-逆时针", dest="acw", action="store_true", help="
 group = parser.add_mutually_exclusive_group()
 group.add_argument("-webp", action="store_const", dest="format", const="webp", default="gif", help="使用WebP而非GIF格式")
 group.add_argument("-apng", "-png", action="store_const", dest="format", const="png", help="使用APNG而非GIF格式")
-matcher = nonebot.on_shell_command("转", aliases={"spin"}, parser=parser)
-matcher.__cmd__ = ["转", "spin"]
-matcher.__doc__ = parser.format_help()
-matcher.__cat__ = "petpet_v2"
+matcher = (command.CommandBuilder("petpet_v2.spin", "转")
+  .category("petpet_v2")
+  .shell(parser)
+  .build())
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
-  errors, avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  if errors:
-    await matcher.finish("\n".join(errors))
+  try:
+    avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
+  except helper.AggregateError as e:
+    await matcher.finish("\n".join(e))
   if args.duration < 1 or args.duration > 200:
     await matcher.finish("时长必须是[1, 200]之间的整数")
   acw = bool(random.randrange(2)) if args.acw is None else args.acw

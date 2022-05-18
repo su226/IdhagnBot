@@ -1,19 +1,21 @@
-from aiohttp import ClientSession
-from aiohttp.client_exceptions import ClientConnectionError
 from typing import Awaitable, Callable
+import base64
+
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
-import base64
+import aiohttp
 import nonebot
+
+from util import command
 
 FactoryType = Callable[[], Awaitable[str]]
 def simple(url: str) -> FactoryType:
   async def func() -> str:
     try:
-      async with ClientSession() as http:
+      async with aiohttp.ClientSession() as http:
         response = await http.get(url)
         data = await response.read()
-    except ClientConnectionError:
+    except aiohttp.ClientError:
       return "网络错误"
     return f"[CQ:image,file=base64://{base64.b64encode(data).decode()}]"
   return func
@@ -30,12 +32,12 @@ for func, _, ids in SOURCES:
   for id in ids:
     SOURCES_DICT[id] = func
 
-txdne = nonebot.on_command("txdne")
-txdne.__cmd__ = "txdne"
-txdne.__brief__ = "This X Does Not Exist"
-txdne.__doc__ = '''\
+txdne = (command.CommandBuilder("txdne", "txdne")
+  .brief("This X Does Not Exist")
+  .usage('''\
 /txdne - 查看支持的来源
-/txdne <来源ID> - 随机图片'''
+/txdne <来源ID> - 随机图片''')
+  .build())
 @txdne.handle()
 async def handle_txdne(args: Message = CommandArg()):
   site = args.extract_plain_text().rstrip()

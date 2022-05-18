@@ -1,11 +1,14 @@
 import math
-from . import baidu, cctv, weibo, zhihu, bilibili
-from .common import Item
-from util.config import BaseConfig, BaseState, BaseModel, Field
+import time
+
+from pydantic import BaseModel, Field
 from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import MessageSegment
-import nonebot
-import time
+
+from util import command
+from util.config import BaseConfig, BaseState
+from . import baidu, cctv, weibo, zhihu, bilibili
+from .common import Item
 
 class Config(BaseConfig):
   __file__ = "trending"
@@ -34,14 +37,14 @@ for names, func in SOURCE_LIST:
   for name in names:
     SOURCE_DICT[name] = (names[0], func)
 
-trending = nonebot.on_command("热搜", aliases={"trending"})
-trending.__cmd__ = ["热搜", "trending"]
-trending.__brief__ = "看看大家又在撕什么（bushi）"
-trending.__doc__ = '''\
+trending = (command.CommandBuilder("trending", "热搜", "trending")
+  .brief("看看大家又在撕什么（bushi）")
+  .usage('''\
 /热搜 - 查看支持的来源
 /热搜 <来源> - 查看热搜第一页
 /热搜 <来源> p<页码> - 查看热搜某一页
-/热搜 <来源> <ID> - 查看某一条热搜'''
+/热搜 <来源> <ID> - 查看某一条热搜''')
+  .build())
 @trending.handle()
 async def handle_trending(msg = CommandArg()):
   args = str(msg).lower().split()

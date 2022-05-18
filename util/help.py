@@ -1,10 +1,9 @@
-from typing import TypeVar
 import html
 import math
 
-import nonebot
+from pydantic import Field
 
-from util.config import BaseConfig, BaseModel, Field
+from util.config import BaseConfig, BaseModel
 from util import context, permission
 
 class CommonData(BaseModel):
@@ -116,10 +115,10 @@ class StringItem(Item):
 class CommandItem(Item):
   commands: dict[str, "CommandItem"] = {}
   prefixes = {
-    context.Permission.MEMBER: "",
-    context.Permission.ADMIN: "[群管] ",
-    context.Permission.OWNER: "[群主] ",
-    context.Permission.SUPER: "[超管] ",
+    permission.Level.MEMBER: "",
+    permission.Level.ADMIN: "[群管] ",
+    permission.Level.OWNER: "[群主] ",
+    permission.Level.SUPER: "[超管] ",
   }
 
   def __init__(self, names: list[str] = [], brief: str = "", usage: str = "", data: CommonData | None = None):
@@ -133,7 +132,7 @@ class CommandItem(Item):
   def html(self) -> str:
     if (info := super().html()):
       info = f"\n{info}"
-    return f"<details><summary>{html.escape(self())}</summary><pre>{html.escape(self.format(False))}{info}</pre></details>"
+    return f"<details id=\"{html.escape(self.names[0])}\"><summary>{html.escape(self())}</summary><pre>{html.escape(self.format(False))}{info}</pre></details>"
 
   def get_order(self) -> int:
     return self.data.level.value
@@ -218,6 +217,11 @@ class CategoryItem(Item):
 
 CategoryItem.ROOT = CategoryItem("root")
 
+def export_index_html() -> str:
+  segments = (f"<li><a href=\"#{html.escape(command.names[0])}\">{CommandItem.prefixes[command.data.level]}{html.escape(name)}</a></li>"
+    for name, command in sorted(CommandItem.commands.items(), key=lambda x: x[0]))
+  return f"<ul>{''.join(segments)}</ul>"  
+
 for item in CONFIG.user_helps:
   if isinstance(item, str):
     CategoryItem.ROOT.add(StringItem(item))
@@ -228,21 +232,3 @@ for item in CONFIG.user_helps:
 
 for path, brief in CONFIG.category_brief.items():
   CategoryItem.find(path, True).brief = brief
-
-def add_all_from_plugins():
-  T = TypeVar("T")
-  def ensure_list(value: T | list[T]) -> list[T]:
-    return value if isinstance(value, list) else [value]
-  for plugin in nonebot.get_loaded_plugins():
-    for matcher in plugin.matcher:
-      if (cmd := getattr(matcher, "__cmd__", None)) is None:
-        continue
-      CategoryItem.find(getattr(matcher, "__cat__", ""), True).add(CommandItem(
-        ensure_list(cmd),
-        getattr(matcher, "__brief__", ""),
-        getattr(matcher, "__doc__", None) or "",
-        CommonData(
-          priority=getattr(matcher, "__priority__", 1 - matcher.priority),
-          in_group=ensure_list(getattr(matcher, "__ctx__", [])),
-          private=getattr(matcher, "__priv__", None),
-          level=getattr(matcher, "__perm__", context.Permission.MEMBER))))

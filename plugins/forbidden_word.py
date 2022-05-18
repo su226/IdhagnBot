@@ -12,7 +12,7 @@ from nonebot.typing import T_State
 from nonebot.permission import SUPERUSER
 import nonebot
 
-from util import context, helper
+from util import context, helper, command
 from util.config import BaseConfig, BaseState
 
 class Config(BaseConfig, file="forbidden_word"):
@@ -41,15 +41,16 @@ parser.set_defaults(subcommand="add")
 parser = subparsers.add_parser("删除", add_help=False)
 parser.add_argument("words", nargs="+", metavar="词语")
 parser.set_defaults(subcommand="delete")
-manage = nonebot.on_shell_command("屏蔽词", rule=context.in_group_rule(context.ANY_GROUP), parser=manage_parser, permission=context.Permission.ADMIN)
-manage.__cmd__ = "屏蔽词"
-manage.__brief__ = "管理屏蔽词"
-manage.__doc__ = '''\
+manage = (command.CommandBuilder("forbidden_word.manage", "屏蔽词")
+  .in_group()
+  .level("admin")
+  .shell(manage_parser)
+  .brief("管理屏蔽词")
+  .usage('''\
 /屏蔽词 查看 - 列出所有屏蔽词
 /屏蔽词 添加 <词语...> - 添加一个或多个屏蔽词
-/屏蔽词 删除 <词语...> - 删除一个或多个屏蔽词'''
-manage.__ctx__ = [context.ANY_GROUP]
-manage.__perm__ = context.Permission.ADMIN
+/屏蔽词 删除 <词语...> - 删除一个或多个屏蔽词''')
+  .build())
 @manage.handle()
 async def handle_manage(event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):

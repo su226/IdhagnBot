@@ -5,13 +5,14 @@ import time
 
 from aiohttp import ClientSession
 from PIL import Image, ImageDraw
+from pydantic import Field
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 import nonebot
 import psutil
 
-from util.config import BaseConfig, Field
-from util import resources, helper
+from util.config import BaseConfig
+from util import resources, helper, command
 from .gpu import get_gpu_info
 
 Items = Literal[
@@ -130,12 +131,12 @@ INFO = "IdhagnFetch - 绝对不是参考的screenfetch或者neofetch"
 def color_to_pil(color: int) -> tuple[int, int, int]:
   return (color >> 16, (color >> 8) & 0xff, color & 0xff)
 
-idhagnfetch = nonebot.on_command("idhagnfetch", aliases={"状态", "state", "运行时间", "uptime"})
-idhagnfetch.__cmd__ = ["idhagnfetch", "状态", "state", "运行时间", "uptime"]
-idhagnfetch.__brief__ = "显示机器人的状态"
-idhagnfetch.__doc__ = '''\
+idhagnfetch = (command.CommandBuilder("idhagnfetch", "idhagnfetch", "状态", "state", "运行时间", "uptime")
+  .brief("显示机器人的状态")
+  .usage('''\
 服务器在线在重启系统（含崩溃自动重启）时归零
-机器人在线在重启机器人（含重启系统）时归零'''
+机器人在线在重启机器人（含重启系统）时归零''')
+  .build())
 @idhagnfetch.handle()
 async def handle_uptime(bot: Bot):
   items = []

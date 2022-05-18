@@ -1,8 +1,10 @@
+from typing import Any
 from argparse import Namespace
 from calendar import Calendar
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime
 from io import BytesIO
 import asyncio
+import html
 import random
 
 from aiohttp import ClientSession
@@ -12,15 +14,12 @@ from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
-import nonebot
 
-from util import context, currency, resources, account_aliases, text, helper
+from util import context, currency, resources, account_aliases, text, helper, command
 from util.config import BaseConfig, BaseState
 
 class Config(BaseConfig):
   __file__ = "sign"
-  reset_time: time = time(0, 0, 0)
-  cooldown: timedelta = timedelta(0)
   coin: int | tuple[int, int] = (80, 120)
   combo_each: float = 0.1
   combo_max: float = 1.0
@@ -58,38 +57,55 @@ class State(BaseState):
 CONFIG = Config.load()
 STATE = State.load()
 
-def get_date(t: datetime) -> date:
-  d = t.date()
-  if t.time() < CONFIG.reset_time and d > datetime.min:
-    d -= timedelta(1)
-  return d
-
-def get_today() -> date:
-  return get_date(datetime.now())
-
-def get_group_data(gid: int) -> GroupData:
+def get_or_create_group_data(gid: int) -> GroupData:
   if gid in STATE.groups:
     group_data = STATE.groups[gid]
-    if get_date(group_data.time) != get_today():
+    if group_data.time.date() != date.today():
       group_data.rank = []
   else:
     group_data = STATE.groups[gid] = GroupData()
   group_data.time = datetime.now()
   return group_data
 
-def get_group_and_user_data(gid: int, uid: int) -> tuple[GroupData, UserData]:
-  group_data = get_group_data(gid)
+def get_or_create_group_and_user_data(gid: int, uid: int) -> tuple[GroupData, UserData]:
+  group_data = get_or_create_group_data(gid)
   if uid not in group_data.users:
     group_data.users[uid] = UserData()
   user_data = group_data.users[uid]
-  sign_date = get_date(user_data.time)
-  today = get_today()
+  sign_date = user_data.time.date()
+  today = date.today()
   if sign_date.year != today.year or sign_date.month != today.month:
     user_data.calendar.clear()
   return group_data, user_data
 
-async def make_calendar(bot: Bot, gid: int, uid: int) -> BytesIO:
-  user_data = STATE.groups[gid].users[uid]
+async def make_calendar(bot: Bot, gid: int, uid: int) -> MessageSegment:
+  async def get_user_infos(users: list[int]) -> dict[int, dict[str, Any]]:
+    coros = [bot.get_group_member_info(group_id=gid, user_id=user) for user in users]
+    return dict(zip(users, await asyncio.gather(*coros)))
+
+  # 排行
+  group_data = STATE.groups[gid]
+  infos = await get_user_infos(group_data.rank)
+  segments = ["<big>今日排名</big>"]
+  for i, user in enumerate(group_data.rank):
+    name = infos[user]["card"] or infos[user]["nickname"]
+    if i < len(CONFIG.first_prefix):
+      prefix = CONFIG.first_prefix[i]
+    else:
+      prefix = f"{i + 1}. "
+    name = html.escape(name)
+    if user == uid:
+      name = f"<b>{name}</b>"
+    time = group_data.users[user].time.strftime("%H:%M:%S")
+    segments.append(f"{prefix}{name} - {time}")
+  rank_im = text.render("\n".join(segments), "sans", 32, markup=True)
+
+  today = date.today()
+  weeks = Calendar().monthdayscalendar(today.year, today.month)
+  im = Image.new("RGB", (656 + rank_im.width, max(264 + len(weeks) * 80, rank_im.height + 64)), (255, 255, 255))
+  im.paste(rank_im, (624, 32), rank_im)
+
+  # 头像
   async with ClientSession() as http:
     response = await http.get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0")
     avatar = Image.open(BytesIO(await response.read())).convert("RGB")
@@ -97,57 +113,56 @@ async def make_calendar(bot: Bot, gid: int, uid: int) -> BytesIO:
   ImageDraw.Draw(mask).ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
   avatar.putalpha(mask)
   avatar = avatar.resize((96, 96), Image.ANTIALIAS)
-  circle = Image.new("L", (144, 144), 0)
-  ImageDraw.Draw(circle).ellipse((0, 0, 143, 143), 255)
-  circle = circle.resize((72, 72), Image.ANTIALIAS)
-  today = get_today()
-  weeks = Calendar().monthdayscalendar(today.year, today.month)
-  im = Image.new("RGB", (624, 264 + len(weeks) * 80), (255, 255, 255))
-  draw = ImageDraw.Draw(im)
   im.paste(avatar, (32, 32), avatar)
-  x_large_font = resources.font("sans", 40)
-  # large_font = resources.font("sans", 32)
-  font = resources.font("sans", 28)
-  info = await bot.get_group_member_info(group_id=gid, user_id=uid)
-  # draw.text((152, 32), info["card"] or info["nickname"], (0, 0, 0), large_font)
-  im2 = text.render(info["card"] or info["nickname"], "sans", 32, box=336, mode=text.ELLIPSIZE_END)
-  im.paste(im2, (152, 32), im2)
-  draw.text((152, 80), (await bot.get_group_info(group_id=gid))["group_name"], (143, 143, 143), font)
-  draw.text((584, 32), ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"][today.month - 1] + "月", (0, 0, 0), x_large_font, "ra")
+
+  # 用户名
+  text.paste(im, (152, 32), infos[uid]["card"] or infos[uid]["nickname"], "sans", 32, box=336, mode=text.ELLIPSIZE_END)
+
+  # 群名
+  text.paste(im, (152, 80), (await bot.get_group_info(group_id=gid))["group_name"], "sans", 28, color=(143, 143, 143))
+
+  # 月份
+  text.paste(im, (584, 32), ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"][today.month - 1] + "月", "sans", 38, color=(0, 0, 0), anchor="rt")
+  
+  # 日历头
   for x, weekday in enumerate(["一", "二", "三", "四", "五", "六", "日"]):
-    draw.text((32 + x * 80 + 40, 152 + 40), weekday, (143, 143, 143), font, "mm")
+    text.paste(im, (32 + x * 80 + 40, 152 + 40), weekday, "sans", 28, color=(143, 143, 143), anchor="mm")
+
+  # 日历
+  user_data = group_data.users[uid]
+  circle = Image.new("RGBA", (144, 144))
+  ImageDraw.Draw(circle).ellipse((0, 0, 143, 143), (76, 175, 80))
+  circle = circle.resize((72, 72), Image.ANTIALIAS)
   for y, days in enumerate(weeks):
     for x, day in enumerate(days):
       if day != 0:
         if day in user_data.calendar:
-          draw.bitmap((32 + x * 80 + 4, 232 + y * 80 + 4), circle, (76, 175, 80))
+          im.paste(circle, (32 + x * 80 + 4, 232 + y * 80 + 4), circle)
           color = (255, 255, 255)
         else:
           color = (0, 0, 0)
-        draw.text((32 + x * 80 + 40, 232 + y * 80 + 40), str(day), color, font, "mm")
+        text.paste(im, (32 + x * 80 + 40, 232 + y * 80 + 40), str(day), "sans", 28, color=color, anchor="mm")
+
   f = BytesIO()
   im.save(f, "png")
-  return f
+  return MessageSegment.image(f)
 
-sign = nonebot.on_command("签到", context.in_group_rule(context.ANY_GROUP), {"sign"})
-sign.__cmd__ = ["签到", "sign"]
-sign.__brief__ = "每日签到获取金币"
-sign.__doc__ = f'''\
+sign = (command.CommandBuilder("sign.sign", "签到", "sign")
+  .in_group()
+  .brief("每日签到获取金币")
+  .usage(f'''\
 每天签到可获得{CONFIG.min_coin}至{CONFIG.max_coin}金币
-签到每日{CONFIG.reset_time.strftime("%H:%M:%S")}重置
-连续签到或前{len(CONFIG.first_award)}名可获得更多金币
-两次签到须间隔至少{helper.format_time(CONFIG.cooldown)}'''
+连续签到或前{len(CONFIG.first_award)}名可获得更多金币''')
+  .build())
 @sign.handle()
 async def handle_sign(bot: Bot, event: MessageEvent):
   ctx = context.get_event_context(event)
-  group_data, user_data = get_group_and_user_data(ctx, event.user_id)
+  group_data, user_data = get_or_create_group_and_user_data(ctx, event.user_id)
   now = datetime.now()
-  today = get_today()
-  days = (today - get_date(user_data.time)).days
+  today = date.today()
+  days = (today - user_data.time.date()).days
   if days == 0:
-    await sign.finish(f"今天你已经签到过了\n你目前有{currency.get_coin(ctx, event.user_id)}个金币" + MessageSegment.image(await make_calendar(bot, ctx, event.user_id)))
-  elif (remaining := CONFIG.cooldown - (now - user_data.time)) > timedelta():
-    await sign.finish(f"签到还在冷却中，剩余{helper.format_time(remaining)}")
+    await sign.finish(f"今天你已经签到过了\n你目前有{currency.get_coin(ctx, event.user_id)}个金币" + await make_calendar(bot, ctx, event.user_id))
   add_coin = random.randint(CONFIG.min_coin, CONFIG.max_coin)
   if days == 1:
     user_data.combo_days += 1
@@ -172,46 +187,25 @@ async def handle_sign(bot: Bot, event: MessageEvent):
   STATE.dump()
   segments[0] = f"签到成功，获得{add_coin}个金币，共有{currency.get_coin(ctx, event.user_id)}个金币"
   segments.append(f"今日排名第{cur_rank + 1}，连续签到{user_data.combo_days + 1}天，总计签到{user_data.total_days}天")
-  await sign.finish("\n".join(segments) + MessageSegment.image(await make_calendar(bot, ctx, event.user_id)))
+  await sign.finish("\n".join(segments) + await make_calendar(bot, ctx, event.user_id))
 
-signrank = nonebot.on_command("签到排行", context.in_group_rule(context.ANY_GROUP), {"signrank"})
-signrank.__cmd__ = ["签到排行", "signrank"]
-signrank.__brief__ = "查看今天的签到排行"
-@signrank.handle()
-async def handle_signcal(bot: Bot, event: MessageEvent):
-  ctx = context.get_event_context(event)
-  group_data = get_group_data(ctx)
-  if len(group_data.rank) == 0:
-    await signrank.finish("今天还没有人签到")
-  segments = [f"{get_today().strftime('%Y/%m/%d')}的签到排名："]
-  for i, uid in zip(range(CONFIG.max_rank), group_data.rank):
-    info = await bot.get_group_member_info(group_id=ctx, user_id=uid)
-    name = info["card"] or info["nickname"]
-    time_str = group_data.users[uid].time.strftime('%H:%M:%S')
-    if i < len(CONFIG.first_prefix):
-      prefix = CONFIG.first_prefix[i]
-    else:
-      prefix = f"{i + 1}:"
-    segments.append(f"{prefix} {name} {time_str}")
-  await signrank.finish("\n".join(segments))
-
-async def match_all(bot: Bot, event: MessageEvent, patterns: list[str]) -> tuple[list[str], set[int]]:
-  async def do_match(pattern: str) -> tuple[list[str], list[int]]:
-    try:
-      return [], [int(pattern)]
-    except ValueError:
-      pass
+async def match_all(bot: Bot, event: MessageEvent, patterns: list[str]) -> set[int]:
+  async def do_match(pattern: str) -> tuple[int]:
     if pattern in ("全部", "全体", "all"):
       ctx = context.get_event_context(event)
-      return [], [i["user_id"] for i in await bot.get_group_member_list(group_id=ctx)]
-    else:
-      return await account_aliases.match_uid(bot, event, pattern, True)
+      return tuple(i["user_id"] for i in await bot.get_group_member_list(group_id=ctx))
+    return await account_aliases.match_uid(bot, event, pattern, True)
   coros = [do_match(i) for i in patterns]
-  errors, users = [], set()
-  for e, u in await asyncio.gather(*coros):
-    errors.extend(e)
-    users.update(u)
-  return errors, users
+  errors: list[helper.AggregateError] = []
+  users = set()
+  for i in await asyncio.gather(*coros, return_exceptions=True):
+    if isinstance(i, helper.AggregateError):
+      errors.append(i)
+    else:
+      users.update(i)
+  if errors:
+    raise helper.AggregateError(*errors)
+  return users
 
 gold_parser = ArgumentParser("/金币", add_help=False)
 gold_parser.add_argument("users", nargs="+", metavar="用户", help="可使用昵称、群名片或QQ号，可指定多个，也可使用\"全部\"指代全体成员")
@@ -219,19 +213,22 @@ group = gold_parser.add_mutually_exclusive_group(required=True)
 group.add_argument("-add", "-增加", type=int, metavar="数量", help="增加指定成员的金币数量，负数为减少金币（但不会减少至低于0个）")
 group.add_argument("-set", "-设置", type=int, metavar="数量", help="设置指定成员的金币数量（-set 0 不会重置连签加成或签到日历）")
 group.add_argument("-reset", "-重置", action="store_true", help="清空金币并重置连签加成（不会重置签到日历）")
-gold = nonebot.on_shell_command("金币", context.in_group_rule(context.ANY_GROUP), parser=gold_parser, permission=context.Permission.ADMIN)
-gold.__cmd__ = "金币"
-gold.__brief__ = "管理群员的金币"
-gold.__doc__ = gold_parser.format_help()
-gold.__ctx__ = [context.ANY_GROUP]
-gold.__perm__ = context.Permission.ADMIN
+
+
+gold = (command.CommandBuilder("sign.gold", "金币", "gold")
+  .in_group()
+  .level("admin")
+  .brief("管理群员的金币")
+  .shell(gold_parser)
+  .build())
 @gold.handle()
 async def handle_gold(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await gold.finish(args.message)
-  errors, users = await match_all(bot, event, args.users)
-  if errors:
-    await gold.finish("\n".join(errors))
+  try:
+    users = await match_all(bot, event, args.users)
+  except helper.AggregateError as e:
+    await gold.finish("\n".join(e))
   ctx = context.get_event_context(event)
   if args.add is not None:
     for i in users:
@@ -247,7 +244,7 @@ async def handle_gold(bot: Bot, event: MessageEvent, args: Namespace | ParserExi
   else:
     for i in users:
       currency.set_coin(ctx, i, 0)
-      _, user_data = get_group_and_user_data(ctx, i)
+      _, user_data = get_or_create_group_and_user_data(ctx, i)
       user_data.time = datetime.min
     STATE.dump()
     msg = f"已重置 {len(users)} 个用户的金币和连签加成"

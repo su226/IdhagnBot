@@ -1,20 +1,21 @@
-from util import context, account_aliases
-from nonebot.adapters.onebot.v11 import Bot, Event, Message
-from nonebot.params import CommandArg
 import asyncio
 import random
-import nonebot
 
-super_poke = nonebot.on_command("戳亿戳", context.in_group_rule(context.ANY_GROUP), {"poke", "superpoke"}, permission=context.Permission.SUPER)
-super_poke.__cmd__ = ["戳亿戳", "poke", "superpoke"]
-super_poke.__brief__ = "发送多次戳一戳"
-super_poke.__doc__ = "/戳亿戳 <总次数> <QQ号列表>"
-super_poke.__ctx__ = context.ANY_GROUP
-super_poke.__perm__ = context.Permission.SUPER
+from nonebot.adapters.onebot.v11 import Bot, Event, Message
+from nonebot.params import CommandArg
+
+from util import context, account_aliases, helper, command
+
+super_poke = (command.CommandBuilder("super_poke", "戳亿戳", "poke")
+  .in_group()
+  .level("super")
+  .brief("发送多次戳一戳")
+  .usage("/戳亿戳 <总次数> <QQ号列表>")
+  .build())
 @super_poke.handle()
-async def handle_super_poke(bot: Bot, event: Event, args: Message = CommandArg()):
+async def handle_super_poke(bot: Bot, event: Event, arg: Message = CommandArg()):
   ctx = context.get_event_context(event)
-  args = str(args).split()
+  args = arg.extract_plain_text().split()
   if len(args) < 2:
     await super_poke.send("/戳亿戳 <总次数> <QQ号列表>")
     return
@@ -22,12 +23,9 @@ async def handle_super_poke(bot: Bot, event: Event, args: Message = CommandArg()
   all_uids = []
   for pattern in args[1:]:
     try:
-      all_uids.append(int(pattern))
-      continue
-    except: pass
-    errors, uids = await account_aliases.match_uid(bot, event, pattern, True)
-    all_uids.extend(uids)
-    all_errors.extend(errors)
+      all_uids.extend(await account_aliases.match_uid(bot, event, pattern, True))
+    except helper.AggregateError as e:
+      all_errors.extend(e)
   if len(all_errors):
     await super_poke.send("\n".join(all_errors))
     return

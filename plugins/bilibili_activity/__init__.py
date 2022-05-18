@@ -1,15 +1,17 @@
 from typing import cast
-from util import context
+import time
+
 from apscheduler.schedulers.base import BaseScheduler
 from aiohttp import ClientSession
 from nonebot.log import logger
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import CommandArg
-from . import util, contents
 import nonebot
-import time
 
-scheduler: BaseScheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
+from util import context, command
+from . import util, contents
+
+scheduler = cast(BaseScheduler, nonebot.require("nonebot_plugin_apscheduler").scheduler)
 driver = nonebot.get_driver()
 info_api = "https://api.bilibili.com/x/space/acc/info?mid={uid}"
 list_api = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?host_uid={uid}&offset_dynamic_id={offset}"
@@ -41,8 +43,9 @@ async def new_activities(http: ClientSession, user: util.User):
     offset = data["next_offset"]
 
 @scheduler.scheduled_job("interval", seconds=util.CONFIG.interval)
-async def check():
+async def check() -> bool:
   bot = cast(Bot, nonebot.get_bot())
+  result = False
   async with ClientSession() as http:
     for user in util.CONFIG.users:
       logger.debug(f"检查 {user._name} 的动态更新")
@@ -59,22 +62,25 @@ async def check():
             await bot.send_group_msg(group_id=target.group, message=message)
           else:
             await bot.send_private_msg(user_id=target.user, message=message)
+        result = True
       user._time = time.time()
+  return result
 
-force_push = nonebot.on_command("推送动态", permission=context.Permission.ADMIN)
-force_push.__cmd__ = "推送动态"
-force_push.__brief__ = "强制推送B站动态"
-force_push.__doc__ = '''\
+FORCE_PUSH_USAGE = '''\
 /推送动态 <动态号>
 动态的动态号是t.bilibili.com后面的数字
 视频的动态号只能通过API获取（不是AV或BV号）'''
-force_push.__perm__ = context.Permission.ADMIN
+force_push = (command.CommandBuilder("bilibili_activity.force_push", "推送动态")
+  .level("admin")
+  .brief("强制推送B站动态")
+  .usage(FORCE_PUSH_USAGE)
+  .build())
 @force_push.handle()
-async def handle_force_push(bot: Bot, event: Event, args: Message = CommandArg()):
-  args = str(args).rstrip()
+async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg()):
+  args = arg.extract_plain_text().rstrip()
   ctx = context.get_event_context(event)
   if len(args) == 0:
-    await force_push.send(force_push.__doc__)
+    await force_push.send(FORCE_PUSH_USAGE)
     return
   async with ClientSession() as http:
     data = (await (await http.get(detail_api.format(id=args))).json())["data"]
@@ -89,11 +95,11 @@ async def handle_force_push(bot: Bot, event: Event, args: Message = CommandArg()
   else:
     await force_push.send(Message(message))
 
-check_now = nonebot.on_command("检查动态", permission=context.Permission.ADMIN)
-check_now.__cmd__ = "检查动态"
-check_now.__brief__ = "立即检查B站动态更新"
-check_now.__perm__ = context.Permission.ADMIN
+check_now = (command.CommandBuilder("bilibili_activity.check_now", "检查动态")
+  .level("admin")
+  .brief("立即检查B站动态更新")
+  .build())
 @check_now.handle()
 async def handle_check_now():
-  await check()
-  await check_now.send(f"检查动态更新完成")
+  if not await check():
+    await check_now.send(f"检查动态更新完成，没有可推送的内容")

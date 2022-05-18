@@ -1,4 +1,6 @@
-from util.config import BaseState, Field
+from pydantic import Field
+
+from util.config import BaseState
 
 class State(BaseState):
   __file__ = "coin"

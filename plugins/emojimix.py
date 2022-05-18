@@ -1,10 +1,13 @@
-from util.config import BaseState, Field
-from aiohttp import ClientSession, ClientConnectionError
+import os
+
+from pydantic import Field
 from nonebot.adapters.onebot.v11 import MessageSegment
 from nonebot.params import CommandArg
 from nonebot.log import logger
-import nonebot
-import os
+import aiohttp
+
+from util import command
+from util.config import BaseState
 
 class State(BaseState):
   __file__ = "emojimix"
@@ -229,14 +232,14 @@ def get_code(emoji: str) -> str:
   return "_".join(map(lambda ch: "u{:x}".format(ord(ch)), emoji))
 SUPPORTED_STR = "支持的 emoji（并不是所有组合都存在）：\n" + "\n".join(map(lambda x: f"{x}（{get_code(x)}）", EMOJIS.keys()))
 
-emojimix = nonebot.on_command("emojimix", aliases={"缝合", "emoji", "mix"})
-emojimix.__cmd__ = ["emojimix", "缝合", "emoji", "mix"]
-emojimix.__brief__ = "缝合两个emoji"
-emojimix.__doc__ = '''\
+emojimix = (command.CommandBuilder("emojimix", "emojimix", "缝合", "emoji", "mix")
+  .brief("缝合两个emoji")
+  .usage('''\
 /emojimix - 查看支持的emoji
 /emojimix <emoji1>+<emoji2> - 缝合两个emoji
 数据来自 https://tikolu.net/emojimix
-图片来自 Google'''
+图片来自 Google''')
+  .build())
 @emojimix.handle()
 async def handle_emojimix(args = CommandArg()):
   emojis = args.extract_plain_text().split("+")
@@ -266,7 +269,7 @@ async def handle_emojimix(args = CommandArg()):
     errors.append(f"不支持 {emoji2}（{code2}）")
   if errors:
     await emojimix.finish("\n".join(errors))
-  async with ClientSession() as http:
+  async with aiohttp.ClientSession() as http:
     try:
       response = await http.get(f"{API}/{EMOJIS[emoji1]}/{code1}/{file1}.png")
       if response.status == 200:
@@ -281,5 +284,5 @@ async def handle_emojimix(args = CommandArg()):
       STATE.unsupported.add(file1)
       STATE.dump()
       await emojimix.finish("组合不存在")
-    except ClientConnectionError:
+    except aiohttp.ClientError:
       await emojimix.finish("网络错误")

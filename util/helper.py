@@ -1,8 +1,7 @@
-from typing import TypeVar
+import itertools
+from typing import Sequence, TypeVar
 from datetime import timedelta
 import random
-
-from nonebot.params import CommandArg
 
 T = TypeVar("T")
 def weighted_choice(choices: list[T | tuple[T, float]]) -> T:
@@ -35,5 +34,14 @@ def format_time(seconds: float | timedelta) -> str:
     segments.append(f"{seconds} 秒")
   return " ".join(segments)
 
-def notnone(value: T | None) -> T:
-  return value # type: ignore
+class AggregateError(Exception, Sequence[str]):
+  def __init__(self, *errors: "str | AggregateError") -> None:
+    super().__init__(*itertools.chain.from_iterable(
+      error if isinstance(error, AggregateError) else [error]
+      for error in errors))
+  
+  def __len__(self) -> int:
+    return len(self.args)
+  
+  def __getitem__(self, index: int) -> str:
+    return self.args[index]

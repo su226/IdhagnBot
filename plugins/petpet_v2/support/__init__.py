@@ -4,27 +4,29 @@ import os
 
 from PIL import Image
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.rule import ArgumentParser, ParserExit
+from nonebot.exception import ParserExit
+from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
-import nonebot
 
+from util import command, helper
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
-parser = ArgumentParser("/精神支柱", add_help=False)
+parser = ArgumentParser(add_help=False)
 parser.add_argument("target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
-matcher = nonebot.on_shell_command("精神支柱", parser=parser)
-matcher.__cmd__ = ["精神支柱"]
-matcher.__doc__ = parser.format_help()
-matcher.__cat__ = "petpet_v2"
+matcher = (command.CommandBuilder("petpet_v2.support", "精神支柱")
+  .category("petpet_v2")
+  .shell(parser)
+  .build())
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
-  errors, avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  if errors:
-    await matcher.finish("\n".join(errors))
+  try:
+    avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
+  except helper.AggregateError as e:
+    await matcher.finish("\n".join(e))
   avatar = avatar.resize((815, 815), Image.ANTIALIAS).rotate(23, Image.BICUBIC, True)
   template = Image.open(os.path.join(plugin_dir, "template.png"))
   im = Image.new("RGB", template.size, (255, 255, 255))

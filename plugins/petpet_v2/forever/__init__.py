@@ -1,3 +1,4 @@
+from typing import cast
 from argparse import Namespace
 from io import BytesIO
 import asyncio
@@ -5,12 +6,12 @@ import os
 import random
 
 from PIL import Image, ImageDraw, ImageOps
-from nonebot.adapters.onebot.v11 import Bot, Event, MessageSegment
-from nonebot.rule import ArgumentParser, ParserExit
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
+from nonebot.exception import ParserExit
+from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
-import nonebot
 
-from util import context, text
+from util import context, text, command, helper
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -26,53 +27,56 @@ def name(value: str):
     raise ValueError("编号必须在[1, 7]以内")
   return id, name
 
-async def get_all(bot: Bot, event: Event, targets: list[str], names: list[str | None]):
-  async def get_one(i: int, target: str, name: str | None):
-    errors, avatar, user = await get_image_and_user(bot, event, target, event.self_id)
-    if errors:
-      return errors, avatar, ""
-    if name is not None:
-      return [], avatar, name
+async def get_all(bot: Bot, event: MessageEvent, targets: list[str], default_names: list[str]) -> tuple[list[Image.Image], list[str]]:
+  async def get_one(i: int, target: str, name: str) -> tuple[Image.Image, str]:
+    avatar, user = await get_image_and_user(bot, event, target, event.self_id)
+    if name:
+      return avatar, name
     if user is None:
-      return [f"请指定第 {i} 人的名字"], avatar, ""
+      raise helper.AggregateError(f"请指定第 {i} 人的名字")
     try:
       info = await bot.get_group_member_info(group_id=ctx, user_id=user)
-      name = info["card"] or info["nickname"]
+      name = cast(str, info["card"] or info["nickname"])
     except:
-      name = (await bot.get_stranger_info(user_id=user))["nickname"]
-    return errors, avatar, name
+      name = cast(str, (await bot.get_stranger_info(user_id=user))["nickname"])
+    return avatar, name
   ctx = context.get_event_context(event)
-  coros = []
-  for i, (target, name) in enumerate(zip(targets, names), 1):
-    coros.append(get_one(i, target, name))
-  errors = []
-  avatars = []
-  names = []
-  for e, a, n in await asyncio.gather(*coros):
-    errors.extend(e)
-    avatars.append(a)
-    names.append(n)
-  return errors, avatars, names
+  coros = [get_one(i, target, name)
+    for i, (target, name)
+    in enumerate(zip(targets, default_names), 1)]
+  errors: list[helper.AggregateError] = []
+  avatars: list[Image.Image] = []
+  names: list[str] = []
+  for i in await asyncio.gather(*coros, return_exceptions=True):
+    if isinstance(i, helper.AggregateError):
+      errors.append(i)
+    else:
+      avatars.append(i[0])
+      names.append(i[1])
+  if errors:
+    raise helper.AggregateError(*errors)
+  return avatars, names
 
-parser = ArgumentParser("/永远喜欢", add_help=False)
+parser = ArgumentParser(add_help=False)
 parser.add_argument("targets", nargs="*", default=[""], metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接，最多7个")
 parser.add_argument("-name", type=name, action="append", default=[])
-matcher = nonebot.on_shell_command("永远喜欢", parser=parser)
-matcher.__cmd__ = "永远喜欢"
-matcher.__doc__ = parser.format_help()
-matcher.__cat__ = "petpet_v2"
+matcher = (command.CommandBuilder("petpet_v2.forever", "永远喜欢")
+  .category("petpet_v2")
+  .shell(parser)
+  .build())
 @matcher.handle()
-async def handler(bot: Bot, event: Event, args: Namespace | ParserExit = ShellCommandArgs()):
+async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
   if len(args.targets) > 7:
     await matcher.finish("你个海王，最多只能有7个目标")
-  names: list[str | None] = [None] * len(args.targets)
+  default_names: list[str] = [""] * len(args.targets)
   for i, name in args.name:
-    names[i - 1] = name
-  errors, avatars, names = await get_all(bot, event, args.targets, names)
-  if errors:
-    await matcher.finish("\n".join(errors))
+    default_names[i - 1] = name
+  try:
+    avatars, names = await get_all(bot, event, args.targets, default_names)
+  except helper.AggregateError as e:
+    await matcher.finish("\n".join(e))
 
   im = Image.open(os.path.join(plugin_dir, "template.png"))
   avatar = ImageOps.fit(avatars[0], (350, 400), Image.ANTIALIAS)

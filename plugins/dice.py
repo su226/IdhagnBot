@@ -1,11 +1,13 @@
 from typing import Callable
-from nonebot.adapters.onebot.v11 import Message
-from nonebot.params import CommandArg
-import numpy
-import nonebot
 import heapq
 import random
 import re
+
+from nonebot.adapters.onebot.v11 import Message
+from nonebot.params import CommandArg
+import numpy
+
+from util import command
 
 CONFIG = {
   "limit": 10000,
@@ -44,19 +46,20 @@ SPECIAL_NAMES = {
 }
 DICE_RE = re.compile(r"^(\d+)?(?:d(\d+))?$")
 
-dice = nonebot.on_command("骰子", aliases={"色子", "dice"})
-dice.__cmd__ = ["骰子", "色子", "dice"]
-dice.__brief__ = "先过个sancheck"
-dice.__doc__ = '''\
+USAGE = '''\
 /骰子 - 扔出一个六面骰子
 /骰子 <个数> - 扔出多个六面骰子
 /骰子 d<面数> - 扔出一个多面骰子
 /骰子 <个数>d<面数> - 扔出多个多面骰子'''
+dice = (command.CommandBuilder("dice", "骰子", "色子", "dice")
+  .brief("先过个sancheck")
+  .usage(USAGE)
+  .build())
 @dice.handle()
 async def handle_dice(args: Message = CommandArg()):
   match = DICE_RE.match(str(args).rstrip())
   if match is None:
-    await dice.send(dice.__doc__)
+    await dice.send(USAGE)
     return
   count = 1 if match[1] is None else int(match[1])
   if count < 1:

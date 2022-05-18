@@ -1,16 +1,17 @@
 from typing import Literal
-from .config import CONFIG
-from aiohttp.web import Server, ServerRunner, TCPSite, Request, Response
-from util import resources
-from libzim.reader import Archive
-from libzim.search import Query, Searcher
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
-from nonebot.params import CommandArg, ArgStr, State
-from nonebot.typing import T_State
-import nonebot
 import socket
 import math
 import re
+
+from aiohttp.web import Server, ServerRunner, TCPSite, BaseRequest, Response
+from libzim.reader import Archive # type: ignore
+from libzim.search import Query, Searcher # type: ignore
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.params import CommandArg, ArgStr, State
+from nonebot.typing import T_State
+
+from util import resources, command
+from .config import CONFIG
 
 ZIM = Archive(CONFIG.zim)
 # 简繁转换代码来自 https://github.com/nk2028/opencc-js ，MIT协议
@@ -180,9 +181,9 @@ COMMON_SCRIPT = '''function() {
   } 
 }'''
 
-CHARSET_RE = re.compile(";\s*charset=([^;]*)")
+CHARSET_RE = re.compile(r";\s*charset=([^;]*)")
 
-async def handler(request: Request):
+async def handler(request: BaseRequest):
   try:
     entry = ZIM.get_entry_by_path(request.path[1:])
   except KeyError:
@@ -219,10 +220,10 @@ async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: 
     await browser.close()
     await site.stop()
 
-wikipedia = nonebot.on_command("维基百科", aliases={"维基", "百科", "wikipedia", "wiki", "pedia"})
-wikipedia.__cmd__ = ["维基百科", "维基", "百科", "wikipedia", "wiki", "pedia"]
-wikipedia.__brief__ = "搜索并查看离线维基百科"
-wikipedia.__doc__ = '''/维基百科 <搜索内容>'''
+wikipedia = (command.CommandBuilder("wikipedia", "维基百科", "维基", "百科", "wikipedia", "wiki", "pedia")
+  .brief("搜索并查看离线维基百科")
+  .usage("/维基百科 <搜索内容>")
+  .build())
 
 def format_choices(state: T_State):
   search = state["search"]
@@ -266,12 +267,12 @@ async def got_choice(choice: str = ArgStr(), state = State()):
     state["page"] += 1
     await wikipedia.reject(format_choices(state))
   try:
-    choice = int(choice)
+    choice_int = int(choice)
   except:
     await wikipedia.reject("只能输入数字，请重新输入，或发送“退”退出")
   search = state["search"]
   count = state["count"]
-  if choice < 1 or choice > count:
+  if choice_int < 1 or choice_int > count:
     await wikipedia.reject(f"只能发送 1 和 {count} 之间的数字，请重新输入，或发送“退”退出")
-  path = next(iter(search.getResults(choice - 1, 1)))
+  path = next(iter(search.getResults(choice_int - 1, 1)))
   await wikipedia.finish(MessageSegment.image(await screenshot(path)))

@@ -1,14 +1,17 @@
-from util.config import BaseModel, BaseConfig, Field
-from util import context
-from aiohttp import ClientSession
-from aiohttp.client_exceptions import ClientConnectionError, ClientProxyConnectionError
-from aiohttp.http import SERVER_SOFTWARE
-from typing import Callable, Literal, TypeVar
-from nonebot.adapters.onebot.v11 import Message
-from nonebot.log import logger
-from nonebot.params import CommandArg
+from typing import Any, Literal
+from argparse import Namespace
 import base64
-import nonebot
+
+from pydantic import BaseModel, Field
+from aiohttp.http import SERVER_SOFTWARE
+from nonebot.adapters.onebot.v11 import Message
+from nonebot.exception import ParserExit
+from nonebot.rule import ArgumentParser
+from nonebot.params import ShellCommandArgs
+import aiohttp
+
+from util.config import BaseConfig
+from util import command
 
 class Site(BaseModel):
   origin: str
@@ -65,7 +68,6 @@ EMPTY_PRESET = {
 class Command(BaseModel):
   command: list[str]
   brief: str = ""
-  usage: str = "/{command} <标签> [limit:每页大小] [page:页码]"
   contexts: list[int] = Field(default_factory=list)
   permission: Literal["member", "admin", "owner", "super"] = "member"
   proxy: str | None = None
@@ -93,66 +95,34 @@ class Config(BaseConfig):
 CONFIG = Config.load()
 presets.update(CONFIG.presets)
 
-T = TypeVar("T")
-class ParseFailed(Exception): pass
-def parse_args(args: list[str], template: dict[str, tuple[Callable[[str], T], T]]):
-  tags = []
-  special = dict(map(lambda x: (x[0], x[1][1]), template.items()))
-  encountered = set()
-  for arg in args:
-    for name, (factory, _) in template.items():
-      if arg.startswith(name + ":"):
-        if name in encountered:
-          raise ParseFailed(f"参数 {name} 出现了多次")
-        encountered.add(name)
-        try:
-          special[name] = factory(arg.split(":", 1)[1])
-        except:
-          raise ParseFailed(f"参数 {arg} 无效")
-        break
-    else:
-      tags.append(arg)
-  return tags, special
-
-def get_by_path(root: dict, path: str):
+def get_by_path(root: dict, path: str) -> Any:
   nodes = path.split("/")
   for i in filter(len, nodes):
     root = root[i]
   return root
 
-def register(command: Command):
-  site = command.to_site()
-  HEADERS = {"User-Agent": command.user_agent}
+def register(definition: Command):
+  site = definition.to_site()
+  HEADERS = {"User-Agent": definition.user_agent}
   POST_URL = site.origin + site.post_url
   API_URL = site.origin + site.api_url
-  async def handler(message = CommandArg()):
-    args = str(message).split()
-    try:
-      tags, special = parse_args(args, {
-        "limit": (int, CONFIG.default_limit),
-        "page": (int, 1)
-      })
-    except ParseFailed as e:
-      await matcher.send(str(e))
-      return
-    if special["limit"] > CONFIG.max_limit:
-      await matcher.send(f"最多只能发送 {CONFIG.max_limit} 张图片")
-      return
-    async with ClientSession(headers=HEADERS) as http:
+  async def handler(args: Namespace | ParserExit = ShellCommandArgs()):
+    if isinstance(args, ParserExit):
+      await matcher.finish(args.message)
+    if args.limit < 1 or args.limit > CONFIG.max_limit:
+      await matcher.finish(f"每页图片数必须在 1 和 {CONFIG.max_limit} 之间")
+    async with aiohttp.ClientSession(headers=HEADERS) as http:
       try:
-        response = await http.get(API_URL.format(tags=" ".join(tags), limit=special["limit"], page=special["page"]), proxy=command.proxy)
-      except ClientProxyConnectionError as e:
-        await matcher.send(f"别试了我没挂梯子:\n{e}")
-        return
-      except ClientConnectionError as e:
-        await matcher.send(f"网络异常:\n{e}")
-        return
+        response = await http.get(API_URL.format(tags=" ".join(args.tags), limit=args.limit, page=args.page), proxy=definition.proxy)
+      except aiohttp.ClientProxyConnectionError as e:
+        await matcher.finish(f"别试了我没挂梯子:\n{e}")
+      except aiohttp.ClientError as e:
+        await matcher.finish(f"网络异常:\n{e}")
       if response.status != 200:
         if response.status == 503:
-          await matcher.send("访问过于频繁，请稍后再试")
+          await matcher.finish("访问过于频繁，请稍后再试")
         else:
-          await matcher.send(f"HTTP错误: {response.status}")
-        return
+          await matcher.finish(f"HTTP错误: {response.status}")
       posts = get_by_path(await response.json(), site.array_path)
       if len(posts) == 0:
         await matcher.send("没有结果")
@@ -162,22 +132,23 @@ def register(command: Command):
         url = POST_URL.format(id=get_by_path(post, site.id_path))
         segments.append(url)
         try:
-          response = await http.get(get_by_path(post, site.sample_path), proxy=command.proxy)
+          response = await http.get(get_by_path(post, site.sample_path), proxy=definition.proxy)
           segments.append(f"[CQ:image,file=base64://{base64.b64encode(await response.read())}]")
         except:
           segments.append("预览下载失败")
     await matcher.send(Message("\n".join(segments)))
-  matcher = nonebot.on_command(
-    command.command[0],
-    context.in_group_rule(*command.contexts),
-    set(command.command[1:]),
-    permission=context.Permission.parse(command.permission),
-    handlers=[handler]
-  )
-  matcher.__cmd__ = command.command
-  matcher.__brief__ = command.brief
-  matcher.__doc__ = command.usage.format(command=command.command[0])
-  matcher.__ctx__ = command.contexts
+  parser = ArgumentParser(add_help=False)
+  parser.add_argument("tags", nargs="+", metavar="标签")
+  parser.add_argument("-limit", type=int, default=CONFIG.default_limit, metavar="图片数", help=f"每页的图片数，默认为{CONFIG.default_limit}，不能超过{CONFIG.max_limit}")
+  parser.add_argument("-page", type=int, default=1, metavar="页码")
+  builder = (command.CommandBuilder(f"image_board.{definition.command[0]}", *definition.command)
+    .level(definition.permission)
+    .brief(definition.brief)
+    .shell(parser))
+  if definition.contexts:
+    builder.has_group(*definition.contexts)
+  matcher = builder.build()
+  matcher.handle()(handler)
   return matcher
 
 for site in CONFIG.sites:
