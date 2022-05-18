@@ -1,8 +1,11 @@
-from nonebot.log import logger
+from typing import cast
+from asyncio.streams import StreamReader, StreamWriter
 import asyncio
 import os
 import json
 import subprocess
+
+from nonebot.log import logger
 
 env_dir = os.path.abspath("states/safe_eval_js")
 if not os.path.exists(env_dir):
@@ -44,12 +47,13 @@ async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: 
     stdout=asyncio.subprocess.PIPE,
     stderr=asyncio.subprocess.PIPE,
   )
-  proc.stdin.write(json.dumps({
+  stdin = cast(StreamWriter, proc.stdin)
+  stdin.write(json.dumps({
     "code": code,
     "nproc": nproc,
     "memory": memory,
   }).encode())
-  proc.stdin.write_eof()
+  stdin.write_eof()
   killed = False
   try:
     await asyncio.wait_for(proc.wait(), timeout)
@@ -57,6 +61,6 @@ async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: 
     proc.kill()
     killed = True
   returncode = await proc.wait()
-  stdout = await proc.stdout.read(output)
-  stderr = await proc.stderr.read(output)
+  stdout = await cast(StreamReader, proc.stdout).read(output)
+  stderr = await cast(StreamReader, proc.stderr).read(output)
   return (killed, returncode, stdout, stderr)

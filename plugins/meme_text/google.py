@@ -1,21 +1,22 @@
 from io import BytesIO
+import random
+
 from PIL import Image, ImageDraw
-from util import resources
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-import random
-import nonebot
+
+from util import resources, command
 
 COLORS = [(66, 133, 244), (234, 67, 53), (251, 188, 5), (52, 168, 83)]
 PADDING = 32
 
-google = nonebot.on_command("谷歌", aliases={"google"})
-google.__cmd__ = ["谷歌", "google"]
-google.__brief__ = "G,O,O,G,L,E,咕噜咕噜"
-google.__doc__ = "/谷歌 <文本>"
+USAGE = "/谷歌 <文本>"
+google = (command.CommandBuilder("meme_text.google", "谷歌", "google")
+  .brief("G,O,O,G,L,E,咕噜咕噜")
+  .build())
 @google.handle()
 async def handle_google(args: Message = CommandArg()):
-  text = args.extract_plain_text().rstrip() or google.__doc__
+  text = args.extract_plain_text().rstrip() or USAGE
   font = resources.font("sans-bold", 64)
   line_height = font.getsize("A")[1] + 4
   w, h = font.getsize_multiline(text)

@@ -1,8 +1,11 @@
-from nonebot.log import logger
+from typing import cast
+from asyncio.streams import StreamReader, StreamWriter
 import asyncio
 import os
 import pickle
 import venv
+
+from nonebot.log import logger
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 # env_dir = os.path.abspath("states/safe_eval_env")
@@ -30,12 +33,13 @@ async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: 
     stdout=asyncio.subprocess.PIPE,
     stderr=asyncio.subprocess.PIPE,
   )
-  proc.stdin.write(pickle.dumps({
+  stdin = cast(StreamWriter, proc.stdin)
+  stdin.write(pickle.dumps({
     "code": code,
     "nproc": nproc,
     "memory": memory,
   }))
-  proc.stdin.write_eof()
+  stdin.write_eof()
   killed = False
   try:
     await asyncio.wait_for(proc.wait(), timeout)
@@ -43,6 +47,6 @@ async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: 
     proc.kill()
     killed = True
   returncode = await proc.wait()
-  stdout = await proc.stdout.read(output)
-  stderr = await proc.stderr.read(output)
+  stdout = await cast(StreamReader, proc.stdout).read(output)
+  stderr = await cast(StreamReader, proc.stderr).read(output)
   return (killed, returncode, stdout, stderr)

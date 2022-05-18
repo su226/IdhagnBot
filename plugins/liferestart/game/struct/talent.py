@@ -1,7 +1,7 @@
-from typing import Literal
-from ..typing.talent import TalentDict
+from typing import Literal, cast
+from ..typing.talent import GradeReplacementDict, TalentDict, TalentReplacementDict
 from ..condition import Condition
-from .commons import Weights, Rarity, parse_weights
+from .commons import Weights, Rarity, parse_weights, EmptyDict
 from dataclasses import dataclass
 import re
 
@@ -35,14 +35,14 @@ class Talent:
   @staticmethod
   def parse(data: TalentDict) -> "Talent":
     effect = data.get("effect", {})
-    replacement = data.get("replacement", {})
+    replacement: GradeReplacementDict | TalentReplacementDict | EmptyDict = data.get("replacement", EmptyDict())
     condition = data.get("condition", "")
     if "grade" in replacement:
       replacement_type = "rarity"
-      replacement_weights = parse_weights(replacement["grade"])
+      replacement_weights = parse_weights(cast(GradeReplacementDict, replacement)["grade"])
     elif "talent" in replacement:
       replacement_type = "talent"
-      replacement_weights = parse_weights(replacement["talent"])
+      replacement_weights = parse_weights(cast(TalentReplacementDict, replacement)["talent"])
     else:
       replacement_type = None
       replacement_weights = {}

@@ -4,7 +4,7 @@ import asyncio
 import time
 
 from apscheduler.schedulers.base import BaseScheduler
-from nonebot.adapters.onebot.v11 import Bot, Event, MessageEvent, NoticeEvent, GroupRecallNoticeEvent, FriendRecallNoticeEvent, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, Event, MessageEvent, GroupRecallNoticeEvent, FriendRecallNoticeEvent, Message, MessageSegment
 from nonebot.adapters.onebot.v11.event import Reply
 from nonebot.params import EventMessage
 from nonebot.matcher import current_event
@@ -46,8 +46,8 @@ def add_message(event: MessageEvent, api_result: dict[str, Any]):
 
 driver = nonebot.get_driver()
 @driver.on_bot_connect
-def on_bot_connect(bot: Bot):
-  async def on_called_api(bot: Bot, e: Exception | None, api: str, params: dict[str, Any], result: Any):
+async def on_bot_connect(bot: Bot):
+  async def on_called_api(_, e: Exception | None, api: str, params: dict[str, Any], result: Any):
     event = current_event.get(None)
     if (
       isinstance(event, MessageEvent) and event.message_id != 0 and e is None and
@@ -57,16 +57,16 @@ def on_bot_connect(bot: Bot):
   bot.on_called_api(on_called_api)
 
 bot_send_original = Bot.send
-async def bot_send(bot: Bot, event: Event, message: str | Message | MessageSegment, **kw) -> Any:
-  result = await bot_send_original(bot, event, message, **kw)
+async def bot_send(self: Bot, event: Event, message: str | Message | MessageSegment, **kw) -> Any:
+  result = await bot_send_original(self, event, message, **kw)
   if isinstance(event, MessageEvent) and event.message_id != 0:
     add_message(event, result)
   return result
 Bot.send = bot_send
 
 AnyRecallNoticeEvent = GroupRecallNoticeEvent | FriendRecallNoticeEvent
-async def rule_auto_recall(event: NoticeEvent):
-  return isinstance(event, AnyRecallNoticeEvent) and event.message_id in messages
+async def rule_auto_recall(event: AnyRecallNoticeEvent):
+  return event.message_id in messages
 
 async def try_delete_msg(bot: Bot, id: int):
   try:

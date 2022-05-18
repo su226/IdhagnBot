@@ -1,4 +1,4 @@
-from ..typing.commons import WeightsList
+from typing import Iterable, TypedDict
 from enum import IntEnum
 
 class Rarity(IntEnum):
@@ -9,9 +9,10 @@ class Rarity(IntEnum):
 
 Weights = dict[int, float]
 Age = dict[int, Weights]
+class EmptyDict(TypedDict): pass
 
-def parse_weights(items: WeightsList) -> Weights:
-  result = {}
+def parse_weights(items: Iterable[int | str]) -> Weights:
+  result: Weights = {}
   for item in items:
     if isinstance(item, str):
       if "*" in item:
