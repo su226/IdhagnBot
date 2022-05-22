@@ -18,10 +18,11 @@
 # 4308:    DYNAMIC_TYPE_LIVE_RCMD        # [TODO] 直播录像？
 # 4310:    DYNAMIC_TYPE_UGC_SEASON
 # 4311:    DYNAMIC_TYPE_SUBSCRIPTION_NEW
-# default: DYNAMIC_TYPE_NONE
+# default: DYNAMIC_TYPE_NONE             # noqa
 
 from typing import Any
-from . import repost, gallery, activity, video, article, unknown
+
+from . import activity, article, gallery, repost, unknown, video
 
 HANDLERS = {
   1: repost,
@@ -30,6 +31,7 @@ HANDLERS = {
   8: video,
   64: article
 }
+
 
 def handle(content: Any) -> str:
   type_id = content["desc"]["type"]

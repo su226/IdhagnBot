@@ -1,31 +1,35 @@
-from typing import Iterable, Generator
+from typing import Generator, Iterable
 
+import nonebot
 from aiohttp.client_exceptions import ClientError
-from pydantic import Field
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent, ActionFailed
-from nonebot.message import run_preprocessor, run_postprocessor, event_postprocessor
+from nonebot.adapters.onebot.v11 import ActionFailed, Bot, Message, MessageEvent
+from nonebot.message import event_postprocessor, run_postprocessor, run_preprocessor
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
-import nonebot
+from pydantic import Field
 
-from util import context, command, permission
+from util import command, context, permission
 from util.config import BaseState
+
 
 class State(BaseState):
   __file__ = "fallback"
   suppress: set[int] = Field(default_factory=set)
 
-STATE = State.load()
 
 class ManualException(Exception):
   def __init__(self):
     super().__init__("管理员使用 /raise 手动触发了错误")
 
+
+STATE = State.load()
 driver = nonebot.get_driver()
+
 
 @run_preprocessor
 async def pre_run(state: T_State):
   state["_prefix"]["run"] = True
+
 
 def convert_superusers(superusers: Iterable[str]) -> Generator[int, None, None]:
   for i in superusers:
@@ -36,6 +40,7 @@ def convert_superusers(superusers: Iterable[str]) -> Generator[int, None, None]:
         yield int(i)
       except ValueError:
         pass
+
 
 @run_postprocessor
 async def post_run(bot: Bot, event: MessageEvent, e: Exception):
@@ -60,6 +65,7 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception):
     for user in superusers:
       await bot.send_private_msg(user_id=user, message=result + f"\n群聊: {group_id}, 用户: {user_id}")
 
+
 @event_postprocessor
 async def post_event(bot: Bot, event: MessageEvent, state: T_State):
   prefix = state["_prefix"]
@@ -73,14 +79,17 @@ SUPPRESS_USAGE = '''\
 /suppress - 查看是否已禁用本群错误消息
 /suppress true - 禁用本群错误消息
 /suppress false - 重新启用本群错误消息'''
-suppress = (command.CommandBuilder("fallback.suppress", "suppress")
+suppress = (
+  command.CommandBuilder("fallback.suppress", "suppress")
   .in_group()
   .level("admin")
   .brief("暂时禁用错误消息")
   .usage(SUPPRESS_USAGE)
   .build())
+
+
 @suppress.handle()
-async def handle_suppress(bot: Bot, event: MessageEvent, args = CommandArg()):
+async def handle_suppress(bot: Bot, event: MessageEvent, args: Message = CommandArg()):
   value = str(args).rstrip()
   ctx = context.get_event_context(event)
   if not value:
@@ -89,22 +98,25 @@ async def handle_suppress(bot: Bot, event: MessageEvent, args = CommandArg()):
   elif value in ("true", "t", "1", "yes", "y", "on"):
     STATE.suppress.add(ctx)
     STATE.dump()
-    await suppress.send(f"已禁用本群错误消息")
+    await suppress.send("已禁用本群错误消息")
   elif value in ("false", "f", "0", "no", "n", "off"):
     STATE.suppress.remove(ctx)
     STATE.dump()
-    await suppress.send(f"已恢复本群错误消息")
+    await suppress.send("已恢复本群错误消息")
   else:
     await suppress.send(SUPPRESS_USAGE)
 
 RAISE_USAGE = "/raise confirm - 手动触发一个错误"
-raise_ = (command.CommandBuilder("fallback.raise", "raise")
+raise_ = (
+  command.CommandBuilder("fallback.raise", "raise")
   .level("admin")
   .in_group()
   .brief("手动触发一个错误")
   .build())
+
+
 @raise_.handle()
-async def handle_raise(args = CommandArg()):
+async def handle_raise(args: Message = CommandArg()):
   if str(args).rstrip() == "confirm":
     raise ManualException
   await raise_.send(RAISE_USAGE)

@@ -1,21 +1,22 @@
-from typing import cast
+import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import asyncio
 
-from apscheduler.schedulers.base import BaseScheduler
-from pydantic import Field
+import nonebot
+from apscheduler.schedulers.base import JobLookupError
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
 from nonebot.exception import IgnoredException
+from nonebot.message import event_preprocessor
 from nonebot.permission import Permission as BotPermission
 from nonebot.rule import Rule
-from nonebot.message import event_preprocessor
-import nonebot
+from pydantic import Field
 
 from . import helper, permission
-from util.config import BaseConfig, BaseModel, BaseState
+from .config import BaseConfig, BaseModel, BaseState
 
-scheduler = cast(BaseScheduler, nonebot.require("nonebot_plugin_apscheduler").scheduler)
+nonebot.require("nonebot_plugin_apscheduler")
+from nonebot_plugin_apscheduler import scheduler
+
 
 class Config(BaseConfig):
   __file__ = "context"
@@ -24,16 +25,16 @@ class Config(BaseConfig):
   private_limit_whitelist: bool = False
   timeout: int = 600
 
+
 class Context(BaseModel):
   group: int
   expire: datetime
+
 
 class State(BaseState):
   __file__ = "context"
   contexts: dict[int, Context] = Field(default_factory=dict)
 
-CONFIG = Config.load()
-STATE = State.load()
 
 @dataclass
 class Group:
@@ -41,10 +42,14 @@ class Group:
   name: str
   aliases: list[str]
 
+
+CONFIG = Config.load()
+STATE = State.load()
 GROUP_IDS: dict[int, Group] = {}
 GROUP_NAMES: dict[str, Group] = {}
 PRIVATE = -1
 ANY_GROUP = -2
+driver = nonebot.get_driver()
 
 now = datetime.now()
 expired = []
@@ -60,12 +65,13 @@ for id, aliases in CONFIG.groups.items():
   for alias in aliases:
     GROUP_NAMES[alias] = group
 
-driver = nonebot.get_driver()
+
 @driver.on_bot_connect
 async def bot_connect(bot: Bot):
   for info in await bot.call_api("get_group_list"):
     if info["group_id"] in GROUP_IDS:
       GROUP_IDS[info["group_id"]].name = info["group_name"]
+
 
 @event_preprocessor
 async def pre_event(event: Event):
@@ -81,14 +87,16 @@ async def pre_event(event: Event):
         raise IgnoredException("私聊用户在黑名单内")
     refresh_context(user_id)
 
+
 def enter_context(uid: int, gid: int):
   STATE.contexts[uid] = Context(group=gid, expire=datetime.min)
   return refresh_context(uid)
 
+
 def exit_context(uid: int) -> bool:
   try:
     scheduler.remove_job(f"context_timeout_{uid}")
-  except:
+  except JobLookupError:
     pass
   if uid in STATE.contexts:
     del STATE.contexts[uid]
@@ -96,9 +104,11 @@ def exit_context(uid: int) -> bool:
     return True
   return False
 
+
 def get_uid_context(uid: int) -> int:
   context = STATE.contexts.get(uid, None)
   return context.group if context else PRIVATE
+
 
 def get_event_context(event: Event) -> int:
   if (group_id := getattr(event, "group_id", None)) is not None:
@@ -107,22 +117,29 @@ def get_event_context(event: Event) -> int:
     return get_uid_context(user_id)
   return -1
 
+
 def refresh_context(uid: int):
   if uid not in STATE.contexts:
     return None
   date = datetime.now() + timedelta(seconds=CONFIG.timeout)
   STATE.contexts[uid].expire = date
   STATE.dump()
-  return scheduler.add_job(timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date)
+  return scheduler.add_job(
+    timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date)
+
 
 async def timeout_exit(uid: int):
   if exit_context(uid):
-    await nonebot.get_bot().call_api("send_private_msg", 
-      user_id=uid,
+    await nonebot.get_bot().call_api(
+      "send_private_msg", user_id=uid,
       message=f"由于 {helper.format_time(CONFIG.timeout)}内未操作，已退出上下文")
 
+
 for user, context in STATE.contexts.items():
-  scheduler.add_job(timeout_exit, "date", (user,), id=f"context_timeout_{user}", replace_existing=True, run_date=context.expire)
+  scheduler.add_job(
+    timeout_exit, "date", (user,), id=f"context_timeout_{user}", replace_existing=True,
+    run_date=context.expire)
+
 
 def in_group(ctx: int, *contexts: int) -> bool:
   for i in contexts:
@@ -130,15 +147,22 @@ def in_group(ctx: int, *contexts: int) -> bool:
       return True
   return len(contexts) == 0
 
+
 def in_group_rule(*contexts: int) -> Rule:
   async def rule(event: Event) -> bool:
     return in_group(get_event_context(event), *contexts)
   return Rule(rule)
 
+
 async def has_group(bot: Bot, user: int, *groups: int) -> bool:
-  tasks = [asyncio.create_task(bot.get_group_member_info(group_id=group, user_id=user)) for group in groups]
-  done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+  tasks = [
+    asyncio.create_task(bot.get_group_member_info(group_id=group, user_id=user))
+    for group in groups]
+  done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+  for i in pending:
+    i.cancel()
   return any(i.exception() is None for i in done)
+
 
 def has_group_rule(*groups: int) -> Rule:
   async def check(bot: Bot, event: Event) -> bool:
@@ -148,6 +172,7 @@ def has_group_rule(*groups: int) -> Rule:
       return await has_group(bot, user_id, *groups)
     return False
   return Rule(check)
+
 
 async def get_event_level(bot: Bot, event: Event) -> permission.Level:
   if (user_id := getattr(event, "user_id", None)) is None:
@@ -159,8 +184,8 @@ async def get_event_level(bot: Bot, event: Event) -> permission.Level:
     return permission.Level.parse(event.sender.role)
   return await permission.get_group_level(bot, user_id, group_id) or permission.Level.MEMBER
 
+
 def build_permission(node: permission.Node, default: permission.Level) -> BotPermission:
-  permission.register_for_export(node, default)
   async def checker(bot: Bot, event: Event) -> bool:
     if (user_id := getattr(event, "user_id", None)) is None:
       return False
@@ -170,4 +195,5 @@ def build_permission(node: permission.Node, default: permission.Level) -> BotPer
     if command_level == permission.Level.MEMBER:
       return True
     return await get_event_level(bot, event) >= command_level
+  permission.register_for_export(node, default)
   return BotPermission(checker)

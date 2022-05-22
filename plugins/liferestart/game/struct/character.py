@@ -1,15 +1,17 @@
 from dataclasses import dataclass
+
 from ..typing.character import CharacterDict
+
 
 @dataclass()
 class Character:
   id: int
   name: str
   talents: list[int]
-  charm: int # CHR, 颜值
-  intelligence: int # INT, 智力
-  strength: int # STR, 体质
-  money: int # MNY, 家境
+  charm: int  # CHR, 颜值
+  intelligence: int  # INT, 智力
+  strength: int  # STR, 体质
+  money: int  # MNY, 家境
 
   @staticmethod
   def parse(data: CharacterDict) -> "Character":

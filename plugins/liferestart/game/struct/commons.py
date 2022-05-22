@@ -1,15 +1,21 @@
-from typing import Iterable, TypedDict
 from enum import IntEnum
+from typing import Iterable, TypedDict
+
 
 class Rarity(IntEnum):
-  COMMON    = 0 # 常见
-  UNCOMMON  = 1 # 稀有
-  RARE      = 2 # 罕见
-  LEGENDARY = 3 # 传说
+  COMMON = 0  # 常见
+  UNCOMMON = 1  # 稀有
+  RARE = 2  # 罕见
+  LEGENDARY = 3  # 传说
+
+
+class EmptyDict(TypedDict):
+  pass
+
 
 Weights = dict[int, float]
 Age = dict[int, Weights]
-class EmptyDict(TypedDict): pass
+
 
 def parse_weights(items: Iterable[int | str]) -> Weights:
   result: Weights = {}

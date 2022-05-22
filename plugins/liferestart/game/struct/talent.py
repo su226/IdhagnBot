@@ -1,41 +1,44 @@
-from typing import Literal, cast
-from ..typing.talent import GradeReplacementDict, TalentDict, TalentReplacementDict
-from ..condition import Condition
-from .commons import Weights, Rarity, parse_weights, EmptyDict
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
+from typing import Literal, cast
+
+from ..condition import Condition
+from ..typing.talent import GradeReplacementDict, TalentDict, TalentReplacementDict
+from .commons import EmptyDict, Rarity, Weights, parse_weights
 
 MAX_EXECUTE_RE = re.compile(r"AGE\s*\?\s*\[((?:\s*(?:\d+)\s*,)*\s*(?:\d+))\s*,?\s*\]")
 
-@dataclass()
+
+@dataclass
 class Talent:
   # 基本属性
   id: int
   name: str
   description: str
-  rarity: Rarity # grade
+  rarity: Rarity  # grade
 
   # 效果
-  charm: int # CHR, 颜值
-  intelligence: int # INT, 智力
-  strength: int # STR, 体质
-  money: int # MNY, 家境
-  spirit: int # SPR, 快乐
-  random: int # RDM, 随机
-  points: int # 初始属性点
+  charm: int  # CHR, 颜值
+  intelligence: int  # INT, 智力
+  strength: int  # STR, 体质
+  money: int  # MNY, 家境
+  spirit: int  # SPR, 快乐
+  random: int  # RDM, 随机
+  points: int  # 初始属性点
 
   # 条件
   condition: Condition
   max_execute: int
   exclusive: bool
-  imcompatible: set[int] # exclude
+  imcompatible: set[int]  # exclude
   replacement: Literal[None, "rarity", "talent"]
   weights: Weights
 
   @staticmethod
   def parse(data: TalentDict) -> "Talent":
     effect = data.get("effect", {})
-    replacement: GradeReplacementDict | TalentReplacementDict | EmptyDict = data.get("replacement", EmptyDict())
+    replacement: GradeReplacementDict | TalentReplacementDict | EmptyDict = (
+      data.get("replacement", EmptyDict()))
     condition = data.get("condition", "")
     if "grade" in replacement:
       replacement_type = "rarity"

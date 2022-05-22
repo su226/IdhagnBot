@@ -1,13 +1,16 @@
+from dataclasses import dataclass, field
 from functools import cached_property
 from typing import ClassVar
-from dataclasses import dataclass, field
+
 from .struct.commons import Rarity
+
 
 @dataclass
 class StatRarityItem:
   min: int
   rarity: Rarity
   message_id: str = ""
+
 
 @dataclass
 class StatRarity:
@@ -172,6 +175,7 @@ class StatRarity:
     "achievements_5": "抽到橙色概率六倍",
   })
 
+
 @dataclass
 class Stat:
   total: int = 20
@@ -179,6 +183,7 @@ class Stat:
   max: int = 10
   spirit: int = 5
   rarity: StatRarity = StatRarity()
+
 
 @dataclass
 class TalentBoostItem:
@@ -190,10 +195,13 @@ class TalentBoostItem:
   legendary: int = 0
 
   def __add__(self, other: "TalentBoostItem") -> "TalentBoostItem":
-    return TalentBoostItem(self.uncommon + other.uncommon, self.rare + other.rare, self.legendary + other.legendary)
+    return TalentBoostItem(
+      self.uncommon + other.uncommon, self.rare + other.rare, self.legendary + other.legendary)
+
 
 TalentBoostItem.ZERO = TalentBoostItem(0, 0, 0)
 TalentBoostItem.ONE = TalentBoostItem(1, 1, 1)
+
 
 @dataclass
 class TalentWeight:
@@ -217,9 +225,12 @@ class TalentWeight:
       case Rarity.LEGENDARY:
         return self.legendary
     raise ValueError("Invaild rarity")
-  
+
   def __mul__(self, boost: TalentBoostItem) -> "TalentWeight":
-    return TalentWeight(self.total, self.uncommon * boost.uncommon, self.rare * boost.rare, self.legendary * boost.legendary)
+    return TalentWeight(
+      self.total, self.uncommon * boost.uncommon, self.rare * boost.rare,
+      self.legendary * boost.legendary)
+
 
 @dataclass
 class TalentBoost:
@@ -238,12 +249,14 @@ class TalentBoost:
     (100, TalentBoostItem(legendary=5)),
   ])
 
+
 @dataclass
 class Talent:
   limit: int = 3
   choices: int = 10
   weight: TalentWeight = TalentWeight()
   boost: TalentBoost = TalentBoost()
+
 
 @dataclass
 class Character:
@@ -268,6 +281,7 @@ class Character:
     5: 1,
   })
   choices: int = 3
+
 
 @dataclass
 class Config:

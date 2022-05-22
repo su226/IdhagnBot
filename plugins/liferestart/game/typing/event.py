@@ -1,5 +1,7 @@
 from typing import Literal, TypedDict
+
 from typing_extensions import NotRequired
+
 
 class EventEffectDict(TypedDict, total=False):
   LIF: int
@@ -9,6 +11,7 @@ class EventEffectDict(TypedDict, total=False):
   STR: int
   MNY: int
   SPR: int
+
 
 class EventDict(TypedDict):
   id: int

@@ -1,5 +1,6 @@
 from util.config import BaseConfig
 
+
 class Config(BaseConfig):
   __file__ = "wikipedia"
   zim: str = ""
@@ -7,5 +8,6 @@ class Config(BaseConfig):
   width: int = 800
   scale: float = 1
   use_opencc: bool = True
+
 
 CONFIG = Config.load()

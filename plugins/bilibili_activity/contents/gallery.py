@@ -1,6 +1,7 @@
-from typing import Any
-from .. import util
 import json
+from typing import Any
+
+from .. import util
 
 FORMAT = '''\
 [CQ:image,file={image}]
@@ -8,6 +9,7 @@ FORMAT = '''\
 https://t.bilibili.com/{id}
 🖼️ {image_count} 张图片
 “{summary}”'''
+
 
 def handle(content: Any) -> str:
   card = json.loads(content["card"])

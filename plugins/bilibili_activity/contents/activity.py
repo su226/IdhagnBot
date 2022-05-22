@@ -1,11 +1,13 @@
-from typing import Any
-from .. import util
 import json
+from typing import Any
+
+from .. import util
 
 FORMAT = '''\
 ⭐ {username} 发布了动态
 https://t.bilibili.com/{id}
 “{summary}”'''
+
 
 def handle(content: Any) -> str:
   card = json.loads(content["card"])

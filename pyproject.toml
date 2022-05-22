@@ -23,10 +23,19 @@ pycairo = "^1.21.0"
 PyGObject = "^3.42.1"
 psutil = "^5.9.0"
 
+[tool.poetry.extras]
+all = ["libzim", "mctools"]
+
 [tool.poetry.dev-dependencies]
+pylama = { extras = ["eradicate", "pycodestyle", "pyflakes", "isort"], version = "^8.3.8" }
 
 [tool.pyright]
 strict = ["plugins/liferestart/game"]
+
+[tool.isort]
+multi_line_output = 4
+line_length = 100
+indent = "  "
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

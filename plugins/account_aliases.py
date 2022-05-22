@@ -7,6 +7,7 @@ from util import account_aliases, command
 
 CONFIG = account_aliases.CONFIG
 
+
 def parse_boolean(value: str) -> bool:
   if value in ("true", "t", "1", "yes", "y", "on"):
     return True
@@ -14,7 +15,9 @@ def parse_boolean(value: str) -> bool:
     return False
   raise ValueError("Not a vaild truthy or falsy")
 
-match = (command.CommandBuilder("account_aliases.match", "匹配", "match")
+
+match = (
+  command.CommandBuilder("account_aliases.match", "匹配", "match")
   .brief("从名字匹配群成员")
   .usage('''\
 /匹配 <QQ号> - 显示成员的所有名字
@@ -23,6 +26,8 @@ match = (command.CommandBuilder("account_aliases.match", "匹配", "match")
 不能有空格，不区分大小写
 特殊符号、emoji等会被忽略''')
   .build())
+
+
 @match.handle()
 async def handle_match(bot: Bot, event: Event, args: Message = CommandArg()):
   name = args.extract_plain_text().rstrip()

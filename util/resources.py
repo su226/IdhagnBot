@@ -1,19 +1,26 @@
-from PIL import ImageFont, features as PILFeatures
-from pydantic import BaseModel, Field
 import pyppeteer
+from PIL import ImageFont
+from PIL import features as PILFeatures
+from pydantic import BaseModel, Field
 
 from util.config import BaseConfig
+
+__all__ = ["font", "launch_pyppeteer"]
+
 
 class Font(BaseModel):
   path: str
   index: int
+
 
 class Config(BaseConfig, file="resources"):
   default_font: str | Font = "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc"
   fonts: dict[str, str | Font] = Field(default_factory=dict)
   chromium: str = "/usr/bin/chromium"
 
+
 CONFIG = Config.load()
+
 
 def font(name: str, size: int) -> ImageFont.FreeTypeFont:
   font = CONFIG.fonts.get(name, CONFIG.default_font)
@@ -28,6 +35,7 @@ def font(name: str, size: int) -> ImageFont.FreeTypeFont:
   else:
     engine = ImageFont.LAYOUT_BASIC
   return ImageFont.truetype(path, size, index, layout_engine=engine)
+
 
 def launch_pyppeteer(**options):
   return pyppeteer.launch(options, executablePath=CONFIG.chromium)

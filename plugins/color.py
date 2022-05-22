@@ -1,14 +1,14 @@
-from io import BytesIO
 import random
+from io import BytesIO
 
-from PIL import Image, ImageDraw
-from nonebot.params import CommandArg
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
-import nonebot
+from nonebot.params import CommandArg
+from PIL import Image, ImageDraw
 
-from util import color, resources, command
+from util import color, command, resources
 
-color_img = (command.CommandBuilder("color", "色图", "color")
+color_img = (
+  command.CommandBuilder("color", "色图", "color")
   .brief("哎哟这个色啊！好色！")
   .usage('''\
 支持多种格式，比如以下均为蓝色
@@ -20,6 +20,8 @@ color_img = (command.CommandBuilder("color", "色图", "color")
 /色图 hsl(240, 100%, 50%)
 /色图 blue''')
   .build())
+
+
 @color_img.handle()
 async def handle_color_img(arg: Message = CommandArg()):
   color_str = arg.extract_plain_text().rstrip()

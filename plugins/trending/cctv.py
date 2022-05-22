@@ -1,8 +1,11 @@
-from aiohttp import ClientSession
-from .common import Item
 import json
 
+from aiohttp import ClientSession
+
+from .common import Item
+
 API = "https://news.cctv.com/2019/07/gaiban/cmsdatainterface/page/news_1.jsonp"
+
 
 async def get_data() -> list[Item]:
   async with ClientSession() as http:

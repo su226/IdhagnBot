@@ -1,26 +1,27 @@
 import os
 
-from pydantic import Field
-from nonebot.adapters.onebot.v11 import MessageSegment
-from nonebot.params import CommandArg
-from nonebot.log import logger
 import aiohttp
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.params import CommandArg
+from pydantic import Field
 
 from util import command
 from util.config import BaseState
+
 
 class State(BaseState):
   __file__ = "emojimix"
   unsupported: set[str] = Field(default_factory=set)
 
+
 CACHE_DIR = "states/emojimix_cache"
 os.makedirs(CACHE_DIR, exist_ok=True)
+
+
 def write_cache(cache: str, data: bytes):
-  try:
-    with open(cache, "wb") as f:
-      f.write(data)
-  except:
-    logger.exception(f"写入缓存失败：{cache}")
+  with open(cache, "wb") as f:
+    f.write(data)
+
 
 STATE = State.load()
 API = "https://www.gstatic.com/android/keyboard/emojikitchen"
@@ -228,11 +229,18 @@ EMOJIS = {
   '\U0001fae4': '20211115',
   '\U0001fae5': '20211115'
 }
+
+
 def get_code(emoji: str) -> str:
   return "_".join(map(lambda ch: "u{:x}".format(ord(ch)), emoji))
-SUPPORTED_STR = "支持的 emoji（并不是所有组合都存在）：\n" + "\n".join(map(lambda x: f"{x}（{get_code(x)}）", EMOJIS.keys()))
 
-emojimix = (command.CommandBuilder("emojimix", "emojimix", "缝合", "emoji", "mix")
+
+SUPPORTED_STR = (
+  "支持的 emoji（并不是所有组合都存在）：\n"
+  + "\n".join(map(lambda x: f"{x}（{get_code(x)}）", EMOJIS.keys())))
+
+emojimix = (
+  command.CommandBuilder("emojimix", "emojimix", "缝合", "emoji", "mix")
   .brief("缝合两个emoji")
   .usage('''\
 /emojimix - 查看支持的emoji
@@ -240,8 +248,10 @@ emojimix = (command.CommandBuilder("emojimix", "emojimix", "缝合", "emoji", "m
 数据来自 https://tikolu.net/emojimix
 图片来自 Google''')
   .build())
+
+
 @emojimix.handle()
-async def handle_emojimix(args = CommandArg()):
+async def handle_emojimix(args: Message = CommandArg()):
   emojis = args.extract_plain_text().split("+")
   if len(emojis) == 0:
     await emojimix.finish(SUPPORTED_STR)

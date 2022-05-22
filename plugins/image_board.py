@@ -1,17 +1,18 @@
-from typing import Any, Literal
-from argparse import Namespace
 import base64
+from argparse import Namespace
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+import aiohttp
 from aiohttp.http import SERVER_SOFTWARE
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.exception import ParserExit
-from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
-import aiohttp
+from nonebot.rule import ArgumentParser
+from pydantic import BaseModel, Field
 
-from util.config import BaseConfig
 from util import command
+from util.config import BaseConfig
+
 
 class Site(BaseModel):
   origin: str
@@ -21,8 +22,9 @@ class Site(BaseModel):
   id_path: str
   sample_path: str
 
+
 presets = {
-  "gelbooru": Site( # Gelbooru (https://gelbooru.com)
+  "gelbooru": Site(  # Gelbooru (https://gelbooru.com)
     origin="https://gelbooru.com",
     post_url="/index.php?page=post&s=view&id={id}",
     api_url="/index.php?page=dapi&s=post&q=index&tags={tags}&limit={limit}&pid={page}&json=1",
@@ -30,7 +32,8 @@ presets = {
     id_path="/id",
     sample_path="/sample_url"
   ),
-  "danbooru": Site( # Danbooru (https://danbooru.donmai.us), Safebooru (https://safebooru.donmai.us)
+  # Danbooru (https://danbooru.donmai.us), Safebooru (https://safebooru.donmai.us)
+  "danbooru": Site(
     origin="https://danbooru.donmai.us",
     post_url="/posts/{id}",
     api_url="/posts.json?tags={tags}&limit={limit}&page={page}",
@@ -38,7 +41,9 @@ presets = {
     id_path="/id",
     sample_path="/large_file_url"
   ),
-  "konachan": Site( # Konachan R18 (https://konachan.com), Konachan G (https://konachan.net), Yandere (https://yande.re)
+  # Konachan R18 (https://konachan.com), Konachan G (https://konachan.net)
+  # Yandere (https://yande.re)
+  "konachan": Site(
     origin="https://konachan.com",
     post_url="/post/show/{id}",
     api_url="/post.json?tags={tags}&limit={limit}&page={page}",
@@ -46,7 +51,7 @@ presets = {
     id_path="/id",
     sample_path="/sample_url"
   ),
-  "e621": Site( # e621 (https://e621.net), e926 (https://e926.net)
+  "e621": Site(  # e621 (https://e621.net), e926 (https://e926.net)
     origin="https://e621.net",
     post_url="/posts/{id}",
     api_url="/posts.json?tags={tags}&limit={limit}&page={page}",
@@ -64,6 +69,7 @@ EMPTY_PRESET = {
   "id_path": None,
   "sample_path": None,
 }
+
 
 class Command(BaseModel):
   command: list[str]
@@ -83,7 +89,9 @@ class Command(BaseModel):
   def to_site(self) -> Site:
     preset = EMPTY_PRESET if self.preset is None else presets[self.preset].dict()
     config = self.dict()
-    return Site.parse_obj({key: value if config[key] is None else config[key] for key, value in preset.items()})
+    return Site.parse_obj({
+      key: value if config[key] is None else config[key] for key, value in preset.items()})
+
 
 class Config(BaseConfig):
   __file__ = "image_board"
@@ -92,8 +100,10 @@ class Config(BaseConfig):
   presets: dict[str, Site] = Field(default_factory=dict)
   sites: list[Command] = Field(default_factory=list)
 
+
 CONFIG = Config.load()
 presets.update(CONFIG.presets)
+
 
 def get_by_path(root: dict, path: str) -> Any:
   nodes = path.split("/")
@@ -101,11 +111,8 @@ def get_by_path(root: dict, path: str) -> Any:
     root = root[i]
   return root
 
+
 def register(definition: Command):
-  site = definition.to_site()
-  HEADERS = {"User-Agent": definition.user_agent}
-  POST_URL = site.origin + site.post_url
-  API_URL = site.origin + site.api_url
   async def handler(args: Namespace | ParserExit = ShellCommandArgs()):
     if isinstance(args, ParserExit):
       await matcher.finish(args.message)
@@ -113,7 +120,9 @@ def register(definition: Command):
       await matcher.finish(f"每页图片数必须在 1 和 {CONFIG.max_limit} 之间")
     async with aiohttp.ClientSession(headers=HEADERS) as http:
       try:
-        response = await http.get(API_URL.format(tags=" ".join(args.tags), limit=args.limit, page=args.page), proxy=definition.proxy)
+        response = await http.get(
+          API_URL.format(tags=" ".join(args.tags), limit=args.limit, page=args.page),
+          proxy=definition.proxy)
       except aiohttp.ClientProxyConnectionError as e:
         await matcher.finish(f"别试了我没挂梯子:\n{e}")
       except aiohttp.ClientError as e:
@@ -134,14 +143,21 @@ def register(definition: Command):
         try:
           response = await http.get(get_by_path(post, site.sample_path), proxy=definition.proxy)
           segments.append(f"[CQ:image,file=base64://{base64.b64encode(await response.read())}]")
-        except:
+        except aiohttp.ClientError:
           segments.append("预览下载失败")
     await matcher.send(Message("\n".join(segments)))
+  site = definition.to_site()
+  HEADERS = {"User-Agent": definition.user_agent}
+  POST_URL = site.origin + site.post_url
+  API_URL = site.origin + site.api_url
   parser = ArgumentParser(add_help=False)
   parser.add_argument("tags", nargs="+", metavar="标签")
-  parser.add_argument("-limit", type=int, default=CONFIG.default_limit, metavar="图片数", help=f"每页的图片数，默认为{CONFIG.default_limit}，不能超过{CONFIG.max_limit}")
+  parser.add_argument(
+    "-limit", type=int, default=CONFIG.default_limit, metavar="图片数",
+    help=f"每页的图片数，默认为{CONFIG.default_limit}，不能超过{CONFIG.max_limit}")
   parser.add_argument("-page", type=int, default=1, metavar="页码")
-  builder = (command.CommandBuilder(f"image_board.{definition.command[0]}", *definition.command)
+  builder = (
+    command.CommandBuilder(f"image_board.{definition.command[0]}", *definition.command)
     .level(definition.permission)
     .brief(definition.brief)
     .shell(parser))
@@ -150,6 +166,7 @@ def register(definition: Command):
   matcher = builder.build()
   matcher.handle()(handler)
   return matcher
+
 
 for site in CONFIG.sites:
   register(site)

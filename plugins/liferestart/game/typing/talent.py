@@ -1,6 +1,9 @@
 from typing import Literal, TypedDict
+
 from typing_extensions import NotRequired
+
 from .commons import WeightsList
+
 
 class TalentEffectDict(TypedDict, total=False):
   RDM: int
@@ -10,11 +13,14 @@ class TalentEffectDict(TypedDict, total=False):
   MNY: int
   SPR: int
 
+
 class GradeReplacementDict(TypedDict):
   grade: list[int]
 
+
 class TalentReplacementDict(TypedDict):
   talent: WeightsList
+
 
 class TalentDict(TypedDict):
   id: int | str

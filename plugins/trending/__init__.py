@@ -1,27 +1,32 @@
 import math
 import time
 
-from pydantic import BaseModel, Field
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-from nonebot.adapters.onebot.v11 import MessageSegment
+from pydantic import BaseModel, Field
 
 from util import command
 from util.config import BaseConfig, BaseState
-from . import baidu, cctv, weibo, zhihu, bilibili
+
+from . import baidu, bilibili, cctv, weibo, zhihu
 from .common import Item
+
 
 class Config(BaseConfig):
   __file__ = "trending"
   cache: int = 600
   page_size: int = 10
 
+
 class Cache(BaseModel):
   time: float = 0
   items: list[Item] = Field(default_factory=list)
 
+
 class State(BaseState):
   __file__ = "trending"
   cache: dict[str, Cache] = Field(default_factory=dict)
+
 
 CONFIG = Config.load()
 STATE = State.load()
@@ -37,7 +42,8 @@ for names, func in SOURCE_LIST:
   for name in names:
     SOURCE_DICT[name] = (names[0], func)
 
-trending = (command.CommandBuilder("trending", "热搜", "trending")
+trending = (
+  command.CommandBuilder("trending", "热搜", "trending")
   .brief("看看大家又在撕什么（bushi）")
   .usage('''\
 /热搜 - 查看支持的来源
@@ -45,8 +51,10 @@ trending = (command.CommandBuilder("trending", "热搜", "trending")
 /热搜 <来源> p<页码> - 查看热搜某一页
 /热搜 <来源> <ID> - 查看某一条热搜''')
   .build())
+
+
 @trending.handle()
-async def handle_trending(msg = CommandArg()):
+async def handle_trending(msg: Message = CommandArg()):
   args = str(msg).lower().split()
   if len(args) > 2:
     await trending.finish(trending.__doc__)
@@ -70,15 +78,19 @@ async def handle_trending(msg = CommandArg()):
   page = 1
   if len(args) == 2:
     if not args[1].startswith("p"):
-      try: i = int(args[1])
-      except: await trending.finish("无效的序号")
+      try:
+        i = int(args[1])
+      except ValueError:
+        await trending.finish("无效的序号")
       if i < 1 or i > len(items):
         await trending.finish(f"只有 {len(items)} 条热搜")
       item = items[i - 1]
       await trending.finish(MessageSegment.share(item.url, item.title, item.content, item.image))
     else:
-      try: page = int(args[1][1:])
-      except: await trending.finish("无效的页码")
+      try:
+        page = int(args[1][1:])
+      except ValueError:
+        await trending.finish("无效的页码")
       if page < 1 or page > pages:
         await trending.finish(f"页码必须在 1 和 {pages} 之间")
   result = []

@@ -1,5 +1,6 @@
-from dataclasses import dataclass
 import subprocess as sp
+from dataclasses import dataclass
+
 
 @dataclass
 class Info:
@@ -10,7 +11,9 @@ class Info:
   clk: int
   temp: int
 
+
 UEVENT_FILE = "uevent"
+
 
 def read(card: str) -> Info:
   root = f"/sys/class/drm/{card}/device/"

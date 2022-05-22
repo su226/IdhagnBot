@@ -4,14 +4,17 @@ import random
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import CommandArg
 
-from util import context, account_aliases, helper, command
+from util import account_aliases, command, context, helper
 
-super_poke = (command.CommandBuilder("super_poke", "戳亿戳", "poke")
+super_poke = (
+  command.CommandBuilder("super_poke", "戳亿戳", "poke")
   .in_group()
   .level("super")
   .brief("发送多次戳一戳")
   .usage("/戳亿戳 <总次数> <QQ号列表>")
   .build())
+
+
 @super_poke.handle()
 async def handle_super_poke(bot: Bot, event: Event, arg: Message = CommandArg()):
   ctx = context.get_event_context(event)

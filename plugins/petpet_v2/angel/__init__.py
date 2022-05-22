@@ -1,14 +1,15 @@
+import os
 from argparse import Namespace
 from io import BytesIO
-import os
 
-from PIL import Image, ImageDraw
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.exception import ParserExit
-from nonebot.rule import ArgumentParser
+from nonebot.exception import ActionFailed, ParserExit
 from nonebot.params import ShellCommandArgs
+from nonebot.rule import ArgumentParser
+from PIL import Image, ImageDraw
 
-from util import resources, text, context, command, helper
+from util import command, context, helper, resources, text
+
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
@@ -21,15 +22,24 @@ GENDERS = {
 }
 
 parser = ArgumentParser(add_help=False)
-parser.add_argument("target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
-parser.add_argument("-name", "-名字", help="自定义名字，对于图片链接必须指定，对于QQ用户默认使用昵称")
-parser.add_argument("-gender", "-性别", help="自定义性别，对于图片链接默认为未知，对于QQ用户默认为资料性别，可以是\"male\"（他）、\"female\"（她）、\"unknown\"（它）、\"animal\"（牠）、\"god\"（祂）")
-matcher = (command.CommandBuilder("petpet_v2.angel", "小天使", "angel")
+parser.add_argument(
+  "target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
+parser.add_argument(
+  "-name", "-名字", help="自定义名字，对于图片链接必须指定，对于QQ用户默认使用昵称")
+parser.add_argument("-gender", "-性别", help=(
+  "自定义性别，对于图片链接默认为未知，对于QQ用户默认为资料性别，可以是\"male\"（他）、"
+  "\"female\"（她）、\"unknown\"（它）、\"animal\"（牠）、\"god\"（祂）"))
+matcher = (
+  command.CommandBuilder("petpet_v2.angel", "小天使", "angel")
   .category("petpet_v2")
   .shell(parser)
   .build())
+
+
 @matcher.handle()
-async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
+async def handler(
+  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+) -> None:
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
   try:
@@ -38,10 +48,11 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = 
     await matcher.finish("\n".join(e))
   if user is not None:
     try:
-      info = await bot.get_group_member_info(group_id=context.get_event_context(event), user_id=user)
+      info = await bot.get_group_member_info(
+        group_id=context.get_event_context(event), user_id=user)
       name = info["card"] or info["nickname"]
       gender = info["sex"]
-    except:
+    except ActionFailed:
       info = await bot.get_stranger_info(user_id=user)
       name = info["nickname"]
       gender = info["sex"]
@@ -53,7 +64,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = 
   if args.gender is not None:
     gender = args.gender
   if name is None:
-    await matcher.finish(f"请使用 -name 指定名字")
+    await matcher.finish("请使用 -name 指定名字")
 
   im = Image.new("RGB", (600, 730), (255, 255, 255))
   draw = ImageDraw.Draw(im)
@@ -74,7 +85,9 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = 
   draw.text((300, 610), "非常可爱！简直就是小天使", (0, 0, 0), font, "ma")
 
   font = resources.font("sans-bold", 26)
-  draw.text((300, 680), f"{GENDERS[gender]}没失踪也没怎么样  我只是觉得你们都该看一下", (0, 0, 0), font, "ma")
+  draw.text(
+    (300, 680), f"{GENDERS[gender]}没失踪也没怎么样  我只是觉得你们都该看一下",
+    (0, 0, 0), font, "ma")
 
   f = BytesIO()
   im.save(f, "PNG")

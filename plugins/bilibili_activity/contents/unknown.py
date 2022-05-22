@@ -1,10 +1,10 @@
 from typing import Any
-from .. import util
 
 FORMAT = '''\
 🤔 {username} 发布了……一些东西
 https://t.bilibili.com/{id}
 目前机器人还不能理解这个qwq'''
+
 
 def handle(content: Any) -> str:
   return FORMAT.format(

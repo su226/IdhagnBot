@@ -1,7 +1,9 @@
 from aiohttp import ClientSession
+
 from .common import Item
 
 API = "https://api.bilibili.com/x/web-interface/popular?ps=50&pn={}"
+
 
 async def get_data() -> list[Item]:
   result = []

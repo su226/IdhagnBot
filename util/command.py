@@ -1,12 +1,13 @@
 from typing import Literal
+
+import nonebot
+from nonebot.matcher import Matcher
+from nonebot.rule import ArgumentParser, Rule
+from nonebot.typing import T_RuleChecker
 from typing_extensions import Self
 
-from nonebot.matcher import Matcher
-from nonebot.rule import Rule, ArgumentParser
-from nonebot.typing import T_RuleChecker
-import nonebot
+from . import context, help, permission
 
-from . import permission, context, help
 
 class CommandBuilder:
   def __init__(self, node: str, name: str, *names: str) -> None:
@@ -69,5 +70,9 @@ class CommandBuilder:
     cat.add(help.CommandItem(self.names, self.brief_, self.usage_, self.help_data))
     permission_ = context.build_permission(tuple(self.node.split(".")), self.level_)
     if self.parser_ is None:
-      return nonebot.on_command(self.names[0], self.rule_, set(self.names[1:]), permission=permission_, _depth=1) # type: ignore
-    return nonebot.on_shell_command(self.names[0], self.rule_, set(self.names[1:]), self.parser_, permission=permission_, _depth=1) # type: ignore
+      return nonebot.on_command(
+        self.names[0], self.rule_, set(self.names[1:]), permission=permission_,
+        _depth=1)  # type: ignore
+    return nonebot.on_shell_command(
+      self.names[0], self.rule_, set(self.names[1:]), self.parser_, permission=permission_,
+      _depth=1)  # type: ignore
