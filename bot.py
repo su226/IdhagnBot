@@ -1,48 +1,23 @@
-from typing import TYPE_CHECKING, Any
 import argparse
-import sys
+import os
 
-from pydantic import BaseModel, Field
-from nonebot.adapters.onebot.v11 import Adapter
-from nonebot.log import logger, logger_id
 import nonebot
+import yaml
+from nonebot.adapters.onebot.v11 import Adapter
 
-if TYPE_CHECKING:
-  from loguru import Record
-
-from util import config_v2
-
-class LogOverride(BaseModel):
-  fold_nonebot: bool = True
-  format: str = "<g>{time:HH:mm:ss}</g>|<lvl>{level:8}</lvl>| <c>{name}</c> - {message}"
-  level: str | int = "INFO"
-
-class Config(BaseModel):
-  nonebot: dict[str, Any] = Field(default_factory=dict)
-  log_override: LogOverride | None = LogOverride()
-
-CONFIG = config_v2.SharedConfig("bot", Config, False)
-
-_config = CONFIG()
-if (_override := _config.log_override) is not None:
-  def loguru_filter(record: "Record") -> bool:
-    if _override.fold_nonebot and (record["name"] or "").startswith("nonebot."):
-      record["name"] = "nonebot"
-    level = logger.level(_override.level.upper()).no if isinstance(_override.level, str) else _override.level
-    return record["level"].no >= level
-  logger.remove(logger_id)
-  logger.add(
-    sys.stderr,
-    filter=loguru_filter,
-    format=_override.format,
-    colorize=True,
-    diagnose=False)
+from util import config_v2, log
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--export-html")
 args = parser.parse_args()
 
-nonebot.init(**_config.nonebot, apscheduler_autostart=True)
+bot_config = {}
+if os.path.exists("configs/nonebot.yaml"):
+  with open("configs/nonebot.yaml") as f:
+    bot_config = yaml.load(f, config_v2.SafeLoader)
+
+log.init()
+nonebot.init(**bot_config, apscheduler_autostart=True)
 nonebot.get_driver().register_adapter(Adapter)
 nonebot.load_plugins("plugins")
 nonebot.load_plugins("user_plugins")
@@ -53,7 +28,9 @@ if args.export_html:
   index = help.export_index_html()
   permissions = permission.export_html()
   with open(args.export_html, "w") as f:
-    f.write(f"<meta name=\"viewport\" content=\"width=device-width\"><h2>命令帮助</h2>{commands}<h2>命令大纲</h2>{index}<h2>已知权限节点</h2>{permissions}")
+    f.write(
+      "<meta name=\"viewport\" content=\"width=device-width\">"
+      f"<h2>命令帮助</h2>{commands}<h2>命令大纲</h2>{index}<h2>已知权限节点</h2>{permissions}")
   print("已导出所有命令帮助和权限节点")
 else:
   nonebot.run()
