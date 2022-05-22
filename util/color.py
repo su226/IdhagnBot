@@ -821,8 +821,19 @@ VALUES = {
 
 LONG_HEX_RE = re.compile(r"^#?([0-9a-fA-F]{6})$")
 SHORT_HEX_RE = re.compile(r"^#?([0-9a-fA-F]{3})$")
-RGB_RE = re.compile(r"^rgb\s*\(\s*(2(?:5[0-5]|[0-4]\d)|1\d\d|[1-9]?\d)\s*(?:,|\s)\s*(2(?:5[0-5]|[0-4]\d)|1\d\d|[1-9]?\d)\s*(?:,|\s)\s*(2(?:5[0-5]|[0-4]\d)|1\d\d|[1-9]?\d)\s*\)$")
-HSL_RE = re.compile(r"^hsl\s*\(\s*(\d+(?:\.\d+)?)(?:deg)?\s*(?:,|\s)\s*(100(?:\.0+)?|[1-9]\d(?:\.\d+)?)%\s*(?:,|\s)\s*(100(?:\.0+)?|[1-9]\d(?:\.\d+)?)%\s*\)$")
+RGB_RE = re.compile(
+  r"^rgb\s*\(\s*"
+  r"(2(?:5[0-5]|[0-4]\d)|1\d\d|[1-9]?\d)\s*(?:,|\s)\s*"
+  r"(2(?:5[0-5]|[0-4]\d)|1\d\d|[1-9]?\d)\s*(?:,|\s)\s*"
+  r"(2(?:5[0-5]|[0-4]\d)|1\d\d|[1-9]?\d)\s*\)$")
+HSL_RE = re.compile(
+  r"^hsl\s*\(\s*"
+  r"(\d+(?:\.\d+)?)(?:deg)?\s*(?:,|\s)\s*"
+  r"(100(?:\.0+)?|[1-9]\d(?:\.\d+)?)%\s*(?:,|\s)\s*"
+  r"(100(?:\.0+)?|[1-9]\d(?:\.\d+)?)%\s*\)$")
+
+RGB = tuple[int, int, int]
+
 
 def parse(src: str) -> int | None:
   if src in VALUES:
@@ -847,13 +858,20 @@ def parse(src: str) -> int | None:
     return hsl2rgb(h, s, l)
   return None
 
+
 def _hue2rgb(p: float, q: float, t: float) -> float:
-  if t < 0: t += 1
-  if t > 1: t -= 1
-  if t < 1 / 6: return p + (q - p) * 6 * t
-  if t < 1 / 2: return q
-  if t < 2 / 3: return p + (q - p) * (2/3 - t) * 6
+  if t < 0:
+    t += 1
+  if t > 1:
+    t -= 1
+  if t < 1 / 6:
+    return p + (q - p) * 6 * t
+  if t < 1 / 2:
+    return q
+  if t < 2 / 3:
+    return p + (q - p) * (2 / 3 - t) * 6
   return p
+
 
 def hsl2rgb(h: float, s: float, l: float) -> int:
   if s == 0:
@@ -861,10 +879,11 @@ def hsl2rgb(h: float, s: float, l: float) -> int:
   else:
     q = l * (1 + s) if l < 0.5 else l + s - l * s
     p = 2 * l - q
-    r = _hue2rgb(p, q, h + 1/3)
+    r = _hue2rgb(p, q, h + 1 / 3)
     g = _hue2rgb(p, q, h)
-    b = _hue2rgb(p, q, h - 1/3)
+    b = _hue2rgb(p, q, h - 1 / 3)
   return round(r * 255) << 16 | round(g * 255) << 8 | round(b * 255)
+
 
 def rgb2hsl(r: int, g: int, b: int) -> tuple[float, float, float]:
   r_ = r / 255
@@ -874,25 +893,34 @@ def rgb2hsl(r: int, g: int, b: int) -> tuple[float, float, float]:
   cmax = max(r_, g_, b_)
   delta = cmax - cmin
 
-  if delta == 0: h = 0.0
-  elif cmax == r_: h = ((g_ - b_) / delta) % 6
-  elif cmax == g_: h = (b_ - r_) / delta + 2
-  else: h = (r_ - g_) / delta + 4
+  if delta == 0:
+    h = 0.0
+  elif cmax == r_:
+    h = ((g_ - b_) / delta) % 6
+  elif cmax == g_:
+    h = (b_ - r_) / delta + 2
+  else:
+    h = (r_ - g_) / delta + 4
   h = h * 60
-  if h < 0: h += 360
+  if h < 0:
+    h += 360
   l = (cmax + cmin) / 2
   s = 0.0 if delta == 0 else delta / (1 - abs(2 * l - 1))
 
   return (h, s, l)
 
-RGB = tuple[int, int, int]
 
 def split_rgb(v: int) -> RGB:
   return (v >> 16, (v >> 8) & 0xff, v & 0xff)
 
+
 def luminance(r: int, g: int, b: int) -> float:
   return 0.3 * (r / 255) + 0.59 * (g / 255) + 0.11 * (b / 255)
 
+
 def blend(color1: RGB, color2: RGB, r: float) -> RGB:
   r2 = 1 - r
-  return (int(color1[0] * r + color2[0] * r2), int(color1[1] * r + color2[1] * r2), int(color1[2] * r + color2[2] * r2))
+  return (
+    int(color1[0] * r + color2[0] * r2),
+    int(color1[1] * r + color2[1] * r2),
+    int(color1[2] * r + color2[2] * r2))

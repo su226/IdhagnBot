@@ -1,11 +1,14 @@
-from urllib.parse import unquote
-from html.parser import HTMLParser
-from aiohttp import ClientSession
-from .common import Item
 import json
+from html.parser import HTMLParser
+from urllib.parse import unquote
+
+from aiohttp import ClientSession
+
+from .common import Item
 
 URL = "https://www.baidu.com"
 UA = "Mozilla/5.0 (X11; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0"
+
 
 class Parser(HTMLParser):
   def __init__(self):
@@ -24,11 +27,13 @@ class Parser(HTMLParser):
       self.data = json.loads(data)
       self.got = False
 
+
 def extract_data(value: str):
   parser = Parser()
   parser.feed(value)
   parser.close()
   return parser.data
+
 
 async def get_data() -> list[Item]:
   async with ClientSession() as http:

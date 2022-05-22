@@ -1,9 +1,10 @@
+from loguru import logger
+
 from .config import CONFIG
-from nonebot.log import logger
 
 if CONFIG.zim:
   try:
-    from . import plugin as _
+    from . import plugin
   except ImportError:
     logger.warning("没有安装libzim，不能使用维基百科插件")
 else:

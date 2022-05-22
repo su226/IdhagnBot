@@ -1,20 +1,17 @@
-from typing import cast
-from asyncio.streams import StreamReader, StreamWriter
 import asyncio
 import os
 import pickle
-import venv
-
-from nonebot.log import logger
+from asyncio.streams import StreamReader, StreamWriter
+from typing import cast
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-# env_dir = os.path.abspath("states/safe_eval_env")
-# if not os.path.exists(env_dir):
-#   logger.info("创建Python虚拟环境")
-#   venv.create(env_dir)
 
-async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: int) -> tuple[bool, int, bytes, bytes]:
-  proc = await asyncio.subprocess.create_subprocess_exec("bwrap",
+
+async def safe_eval(
+  code: str, timeout: float, nproc: int, memory: int, output: int
+) -> tuple[bool, int, bytes, bytes]:
+  proc = await asyncio.subprocess.create_subprocess_exec(
+    "bwrap",
     "--unshare-all",
     "--clearenv",
     "--die-with-parent",

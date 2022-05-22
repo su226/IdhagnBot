@@ -1,12 +1,13 @@
 import random
-from typing import Literal
+from typing import Literal, cast
 
+import numpy
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
-import numpy
 
 from util import command
 from util.config import BaseConfig
+
 
 class Config(BaseConfig):
   __file__ = "coin"
@@ -16,13 +17,18 @@ class Config(BaseConfig):
   limit: int = 10000
   binomial_limit: int = 10 ** 15
 
-CONFIG = Config.load()
 
+CONFIG = Config.load()
 warn_str = f"超过 {CONFIG.limit} 的硬币将会使用二项分布估算"
 fail_str = f"硬币数量必须是不超过 {CONFIG.binomial_limit} 的正整数\n{warn_str}"
 
-def flip() -> Literal["front", "back", "stand"]:
-  return random.choices(["front", "back", "stand"], [CONFIG.front_weight, CONFIG.back_weight, CONFIG.stand_weight])[0] # type: ignore
+FlipResult = Literal["front", "back", "stand"]
+
+
+def flip() -> FlipResult:
+  return cast(FlipResult, random.choices(
+    ["front", "back", "stand"], [CONFIG.front_weight, CONFIG.back_weight, CONFIG.stand_weight])[0])
+
 
 def flip_multiple(count) -> tuple[int, int, int]:
   front = 0
@@ -38,11 +44,15 @@ def flip_multiple(count) -> tuple[int, int, int]:
         stand += 1
   return front, back, stand
 
+
 def flip_binomial(count: int) -> tuple[int, int, int]:
-  stand = numpy.random.binomial(count, CONFIG.stand_weight / (CONFIG.front_weight + CONFIG.back_weight + CONFIG.stand_weight))
-  front = numpy.random.binomial(count - stand, CONFIG.front_weight / (CONFIG.front_weight + CONFIG.back_weight))
+  stand = numpy.random.binomial(
+    count, CONFIG.stand_weight / (CONFIG.front_weight + CONFIG.back_weight + CONFIG.stand_weight))
+  front = numpy.random.binomial(
+    count - stand, CONFIG.front_weight / (CONFIG.front_weight + CONFIG.back_weight))
   back = count - stand - front
   return front, back, stand
+
 
 def format_one() -> str:
   match flip():
@@ -53,13 +63,17 @@ def format_one() -> str:
     case "stand":
       return "你抛出了一枚硬币，立起来了"
 
-coin = (command.CommandBuilder("coin", "硬币", "coin")
+
+coin = (
+  command.CommandBuilder("coin", "硬币", "coin")
   .brief("试试你的运气")
   .usage(f'''
 /硬币 - 抛出一枚硬币
 /硬币 <硬币数量> - 抛出一把硬币
 {warn_str}''')
   .build())
+
+
 @coin.handle()
 async def handle_coin(arg: Message = CommandArg()):
   args = arg.extract_plain_text().strip()

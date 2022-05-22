@@ -1,28 +1,33 @@
-from io import BytesIO
 import math
 import random
+from io import BytesIO
 
-from PIL import Image, ImageDraw
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
+from PIL import Image, ImageDraw
 
-from util import resources, command
+from util import command, resources
 
 OMEGA = 0.2
 
+
 def rainbow(x: float, phi: float) -> tuple[int, int, int]:
-  r = math.sin(OMEGA * x + phi)                  * 127 + 128
-  g = math.sin(OMEGA * x + phi + math.pi * 2 /3) * 127 + 128
-  b = math.sin(OMEGA * x + phi + math.pi * 4 /3) * 127 + 128
+  r = math.sin(OMEGA * x + phi) * 127 + 128
+  g = math.sin(OMEGA * x + phi + math.pi * 2 / 3) * 127 + 128
+  b = math.sin(OMEGA * x + phi + math.pi * 4 / 3) * 127 + 128
   return (int(r), int(g), int(b))
+
 
 USAGE = '''\
 /lolcat <文本>
 灵感来自github.com/busyloop/lolcat'''
-lolcat = (command.CommandBuilder("meme_text.lolcat", "lolcat")
+lolcat = (
+  command.CommandBuilder("meme_text.lolcat", "lolcat")
   .brief("彩虹和独角兽！")
   .usage(USAGE)
   .build())
+
+
 @lolcat.handle()
 async def handle_lolcat(arg: Message = CommandArg()):
   text = arg.extract_plain_text().strip() or USAGE

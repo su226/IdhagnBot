@@ -1,33 +1,38 @@
-from typing import cast
-from argparse import Namespace
-from io import BytesIO
 import asyncio
 import os
 import random
+from argparse import Namespace
+from io import BytesIO
+from typing import cast
 
-from PIL import Image, ImageDraw, ImageOps
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.exception import ParserExit
-from nonebot.rule import ArgumentParser
+from nonebot.exception import ActionFailed, ParserExit
 from nonebot.params import ShellCommandArgs
+from nonebot.rule import ArgumentParser
+from PIL import Image, ImageDraw, ImageOps
 
-from util import context, text, command, helper
+from util import command, context, helper, text
+
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 PREFIX = "我永远喜欢"
 
-def name(value: str):
+
+def name(value: str) -> tuple[int, str]:
   try:
     id, name = value.split(":", 1)
     id = int(id)
-  except:
+  except ValueError:
     raise ValueError("-name的格式是\"编号:名字\"")
   if id < 1 or id > 7:
     raise ValueError("编号必须在[1, 7]以内")
   return id, name
 
-async def get_all(bot: Bot, event: MessageEvent, targets: list[str], default_names: list[str]) -> tuple[list[Image.Image], list[str]]:
+
+async def get_all(
+  bot: Bot, event: MessageEvent, targets: list[str], default_names: list[str]
+) -> tuple[list[Image.Image], list[str]]:
   async def get_one(i: int, target: str, name: str) -> tuple[Image.Image, str]:
     avatar, user = await get_image_and_user(bot, event, target, event.self_id)
     if name:
@@ -37,13 +42,12 @@ async def get_all(bot: Bot, event: MessageEvent, targets: list[str], default_nam
     try:
       info = await bot.get_group_member_info(group_id=ctx, user_id=user)
       name = cast(str, info["card"] or info["nickname"])
-    except:
+    except ActionFailed:
       name = cast(str, (await bot.get_stranger_info(user_id=user))["nickname"])
     return avatar, name
   ctx = context.get_event_context(event)
-  coros = [get_one(i, target, name)
-    for i, (target, name)
-    in enumerate(zip(targets, default_names), 1)]
+  coros = [
+    get_one(i, target, name) for i, (target, name) in enumerate(zip(targets, default_names), 1)]
   errors: list[helper.AggregateError] = []
   avatars: list[Image.Image] = []
   names: list[str] = []
@@ -58,14 +62,21 @@ async def get_all(bot: Bot, event: MessageEvent, targets: list[str], default_nam
   return avatars, names
 
 parser = ArgumentParser(add_help=False)
-parser.add_argument("targets", nargs="*", default=[""], metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接，最多7个")
+parser.add_argument(
+  "targets", nargs="*", default=[""], metavar="目标",
+  help="可使用@、QQ号、昵称、群名片或图片链接，最多7个")
 parser.add_argument("-name", type=name, action="append", default=[])
-matcher = (command.CommandBuilder("petpet_v2.forever", "永远喜欢")
+matcher = (
+  command.CommandBuilder("petpet_v2.forever", "永远喜欢")
   .category("petpet_v2")
   .shell(parser)
   .build())
+
+
 @matcher.handle()
-async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
+async def handler(
+  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+) -> None:
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
   if len(args.targets) > 7:
@@ -95,7 +106,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = 
   text_x = (im.width - text_im.width) // 2
   text_y = 520 - text_im.height // 2
   im.paste(text_im, (text_x, text_y), text_im)
-  
+
   prefix_w = text.layout("我永远喜欢", "sans-bold", 70).get_pixel_size()[0] * text_im.width // text_w
   line_x0 = text_x + prefix_w
   line_x1 = text_x + text_im.width

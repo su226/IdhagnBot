@@ -1,6 +1,7 @@
-from typing import Any
-from .. import util
 import json
+from typing import Any
+
+from .. import util
 
 FORMAT = '''\
 [CQ:image,file={cover}]
@@ -10,6 +11,7 @@ FORMAT = '''\
 ---- 视频 ----
 ▶️ {title}
 “{summary}”'''
+
 
 def handle(content: Any) -> str:
   card = json.loads(content["card"])

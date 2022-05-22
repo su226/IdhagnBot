@@ -1,20 +1,22 @@
 # 当我写下这段时，只有上帝和我明白我在做什么
 # 现在只有上帝明白了
-
-from typing import Any, Callable, ClassVar, Generic, Iterable, TypeVar
-from typing_extensions import TypeVarTuple, Unpack
 import os
 import shutil
+from typing import Any, Callable, ClassVar, Generic, Iterable, TypeVar
 
+import yaml
 from loguru import logger
 from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
-import yaml
+from typing_extensions import TypeVarTuple, Unpack
+
 try:
-  from yaml import CSafeLoader as SafeLoader, CSafeDumper as SafeDumper
+  from yaml import CSafeDumper as SafeDumper
+  from yaml import CSafeLoader as SafeLoader
 except ImportError:
-  logger.info("似乎没有安装libyaml，YAML将使用纯Python解析器")
-  from yaml import SafeLoader, SafeDumper
+  logger.info("似乎没有安装libyaml，将使用纯Python的YAML解析器")
+  from yaml import SafeDumper, SafeLoader
+
 
 def encode(data: Any) -> Any:
   if data is None or isinstance(data, (str, int, float)):
@@ -26,9 +28,12 @@ def encode(data: Any) -> Any:
   else:
     return encode(pydantic_encoder(data))
 
+
 TModel = TypeVar("TModel", bound=BaseModel)
 TParam = TypeVarTuple("TParam")
 LoadHandler = Callable[[TModel | None, TModel, Unpack[TParam]], None]
+
+
 class BaseConfig(Generic[TModel, Unpack[TParam]]):
   category: ClassVar = "配置"
   all: ClassVar[list["BaseConfig"]] = []
@@ -36,7 +41,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
   cache: dict[tuple[Unpack[TParam]], TModel]
   reloadable: bool
   handler: LoadHandler | None
-  
+
   def __init__(self, model: type[TModel], reloadable: bool = True) -> None:
     self.model = model
     self.cache = {}
@@ -60,12 +65,8 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
       old_config = None
     file = self.get_file(*args)
     if os.path.exists(file):
-      try:
-        with open(file) as f:
-          self.cache[args] = self.model.parse_obj(yaml.load(f, SafeLoader))
-      except Exception:
-        logger.opt(exception=True).warning(f"无法读取{self.category}：{file}")
-        self.cache[args] = self.model()
+      with open(file) as f:
+        self.cache[args] = self.model.parse_obj(yaml.load(f, SafeLoader))
     else:
       logger.info(f"{self.category}文件不存在: {file}")
       self.cache[args] = self.model()
@@ -77,11 +78,8 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
       return
     data = encode(self.cache[args].dict())
     file = self.get_file(*args)
-    try:
-      with open(file, "w") as f:
-        yaml.dump(data, f, SafeDumper, allow_unicode=True)
-    except:
-      logger.opt(exception=True).warning(f"无法记录{self.category}：{file}")
+    with open(file, "w") as f:
+      yaml.dump(data, f, SafeDumper, allow_unicode=True)
 
   def onload(self, immediate: bool = True) -> Callable[[LoadHandler], LoadHandler]:
     def decorator(handler: LoadHandler) -> LoadHandler:
@@ -98,6 +96,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     for i in self.get_all():
       self.load(*i)
 
+
 class SharedConfig(BaseConfig[TModel]):
   base_dir: ClassVar = "configs"
 
@@ -111,9 +110,11 @@ class SharedConfig(BaseConfig[TModel]):
   def get_all(self) -> Iterable[tuple[()]]:
     yield ()
 
+
 class SharedState(SharedConfig[TModel]):
   category = "状态"
   base_dir = "states"
+
 
 class GroupConfig(BaseConfig[TModel, int]):
   base_dir: ClassVar = "configs"
@@ -133,6 +134,7 @@ class GroupConfig(BaseConfig[TModel, int]):
     from . import context
     for i in context.CONFIG.groups:
       yield i,
+
 
 class GroupState(GroupConfig[TModel]):
   category = "状态"

@@ -1,6 +1,7 @@
-from .common import Info
-import subprocess as sp
 import re
+import subprocess as sp
+
+from .common import Info
 
 PERCENT_FILE = "gpu_busy_percent"
 MEM_PERCENT_FILE = "mem_busy_percent"
@@ -11,6 +12,7 @@ JUNCTION_TEMP_FILE = "hwmon/hwmon2/temp2_input"
 MEM_TEMP_FILE = "hwmon/hwmon2/temp3_input"
 VDD_FILE = "hwmon/hwmon2/in0_input"
 UEVENT_FILE = "uevent"
+
 
 def read(card: str) -> Info:
   root = f"/sys/class/drm/{card}/device/"

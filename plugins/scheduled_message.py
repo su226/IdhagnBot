@@ -1,20 +1,24 @@
-from typing import cast
-from datetime import datetime
 import random
 import time
+from datetime import datetime
+from typing import cast
 
-from pydantic import Field
-from apscheduler.schedulers.base import BaseScheduler, Job
-from apscheduler.triggers.date import DateTrigger
-from nonebot.adapters.onebot.v11 import MessageEvent, Message, GroupMessageEvent
-from nonebot.adapters.onebot.v11.event import Sender
-from nonebot.params import CommandArg
-from nonebot.message import handle_event
-from nonebot.log import logger
 import nonebot
+from apscheduler.schedulers.base import Job
+from apscheduler.triggers.date import DateTrigger
+from loguru import logger
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, MessageEvent
+from nonebot.adapters.onebot.v11.event import Sender
+from nonebot.message import handle_event
+from nonebot.params import CommandArg
+from pydantic import Field
 
+from util import command, context
 from util.config import BaseModel, BaseState
-from util import context, command
+
+nonebot.require("nonebot_plugin_apscheduler")
+from nonebot_plugin_apscheduler import scheduler
+
 
 class Scheduled(BaseModel):
   user: int
@@ -40,24 +44,30 @@ class Scheduled(BaseModel):
     STATE.del_scheduled(group, id)
 
   def schedule(self, ctx: int, id: str):
-    scheduler.add_job(self.send, "date", (ctx, id), id=f"scheduled_message_{id}", run_date=self.date)
+    scheduler.add_job(
+      self.send, "date", (ctx, id), id=f"scheduled_message_{id}", run_date=self.date)
+
 
 class State(BaseState):
   __file__ = "scheduled_message"
   scheduled: dict[int, dict[str, Scheduled]] = Field(default_factory=dict)
+
   def len_scheduled(self, ctx: int) -> int:
     if ctx not in self.scheduled:
       return 0
     return len(self.scheduled[ctx])
+
   def has_scheduled(self, ctx: int, id: str) -> bool:
     if ctx not in self.scheduled:
       return False
     return id in self.scheduled[ctx]
+
   def del_scheduled(self, ctx: int, id: str):
     del self.scheduled[ctx][id]
     if not len(self.scheduled[ctx]):
       del self.scheduled[ctx]
     self.dump()
+
   def set_scheduled(self, ctx: int, id: str, user: int, message: str, date: datetime):
     if ctx not in self.scheduled:
       self.scheduled[ctx] = {}
@@ -66,10 +76,10 @@ class State(BaseState):
     self.dump()
     scheduled.schedule(ctx, id)
 
-driver = nonebot.get_driver()
-scheduler: BaseScheduler = nonebot.require("nonebot_plugin_apscheduler").scheduler
+
 STATE = State.load()
 
+driver = nonebot.get_driver()
 now = datetime.now()
 expired: list[tuple[int, str]] = []
 for ctx, messages in STATE.scheduled.items():
@@ -82,10 +92,12 @@ for ctx, messages in STATE.scheduled.items():
 for ctx, id in expired:
   STATE.del_scheduled(ctx, id)
 
+
 def ellipsis(content: str, limit: int) -> str:
   if len(content) > limit:
     return content[:limit - 3] + "..."
   return content
+
 
 def get_message(msg: Message) -> str:
   texts = []
@@ -93,7 +105,9 @@ def get_message(msg: Message) -> str:
     texts.append(seg.data["text"] if seg.is_text() else str(seg))
   return "".join(texts)
 
-schedule = (command.CommandBuilder("schedule", "定时", "schedule")
+
+schedule = (
+  command.CommandBuilder("schedule", "定时", "schedule")
   .in_group()
   .level("super")
   .brief("设置定时任务")
@@ -103,6 +117,8 @@ schedule = (command.CommandBuilder("schedule", "定时", "schedule")
 /定时 预览|preview <任务ID> - 预览定时任务
 /定时 取消|cancel <任务ID> - 取消定时任务''')
   .build())
+
+
 @schedule.handle()
 async def handle_schedule(event: MessageEvent, msg: Message = CommandArg()):
   args = get_message(msg).rstrip().split(None, 1)
@@ -145,7 +161,7 @@ async def handle_schedule(event: MessageEvent, msg: Message = CommandArg()):
       return
     try:
       date = datetime.fromisoformat(args[0])
-    except:
+    except ValueError:
       await schedule.send("时间格式无效")
       return
     if date < datetime.now():

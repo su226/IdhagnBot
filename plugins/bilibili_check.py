@@ -1,25 +1,28 @@
+import asyncio
+import time
 from dataclasses import dataclass
 from io import BytesIO
 from urllib.parse import quote as urlencode
-import asyncio
-import time
 
-from PIL import Image, ImageDraw, ImageOps
-from pydantic import BaseModel, Field
+import aiohttp
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-import aiohttp
+from PIL import Image, ImageDraw, ImageOps
+from pydantic import BaseModel, Field
 
-from util import command, config_v2, text, color
+from util import color, command, config_v2, text
+
 
 class Config(BaseModel):
   cookie: str = ""
   update_interval: int = 86400
   update_timeout: int = 10
 
+
 class State(BaseModel):
   timestamp: float = 0
   name_cache: dict[int, str] = Field(default_factory=dict)
+
 
 CONFIG = config_v2.SharedConfig("bilibili_check", Config)
 STATE = config_v2.SharedState("bilibili_check", State)
@@ -32,6 +35,8 @@ VTB_APIS = [
   "https://api.tokyo.vtbs.moe/v1/short",
   "https://vtbs.musedash.moe/v1/short",
 ]
+GRADIENT_45DEG_WH = 362.038671968  # 256 * sqrt(2)
+
 
 async def update_vtbs(http: aiohttp.ClientSession) -> bool:
   async def get_single(url: str):
@@ -42,16 +47,19 @@ async def update_vtbs(http: aiohttp.ClientSession) -> bool:
   now = time.time()
   if state.timestamp > now - config.update_interval:
     return True
-  done, pending = await asyncio.wait([asyncio.create_task(get_single(api)) for api in VTB_APIS], timeout=config.update_timeout, return_when=asyncio.FIRST_COMPLETED)
+  done, pending = await asyncio.wait(
+    [asyncio.create_task(get_single(api)) for api in VTB_APIS],
+    timeout=config.update_timeout, return_when=asyncio.FIRST_COMPLETED)
   for task in pending:
     task.cancel()
   for task in done:
     if task.exception() is None:
-      state.name_cache = {x["mid"]: x["uname"] for x in task.result()}
+      state.name_cache = {x["mid"]: x["uname"] for x in task.result() if x}
       state.timestamp = now
       STATE.dump()
       return True
   return False
+
 
 @dataclass
 class Medal:
@@ -61,7 +69,6 @@ class Medal:
   color_end: int
   color_border: int
 
-GRADIENT_45DEG_WH = 362.038671968 # 256 * sqrt(2)
 
 def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
   name_im = text.render(name, "sans", 32)
@@ -75,9 +82,11 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
   if medal:
     medal_name_layout = text.layout(medal.name, "sans", 28)
     medal_level_layout = text.layout(str(medal.level), "sans", 28)
-    medal_width = medal_name_layout.get_pixel_size()[0] + medal_level_layout.get_pixel_size()[0] + padding * 4 + border * 2
+    medal_width = (
+      medal_name_layout.get_pixel_size()[0] + medal_level_layout.get_pixel_size()[0]
+      + padding * 4 + border * 2)
     im_width += margin + medal_width
-  else: # 不然静态类型检查器会抱怨
+  else:  # 不然静态类型检查器会抱怨
     medal_name_layout = None
     medal_level_layout = None
     medal_width = 0
@@ -89,8 +98,10 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
 
   y = (im.height - uid_im.height) // 2
   rounded_im = Image.new("L", (uid_width * 2, uid_im.height * 2), 0)
-  ImageDraw.Draw(rounded_im).rounded_rectangle((0, 0, uid_width * 2 - 1, uid_im.height * 2 - 1), 8, 255)
-  draw.bitmap((x, y), rounded_im.resize((uid_width, uid_im.height), Image.ANTIALIAS), (221, 221, 221))
+  ImageDraw.Draw(rounded_im).rounded_rectangle(
+    (0, 0, uid_width * 2 - 1, uid_im.height * 2 - 1), 8, 255)
+  draw.bitmap(
+    (x, y), rounded_im.resize((uid_width, uid_im.height), Image.ANTIALIAS), (221, 221, 221))
   im.paste(uid_im, (x + padding, y), uid_im)
   x += uid_width + margin
   if not medal:
@@ -102,14 +113,15 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
 
   medal_height = medal_name_im.height + border * 2
   y = (im.height - medal_height) // 2
-  draw.rectangle((x, y, x + medal_width - 1, y + medal_height - 1), color.split_rgb(medal.color_border))
+  draw.rectangle(
+    (x, y, x + medal_width - 1, y + medal_height - 1), color.split_rgb(medal.color_border))
 
   medal_name_bg_width = medal_name_im.width + padding * 2
   ratio = medal_name_bg_width / medal_name_im.height
   gradient = ImageOps.colorize(
     Image.linear_gradient("L"),
-    color.split_rgb(medal.color_start), # type: ignore
-    color.split_rgb(medal.color_end) # type: ignore
+    color.split_rgb(medal.color_start),  # type: ignore
+    color.split_rgb(medal.color_end)  # type: ignore
   ).rotate(45, Image.BICUBIC, True)
   grad_h = int(GRADIENT_45DEG_WH / (1 + ratio))
   grad_w = int(ratio * grad_h)
@@ -122,11 +134,16 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
 
   x += medal_name_bg_width + border
   medal_level_bg_width = medal_level_im.width + padding * 2
-  draw.rectangle((x, y + border, x + medal_level_bg_width - 1, y + border + medal_name_im.height - 1), (255, 255, 255))
+  draw.rectangle(
+    (x, y + border, x + medal_level_bg_width - 1, y + border + medal_name_im.height - 1),
+    (255, 255, 255))
   im.paste(medal_level_im, (x + padding, y + border), medal_level_im)
   return im
 
-def make_header(avatar: Image.Image, name: str, uid: int, fans: int, followings: int, vtbs: int) -> Image.Image:
+
+def make_header(
+  avatar: Image.Image, name: str, uid: int, fans: int, followings: int, vtbs: int
+) -> Image.Image:
   ratio = 0 if followings == 0 else vtbs / followings * 100
   name_im = text.render(name, "sans bold", 32)
   uid_im = text.render(str(uid), "sans", 28)
@@ -150,10 +167,13 @@ def make_header(avatar: Image.Image, name: str, uid: int, fans: int, followings:
   x = avatar.width + 32
   im.paste(name_im, (x, 0), name_im)
 
-  y = (name_im.height - uid_im.height) // 2 
+  y = (name_im.height - uid_im.height) // 2
   rounded_im = Image.new("L", (uid_width * 2, uid_im.height * 2), 0)
-  ImageDraw.Draw(rounded_im).rounded_rectangle((0, 0, rounded_im.width - 1, rounded_im.height - 1), 8, 255)
-  ImageDraw.Draw(im).bitmap((x + name_im.width + margin, y), rounded_im.resize((uid_width, uid_im.height), Image.ANTIALIAS), (221, 221, 221))
+  ImageDraw.Draw(rounded_im).rounded_rectangle(
+    (0, 0, rounded_im.width - 1, rounded_im.height - 1), 8, 255)
+  ImageDraw.Draw(im).bitmap(
+    (x + name_im.width + margin, y),
+    rounded_im.resize((uid_width, uid_im.height), Image.ANTIALIAS), (221, 221, 221))
   im.paste(uid_im, (x + name_im.width + margin + padding, y), uid_im)
 
   y = name_im.height
@@ -162,10 +182,14 @@ def make_header(avatar: Image.Image, name: str, uid: int, fans: int, followings:
   im.paste(info2_im, (x, y), info2_im)
   return im
 
-bilibili_check = (command.CommandBuilder("bilibili_check", "查成分")
+
+bilibili_check = (
+  command.CommandBuilder("bilibili_check", "查成分")
   .brief("卧槽，□批！")
   .usage("/查成分 <用户名或ID>")
   .build())
+
+
 @bilibili_check.handle()
 async def handle_bilibili_check(arg: Message = CommandArg()):
   name = arg.extract_plain_text().rstrip()
@@ -200,7 +224,9 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
         data = await resp.json()
       for i in data["data"]["list"]:
         info = i["medal_info"]
-        medals[info["target_id"]] = Medal(info["level"], info["medal_name"], info["medal_color_start"], info["medal_color_end"], info["medal_color_border"])
+        medals[info["target_id"]] = Medal(
+          info["level"], info["medal_name"],
+          info["medal_color_start"], info["medal_color_end"], info["medal_color_border"])
   items = [make_list_item(name, uid, medals.get(uid, None)) for uid, name in vtbs]
   header = make_header(avatar, name, uid, fans, len(followings), len(vtbs))
 
@@ -233,7 +259,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
       draw.rectangle((x, y, im.width - margin - border, y + item_height - 1), (247, 247, 247))
     im.paste(item, (x + x_padding, y + y_padding), item)
     y += item_height
-  
+
   f = BytesIO()
   im.save(f, "PNG")
   await bilibili_check.finish(MessageSegment.image(f))

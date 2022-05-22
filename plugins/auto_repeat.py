@@ -1,19 +1,24 @@
-from util import context
-from nonebot.adapters.onebot.v11 import MessageEvent, Message
-from nonebot.rule import Rule
-import nonebot
 import re
+
+import nonebot
+from nonebot.adapters.onebot.v11 import Message, MessageEvent
+from nonebot.rule import Rule
+
+from util import context
 
 last_message: dict[int, str] = {}
 repeated: set[int] = set()
+ORIGINAL_EMOTE_RE = re.compile(r"^\[[A-Za-z0-9\u4e00-\u9fa5]+\]$")
+
 
 def is_command(event: MessageEvent) -> bool:
   return event.message.extract_plain_text().lstrip().startswith("/")
 
-ORIGINAL_EMOTE_RE = re.compile(r"^\[[A-Za-z0-9\u4e00-\u9fa5]+\]$")
+
 def is_original_emote(event: MessageEvent) -> bool:
   # 找不到更好的解决方案，只能正则表达式匹配，虽然理论上不会漏判，但是会误判
   return ORIGINAL_EMOTE_RE.match(event.raw_message) is not None
+
 
 async def can_repeat(event: MessageEvent) -> bool:
   ctx = context.get_event_context(event)
@@ -26,6 +31,8 @@ async def can_repeat(event: MessageEvent) -> bool:
   return result
 
 auto_repeat = nonebot.on_message(Rule(can_repeat), priority=2)
+
+
 @auto_repeat.handle()
 async def handle_auto_repeat(event: MessageEvent):
   for seg in event.message:

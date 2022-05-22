@@ -2,6 +2,7 @@ from typing import Literal, TypedDict
 
 Opportunity = Literal["START", "TRAJECTORY", "SUMMARY", "END"]
 
+
 class AchievementDict(TypedDict):
   id: int
   name: str

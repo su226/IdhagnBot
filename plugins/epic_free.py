@@ -1,14 +1,17 @@
-from typing import Iterable
 from datetime import datetime, timedelta, timezone
+from typing import Iterable
 
 from aiohttp import ClientSession
 from nonebot.adapters.onebot.v11 import Message
 
 from util import command
 
-API = "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=zh-CN&country=CN&allowCountries=CN"
+API = (
+  "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions?locale=zh-CN"
+  "&country=CN&allowCountries=CN")
 FREE = {"discountType": "PERCENTAGE", "discountPercentage": 0}
 ZERO = timedelta()
+
 
 def iter_promotions(promotions: dict) -> Iterable[dict]:
   if promotions is None:
@@ -18,6 +21,7 @@ def iter_promotions(promotions: dict) -> Iterable[dict]:
   for i in promotions["upcomingPromotionalOffers"]:
     yield from i["promotionalOffers"]
 
+
 def getslug(game: dict) -> str | None:
   slug = game['productSlug']
   if slug and slug != "[]":
@@ -26,6 +30,7 @@ def getslug(game: dict) -> str | None:
     if i.get("pageType", None) == "productHome":
       return i["pageSlug"]
   return None
+
 
 def iter_free_games(games: list[dict]) -> Iterable[str]:
   now_date = datetime.now(timezone.utc)
@@ -52,12 +57,16 @@ def iter_free_games(games: list[dict]) -> Iterable[str]:
           yield f"[CQ:image,file={image}]{title} 将在 {start_date_str} 免费，截止到 {end_date_str}\n{url}"
           break
 
-epicfree = (command.CommandBuilder("epicfree", "epicfree", "epic", "喜加一")
+
+epicfree = (
+  command.CommandBuilder("epicfree", "epicfree", "epic", "喜加一")
   .brief("看看E宝又在送什么")
   .usage('''\
 /epicfree - 查看现在的免费游戏
 你送游戏你是我宝，你卖游戏翻脸不认（雾）''')
   .build())
+
+
 @epicfree.handle()
 async def handle_epicfree():
   async with ClientSession() as http:

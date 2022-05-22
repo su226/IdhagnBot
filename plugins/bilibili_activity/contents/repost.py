@@ -1,6 +1,7 @@
-from typing import Any, Callable
-from .. import util
 import json
+from typing import Any, Callable
+
+from .. import util
 
 FORMAT = '''\
 👀 {username} 转发了 {fromuser} 的{type}
@@ -8,6 +9,7 @@ https://t.bilibili.com/{id}
 “{summary}”
 ---- 原{type} ----
 {original}'''
+
 
 def gallery(original: str) -> str:
   card = json.loads(original)
@@ -19,11 +21,13 @@ def gallery(original: str) -> str:
     image_count=len(card["item"]["pictures"]),
     summary=util.ellipsis(text))
 
+
 def activity(original: str) -> str:
   card = json.loads(original)
   text = card["item"]["content"]
   util.check_ignore(True, text)
   return "“{summary}”".format(summary=util.ellipsis(text))
+
 
 def video(original: str) -> str:
   card = json.loads(original)
@@ -33,6 +37,7 @@ def video(original: str) -> str:
     title=card["title"],
     summary=util.ellipsis(card["desc"]))
 
+
 def article(original: str) -> str:
   card = json.loads(original)
   return '''\
@@ -40,6 +45,7 @@ def article(original: str) -> str:
 “{summary}”'''.format(
     title=card["title"],
     summary=util.ellipsis(card["summary"]))
+
 
 FormatterType = Callable[[str], str]
 ORIGINAL_FORMAT: dict[int, tuple[str, FormatterType]] = {
@@ -49,6 +55,7 @@ ORIGINAL_FORMAT: dict[int, tuple[str, FormatterType]] = {
   64: ("专栏", article)
 }
 ORIGINAL_UNKNOWN: tuple[str, FormatterType] = ("动态", lambda _: "目前机器人还不能理解这个qwq")
+
 
 def handle(content: Any) -> str:
   card = json.loads(content["card"])

@@ -1,12 +1,15 @@
-from io import StringIO
 from html.parser import HTMLParser
+from io import StringIO
+
 from pydantic import BaseModel
+
 
 class Item(BaseModel):
   url: str
   title: str
   image: str
   content: str
+
 
 class HTMLStripper(HTMLParser):
   def __init__(self):
@@ -19,6 +22,7 @@ class HTMLStripper(HTMLParser):
   def close(self) -> str:
     super().close()
     return self.f.getvalue()
+
 
 def strip_html(*text: str):
   stripper = HTMLStripper()

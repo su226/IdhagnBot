@@ -1,11 +1,11 @@
-from typing import cast
-from asyncio.streams import StreamReader, StreamWriter
 import asyncio
-import os
 import json
+import os
 import subprocess
+from asyncio.streams import StreamReader, StreamWriter
+from typing import cast
 
-from nonebot.log import logger
+from loguru import logger
 
 env_dir = os.path.abspath("states/safe_eval_js")
 if not os.path.exists(env_dir):
@@ -15,8 +15,12 @@ if not os.path.exists(env_dir):
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
-async def safe_eval(code: str, timeout: float, nproc: int, memory: int, output: int) -> tuple[bool, int, bytes, bytes]:
-  proc = await asyncio.subprocess.create_subprocess_exec("bwrap",
+
+async def safe_eval(
+  code: str, timeout: float, nproc: int, memory: int, output: int
+) -> tuple[bool, int, bytes, bytes]:
+  proc = await asyncio.subprocess.create_subprocess_exec(
+    "bwrap",
     "--unshare-all",
     "--clearenv",
     "--die-with-parent",

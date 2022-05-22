@@ -1,34 +1,42 @@
-from argparse import Namespace
 import os
+from argparse import Namespace
 
-from PIL import Image
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
 from nonebot.exception import ParserExit
-from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
+from nonebot.rule import ArgumentParser
+from PIL import Image
 
 from util import command, helper
-from ..util import segment_animated_image, get_image_and_user
+
+from ..util import get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 BOXES = [
-  (82, 100, 130, 119), (82, 94, 126, 125), (82, 120, 128, 99),
-  (81, 164, 132, 55), (79, 163, 132, 55), (82, 140, 127, 79),
-  (83, 152, 125, 67), (75, 157, 140, 62), (72, 165, 144, 54),
-  (80, 132, 128, 87), (81, 127, 127, 92), (79, 111, 132, 108)
-]
+  (82, 100, 130, 119), (82, 94, 126, 125), (82, 120, 128, 99), (81, 164, 132, 55),
+  (79, 163, 132, 55), (82, 140, 127, 79), (83, 152, 125, 67), (75, 157, 140, 62),
+  (72, 165, 144, 54), (80, 132, 128, 87), (81, 127, 127, 92), (79, 111, 132, 108)]
 
 parser = ArgumentParser(add_help=False)
-parser.add_argument("target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
+parser.add_argument(
+  "target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
 group = parser.add_mutually_exclusive_group()
-group.add_argument("-webp", action="store_const", dest="format", const="webp", default="gif", help="使用WebP而非GIF格式")
-group.add_argument("-apng", "-png", action="store_const", dest="format", const="png", help="使用APNG而非GIF格式")
-matcher = (command.CommandBuilder("petpet_v2.suck", "吸")
+group.add_argument(
+  "-webp", action="store_const", dest="format", const="webp", default="gif",
+  help="使用WebP而非GIF格式")
+group.add_argument(
+  "-apng", "-png", action="store_const", dest="format", const="png", help="使用APNG而非GIF格式")
+matcher = (
+  command.CommandBuilder("petpet_v2.suck", "吸")
   .category("petpet_v2")
   .shell(parser)
   .build())
+
+
 @matcher.handle()
-async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
+async def handler(
+  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+) -> None:
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
   try:

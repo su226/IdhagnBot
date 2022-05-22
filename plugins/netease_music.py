@@ -1,40 +1,46 @@
-from typing import TypedDict
-from urllib.parse import quote
 import math
+from typing import TypedDict, cast
+from urllib.parse import quote
 
 from aiohttp import ClientSession
-from nonebot.params import CommandArg, State, ArgStr
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.params import ArgStr, CommandArg
+from nonebot.typing import T_State
 
 from util import command
 
 API = "https://music.163.com/api/search/get/web?type=1&offset={offset}&limit={limit}&s={keyword}"
 LIMIT = 10
 
-class CmdState(TypedDict):
+
+class StateDict(TypedDict):
   keyword: str
   page: int
   end: bool
   choices: list[int]
 
-netease = (command.CommandBuilder("netease", "网易云", "netease", "163", "cloudmusic")
+
+netease = (
+  command.CommandBuilder("netease", "网易云", "netease", "163", "cloudmusic")
   .brief("网易云点歌")
   .usage('''\
 /网易云 <关键字> - 搜索关键字
 /网易云 <id> - 发送指定ID的歌''')
   .build())
 
-async def get_prompt(state: CmdState):
+
+async def get_prompt(state: StateDict):
   if state["end"]:
     return "没有下一页了，请重新输入，或发送“取”取消点歌"
   offset = LIMIT * state["page"]
   async with ClientSession() as http:
-    response = await http.get(API.format(keyword=quote(state["keyword"]), offset=offset, limit=LIMIT))
+    response = await http.get(
+      API.format(keyword=quote(state["keyword"]), offset=offset, limit=LIMIT))
     data = await response.json(content_type=None)
   songs = data["result"]["songCount"]
   pages = math.ceil(songs / LIMIT)
   if pages == 0:
-    await netease.finish(f"搜索结果为空")
+    await netease.finish("搜索结果为空")
   prompt = []
   has_vip = False
   for i, song in enumerate(data["result"]["songs"], offset + 1):
@@ -60,8 +66,9 @@ async def get_prompt(state: CmdState):
   prompt.append("- 发送“取”取消点歌")
   return "\n".join(prompt)
 
+
 @netease.handle()
-async def handle_netease(args: Message = CommandArg(), state = State()):
+async def handle_netease(state: T_State, args: Message = CommandArg()):
   keyword = str(args).rstrip()
   if not keyword:
     await netease.finish(netease.__doc__)
@@ -75,18 +82,19 @@ async def handle_netease(args: Message = CommandArg(), state = State()):
   state["page"] = 0
   state["end"] = False
   state["choices"] = []
-  await netease.send(await get_prompt(state))
+  await netease.send(await get_prompt(cast(StateDict, state)))
+
 
 @netease.got("choice")
-async def receive_netease(choice: str = ArgStr(), state = State()):
+async def receive_netease(state: T_State, choice: str = ArgStr()):
   choice = choice.strip()
   if choice == "取":
     await netease.finish("点歌取消")
   elif choice == "下":
-    await netease.reject(await get_prompt(state))
+    await netease.reject(await get_prompt(cast(StateDict, state)))
   try:
     choice_int = int(choice)
-  except:
+  except ValueError:
     await netease.reject("只能输入数字，请重新输入，或发送“取”取消点歌")
   choices = state["choices"]
   if choice_int < 1 or choice_int > len(choices):

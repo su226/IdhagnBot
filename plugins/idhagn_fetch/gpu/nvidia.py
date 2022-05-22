@@ -1,5 +1,6 @@
-from .common import Info
 import subprocess as sp
+
+from .common import Info
 
 COMMAND = [
   "nvidia-smi",
@@ -7,6 +8,7 @@ COMMAND = [
   "--format=csv"
 ]
 UEVENT_FILE = "uevent"
+
 
 def read(card: str) -> Info:
   root = f"/sys/class/drm/{card}/device/"
@@ -27,4 +29,5 @@ def read(card: str) -> Info:
   if info is None:
     raise RuntimeError(f"无法获取状态：{card}")
   name, clk, temp, percent, mem_percent = info
-  return Info(False, name, int(percent[:-2]), int(mem_percent[:-2]), int(clk[:-4]) * 1000000, int(temp))
+  return Info(
+    False, name, int(percent[:-2]), int(mem_percent[:-2]), int(clk[:-4]) * 1000000, int(temp))

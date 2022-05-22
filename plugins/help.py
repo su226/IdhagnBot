@@ -1,22 +1,25 @@
 import asyncio
 
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent
+from nonebot.exception import ActionFailed
 from nonebot.params import CommandArg
 
-from util import context, help, command
+from util import command, context, help
+
 
 async def get_available_groups(bot: Bot, user_id: int) -> list[int]:
   async def in_group(group_id: int) -> int:
     try:
       await bot.get_group_member_info(group_id=group_id, user_id=user_id)
-    except:
+    except ActionFailed:
       return 0
     else:
       return group_id
   groups = await asyncio.gather(in_group(group) for group in context.CONFIG.groups)
   return [group for group in groups if group]
 
-help_cmd = (command.CommandBuilder("help", "帮助", "help", "?")
+help_cmd = (
+  command.CommandBuilder("help", "帮助", "help", "?")
   .brief("查看所有帮助")
   .usage('''\
 /帮助 [...分类] [页码] - 查看帮助页
@@ -25,6 +28,8 @@ help_cmd = (command.CommandBuilder("help", "帮助", "help", "?")
 分类和命令前面的符号仅用作区分，查看时无需输入
 命令帮助中尖括号里的参数必选，方括号里的参数可选，带...的参数可输入多个''')
   .build())
+
+
 @help_cmd.handle()
 async def handle_help(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
   args = msg.extract_plain_text().split()
@@ -45,7 +50,7 @@ async def handle_help(bot: Bot, event: MessageEvent, msg: Message = CommandArg()
   elif len(args) == 1:
     try:
       command = help.CommandItem.find(args[0])
-    except:
+    except KeyError:
       pass
     else:
       if command.can_show(data):
@@ -53,12 +58,12 @@ async def handle_help(bot: Bot, event: MessageEvent, msg: Message = CommandArg()
   try:
     page = int(args[-1])
     path = args[:-1]
-  except:
+  except ValueError:
     page = 1
     path = args
   try:
     category = help.CategoryItem.find(path)
-  except:
+  except KeyError:
     await help_cmd.finish("无此条目或分类、权限不足或在当前上下文不可用")
   else:
     if category.can_show(data):

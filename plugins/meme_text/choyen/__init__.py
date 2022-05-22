@@ -2,17 +2,19 @@ import os
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-import nonebot
 
-from util import resources, command
+from util import command, resources
 
 PAGE = "file://" + os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
 USAGE = "/5000兆元 <红色文本> [银色文本]"
 
-choyen = (command.CommandBuilder("meme_text.5000choyen", "5000兆元", "兆元", "5000choyen", "choyen")
+choyen = (
+  command.CommandBuilder("meme_text.5000choyen", "5000兆元", "兆元", "5000choyen", "choyen")
   .brief("生成想要5000兆元风格文字")
   .usage(USAGE)
   .build())
+
+
 @choyen.handle()
 async def handle_choyen(args: Message = CommandArg()):
   text = args.extract_plain_text().split()

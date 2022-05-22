@@ -1,13 +1,16 @@
-from typing import Any, Literal
 from enum import Enum
+from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from loguru import logger
 from nonebot.adapters.onebot.v11 import Adapter, Bot
-from nonebot.log import logger
+from nonebot.exception import ActionFailed
+from pydantic import BaseModel, Field
 
 from .config_v2 import GroupState, SharedState
 
 Node = tuple[str, ...]
+
+
 class Entry(BaseModel):
   node_str: str = Field(alias="node")
   value: bool
@@ -18,18 +21,22 @@ class Entry(BaseModel):
       return ()
     return tuple(self.node_str.split("."))
 
+
 class Role(BaseModel):
   priority: int = 0
   parents: list[str] = Field(default_factory=list)
   entries: list[Entry] = Field(default_factory=list)
+
 
 class User(BaseModel):
   roles: list[str] = Field(default_factory=list)
   entries: list[Entry] = Field(default_factory=list)
   level: Literal[None, "member", "admin", "owner"] = None
 
+
 class Command(BaseModel):
   level: Literal[None, "member", "admin", "owner"] = None
+
 
 class State(BaseModel):
   roles: dict[str, Role] = Field(default_factory=dict)
@@ -47,10 +54,13 @@ class State(BaseModel):
       return self.commands[key].level
     return None
 
+
 SHARED_STATE = SharedState("permission_override", State)
 GROUP_STATE = GroupState("permission", State)
-
+ADAPTER_NAME = Adapter.get_name().split(None, 1)[0].lower()
 LEVELS: dict[str, "Level"] = {}
+
+
 class Level(Enum):
   MEMBER = "member", 0
   ADMIN = "admin", 1
@@ -66,14 +76,17 @@ class Level(Enum):
     if isinstance(other, Level):
       return self.order >= other.order
     return NotImplemented
+
   def __gt__(self, other: object) -> bool:
     if isinstance(other, Level):
       return self.order > other.order
     return NotImplemented
+
   def __le__(self, other: object) -> bool:
     if isinstance(other, Level):
       return self.order <= other.order
     return NotImplemented
+
   def __lt__(self, other: object) -> bool:
     if isinstance(other, Level):
       return self.order < other.order
@@ -83,8 +96,10 @@ class Level(Enum):
   def parse(cls, value: str) -> "Level":
     return LEVELS[value]
 
+
 def tuple_startswith(value: tuple[Any, ...], prefix: tuple[Any, ...]) -> bool:
   return len(value) >= len(prefix) and value[:len(prefix)] == prefix
+
 
 def check_in(node: Node, state: State, user: int) -> bool | None:
   entries: list[list[Entry]] = [[] for _ in range(len(node))]
@@ -116,6 +131,7 @@ def check_in(node: Node, state: State, user: int) -> bool | None:
       return e2.value
   return None
 
+
 def check(node: Node, user: int, group: int = 1) -> bool | None:
   shared_state = SHARED_STATE()
   if (result := check_in(node, shared_state, user)) is not None:
@@ -126,9 +142,10 @@ def check(node: Node, user: int, group: int = 1) -> bool | None:
       return result
   return None
 
-ADAPTER_NAME = Adapter.get_name().split(None, 1)[0].lower()
+
 def is_superuser(bot: Bot, user: int) -> bool:
   return f"{ADAPTER_NAME}:{user}" in bot.config.superusers or str(user) in bot.config.superusers
+
 
 def get_override_level(bot: Bot, user: int, group: int = -1) -> Level | None:
   if is_superuser(bot, user):
@@ -142,14 +159,16 @@ def get_override_level(bot: Bot, user: int, group: int = -1) -> Level | None:
       return Level.parse(level)
   return None
 
+
 async def get_group_level(bot: Bot, user: int, group: int) -> Level | None:
   try:
     info = await bot.get_group_member_info(group_id=group, user_id=user)
-  except:
+  except ActionFailed:
     logger.exception(f"获取权限失败，这通常不应该发生！群聊: {group} 用户: {user}")
   else:
     return Level.parse(info["role"])
   return None
+
 
 def get_node_level(node: Node, group: int = -1) -> Level | None:
   if (level_name := SHARED_STATE().get_command_level(node)) is not None:
@@ -157,6 +176,7 @@ def get_node_level(node: Node, group: int = -1) -> Level | None:
   elif group != -1 and (level_name := GROUP_STATE(group).get_command_level(node)) is not None:
     return Level.parse(level_name)
   return None
+
 
 EXPORT_LEVELS: dict[Level, str] = {
   Level.MEMBER: "群员",
@@ -166,10 +186,13 @@ EXPORT_LEVELS: dict[Level, str] = {
 }
 EXPORT_NODES: list[tuple[Node, Level]] = []
 
+
 def register_for_export(node: Node, level: Level):
   EXPORT_NODES.append((node, level))
 
+
 def export_html() -> str:
   EXPORT_NODES.sort(key=lambda x: x[0])
-  content = "".join(f"<li>[{EXPORT_LEVELS[level]}] {'.'.join(node)}</li>" for node, level in EXPORT_NODES)
+  content = "".join(
+    f"<li>[{EXPORT_LEVELS[level]}] {'.'.join(node)}</li>" for node, level in EXPORT_NODES)
   return f"<ul>{content}</ul>"

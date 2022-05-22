@@ -1,23 +1,28 @@
 import asyncio
 
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message
+from nonebot.exception import ActionFailed
 from nonebot.params import CommandArg
 
-from util import account_aliases, helper, command
+from util import account_aliases, command, helper
+
 
 async def get_card(bot: Bot, group: int, user: int) -> str:
   try:
     info = await bot.get_group_member_info(group_id=group, user_id=user)
-  except:
+  except ActionFailed:
     return (await bot.get_stranger_info(user_id=user))["nickname"]
   else:
     return info["card"] or info["nickname"]
 
-fake_forward = (command.CommandBuilder("fake_forward", "我有一个朋友", "朋友", "吾有一友", "friend")
+fake_forward = (
+  command.CommandBuilder("fake_forward", "我有一个朋友", "朋友", "吾有一友", "friend")
   .brief("鲁迅：我没有说过这句话")
   .usage("/我有一个朋友 <用户> <消息>")
   .private(False)
   .build())
+
+
 @fake_forward.handle()
 async def handle_fake_forward(bot: Bot, event: GroupMessageEvent, msg: Message = CommandArg()):
   args = str(msg).split(None, 1)

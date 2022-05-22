@@ -1,17 +1,25 @@
 from typing import Any
+
 from aiohttp import ClientSession
+
 from .common import Item, strip_html
 
 API = "https://weibo.com/ajax/statuses/hot_band"
 IMG = "https://wx4.sinaimg.cn/large/{}.jpg"
 SEARCH = "https://s.weibo.com/weibo?q=%23{}%23"
 
+
 def get_image(data: Any) -> str:
-  try: return IMG.format(data["mblog"]["pic_ids"][0])
-  except: pass
-  try: return data["mblog"]["page_info"]["page_pic"]
-  except: pass
+  try:
+    return IMG.format(data["mblog"]["pic_ids"][0])
+  except KeyError:
+    pass
+  try:
+    return data["mblog"]["page_info"]["page_pic"]
+  except KeyError:
+    pass
   return ""
+
 
 async def get_data() -> list[Item]:
   async with ClientSession() as http:

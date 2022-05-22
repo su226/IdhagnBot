@@ -1,46 +1,46 @@
-from argparse import Namespace
 import os
+from argparse import Namespace
 
-from PIL import Image
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
 from nonebot.exception import ParserExit
-from nonebot.rule import ArgumentParser
 from nonebot.params import ShellCommandArgs
+from nonebot.rule import ArgumentParser
+from PIL import Image
 
 from util import command, helper
-from ..util import circle, segment_animated_image, get_image_and_user
+
+from ..util import circle, get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
 OTHER_BOXES = [
-  (39, 91, 75, 75),
-  (49, 101, 75, 75),
-  (67, 98, 75, 75),
-  (55, 86, 75, 75),
-  (61, 109, 75, 75),
-  (65, 101, 75, 75)
-]
+  (39, 91, 75, 75), (49, 101, 75, 75), (67, 98, 75, 75), (55, 86, 75, 75), (61, 109, 75, 75),
+  (65, 101, 75, 75)]
 SELF_BOXES = [
-  (102, 95, 70, 80, 0),
-  (108, 60, 50, 100, 0),
-  (97, 18, 65, 95, 0),
-  (65, 5, 75, 75, -20),
-  (95, 57, 100, 55, -70),
-  (109, 107, 65, 75, 0)
-]
+  (102, 95, 70, 80, 0), (108, 60, 50, 100, 0), (97, 18, 65, 95, 0), (65, 5, 75, 75, -20),
+  (95, 57, 100, 55, -70), (109, 107, 65, 75, 0)]
 
 parser = ArgumentParser(add_help=False)
-parser.add_argument("target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
+parser.add_argument(
+  "target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
 parser.add_argument("-source", default="", metavar="源", help="同上")
 group = parser.add_mutually_exclusive_group()
-group.add_argument("-webp", action="store_const", dest="format", const="webp", default="gif", help="使用WebP而非GIF格式")
-group.add_argument("-apng", "-png", action="store_const", dest="format", const="png", help="使用APNG而非GIF格式")
-matcher = (command.CommandBuilder("petpet_v2.intimate", "贴贴")
+group.add_argument(
+  "-webp", action="store_const", dest="format", const="webp", default="gif",
+  help="使用WebP而非GIF格式")
+group.add_argument(
+  "-apng", "-png", action="store_const", dest="format", const="png", help="使用APNG而非GIF格式")
+matcher = (
+  command.CommandBuilder("petpet_v2.intimate", "贴贴")
   .category("petpet_v2")
   .shell(parser)
   .build())
+
+
 @matcher.handle()
-async def handler(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()) -> None:
+async def handler(
+  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+) -> None:
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
   try:

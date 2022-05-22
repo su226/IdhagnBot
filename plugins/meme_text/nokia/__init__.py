@@ -1,21 +1,24 @@
-from io import BytesIO
 import os
+from io import BytesIO
 
-from PIL import Image, ImageDraw, ImageFilter
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
+from PIL import Image, ImageDraw, ImageFilter
 
-from util import resources, command
+from util import command, resources
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 HELP = '''\
 /诺基亚 <文本>
 自动换行，文本不能超过 6 行'''
 
-nokia = (command.CommandBuilder("meme_text.nokia", "诺基亚", "nokia", "无内鬼")
+nokia = (
+  command.CommandBuilder("meme_text.nokia", "诺基亚", "nokia", "无内鬼")
   .brief("生成诺基亚无内鬼梗图")
   .usage(HELP)
   .build())
+
+
 @nokia.handle()
 async def handle_nokia(args: Message = CommandArg()):
   text = args.extract_plain_text().replace("\r", "").rstrip().removeprefix(".") or f"用法:\n{HELP}"

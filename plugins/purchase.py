@@ -1,17 +1,18 @@
-from argparse import Namespace
 import asyncio
 import itertools
 import random
+from argparse import Namespace
 
-from pydantic import BaseModel, Field
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
-from nonebot.params import ShellCommandArgs, CommandArg, ArgPlainText
+from nonebot.params import ArgPlainText, CommandArg, ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from nonebot.typing import T_State
+from pydantic import BaseModel, Field
 
-from util import context, account_aliases, currency, helper, command
+from util import account_aliases, command, context, currency, helper
 from util.config import BaseState
+
 
 class Goods(BaseModel):
   notify: int
@@ -24,26 +25,39 @@ class Goods(BaseModel):
   total_purchased: int = 0
   single_purchased: dict[int, int] = Field(default_factory=dict)
 
+
 class State(BaseState, file="goods"):
   goods: dict[int, dict[int, Goods]] = Field(default_factory=dict)
+
 
 STATE = State.load()
 
 parser_add_goods = ArgumentParser("/添加商品", add_help=False)
 parser_add_goods.add_argument("name", metavar="商品名")
 parser_add_goods.add_argument("price", metavar="价格", type=int)
-parser_add_goods.add_argument("-desc", "-描述", metavar="内容", default="没有描述", help="商品描述，如果有空格或换行要用英文引号包起来")
-parser_add_goods.add_argument("-total", "-总限购", metavar="次数", type=int, default=0, help="全部群成员可购买的次数，默认不限购")
-parser_add_goods.add_argument("-single", "-单人限购", metavar="次数", type=int, default=0, help="每个群成员可购买的次数，默认不限购")
+parser_add_goods.add_argument(
+  "-desc", "-描述", metavar="内容", default="没有描述",
+  help="商品描述，如果有空格或换行要用英文引号包起来")
+parser_add_goods.add_argument(
+  "-total", "-总限购", metavar="次数", type=int, default=0,
+  help="全部群成员可购买的次数，默认不限购")
+parser_add_goods.add_argument(
+  "-single", "-单人限购", metavar="次数", type=int, default=0,
+  help="每个群成员可购买的次数，默认不限购")
 parser_add_goods.add_argument("-notify", "-提醒", metavar="用户", help="设置购买商品后提醒谁")
-add_goods = (command.CommandBuilder("purchase.add_goods", "添加商品")
+add_goods = (
+  command.CommandBuilder("purchase.add_goods", "添加商品")
   .in_group()
   .level("admin")
   .brief("添加一个金币商品")
   .shell(parser_add_goods)
   .build())
+
+
 @add_goods.handle()
-async def handle_add_goods(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
+async def handle_add_goods(
+  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+):
   if isinstance(args, ParserExit):
     await add_goods.finish(args.message)
   if args.notify is None:
@@ -54,13 +68,16 @@ async def handle_add_goods(bot: Bot, event: MessageEvent, args: Namespace | Pars
     except helper.AggregateError as e:
       await add_goods.finish("\n".join(e))
   ctx = context.get_event_context(event)
-  goods = Goods(notify=notify, name=args.name, price=args.price, description=args.desc, total=args.total, single=args.single)
+  goods = Goods(
+    notify=notify, name=args.name, price=args.price, description=args.desc, total=args.total,
+    single=args.single)
   goods_id = random.randrange(1000000000)
   if ctx not in STATE.goods:
     STATE.goods[ctx] = {}
   STATE.goods[ctx][goods_id] = goods
   STATE.dump()
   await add_goods.finish(f"已添加ID为 {goods_id} 的商品")
+
 
 def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
   try:
@@ -94,6 +111,7 @@ def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
     raise helper.AggregateError("\n".join(segments))
   return all_goods[0]
 
+
 async def find_user(bot: Bot, event: MessageEvent, pattern: str) -> int:
   if pattern == "全部":
     return 0
@@ -102,26 +120,42 @@ async def find_user(bot: Bot, event: MessageEvent, pattern: str) -> int:
 parser_modify_goods = ArgumentParser("/修改商品")
 group = parser_modify_goods.add_argument_group()
 parser_modify_goods.add_argument("goods", metavar="商品", help="可以是名字或ID")
-parser_modify_goods.add_argument("-name", "-名字", metavar="新名字", help="修改商品名字，默认为不修改")
-parser_modify_goods.add_argument("-desc", "-描述", metavar="新描述", help="修改商品描述，默认为不修改")
-parser_modify_goods.add_argument("-price", "-价格", metavar="新价格", type=int, help="修改商品价格，默认为不修改")
-parser_modify_goods.add_argument("-total", "-总限购", metavar="新次数", type=int, help="修改商品总限购，默认为不修改")
-parser_modify_goods.add_argument("-single", "-单人限购", metavar="新次数", type=int, help="修改商品单人限购，默认为不修改")
-parser_modify_goods.add_argument("-reset-total", "-重置总限购", action="store_true", help="重置总限购")
-parser_modify_goods.add_argument("-reset-single", "-重置单人限购", metavar="用户", action="append", default=[], help="重置某人的单人限购（可使用多次），也可使用\"全部\"指定全部人")
+parser_modify_goods.add_argument(
+  "-name", "-名字", metavar="新名字", help="修改商品名字，默认为不修改")
+parser_modify_goods.add_argument(
+  "-desc", "-描述", metavar="新描述", help="修改商品描述，默认为不修改")
+parser_modify_goods.add_argument(
+  "-price", "-价格", metavar="新价格", type=int, help="修改商品价格，默认为不修改")
+parser_modify_goods.add_argument(
+  "-total", "-总限购", metavar="新次数", type=int, help="修改商品总限购，默认为不修改")
+parser_modify_goods.add_argument(
+  "-single", "-单人限购", metavar="新次数", type=int, help="修改商品单人限购，默认为不修改")
+parser_modify_goods.add_argument(
+  "-reset-total", "-重置总限购", action="store_true", help="重置总限购")
+parser_modify_goods.add_argument(
+  "-reset-single", "-重置单人限购", metavar="用户", action="append", default=[],
+  help="重置某人的单人限购（可使用多次），也可使用\"全部\"指定全部人")
 parser_modify_goods.add_argument("-notify", "-提醒", metavar="新用户", help="设置购买商品后提醒谁")
-parser_modify_goods.add_argument("-delete", "-删除", action="store_true", help="删除商品（不能找回）")
+parser_modify_goods.add_argument(
+  "-delete", "-删除", action="store_true", help="删除商品（不能找回）")
 group = parser_modify_goods.add_mutually_exclusive_group()
-group.add_argument("-disable", "-下架", dest="disabled", action="store_true", default=None, help="下架商品，不会隐藏商品，但是不能购买")
+group.add_argument(
+  "-disable", "-下架", dest="disabled", action="store_true", default=None,
+  help="下架商品，不会隐藏商品，但是不能购买")
 group.add_argument("-enable", "-上架", dest="disabled", action="store_false", help="重新上架商品")
-modify_goods = (command.CommandBuilder("purchase.modify_goods", "修改商品")
+modify_goods = (
+  command.CommandBuilder("purchase.modify_goods", "修改商品")
   .in_group()
   .level("admin")
   .brief("修改一个金币商品")
   .shell(parser_modify_goods)
   .build())
+
+
 @modify_goods.handle()
-async def handle_modify_goods(bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
+async def handle_modify_goods(
+  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+):
   if isinstance(args, ParserExit):
     await modify_goods.finish(args.message)
   ctx = context.get_event_context(event)
@@ -164,11 +198,11 @@ async def handle_modify_goods(bot: Bot, event: MessageEvent, args: Namespace | P
     results.append(f"已修改单人限购为：{args.single}")
   if args.reset_total:
     goods.total_purchased = 0
-    results.append(f"已重置总限购")
+    results.append("已重置总限购")
   for i in reset_single:
     if i == 0:
       goods.single_purchased.clear()
-      results.append(f"已重置所有人的单人限购")
+      results.append("已重置所有人的单人限购")
     else:
       info = await bot.get_group_member_info(group_id=ctx, user_id=i)
       username = info["card"] or info["nickname"]
@@ -183,9 +217,9 @@ async def handle_modify_goods(bot: Bot, event: MessageEvent, args: Namespace | P
   if args.disabled is not None:
     goods.disabled = args.disabled
     if args.disabled:
-      results.append(f"已下架商品")
+      results.append("已下架商品")
     else:
-      results.append(f"已重新上架商品")
+      results.append("已重新上架商品")
   if args.delete:
     del STATE.goods[ctx][id]
     results.append("已删除商品")
@@ -193,6 +227,7 @@ async def handle_modify_goods(bot: Bot, event: MessageEvent, args: Namespace | P
     results.append("似乎什么都没改")
   STATE.dump()
   await modify_goods.finish("\n".join(results))
+
 
 async def format_goods(bot: Bot, event: MessageEvent, id: int, goods: Goods) -> Message:
   ctx = context.get_event_context(event)
@@ -220,14 +255,18 @@ async def format_goods(bot: Bot, event: MessageEvent, id: int, goods: Goods) -> 
     f"你已购买：{single}\n"
     f"简介："
   ) + Message(goods.description)
-  
-show_goods = (command.CommandBuilder("purchase.show_goods", "商品")
+
+
+show_goods = (
+  command.CommandBuilder("purchase.show_goods", "商品")
   .in_group()
   .brief("列出所有金币商品或显示详细信息")
   .usage('''\
 /商品 - 列出所有金币商品
 /商品 <名字或ID> - 显示商品详细信息''')
   .build())
+
+
 @show_goods.handle()
 async def handle_show_goods(bot: Bot, event: MessageEvent, arg: Message = CommandArg()):
   name = arg.extract_plain_text().rstrip()
@@ -251,13 +290,18 @@ async def handle_show_goods(bot: Bot, event: MessageEvent, arg: Message = Comman
       await show_goods.finish("\n".join(e))
     await show_goods.finish(await format_goods(bot, event, id, goods))
 
-purchase = (command.CommandBuilder("purchase.purchase", "购买")
+purchase = (
+  command.CommandBuilder("purchase.purchase", "购买")
   .in_group()
   .brief("购买金币商品")
   .usage("/购买商品 <名字或ID> - 购买指定商品，购买后会提醒商品的所有人")
   .build())
+
+
 @purchase.handle()
-async def handle_purchase(bot: Bot, event: MessageEvent, state: T_State, arg: Message = CommandArg()):
+async def handle_purchase(
+  bot: Bot, event: MessageEvent, state: T_State, arg: Message = CommandArg()
+):
   name = arg.extract_plain_text().rstrip()
   ctx = context.get_event_context(event)
   try:
@@ -276,7 +320,10 @@ async def handle_purchase(bot: Bot, event: MessageEvent, state: T_State, arg: Me
   new_balance = balance - goods.price
   if new_balance < 0:
     await purchase.finish(formatted + f"\n余额：{balance}\n余额不足，无法购买")
-  await purchase.send(formatted + f"\n余额：{balance} → {new_balance}\n发送“确定”确定购买，发送“取消”或其他消息取消购买")
+  await purchase.send(
+    formatted
+    + f"\n余额：{balance} → {new_balance}\n发送“确定”确定购买，发送“取消”或其他消息取消购买")
+
 
 @purchase.got("choice")
 async def got_purchase(bot: Bot, event: MessageEvent, state: T_State, choice: str = ArgPlainText()):
@@ -301,9 +348,11 @@ async def got_purchase(bot: Bot, event: MessageEvent, state: T_State, choice: st
     goods.single_purchased[event.user_id] = 1
   STATE.dump()
   if ctx == getattr(event, "group_id", -1):
-    await purchase.finish(f"你已成功购买该商品，请与商品的主人沟通：" + MessageSegment.at(goods.notify))
+    await purchase.finish("你已成功购买该商品，请与商品的主人沟通：" + MessageSegment.at(goods.notify))
   else:
     info = await bot.get_group_member_info(group_id=ctx, user_id=event.user_id)
     username = info["card"] or info["nickname"]
-    await bot.send_group_msg(group_id=ctx, message=MessageSegment.at(goods.notify) + f"{username}（{event.user_id}）购买了你的商品 {goods.name}，请注意！")
-    await purchase.finish(f"你已成功购买该商品，请与商品的主人沟通")
+    await bot.send_group_msg(group_id=ctx, message=(
+      MessageSegment.at(goods.notify)
+      + f"{username}（{event.user_id}）购买了你的商品 {goods.name}，请注意！"))
+    await purchase.finish("你已成功购买该商品，请与商品的主人沟通")
