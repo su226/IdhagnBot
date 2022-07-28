@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pprint import pformat
 
 import yaml
@@ -42,6 +43,7 @@ async def redirect(bot: Bot, event: MessageEvent, msg: Message):
       message_type="private",
       message_id=-1,
       message=msg,
+      original_message=deepcopy(msg),
       raw_message=str(msg),
       font=event.font,
       sender=event.sender,
@@ -58,6 +60,7 @@ async def redirect(bot: Bot, event: MessageEvent, msg: Message):
       message_type="group",
       message_id=-1,
       message=msg,
+      original_message=deepcopy(msg),
       raw_message=str(msg),
       font=event.font,
       sender=event.sender,

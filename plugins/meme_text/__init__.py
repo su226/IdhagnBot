@@ -1,1 +1,1 @@
-from . import choyen, google, lolcat, nokia, pornhub, tiktok
+from . import addict, choyen, goodnews, google, lolcat, luxun, nokia, pornhub, tiktok, orly

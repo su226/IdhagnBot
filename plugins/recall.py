@@ -72,9 +72,9 @@ def add_message(event: MessageEvent, api_result: dict[str, Any]):
 async def on_bot_connect(bot: Bot):
   async def on_called_api(_, e: Exception | None, api: str, params: dict[str, Any], result: Any):
     event = current_event.get(None)
-    if (
-      isinstance(event, MessageEvent) and event.message_id != 0 and e is None
-      and api in ("send_private_msg", "send_group_msg", "send_group_forward_msg", "send_msg")
+    if isinstance(event, MessageEvent) and event.message_id != 0 and e is None and api in (
+        "send_private_msg", "send_group_msg", "send_msg",
+        "send_private_forward_msg", "send_group_forward_msg", "send_forward_msg"
     ):
       add_message(event, result)
   bot.on_called_api(on_called_api)

@@ -14,6 +14,7 @@ ENGLISH_RE = re.compile(r"^[A-Za-z0-9]+$")
 NBNHHSH_API = "https://lab.magiconch.com/api/nbnhhsh/guess"
 COUPLET_API = "https://ai-backend.binwang.me/v0.2/couplet/"
 ALIPAY_VOICE_API = "https://mm.cqu.cc/share/zhifubaodaozhang/{}.mp3"
+DINGZHEN_API = "https://api.aya1.top/randomdj?r=0"
 
 NBNHHSH_USAGE = (
   "/能不能好好说话 <...缩写>\n只能输入字母和数字\n接口来自https://lab.magiconch.com/nbnhhsh/")
@@ -82,29 +83,25 @@ alipay_voice = (
 async def handle_alipay_voice(arg: Message = CommandArg()):
   try:
     value = float(arg.extract_plain_text().rstrip())
-    if value * 100 % 1 > 0:
-      raise ValueError("只能有两位小数")
-    elif value < 0.01 or value > 999999999999.99:
+    if value < 0.01 or value > 999999999999.99:
       raise ValueError("超出范围")
   except ValueError:
     await alipay_voice.finish(ALIPAY_VOICE_USAGE)
+  value = round(value, 2)
   value_str = str(int(value)) if value % 1 == 0 else str(value)
-  await alipay_voice.finish(MessageSegment.record(
-    f"https://mm.cqu.cc/share/zhifubaodaozhang/mp3/{value_str}.mp3"))
+  await alipay_voice.finish(MessageSegment.record(ALIPAY_VOICE_API.format(value_str)))
 
-today = (
-  command.CommandBuilder("fun_api.today", "今天", "today")
-  .brief("查看历史上的今天")
-  .usage("接口来自https://www.ipip5.com/today/")
+
+dingzhen = (
+  command.CommandBuilder("fun_api.dingzhen", "一眼丁真", "丁真")
+  .brief("鉴定为假")
+  .usage("接口来自https://api.aya1.top/randomdj")
   .build())
 
 
-@today.handle()
-async def handle_today():
+@dingzhen.handle()
+async def handle_dingzhen():
   async with aiohttp.ClientSession() as http:
-    response = await http.get("https://www.ipip5.com/today/api.php?type=json")
+    response = await http.get(DINGZHEN_API)
     data = await response.json()
-  result = [f"今天是{data['result'][-1]['year']}年{data['today']}，历史上的今天是："]
-  for i in data["result"][:-1]:
-    result.append(f"{i['year']}: {i['title']}")
-  await today.finish("\n".join(result))
+  await dingzhen.send(MessageSegment.image(data["url"]))

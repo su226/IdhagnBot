@@ -15,7 +15,8 @@ async def get_available_groups(bot: Bot, user_id: int) -> list[int]:
       return 0
     else:
       return group_id
-  groups = await asyncio.gather(in_group(group) for group in context.CONFIG.groups)
+  coros = [in_group(group) for group in context.CONFIG.groups]
+  groups = await asyncio.gather(*coros)
   return [group for group in groups if group]
 
 help_cmd = (

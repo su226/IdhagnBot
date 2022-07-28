@@ -21,11 +21,12 @@ list_api = (
   "?host_uid={uid}&offset_dynamic_id={offset}")
 detail_api = (
   "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail?dynamic_id={id}")
+user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:101.0) Gecko/20100101 Firefox/101.0"
 
 
 @driver.on_startup
 async def startup():
-  async with aiohttp.ClientSession() as http:
+  async with aiohttp.ClientSession(headers={"User-Agent": user_agent}) as http:
     for user in util.CONFIG.users:
       try:
         user._name = (await (await http.get(info_api.format(uid=user.uid))).json())["data"]["name"]

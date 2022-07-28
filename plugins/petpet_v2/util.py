@@ -7,7 +7,7 @@ from typing import Any, cast
 
 import aiohttp
 import numpy as np
-from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from PIL import Image, ImageChops, ImageDraw
 
 from util import account_aliases, helper
@@ -45,6 +45,7 @@ class RemapTransform:
 
 AT_RE = re.compile(r"^\[CQ:at,qq=(\d+)\]$")
 LINK_RE = re.compile(r"^https?://.+$")
+IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
 
 
 async def download_image(url: str, crop: bool) -> Image.Image:
@@ -60,26 +61,39 @@ async def download_image(url: str, crop: bool) -> Image.Image:
   return image
 
 
+async def get_image_from_link(url: str, crop: bool) -> Image.Image:
+  try:
+    return await asyncio.wait_for(download_image(url, crop), 10)
+  except asyncio.TimeoutError as e:
+    raise helper.AggregateError(f"下载图片超时：{url}") from e
+  except aiohttp.ClientError as e:
+    raise helper.AggregateError(f"下载图片失败：{url}") from e
+  except Exception as e:
+    raise helper.AggregateError(f"无效图片：{url}") from e
+
+
 async def get_image_and_user(
   bot: Bot, event: MessageEvent, pattern: str, default: int, *, crop: bool = True
 ) -> tuple[Image.Image, int | None]:
+  if pattern in ("-", "发送"):
+    await bot.send(event, "请发送一张图片")
+    pattern = str(await helper.prompt(event)).strip()
   if not pattern:
     uid = default
   elif match := AT_RE.match(pattern):
-    uid = match[1]
+    uid = int(match[1])
+  elif IMAGE_RE.match(pattern):
+    return await get_image_from_link(Message(pattern)[0].data["url"], crop), None
   elif match := LINK_RE.match(pattern):
-    try:
-      return await asyncio.wait_for(download_image(pattern, crop), 10), None
-    except asyncio.TimeoutError as e:
-      raise helper.AggregateError(f"下载图片超时：{pattern}") from e
-    except aiohttp.ClientError as e:
-      raise helper.AggregateError(f"下载图片失败：{pattern}") from e
-    except Exception as e:
-      raise helper.AggregateError(f"无效图片：{pattern}") from e
-  elif pattern == "自己":
+    return await get_image_from_link(pattern, crop), None
+  elif pattern in ("~", "自己"):
     uid = event.user_id
-  elif pattern == "机器人":
+  elif pattern in ("0", "机器人"):
     uid = event.self_id
+  elif pattern in ("?", "回复"):
+    if not event.reply:
+      raise helper.AggregateError("没有回复")
+    uid = event.reply.sender.user_id
   else:
     uid = await account_aliases.match_uid(bot, event, pattern)
   try:

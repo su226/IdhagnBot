@@ -22,12 +22,6 @@ parser.add_argument(
   "target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
 parser.add_argument(
   "-name", "-名字", help="自定义名字，对于图片链接必须指定，对于QQ用户默认使用昵称")
-group = parser.add_mutually_exclusive_group()
-group.add_argument(
-  "-webp", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式")
-group.add_argument(
-  "-apng", "-png", action="store_const", dest="format", const="png", help="使用APNG而非GIF格式")
 matcher = (
   command.CommandBuilder("petpet_v2.police", "警察", "police")
   .category("petpet_v2")

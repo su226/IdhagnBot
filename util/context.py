@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import nonebot
 from apscheduler.schedulers.base import JobLookupError
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
-from nonebot.exception import IgnoredException
+from nonebot.exception import ActionFailed, IgnoredException
 from nonebot.message import event_preprocessor
 from nonebot.permission import Permission as BotPermission
 from nonebot.rule import Rule
@@ -197,3 +197,12 @@ def build_permission(node: permission.Node, default: permission.Level) -> BotPer
     return await get_event_level(bot, event) >= command_level
   permission.register_for_export(node, default)
   return BotPermission(checker)
+
+
+async def get_card_or_name(bot: Bot, event: Event, uid: int) -> str:
+  try:
+    info = await bot.get_group_member_info(group_id=get_event_context(event), user_id=uid)
+    return info["card"] or info["nickname"]
+  except ActionFailed:
+    info = await bot.get_stranger_info(user_id=uid)
+    return info["nickname"]

@@ -14,7 +14,7 @@ from ..util import get_image_and_user, segment_animated_image
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 BOXES = [
   (60, 308, 210, 195), (60, 308, 210, 198), (45, 330, 250, 172), (58, 320, 218, 180),
-  (60, 310, 215, 193), (40, 320, 250, 285), (48, 308, 226, 192), (51, 301, 223, 200)]
+  (60, 310, 215, 193), (45, 327, 241, 171), (48, 308, 226, 192), (51, 301, 223, 200)]
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument(

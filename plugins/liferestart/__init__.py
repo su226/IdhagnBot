@@ -3,17 +3,16 @@ import itertools
 import random
 from argparse import Namespace
 from io import BytesIO
-from typing import AsyncGenerator, Callable, Generator, Iterable, TypeVar, cast
+from typing import Callable, Generator, Iterable, TypeVar, cast
 
-import nonebot
-from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageDraw, ImageFont
 from pydantic import Field
 
-from util import command, context, resources
+from util import command, context, resources, helper
 from util.config import BaseConfig, BaseState
 
 from .game import Config as GameConfig
@@ -44,20 +43,6 @@ class State(BaseState):
 
 CONFIG = Config.load()
 STATE = State.load()
-
-
-async def prompt(event: MessageEvent) -> AsyncGenerator[Message, None]:
-  async def check_prompt(event2: MessageEvent):
-    return (
-      event.user_id == event2.user_id
-      and getattr(event, "group_id", -1) == getattr(event2, "group_id", -1))
-
-  async def handle_prompt(event2: MessageEvent):
-    future.set_result(event2.get_message())
-  while True:
-    future = asyncio.get_event_loop().create_future()
-    nonebot.on_message(check_prompt, handlers=[handle_prompt], temp=True, priority=-1)
-    yield await future
 
 
 def find_character(name: str) -> Character | None:
@@ -229,8 +214,9 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
     segments.append("- 发送 “退” 退出游戏")
     await liferestart.send("\n".join(segments))
     choice = ""
-    async for message in prompt(event):
-      choice = message.extract_plain_text()
+    while True:
+      msg = await helper.prompt(event)
+      choice = msg.extract_plain_text()
       if choice in ("退", "换", "随"):
         break
       try:
@@ -282,8 +268,9 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
   await liferestart.send("\n".join(segments))
   stats: list[int] = []
   choice = ""
-  async for msg in prompt(event):
-    choice: str = str(msg)
+  while True:
+    msg = await helper.prompt(event)
+    choice = msg.extract_plain_text()
     if choice in ("退", "随"):
       break
     try:
@@ -372,10 +359,7 @@ async def handle_character_create(bot: Bot, event: MessageEvent, args: Namespace
   await liferestart.send(
     "一旦创建角色将不能修改或删除，但可重命名，名字中不能有空格"
     "\n- 发送“退”取消\n- 发送名字创建角色")
-  name = ""
-  async for msg in prompt(event):
-    name = msg.extract_plain_text()
-    break
+  name = (await helper.prompt(event)).extract_plain_text()
   if name == "退":
     await liferestart.finish("创建取消")
   elif " " in name:

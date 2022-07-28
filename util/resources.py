@@ -1,3 +1,4 @@
+import aiohttp
 import pyppeteer
 from PIL import ImageFont
 from PIL import features as PILFeatures
@@ -39,3 +40,13 @@ def font(name: str, size: int) -> ImageFont.FreeTypeFont:
 
 def launch_pyppeteer(**options):
   return pyppeteer.launch(options, executablePath=CONFIG.chromium)
+
+
+http_session: aiohttp.ClientSession | None = None
+
+
+def http() -> aiohttp.ClientSession:
+  global http_session
+  if http_session is None:
+    http_session = aiohttp.ClientSession()
+  return http_session

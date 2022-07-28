@@ -1,4 +1,3 @@
-import os
 from argparse import Namespace
 from io import BytesIO
 
@@ -12,7 +11,6 @@ from util import command, context, helper, resources, text
 
 from ..util import get_image_and_user
 
-plugin_dir = os.path.dirname(os.path.abspath(__file__))
 GENDERS = {
   "male": "他",
   "female": "她",
@@ -46,23 +44,20 @@ async def handler(
     avatar, user = await get_image_and_user(bot, event, args.target, event.self_id)
   except helper.AggregateError as e:
     await matcher.finish("\n".join(e))
-  if user is not None:
+  name = args.name
+  gender = args.gender
+  if (name is None or gender is None) and user is not None:
     try:
       info = await bot.get_group_member_info(
         group_id=context.get_event_context(event), user_id=user)
-      name = info["card"] or info["nickname"]
-      gender = info["sex"]
+      name = name or info["card"] or info["nickname"]
+      gender = gender or info["sex"]
     except ActionFailed:
       info = await bot.get_stranger_info(user_id=user)
-      name = info["nickname"]
-      gender = info["sex"]
-  else:
-    name = None
+      name = name or info["nickname"]
+      gender = gender or info["sex"]
+  if gender is None:
     gender = "unknown"
-  if args.name is not None:
-    name = args.name
-  if args.gender is not None:
-    gender = args.gender
   if name is None:
     await matcher.finish("请使用 -name 指定名字")
 

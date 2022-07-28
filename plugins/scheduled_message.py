@@ -1,5 +1,6 @@
 import random
 import time
+from copy import deepcopy
 from datetime import datetime
 from typing import cast
 
@@ -28,6 +29,7 @@ class Scheduled(BaseModel):
   async def send(self, group: int, id: str):
     bot = nonebot.get_bot()
     message = "/" + self.message
+    msg = Message(message)
     await handle_event(bot, GroupMessageEvent(
       time=int(time.time()),
       self_id=int(bot.self_id),
@@ -36,7 +38,8 @@ class Scheduled(BaseModel):
       user_id=self.user,
       message_type="group",
       message_id=0,
-      message=Message(message),
+      message=msg,
+      original_message=deepcopy(msg),
       raw_message=message,
       font=0,
       sender=Sender(),

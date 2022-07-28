@@ -39,12 +39,13 @@ async def handler(
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
   except helper.AggregateError as e:
     await matcher.finish("\n".join(e))
-  avatar = avatar.resize((32, 32), Image.ANTIALIAS)
+  avatar = avatar.resize((34, 34), Image.ANTIALIAS)
   frames: list[Image.Image] = []
   for i in range(3):
     template = Image.open(os.path.join(plugin_dir, f"{i}.png"))
     im = Image.new("RGB", template.size, (255, 255, 255))
-    im.paste(avatar, (1, 38), avatar)
+    im.paste(avatar, (2, 40), avatar)
     im.paste(template, mask=template)
+    im.save(f"a{i}.png")
     frames.append(im)
   await matcher.finish(segment_animated_image(args.format, frames, 50))

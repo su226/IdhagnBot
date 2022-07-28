@@ -1,7 +1,16 @@
+# Python
+__pycache__/
+.venv/
+.pdm.toml
+
+# Nonebot2
+.env*
+
+# IdhagnBot
 configs
 resources
 states
 user_plugins
-__pycache__
-.env*
+
+# Editors
 .vscode

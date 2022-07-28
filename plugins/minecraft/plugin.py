@@ -77,5 +77,7 @@ async def handle_minecraft(bot: Bot):
       await bot.send_private_msg(
         user_id=user, message="Minecraft服务器部分地址连接失败，请及时检修！\n" + "\n".join(errors))
     segments.append("部分地址连接失败，已经发送反馈")
-  icon = stats['favicon'].removeprefix("data:image/png;base64,")
-  await minecraft.finish(MessageSegment.image("base64://" + icon) + "\n".join(segments))
+  if "favicon" in stats:
+    icon = stats["favicon"].removeprefix("data:image/png;base64,")
+    await minecraft.finish(MessageSegment.image("base64://" + icon) + "\n".join(segments))
+  await minecraft.finish("\n".join(segments))

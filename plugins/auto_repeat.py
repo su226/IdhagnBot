@@ -1,14 +1,14 @@
 import re
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Message, MessageEvent
+from nonebot.adapters.onebot.v11 import MessageEvent
 from nonebot.rule import Rule
 
 from util import context
 
 last_message: dict[int, str] = {}
 repeated: set[int] = set()
-ORIGINAL_EMOTE_RE = re.compile(r"^\[[A-Za-z0-9\u4e00-\u9fa5]+\]$")
+ORIGINAL_EMOTE_RE = re.compile(r"^&#91;[A-Za-z0-9\u4e00-\u9fa5]+&#93;$")
 
 
 def is_command(event: MessageEvent) -> bool:
@@ -17,7 +17,7 @@ def is_command(event: MessageEvent) -> bool:
 
 def is_original_emote(event: MessageEvent) -> bool:
   # 找不到更好的解决方案，只能正则表达式匹配，虽然理论上不会漏判，但是会误判
-  return ORIGINAL_EMOTE_RE.match(event.raw_message) is not None
+  return ORIGINAL_EMOTE_RE.match(str(event.message)) is not None
 
 
 async def can_repeat(event: MessageEvent) -> bool:

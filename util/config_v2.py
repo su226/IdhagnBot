@@ -78,6 +78,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
       return
     data = encode(self.cache[args].dict())
     file = self.get_file(*args)
+    os.makedirs(os.path.dirname(file), exist_ok=True)
     with open(file, "w") as f:
       yaml.dump(data, f, SafeDumper, allow_unicode=True)
 

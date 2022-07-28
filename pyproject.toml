@@ -1,42 +1,48 @@
-[tool.poetry]
+[project]
 name = "idhagn_bot"
-version = "0.0.1"
 description = "Simple chatbot for Tencent QQ."
-authors = ["su226 <1368981939@qq.com>"]
-license = "MIT"
-homepage = "https://github.com/su226/IdhagnBot"
-repository = "https://github.com/su226/IdhagnBot"
+authors = [
+  {name = "su226", email = "thesu226@outlook.com"},
+]
+license = {text = "MIT"}
+requires-python = ">=3.10,<4.0"
+dependencies = [
+  "nonebot2[aiohttp]<3.0.0.0,>=2.0.0-beta.3",
+  "nonebot-adapter-onebot<3.0.0.0,>=2.0.0-beta.1",
+  "nonebot-plugin-apscheduler<1.0.0,>=0.1.2",
+  "PyYAML<7.0,>=6.0",
+  "Pillow<10.0.0,>=9.1.0",
+  "numpy<2.0.0,>=1.22.3",
+  "pyppeteer<2.0.0,>=1.0.2",
+  "pycairo<2.0.0,>=1.21.0",
+  "PyGObject<4.0.0,>=3.42.1",
+  "psutil<6.0.0,>=5.9.0",
+  "jieba<1.0.0,>=0.42.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.10"
-nonebot2 = "^2.0.0-beta.2"
-nonebot-adapter-onebot = "^2.0.0-beta.1"
-nonebot-plugin-apscheduler = "^0.1.2"
-aiohttp = "^3.8.1"
-PyYAML = "^6.0"
-Pillow = "^9.1.0"
-numpy = "^1.22.3"
-pyppeteer = "^1.0.2"
-libzim = { version = "^1.0.0", optional = true }
-mctools = { version = "^1.1.2", optional = true }
-pycairo = "^1.21.0"
-PyGObject = "^3.42.1"
-psutil = "^5.9.0"
+[project.optional-dependencies]
+all = ["libzim<2.0.0,>=1.0.0", "mctools<2.0.0,>=1.1.2"]
 
-[tool.poetry.extras]
-all = ["libzim", "mctools"]
+[build-system]
+requires = ["pdm-pep517>=0.12.0"]
+build-backend = "pdm.pep517.api"
 
-[tool.poetry.dev-dependencies]
-pylama = { extras = ["eradicate", "pycodestyle", "pyflakes", "isort"], version = "^8.3.8" }
+[tool.pdm]
+includes = []
 
-[tool.pyright]
-strict = ["plugins/liferestart/game"]
+[tool.pdm.dev-dependencies]
+dev = [
+  "pylama[eradicate,isort,pycodestyle,pyflakes]<9.0.0,>=8.3.8",
+]
+
+[tool.pdm.scripts]
+start = "python bot.py"
 
 [tool.isort]
 multi_line_output = 4
 line_length = 100
 indent = "  "
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.pyright]
+typeCheckingMode = "basic"
+strict = ["plugins/liferestart/game"]

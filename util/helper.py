@@ -1,7 +1,11 @@
+import asyncio
 import itertools
 import random
 from datetime import timedelta
 from typing import Sequence, TypeVar
+
+import nonebot
+from nonebot.adapters.onebot.v11 import Message, MessageEvent
 
 T = TypeVar("T")
 
@@ -49,3 +53,17 @@ class AggregateError(Exception, Sequence[str]):
 
   def __getitem__(self, index: int) -> str:
     return self.args[index]
+
+
+def prompt(event: MessageEvent) -> asyncio.Future[Message]:
+  async def check_prompt(event2: MessageEvent):
+    return (
+      event.user_id == event2.user_id
+      and getattr(event, "group_id", -1) == getattr(event2, "group_id", -1))
+
+  async def handle_prompt(event2: MessageEvent):
+    future.set_result(event2.get_message())
+
+  future = asyncio.get_event_loop().create_future()
+  nonebot.on_message(check_prompt, handlers=[handle_prompt], temp=True, priority=-1)
+  return future

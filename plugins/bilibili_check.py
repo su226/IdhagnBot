@@ -207,7 +207,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
         await bilibili_check.finish(f"找不到用户：{name}")
       uid = data["data"]["result"][0]["mid"]
     async with http.get(FOLLOW_API.format(uid)) as resp:
-      data = await resp.json()
+      data = await resp.json(content_type=None)
     async with http.get(data["card"]["face"]) as resp:
       avatar = Image.open(BytesIO(await resp.read()))
     name = data["card"]["name"]
