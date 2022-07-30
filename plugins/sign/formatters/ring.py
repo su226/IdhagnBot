@@ -76,8 +76,8 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
       cr.translate(center_x + math.cos(pos) * 140, avatar_y + math.sin(pos) * 140)
       cr.rotate(pos + math.pi / 2)
       s = str(i + 1)
-      cr.move_to(-cr.text_extents(s).width / 2, 0)
       cr.set_font_size(16)
+      cr.move_to(-cr.text_extents(s).x_advance / 2, 0)
       cr.show_text(s)
       cr.identity_matrix()
     box_y2 = im.height - BOX_MARGIN

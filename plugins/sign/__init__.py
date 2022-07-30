@@ -10,17 +10,10 @@ from nonebot.rule import ArgumentParser
 
 from util import account_aliases, command, context, currency, help, helper
 
-from .config import CONFIG, STATE, Config, FormatData, GroupData
+from . import leaderboard
+from .config import CONFIG, STATE, Config, FormatData
 from .formatters.legacy import format as formatter_legacy
 from .formatters.ring import format as formatter_ring
-
-
-def get_group_data(gid: int) -> GroupData:
-  state = STATE(gid)
-  if state.time.date() != date.today():
-    state.rank = []
-  state.time = datetime.now()
-  return state
 
 
 FORMATTERS = {
@@ -50,7 +43,8 @@ async def handle_sign(bot: Bot, event: MessageEvent):
   gid = context.get_event_context(event)
   config = CONFIG()
   formatter = FORMATTERS[config.formatter]
-  group_data = get_group_data(gid)
+  group_data = STATE(gid)
+  group_data.update()
   user_data = group_data.get_user(uid)
   format_data = FormatData(uid, gid, -1, -1, None, None)
 

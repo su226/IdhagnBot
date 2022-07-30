@@ -51,6 +51,12 @@ class GroupData(BaseModel):
       user_data.calendar.clear()
     return user_data
 
+  def update(self) -> None:
+    now = datetime.now()
+    if self.time.date() != now.date():
+      self.rank = []
+    self.time = now
+
 
 @dataclass
 class FormatData:
