@@ -8,7 +8,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageDraw
 
-from util import command, helper, resources
+from util import command, text, util
 
 from ..util import get_image_and_user
 
@@ -32,17 +32,15 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  font = resources.font("sans", 24)
-  w1, _ = font.getsize("你怎么跟")
-  w2, _ = font.getsize("一样")
-  im = Image.new("RGB", (w1 + w2 + 120, 110), (255, 255, 255))
-  draw = ImageDraw.Draw(im)
-  draw.text((10, 55), "你怎么跟", (0, 0, 0), font, "lm")
-  draw.text((w1 + 110, 55), "一样", (0, 0, 0), font, "lm")
-  avatar = avatar.resize((90, 90), Image.ANTIALIAS)
-  im.paste(avatar, (w1 + 15, 10), avatar)
+  left_im = text.render("你怎么跟", "sans", 24)
+  right_im = text.render("一样", "sans", 24)
+  im = Image.new("RGB", (left_im.width + right_im.width + 120, 110), (255, 255, 255))
+  im.paste(left_im, (10, 55 - left_im.height // 2), left_im)
+  im.paste(right_im, (left_im.width + 110, 55 - right_im.height // 2), right_im)
+  avatar = avatar.resize((90, 90), util.scale_resample)
+  im.paste(avatar, (left_im.width + 15, 10), avatar)
   f = BytesIO()
   im.save(f, "png")
   await matcher.finish(MessageSegment.image(f))

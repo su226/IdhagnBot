@@ -8,14 +8,14 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
-from util import command, context, helper, text
+from util import command, context, text, util
 
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
-AVATAR_TRANSFORM = Image.PERSPECTIVE, (1.0116, -0.0598, 0, -0.0453, 1.0905, 0, 0, 0.0004)
-NAME_TRANSFORM = Image.AFFINE, (1, -0.125, 0, 0, 1, 0)
+AVATAR_TRANSFORM = Image.Transform.PERSPECTIVE, (1.0116, -0.0598, 0, -0.0453, 1.0905, 0, 0, 0.0004)
+NAME_TRANSFORM = Image.Transform.AFFINE, (1, -0.125, 0, 0, 1, 0)
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument(
@@ -38,7 +38,7 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, user = await get_image_and_user(bot, event, args.target, event.user_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   if args.name is not None:
     name = args.name
@@ -52,11 +52,11 @@ async def handler(
       name = info["nickname"]
   else:
     await matcher.finish("请使用 -name 指定名字")
-  large = avatar.resize((460, 460), Image.ANTIALIAS).rotate(-17, Image.BICUBIC, True)
-  pre_small = avatar.resize((118, 118), Image.ANTIALIAS)
+  large = avatar.resize((460, 460), util.scale_resample).rotate(-17, util.resample, True)
+  pre_small = avatar.resize((118, 118), util.scale_resample)
   small = Image.new("RGBA", (120, 120))
   small.paste(pre_small, (1, 1), pre_small)
-  small = small.transform((200, 200), *AVATAR_TRANSFORM, resample=Image.BICUBIC)
+  small = small.transform((200, 200), *AVATAR_TRANSFORM, resample=util.resample)
   im = Image.new("RGB", (600, 600), (255, 255, 255))
   im.paste(large, (84, 114), large)
   template = Image.open(os.path.join(plugin_dir, "template.png"))
@@ -64,10 +64,10 @@ async def handler(
   im.paste(small, (82, 409), small)
   text_im = text.render(name, "sans", 16)
   if text_im.width > 120:
-    text_im = text_im.resize((120, 24), Image.ANTIALIAS)
+    text_im = text_im.resize((120, 24), util.scale_resample)
   else:
-    text_im = ImageOps.pad(text_im, (120, 24), Image.ANTIALIAS)
-  text_im = text_im.transform((123, 24), *NAME_TRANSFORM, Image.BICUBIC)
+    text_im = ImageOps.pad(text_im, (120, 24), util.scale_resample)
+  text_im = text_im.transform((123, 24), *NAME_TRANSFORM, util.resample)
   im.paste(text_im, (90, 534), text_im)
   f = BytesIO()
   im.save(f, "png")

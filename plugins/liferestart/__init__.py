@@ -1,4 +1,4 @@
-import asyncio
+import html
 import itertools
 import random
 from argparse import Namespace
@@ -9,10 +9,10 @@ from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from pydantic import Field
 
-from util import command, context, resources, helper
+from util import command, context, text, util
 from util.config import BaseConfig, BaseState
 
 from .game import Config as GameConfig
@@ -76,48 +76,28 @@ def groupbyn(iterable: Iterable[TItem], n: int) -> Generator[list[TItem], None, 
     yield result
 
 
-WIDTH = 576
-
-
-def wrap(font: ImageFont.FreeTypeFont, text: str) -> Generator[str, None, None]:
-  cur = []
-  curwidth = 0
-  for ch in text:
-    chwidth, _ = font.getsize(ch)
-    if curwidth + chwidth > WIDTH:
-      yield "".join(cur)
-      cur.clear()
-      curwidth = 0
-    cur.append(ch)
-    curwidth += chwidth
-  if cur:
-    yield "".join(cur)
-
-
 RARITY_COLOR = {
-  Rarity.COMMON: (255, 255, 255),
-  Rarity.UNCOMMON: (130, 177, 255),
-  Rarity.RARE: (234, 128, 252),
-  Rarity.LEGENDARY: (255, 209, 128),
+  Rarity.COMMON: "ffffff",
+  Rarity.UNCOMMON: "82b1ff",
+  Rarity.RARE: "ea80fc",
+  Rarity.LEGENDARY: "ffd180",
 }
 
 
 def make_image(
-  font: ImageFont.FreeTypeFont, messages: Iterable[tuple[Rarity, str] | str]
+  messages: Iterable[tuple[Rarity, str] | str]
 ) -> Image.Image:
-  line_height = font.getsize("A")[1] + 4
   lines = []
   for line in messages:
     if isinstance(line, tuple):
-      rarity, text = line
+      rarity, content = line
     else:
       rarity = Rarity.COMMON
-      text = line
-    lines.extend((rarity, i) for i in wrap(font, text))
-  im = Image.new("RGB", (640, line_height * len(lines) + 32 + font.getmetrics()[1]), (38, 50, 56))
-  draw = ImageDraw.Draw(im)
-  for i, (rarity, text) in enumerate(lines):
-    draw.text((16, 16 + i * line_height), text, RARITY_COLOR[rarity], font)
+      content = line
+    lines.append(f"<span color=\"#{RARITY_COLOR[rarity]}\">{html.escape(content)}</span>")
+  text_im = text.render("\n".join(lines), "sans", 32, box=576, color=(255, 255, 255), markup=True)
+  im = Image.new("RGB", (text_im.width + 64, text_im.height + 64), (38, 50, 56))
+  im.paste(text_im, (32, 32), text_im)
   f = BytesIO()
   im.save(f, "jpeg")
   return im
@@ -215,7 +195,7 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
     await liferestart.send("\n".join(segments))
     choice = ""
     while True:
-      msg = await helper.prompt(event)
+      msg = await util.prompt(event)
       choice = msg.extract_plain_text()
       if choice in ("退", "换", "随"):
         break
@@ -269,7 +249,7 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
   stats: list[int] = []
   choice = ""
   while True:
-    msg = await helper.prompt(event)
+    msg = await util.prompt(event)
     choice = msg.extract_plain_text()
     if choice in ("退", "随"):
       break
@@ -298,10 +278,9 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
   game.statistics.inherited_talent = talents[0].id
   STATE.dump()
 
-  font = resources.font("sans", 32)
   for part in groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
-    make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
+    make_image(itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
 classic = subparsers.add_parser("经典", aliases=["c"], help="游玩经典模式")
@@ -345,10 +324,9 @@ async def handle_character_list(bot: Bot, event: MessageEvent, args: Namespace):
   for i in STATE.statistics.values():
     if ch := i.character:
       messages.append(get_character_segments(ch))
-  font = resources.font("sans", 32)
   for part in groupbyn(messages, CONFIG.character_group_by):
     f = BytesIO()
-    make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
+    make_image(itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
 character_list = subparsers.add_parser("角色列表", help="列出别人的角色")
@@ -359,7 +337,7 @@ async def handle_character_create(bot: Bot, event: MessageEvent, args: Namespace
   await liferestart.send(
     "一旦创建角色将不能修改或删除，但可重命名，名字中不能有空格"
     "\n- 发送“退”取消\n- 发送名字创建角色")
-  name = (await helper.prompt(event)).extract_plain_text()
+  name = (await util.prompt(event)).extract_plain_text()
   if name == "退":
     await liferestart.finish("创建取消")
   elif " " in name:
@@ -419,10 +397,9 @@ async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace):
 
   messages = get_messages(game)
   STATE.dump()
-  font = resources.font("sans", 32)
   for part in groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
-    make_image(font, itertools.chain.from_iterable(part)).save(f, "png")
+    make_image(itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
 
 character_play = subparsers.add_parser("角色", aliases=["h"], help="游玩名人或自定义角色")
@@ -459,7 +436,7 @@ async def handle_achievements(bot: Bot, event: MessageEvent, args: Namespace):
     description = "隐藏成就" if hidden else achievement.description
     segments.append((achievement.rarity, f"{symbol} {name} - {description}"))
   f = BytesIO()
-  make_image(resources.font("sans", 32), segments).save(f, "png")
+  make_image(segments).save(f, "png")
   await liferestart.send(MessageSegment.image(f))
 
 achievements = subparsers.add_parser("成就", help="查看成就和统计")
@@ -488,7 +465,7 @@ def leaderboard_factory(
         name = (await bot.get_stranger_info(user_id=id))["nickname"]
       segments.append((judge.rarity, f"{name} - {v}{suffix}"))
     f = BytesIO()
-    make_image(resources.font("sans", 32), segments).save(f, "png")
+    make_image(segments).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
   return handler
 

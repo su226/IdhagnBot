@@ -8,7 +8,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
-from util import command, helper
+from util import command, util
 
 from ..util import get_image_and_user
 
@@ -32,10 +32,10 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id, crop=False)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   im = Image.open(plugin_dir / "template.png")
-  avatar = ImageOps.fit(avatar, (310, 460), Image.ANTIALIAS)
+  avatar = ImageOps.fit(avatar, (310, 460), util.scale_resample)
   im.paste(avatar, (313, 64), avatar)
   f = BytesIO()
   im.save(f, "PNG")

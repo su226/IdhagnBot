@@ -8,9 +8,9 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
-from ..util import circle, get_image_and_user, segment_animated_image
+from ..util import get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -47,16 +47,16 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   if args.duration < 1 or args.duration > 200:
     await matcher.finish("时长必须是[1, 200]之间的整数")
   acw = bool(random.randrange(2)) if args.acw is None else args.acw
   frames: list[Image.Image] = []
   if not args.original:
-    avatar = avatar.resize((250, 250), Image.ANTIALIAS)
+    avatar = avatar.resize((250, 250), util.scale_resample)
   for i in range(0, 360, 10):
-    frame = avatar.rotate(i if acw else -i, Image.BICUBIC)
-    circle(frame, args.format != "gif")
+    frame = avatar.rotate(i if acw else -i, util.resample)
+    util.circle(frame, args.format != "gif")
     frames.append(frame)
   await matcher.finish(segment_animated_image(args.format, frames, args.duration))

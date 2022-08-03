@@ -3,7 +3,7 @@ from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegme
 from nonebot.params import CommandArg
 from nonebot.rule import Rule
 
-from util import account_aliases, command, context, helper
+from util import account_aliases, command, context, util
 
 uids: dict[int, set[str]] = {}
 
@@ -35,7 +35,7 @@ async def handle_auto_poke(bot: Bot, event: MessageEvent, arg: Message = Command
     for pattern in args:
       try:
         all_uids.extend(await account_aliases.match_uid(bot, event, pattern, True))
-      except helper.AggregateError as e:
+      except util.AggregateError as e:
         all_errors.extend(e)
     if len(all_errors):
       await auto_poke.send("\n".join(all_errors))

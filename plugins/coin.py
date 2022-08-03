@@ -1,11 +1,10 @@
 import random
 from typing import Literal, cast
 
-import numpy
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
 
-from util import command
+from util import binomial, command
 from util.config import BaseConfig
 
 
@@ -46,9 +45,9 @@ def flip_multiple(count) -> tuple[int, int, int]:
 
 
 def flip_binomial(count: int) -> tuple[int, int, int]:
-  stand = numpy.random.binomial(
+  stand = binomial.sample(
     count, CONFIG.stand_weight / (CONFIG.front_weight + CONFIG.back_weight + CONFIG.stand_weight))
-  front = numpy.random.binomial(
+  front = binomial.sample(
     count - stand, CONFIG.front_weight / (CONFIG.front_weight + CONFIG.back_weight))
   back = count - stand - front
   return front, back, stand

@@ -9,9 +9,9 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
-from ..util import circle, get_image_and_user
+from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -36,14 +36,14 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   template_id = random.randrange(92) if args.template is None else args.template
   if template_id < 0 or template_id > 91:
     await matcher.finish("模板编号需要是[0, 91]之间的整数")
   im = Image.open(os.path.join(plugin_dir, f"{template_id}.jpg"))
-  avatar = avatar.resize((100, 100), Image.ANTIALIAS)
-  circle(avatar)
+  avatar = avatar.resize((100, 100), util.scale_resample)
+  util.circle(avatar)
   im.paste(avatar, (0, 400), avatar)
   f = BytesIO()
   im.save(f, "png")

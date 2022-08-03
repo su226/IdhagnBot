@@ -2,6 +2,7 @@ import asyncio
 import time
 from dataclasses import dataclass
 from io import BytesIO
+from typing import Any
 from urllib.parse import quote as urlencode
 
 import aiohttp
@@ -10,7 +11,7 @@ from nonebot.params import CommandArg
 from PIL import Image, ImageDraw, ImageOps
 from pydantic import BaseModel, Field
 
-from util import color, command, config_v2, text
+from util import color, command, config_v2, text, util
 
 
 class Config(BaseModel):
@@ -79,6 +80,10 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
   margin = 12
   uid_width = uid_im.width + padding * 2
   im_width = name_im.width + margin + uid_width
+  _bound: Any = None  # HACK
+  medal_name_layout = _bound
+  medal_level_layout = _bound
+  medal_width = _bound
   if medal:
     medal_name_layout = text.layout(medal.name, "sans", 28)
     medal_level_layout = text.layout(str(medal.level), "sans", 28)
@@ -86,10 +91,6 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
       medal_name_layout.get_pixel_size()[0] + medal_level_layout.get_pixel_size()[0]
       + padding * 4 + border * 2)
     im_width += margin + medal_width
-  else:  # 不然静态类型检查器会抱怨
-    medal_name_layout = None
-    medal_level_layout = None
-    medal_width = 0
   im = Image.new("RGBA", (im_width, name_im.height))
   draw = ImageDraw.Draw(im)
 
@@ -101,7 +102,7 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
   ImageDraw.Draw(rounded_im).rounded_rectangle(
     (0, 0, uid_width * 2 - 1, uid_im.height * 2 - 1), 8, 255)
   draw.bitmap(
-    (x, y), rounded_im.resize((uid_width, uid_im.height), Image.ANTIALIAS), (221, 221, 221))
+    (x, y), rounded_im.resize((uid_width, uid_im.height), util.scale_resample), (221, 221, 221))
   im.paste(uid_im, (x + padding, y), uid_im)
   x += uid_width + margin
   if not medal:
@@ -122,13 +123,13 @@ def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
     Image.linear_gradient("L"),
     color.split_rgb(medal.color_start),  # type: ignore
     color.split_rgb(medal.color_end)  # type: ignore
-  ).rotate(45, Image.BICUBIC, True)
+  ).rotate(45, util.resample, True)
   grad_h = int(GRADIENT_45DEG_WH / (1 + ratio))
   grad_w = int(ratio * grad_h)
   gradient = gradient.crop((
     (gradient.width - grad_w) // 2, (gradient.height - grad_h) // 2,
     (gradient.width + grad_w) // 2, (gradient.height + grad_h) // 2,
-  )).resize((medal_name_bg_width, medal_name_im.height), Image.ANTIALIAS)
+  )).resize((medal_name_bg_width, medal_name_im.height), util.scale_resample)
   im.paste(gradient, (x + border, y + border))
   im.paste(medal_name_im, (x + border + padding, y + border), medal_name_im)
 
@@ -150,10 +151,8 @@ def make_header(
   info_im = text.render(f"<b>粉丝:</b> {fans} <b>关注:</b> {followings}", "sans", 32, markup=True)
   info2_im = text.render(f"<b>VTB:</b> {vtbs} ({ratio:.2f}%)", "sans", 32, markup=True)
 
-  avatar = avatar.convert("RGB").resize((144, 144), Image.ANTIALIAS)
-  circle = Image.new("L", (avatar.width * 2, avatar.height * 2), 0)
-  ImageDraw.Draw(circle).ellipse((0, 0, circle.width - 1, circle.height - 1), 255)
-  avatar.putalpha(circle.resize(avatar.size, Image.ANTIALIAS))
+  avatar = avatar.convert("RGB").resize((144, 144), util.scale_resample)
+  util.circle(avatar)
 
   margin = 12
   padding = 6
@@ -173,7 +172,7 @@ def make_header(
     (0, 0, rounded_im.width - 1, rounded_im.height - 1), 8, 255)
   ImageDraw.Draw(im).bitmap(
     (x + name_im.width + margin, y),
-    rounded_im.resize((uid_width, uid_im.height), Image.ANTIALIAS), (221, 221, 221))
+    rounded_im.resize((uid_width, uid_im.height), util.scale_resample), (221, 221, 221))
   im.paste(uid_im, (x + name_im.width + margin + padding, y), uid_im)
 
   y = name_im.height
@@ -212,7 +211,9 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
       avatar = Image.open(BytesIO(await resp.read()))
     name = data["card"]["name"]
     fans = data["card"]["fans"]
+    following_count = data["card"]["attention"]
     followings = data["card"]["attentions"]
+    private = following_count != 0 and not followings
     names = STATE().name_cache
     vtbs = sorted(
       ((following, names[following]) for following in followings if following in names),
@@ -228,10 +229,13 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
           info["level"], info["medal_name"],
           info["medal_color_start"], info["medal_color_end"], info["medal_color_border"])
   items = [make_list_item(name, uid, medals.get(uid, None)) for uid, name in vtbs]
-  header = make_header(avatar, name, uid, fans, len(followings), len(vtbs))
+  header = make_header(avatar, name, uid, fans, following_count, len(vtbs))
 
   if not items:
-    items.append(text.render("什么都查不到", "sans", 32))
+    if private:
+      items.append(text.render("关注列表不公开", "sans", 32))
+    else:
+      items.append(text.render("什么都查不到", "sans", 32))
 
   margin = 32
   gap = 16

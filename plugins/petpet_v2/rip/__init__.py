@@ -8,7 +8,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
 from ..util import get_image_and_user
 
@@ -38,22 +38,22 @@ async def handler(
   else:
     try:
       avatar, _ = await get_image_and_user(bot, event, args.target, event.user_id)
-    except helper.AggregateError as e:
+    except util.AggregateError as e:
       await matcher.finish("\n".join(e))
     template = Image.new("RGBA", (1080, 804))
-    avatar = avatar.resize((230, 230), Image.ANTIALIAS)
+    avatar = avatar.resize((230, 230), util.scale_resample)
     template.paste(avatar, (408, 418), avatar)
     template2 = Image.open(os.path.join(plugin_dir, "template_custom.png"))
     template.paste(template2, mask=template2)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  avatar = avatar.resize((385, 385), Image.ANTIALIAS)
+  avatar = avatar.resize((385, 385), util.scale_resample)
   im = Image.new("RGB", template.size, (255, 255, 255))
-  left = avatar.rotate(24, Image.BICUBIC, True)
+  left = avatar.rotate(24, util.resample, True)
   im.paste(left, (-5, 355), left)
-  right = avatar.rotate(-11, Image.BICUBIC, True)
+  right = avatar.rotate(-11, util.resample, True)
   im.paste(right, (649, 310), right)
   im.paste(template, mask=template)
   f = BytesIO()

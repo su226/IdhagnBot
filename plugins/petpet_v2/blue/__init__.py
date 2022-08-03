@@ -6,9 +6,9 @@ from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageOps
 
-from util import command, helper, resources
+from util import command, text, util
 
 from ..util import get_image_and_user
 
@@ -33,18 +33,18 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  avatar = avatar.resize((500, 500), Image.ANTIALIAS).convert("LA")  # type: ignore
+  avatar = avatar.resize((500, 500), util.scale_resample).convert("LA")
   im = Image.new("L", (500, 500), 191)
   im.paste(avatar, mask=avatar.getchannel("A"))
   im = ImageOps.colorize(im, (0, 0, 0), (255, 255, 255), COLOR)  # type: ignore
-  draw = ImageDraw.Draw(im)
-  font = resources.font("sans-bold", 80)
-  draw.text((400, 50), "群", (255, 255, 255), font, stroke_width=2, stroke_fill=COLOR)
-  draw.text((400, 150), "青", (255, 255, 255), font, stroke_width=2, stroke_fill=COLOR)
-  font = resources.font("sans-bold", 40)
-  draw.text((310, 270), "YOASOBI", (255, 255, 255), font, stroke_width=2, stroke_fill=COLOR)
+  text.paste(
+    im, (400, 50), "群", "sans bold", 80, color=(255, 255, 255), stroke=2, stroke_color=COLOR)
+  text.paste(
+    im, (400, 150), "青", "sans bold", 80, color=(255, 255, 255), stroke=2, stroke_color=COLOR)
+  text.paste(
+    im, (310, 270), "YOASOBI", "sans bold", 40, color=(255, 255, 255), stroke=2, stroke_color=COLOR)
   f = BytesIO()
   im.save(f, "PNG")
   await matcher.finish(MessageSegment.image(f))

@@ -10,7 +10,7 @@ from nonebot.rule import ArgumentParser
 from nonebot.typing import T_State
 from pydantic import BaseModel, Field
 
-from util import account_aliases, command, context, currency, helper
+from util import account_aliases, command, context, currency, util
 from util.config import BaseState
 
 
@@ -65,7 +65,7 @@ async def handle_add_goods(
   else:
     try:
       notify = await account_aliases.match_uid(bot, event, args.notify)
-    except helper.AggregateError as e:
+    except util.AggregateError as e:
       await add_goods.finish("\n".join(e))
   ctx = context.get_event_context(event)
   goods = Goods(
@@ -87,7 +87,7 @@ def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
     pass
   pattern = account_aliases.to_identifier(raw_pattern)
   if not pattern:
-    raise helper.AggregateError(f"有效名字为空：{raw_pattern}")
+    raise util.AggregateError(f"有效名字为空：{raw_pattern}")
   all_goods = STATE.goods.get(ctx, {})
   exact: list[tuple[int, Goods]] = []
   inexact: list[tuple[int, Goods]] = []
@@ -99,7 +99,7 @@ def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
       inexact.append((id, goods))
   all_goods = exact or inexact
   if not all_goods:
-    raise helper.AggregateError(f"没有找到商品：{raw_pattern}")
+    raise util.AggregateError(f"没有找到商品：{raw_pattern}")
   elif len(all_goods) > 1:
     segments = [f"{raw_pattern} 可以指多个商品，请使用更具体的名字或者商品ID："]
     for id, goods in itertools.chain(exact, inexact):
@@ -108,7 +108,7 @@ def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
       else:
         price = f"{goods.price}金币"
       segments.append(f"{id:09} - {goods.name}: {price}")
-    raise helper.AggregateError("\n".join(segments))
+    raise util.AggregateError("\n".join(segments))
   return all_goods[0]
 
 
@@ -161,14 +161,14 @@ async def handle_modify_goods(
   ctx = context.get_event_context(event)
   try:
     id, goods = find_goods(ctx, args.goods)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await modify_goods.finish("\n".join(e))
   coros = []
   for pattern in args.reset_single:
     coros.append(find_user(bot, event, pattern))
   errors, reset_single = [], []
   for i in await asyncio.gather(*coros, return_exceptions=True):
-    if isinstance(i, helper.AggregateError):
+    if isinstance(i, util.AggregateError):
       errors.extend(i)
     else:
       reset_single.append(i)
@@ -178,7 +178,7 @@ async def handle_modify_goods(
   if notify is not None:
     try:
       notify = await account_aliases.match_uid(bot, event, args.notify)
-    except helper.AggregateError as e:
+    except util.AggregateError as e:
       await modify_goods.finish("\n".join(e))
   results = []
   if args.name is not None:
@@ -286,7 +286,7 @@ async def handle_show_goods(bot: Bot, event: MessageEvent, arg: Message = Comman
   else:
     try:
       id, goods = find_goods(ctx, name)
-    except helper.AggregateError as e:
+    except util.AggregateError as e:
       await show_goods.finish("\n".join(e))
     await show_goods.finish(await format_goods(bot, event, id, goods))
 
@@ -306,7 +306,7 @@ async def handle_purchase(
   ctx = context.get_event_context(event)
   try:
     id, goods = find_goods(ctx, name)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await purchase.finish("\n".join(e))
   state["id"] = id
   formatted = await format_goods(bot, event, id, goods)

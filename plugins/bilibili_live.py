@@ -7,7 +7,7 @@ from loguru import logger
 from nonebot.adapters.onebot.v11 import Bot
 from pydantic import BaseModel
 
-from util import command, helper
+from util import command, util
 from util.config import BaseConfig
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -42,7 +42,7 @@ check_live = (
   .brief("立即检查直播间状态")
   .usage(f'''\
 立即检查直播间是否开播
-每 {helper.format_time(CONFIG.interval)}会自动检查''')
+每 {util.format_time(CONFIG.interval)}会自动检查''')
   .build())
 
 

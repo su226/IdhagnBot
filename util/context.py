@@ -11,7 +11,7 @@ from nonebot.permission import Permission as BotPermission
 from nonebot.rule import Rule
 from pydantic import Field
 
-from . import helper, permission
+from . import permission, util
 from .config import BaseConfig, BaseModel, BaseState
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -132,7 +132,7 @@ async def timeout_exit(uid: int):
   if exit_context(uid):
     await nonebot.get_bot().call_api(
       "send_private_msg", user_id=uid,
-      message=f"由于 {helper.format_time(CONFIG.timeout)}内未操作，已退出上下文")
+      message=f"由于 {util.format_time(CONFIG.timeout)}内未操作，已退出上下文")
 
 
 for user, context in STATE.contexts.items():

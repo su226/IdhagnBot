@@ -9,7 +9,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
 from ..util import get_image_and_user
 
@@ -35,10 +35,11 @@ async def handler(
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
     avatar2, _ = await get_image_and_user(bot, event, args.source, event.user_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  avatar = avatar.resize((130, 130), Image.ANTIALIAS).rotate(random.uniform(0, 360), Image.BICUBIC)
-  avatar2 = avatar2.resize((130, 130), Image.ANTIALIAS)
+  avatar = (
+    avatar.resize((130, 130), util.scale_resample).rotate(random.uniform(0, 360), util.resample))
+  avatar2 = avatar2.resize((130, 130), util.scale_resample)
   im = Image.new("RGB", (830, 830), (255, 255, 255))
   im.paste(avatar2, (382, 59), avatar2)
   im.paste(avatar, (609, 317), avatar)

@@ -9,7 +9,7 @@ from aiohttp import ClientSession
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
 from PIL import Image, ImageDraw
 
-from util import text, currency
+from util import text, currency, util
 
 from ..config import CONFIG, STATE, FormatData
 
@@ -50,10 +50,8 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
   async with ClientSession() as http:
     async with http.get(f"https://q1.qlogo.cn/g?b=qq&nk={format_data.uid}&s=0") as response:
       avatar = Image.open(BytesIO(await response.read())).convert("RGB")
-  mask = Image.new("L", avatar.size, 0)
-  ImageDraw.Draw(mask).ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
-  avatar.putalpha(mask)
-  avatar = avatar.resize((96, 96), Image.ANTIALIAS)
+  avatar = avatar.resize((96, 96), util.scale_resample)
+  util.circle(avatar)
   im.paste(avatar, (32, 32), avatar)
 
   # 用户名
@@ -77,9 +75,8 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
 
   # 日历
   user_data = group_data.get_user(format_data.uid)
-  circle = Image.new("RGBA", (144, 144))
-  ImageDraw.Draw(circle).ellipse((0, 0, 143, 143), (76, 175, 80))
-  circle = circle.resize((72, 72), Image.ANTIALIAS)
+  circle = Image.new("RGB", (72, 72), (76, 175, 80))
+  util.circle(circle)
   for y, days in enumerate(weeks):
     for x, day in enumerate(days):
       if day == 0:

@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageDraw
 
-from util import command, resources
+from util import command, text, util
 
 Color = tuple[int, int, int]
 
@@ -29,7 +29,7 @@ def rounded_rect(
   im2 = Image.new("L", (radius * 4, radius * 4))
   draw2 = ImageDraw.Draw(im2)
   draw2.ellipse((0, 0, radius * 4 - 1, radius * 4 - 1), 255)
-  im2 = im2.resize((radius * 2, radius * 2), Image.ANTIALIAS)
+  im2 = im2.resize((radius * 2, radius * 2), util.scale_resample)
   x, y, w, h = xywh
   draw.bitmap((x, y), im2.crop((0, 0, radius, radius)), color)
   draw.bitmap((x + w - radius, y), im2.crop((radius, 0, radius * 2, radius)), color)
@@ -45,28 +45,31 @@ def rounded_rect(
 
 def register(node: str, names: list[str], brief: str, theme: Theme):
   async def handler(args: Message = CommandArg()):
-    text = args.extract_plain_text().split()
-    if len(text) == 2:
-      left, right = text
+    content = args.extract_plain_text().split()
+    if len(content) == 2:
+      left, right = content
     else:
       left = f"用法: /{names[0]}"
       right = "<左侧文本> <右侧文本>"
-    font = resources.font("sans-bold", 64)
-    lw, lh = font.getsize(left)
-    rw, rh = font.getsize(right)
-    h = max(lh, rh) + font.getmetrics()[1]
+    left_im = text.render(left, "sans bold", 64, color=theme.fg1)
+    right_im = text.render(right, "sans bold", 64, color=theme.fg2)
+    lw, lh = left_im.size
+    rw, rh = right_im.size
+    h = max(lh, rh)
     im = Image.new("RGB", (
       lw + rw + theme.margin_text + theme.margin_outer * 2 + theme.padding_h * 2,
-      h + theme.padding_v * 2 + theme.margin_outer * 2), theme.bg1)
+      h + theme.padding_v * 2 + theme.margin_outer * 2
+    ), theme.bg1)
     draw = ImageDraw.Draw(im)
     rounded_rect(draw, (
       lw + theme.margin_outer + theme.margin_text, theme.margin_outer,
-      rw + theme.padding_h * 2, h + theme.padding_v * 2), theme.radius, theme.bg2)
+      rw + theme.padding_h * 2, h + theme.padding_v * 2
+    ), theme.radius, theme.bg2)
     text_y = theme.margin_outer + theme.padding_v
-    draw.text((theme.margin_outer, text_y), left, theme.fg1, font)
-    draw.text(
-      (theme.margin_outer + lw + theme.margin_text + theme.padding_h, text_y),
-      right, theme.fg2, font)
+    im.paste(
+      left_im, (theme.margin_outer, text_y), left_im)
+    im.paste(
+      right_im, (theme.margin_outer + lw + theme.margin_text + theme.padding_h, text_y), right_im)
     f = BytesIO()
     im.save(f, "png")
     await matcher.finish(MessageSegment.image(f))

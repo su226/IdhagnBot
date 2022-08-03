@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageOps
 
-from util import command, text
+from util import command, text, util
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,7 +24,7 @@ async def handle_addict(args: Message = CommandArg()):
     await addict.finish(USAGE)
   im = Image.open(os.path.join(plugin_dir, "template.png"))
   text_im = text.render(content, "sans medium", 50, color=(255, 255, 255))
-  text_im = ImageOps.pad(text_im, (290, 72), Image.ANTIALIAS)
+  text_im = ImageOps.pad(text_im, (290, 72), util.scale_resample)
   im.paste(text_im, (398, 648), text_im)
   f = BytesIO()
   im.save(f, "png")

@@ -12,7 +12,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageDraw, ImageOps
 
-from util import color, command, context, text, helper
+from util import color, command, context, text, util
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 COLORS = [
@@ -95,7 +95,7 @@ async def handle_orly(
   else:
     if args.image == "-":
       await orly.send("请发送一张图片")
-      url = await helper.prompt(event)
+      url = await util.prompt(event)
       try:
         url = url["image", 0].data["url"]
       except IndexError:
@@ -113,7 +113,7 @@ async def handle_orly(
         await orly.finish(f"下载失败：{url}")
       except Exception:
         await orly.finish(f"无效图片：{url}")
-  cover = ImageOps.contain(cover, (920, 707), Image.ANTIALIAS)
+  cover = ImageOps.contain(cover, (920, 707), util.scale_resample)
   im = Image.new("RGB", (1000, 1400), (255, 255, 255))
   im.paste(cover, (960 - cover.width, 802 - cover.height))
   rect_y = 802

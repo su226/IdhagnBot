@@ -8,7 +8,7 @@ from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 
-from util import account_aliases, command, context, currency, help, helper
+from util import account_aliases, command, context, currency, help, util
 
 from . import leaderboard
 from .config import CONFIG, STATE, Config, FormatData
@@ -90,15 +90,15 @@ async def match_all(bot: Bot, event: MessageEvent, patterns: list[str]) -> set[i
       return tuple(i["user_id"] for i in await bot.get_group_member_list(group_id=ctx))
     return await account_aliases.match_uid(bot, event, pattern, True)
   coros = [do_match(i) for i in patterns]
-  errors: list[helper.AggregateError] = []
+  errors: list[util.AggregateError] = []
   users = set()
   for i in await asyncio.gather(*coros, return_exceptions=True):
-    if isinstance(i, helper.AggregateError):
+    if isinstance(i, util.AggregateError):
       errors.append(i)
     else:
       users.update(i)
   if errors:
-    raise helper.AggregateError(*errors)
+    raise util.AggregateError(*errors)
   return users
 
 gold_parser = ArgumentParser("/金币", add_help=False)
@@ -133,7 +133,7 @@ async def handle_gold(
     await gold.finish(args.message)
   try:
     users = await match_all(bot, event, args.users)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await gold.finish("\n".join(e))
   ctx = context.get_event_context(event)
   if args.add is not None:

@@ -3,14 +3,14 @@ from io import BytesIO
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageFilter, ImageOps
 
-from util import command, resources
+from util import command, text, util
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 HELP = '''\
 /诺基亚 <文本>
-自动换行，文本不能超过 6 行'''
+自动换行，文本不能超过 7 行'''
 
 nokia = (
   command.CommandBuilder("meme_text.nokia", "诺基亚", "nokia", "无内鬼")
@@ -21,24 +21,14 @@ nokia = (
 
 @nokia.handle()
 async def handle_nokia(args: Message = CommandArg()):
-  text = args.extract_plain_text().replace("\r", "").rstrip().removeprefix(".") or f"用法:\n{HELP}"
-  layer = Image.new("RGBA", (320, 224))
-  draw = ImageDraw.Draw(layer)
-  lines = []
-  cur_line = ""
-  font = resources.font("pixel", 32)
-  for ch in text:
-    if ch == "\n" or font.getsize(cur_line + ch)[0] > layer.width:
-      lines.append(cur_line)
-      cur_line = ""
-    if ch != "\n":
-      cur_line += ch
-  if cur_line:
-    lines.append(cur_line)
-  if len(lines) > 7:
-    lines = ["文本不能超过 7 行"]
-  draw.text((0, 0), "\n".join(lines), (24, 53, 4), font)
-  layer = layer.rotate(-14, Image.BICUBIC, True)
+  content = args.extract_plain_text().rstrip().removeprefix(".") or f"用法:\n{HELP}"
+  font = util.special_font("pixel", "sans")
+  layout = text.layout(content, font, 32, box=320)
+  if layout.get_pixel_size().height > 224:
+    layout = text.layout("文本不能超过 7 行", font, 32, box=320)
+  layer = text.render(layout, color=(24, 53, 4))
+  layer = ImageOps.expand(layer, (0, 0, 320 - layer.width, 224 - layer.height))
+  layer = layer.rotate(-14, util.resample, True)
   layer = layer.filter(ImageFilter.GaussianBlur(0.75))
   im = Image.open(os.path.join(plugin_dir, "诺基亚.png"))
   im.paste(layer, (83, 127), layer)

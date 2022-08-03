@@ -11,9 +11,9 @@ from nonebot.params import CommandArg
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageDraw
 
-from util import command, context, helper, text
+from util import command, context, text, util
 
-from ..util import circle, get_image_and_user
+from ..util import get_image_and_user
 
 
 @dataclass
@@ -30,8 +30,8 @@ class RenderedMessage:
   content: Image.Image
 
   def __init__(self, message: ParsedMessage) -> None:
-    self.avatar = message.avatar.resize((100, 100), Image.ANTIALIAS)
-    circle(self.avatar)
+    self.avatar = message.avatar.resize((100, 100), util.scale_resample)
+    util.circle(self.avatar)
     self.name = text.render(message.name, "sans", 25, color=(134, 136, 148))
     self.content = text.render(message.content, "sans", 40, box=600, markup=True)
     self.width = max(self.content.width, self.name.width + 15) + 270
@@ -76,14 +76,14 @@ async def handler(
     try:
       args = parser.parse_args(argv)
     except ParserExit as e:
-      raise helper.AggregateError(str(e.message))
+      raise util.AggregateError(str(e.message))
     avatar, user = await get_image_and_user(bot, event, args.user, event.self_id)
     if args.name is not None:
       name = args.name
     elif user is not None:
       name = await context.get_card_or_name(bot, event, user)
     else:
-      raise helper.AggregateError("请使用 --name 指定名字")
+      raise util.AggregateError("请使用 --name 指定名字")
     return ParsedMessage(avatar, name, " ".join(args.content))
 
   try:
@@ -99,7 +99,7 @@ async def handler(
   for i in tasks:
     try:
       parsed.append(await i)
-    except helper.AggregateError as e:
+    except util.AggregateError as e:
       errors.extend(e)
   if errors:
     await matcher.finish("\n".join(errors))

@@ -3,9 +3,9 @@ from io import BytesIO
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from util import color, command, resources
+from util import color, command, text
 
 color_img = (
   command.CommandBuilder("color", "色图", "color")
@@ -33,23 +33,19 @@ async def handle_color_img(arg: Message = CommandArg()):
     value = random.randint(0, 0xffffff)
   r, g, b = color.split_rgb(value)
   h, s, l = color.rgb2hsl(r, g, b)
-  fg = (255, 255, 255) if color.luminance(r, g, b) < 0.5 else (0, 0, 0)
   im = Image.new("RGB", (1000, 1000), (r, g, b))
-  draw = ImageDraw.Draw(im)
-  large_font = resources.font("IBM Plex Sans", 128)
-  font = resources.font("IBM Plex Sans", 64)
-  lines = [
-    (large_font, f"#{value:06x}"),
-    (font, f"rgb({r}, {g}, {b})"),
-    (font, f"hsl({h:.1f}deg, {s * 100:.1f}%, {l * 100:.1f}%)"),
-  ]
+
+  markup = f'''\
+<span size="200%">#{value:06x}</span>
+rgb({r}, {g}, {b})
+hsl({h:.1f}deg, {s * 100:.1f}%, {l * 100:.1f}%)'''
   if value in color.NAMES:
-    lines.append((font, color.NAMES[value]))
-  y = 500 - sum(font.getsize("A")[1] + round(font.size * 0.2) for font, _ in lines) / 2
-  for font, text in lines:
-    w, h = font.getsize(text)
-    draw.text((500 - w / 2, y), text, fg, font)
-    y += h + round(font.size * 0.2)
+    markup += "\n" + color.NAMES[value]
+  fg = (255, 255, 255) if color.luminance(r, g, b) < 0.5 else (0, 0, 0)
+  text.paste(
+    im, (im.width // 2, im.height // 2), markup, "sans", 64,
+    markup=True, align="m", anchor="mm", color=fg)
+
   f = BytesIO()
   im.save(f, "png")
   await color_img.finish(MessageSegment.image(f))

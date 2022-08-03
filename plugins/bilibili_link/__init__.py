@@ -8,9 +8,9 @@ import nonebot
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import EventMessage
 from nonebot.typing import T_State
-from PIL import Image, ImageDraw
+from PIL import Image, ImageOps, ImageDraw
 
-from util import resources, text
+from util import text, util
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 VIDEO_RE = re.compile(r"av\d{1,9}|(BV|bv)[A-Za-z0-9]{10}")
@@ -100,7 +100,7 @@ bilibili_link = nonebot.on_message(check_bilibili_link)
 @bilibili_link.handle()
 async def handle_bilibili_link(state: T_State) -> None:
   link: str = state["link"]
-  http = resources.http()
+  http = util.http()
   match = VIDEO_RE.search(link)
   if not match:
     async with http.get("https://" + link, allow_redirects=False) as response:
@@ -125,18 +125,15 @@ async def handle_bilibili_link(state: T_State) -> None:
     data_view["title"], "sans", 40, box=CONTENT_WIDTH, mode=text.ELLIPSIZE_END)
   async with http.get(data_card["face"]) as response:
     avatar = Image.open(BytesIO(await response.read()))
-  avatar = avatar.convert("RGB").resize((40, 40), Image.BICUBIC)
-  circle = Image.new("L", (avatar.width * 2, avatar.height * 2), 0)
-  draw = ImageDraw.Draw(circle)
-  draw.ellipse((0, 0, circle.width - 1, circle.height - 1), 255)
-  avatar.putalpha(circle.resize(avatar.size, Image.BICUBIC))
+  avatar = avatar.convert("RGB").resize((40, 40), util.scale_resample)
+  util.circle(avatar)
   fans_im = text.render(normalize_10k(data_card["fans"]) + "粉", "sans", 32)
   name_im = text.render(
     data_card["name"], "sans", 32,
     box=CONTENT_WIDTH - avatar.width - AVATAR_MARGIN * 2 - fans_im.width, mode=text.ELLIPSIZE_END)
   async with http.get(data_view["pic"]) as response:
     cover = Image.open(BytesIO(await response.read()))
-  cover = cover.resize((WIDTH, int(cover.height / cover.width * WIDTH)), Image.BICUBIC)
+  cover = ImageOps.fit(cover, (WIDTH, WIDTH * 10 // 16), util.scale_resample)
   date = time.strftime("%Y-%m-%d", time.localtime(data_view["pubdate"]))
   infos = InfoRender()
   infos.add(text.render(date, "sans", 32))

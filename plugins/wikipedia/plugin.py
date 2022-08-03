@@ -1,7 +1,8 @@
 import math
 import re
 import socket
-from typing import Literal
+from contextlib import asynccontextmanager
+from typing import AsyncIterator, Literal
 
 from aiohttp.web import BaseRequest, Response, Server, ServerRunner, TCPSite
 from libzim.reader import Archive  # type: ignore
@@ -10,7 +11,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 
-from util import command, resources
+from util import command, util
 
 from .config import CONFIG
 
@@ -749,6 +750,15 @@ async def handler(request: BaseRequest):
   return Response(body=item.content, content_type=mime, charset=charset)
 
 
+@asynccontextmanager
+async def autostop(site: TCPSite) -> AsyncIterator[None]:
+  await site.start()
+  try:
+    yield
+  finally:
+    await site.stop()
+
+
 async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: int = 100):
   server = Server(handler)
   runner = ServerRunner(server)
@@ -757,9 +767,7 @@ async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: 
     s.bind(("", 0))
     port = s.getsockname()[1]
   site = TCPSite(runner, "localhost", port)
-  await site.start()
-  browser = await resources.launch_pyppeteer()
-  try:
+  async with autostop(site), util.browser() as browser:
     page = await browser.newPage()
     await page.setViewport({"width": CONFIG.width, "height": 0, "deviceScaleFactor": CONFIG.scale})
     await page.goto(f"http://localhost:{port}/{path}")
@@ -767,9 +775,6 @@ async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: 
     if CONFIG.use_opencc:
       await page.evaluate(OPENCC_SCRIPT)
     return await page.screenshot(fullPage=True, format=format, quality=quality)
-  finally:
-    await browser.close()
-    await site.stop()
 
 wikipedia = (
   command.CommandBuilder("wikipedia", "维基百科", "维基", "百科", "wikipedia", "wiki", "pedia")

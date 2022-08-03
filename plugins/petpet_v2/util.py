@@ -6,11 +6,10 @@ from io import BytesIO
 from typing import Any, cast
 
 import aiohttp
-import numpy as np
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
-from PIL import Image, ImageChops, ImageDraw
+from PIL import Image
 
-from util import account_aliases, helper
+from util import account_aliases, util
 
 Size = tuple[int, int]
 Point = tuple[float, float]
@@ -19,6 +18,7 @@ PerspectiveData = tuple[float, float, float, float, float, float, float, float]
 
 
 def find_coefficients(old_plane: Plane, new_plane: Plane) -> PerspectiveData:
+  import numpy as np
   matrix = []
   for p1, p2 in zip(old_plane, new_plane):
     matrix.append([p2[0], p2[1], 1, 0, 0, 0, -p1[0] * p2[0], -p1[0] * p2[1]])
@@ -40,7 +40,7 @@ class RemapTransform:
     self.data = find_coefficients(old_plane, new_plane)
 
   def getdata(self) -> tuple[int, tuple[float, ...]]:
-    return Image.PERSPECTIVE, self.data
+    return Image.Transform.PERSPECTIVE, self.data
 
 
 AT_RE = re.compile(r"^\[CQ:at,qq=(\d+)\]$")
@@ -65,11 +65,11 @@ async def get_image_from_link(url: str, crop: bool) -> Image.Image:
   try:
     return await asyncio.wait_for(download_image(url, crop), 10)
   except asyncio.TimeoutError as e:
-    raise helper.AggregateError(f"下载图片超时：{url}") from e
+    raise util.AggregateError(f"下载图片超时：{url}") from e
   except aiohttp.ClientError as e:
-    raise helper.AggregateError(f"下载图片失败：{url}") from e
+    raise util.AggregateError(f"下载图片失败：{url}") from e
   except Exception as e:
-    raise helper.AggregateError(f"无效图片：{url}") from e
+    raise util.AggregateError(f"无效图片：{url}") from e
 
 
 async def get_image_and_user(
@@ -77,7 +77,7 @@ async def get_image_and_user(
 ) -> tuple[Image.Image, int | None]:
   if pattern in ("-", "发送"):
     await bot.send(event, "请发送一张图片")
-    pattern = str(await helper.prompt(event)).strip()
+    pattern = str(await util.prompt(event)).strip()
   if not pattern:
     uid = default
   elif match := AT_RE.match(pattern):
@@ -92,7 +92,7 @@ async def get_image_and_user(
     uid = event.self_id
   elif pattern in ("?", "回复"):
     if not event.reply:
-      raise helper.AggregateError("没有回复")
+      raise util.AggregateError("没有回复")
     uid = event.reply.sender.user_id
   else:
     uid = await account_aliases.match_uid(bot, event, pattern)
@@ -101,9 +101,9 @@ async def get_image_and_user(
     return await asyncio.wait_for(
       download_image(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0", crop), 10), uid
   except asyncio.TimeoutError:
-    raise helper.AggregateError(f"下载头像超时：{uid}")
+    raise util.AggregateError(f"下载头像超时：{uid}")
   except aiohttp.ClientError:
-    raise helper.AggregateError(f"下载头像失败：{uid}")
+    raise util.AggregateError(f"下载头像失败：{uid}")
 
 
 def save_transparent_gif(f: Any, frames: list[Image.Image], **kw):
@@ -146,15 +146,3 @@ def segment_animated_image(
   else:
     frames[0].save(f, format, append_images=frames[1:], save_all=True, duration=duration)
   return MessageSegment.image(f)
-
-
-def circle(im: Image.Image, antialias: bool = True):
-  if antialias:
-    mask = Image.new("L", (im.width * 2, im.height * 2))
-  else:
-    mask = Image.new("L", im.size)
-  draw = ImageDraw.Draw(mask)
-  draw.ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
-  if antialias:
-    mask = mask.resize(im.size, Image.ANTIALIAS)
-  im.putalpha(ImageChops.multiply(im.getchannel("A"), mask))

@@ -5,26 +5,11 @@ from io import BytesIO
 
 import cairo
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
-from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter
+from PIL import Image, ImageEnhance, ImageFilter
 
-from util import currency, resources, text
+from util import currency, text, util
 
 from ..config import STATE, FormatData
-
-
-# TODO: 把这个函数提取出去
-def circle(im: Image.Image, antialias: bool = True):
-  if antialias:
-    mask = Image.new("L", (im.width * 2, im.height * 2))
-  else:
-    mask = Image.new("L", im.size)
-  draw = ImageDraw.Draw(mask)
-  draw.ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
-  if antialias:
-    mask = mask.resize(im.size, Image.ANTIALIAS)
-  if "A" in im.getbands():
-    mask = ImageChops.multiply(im.getchannel("A"), mask)
-  im.putalpha(mask)
 
 
 def rounded_rect(cr: cairo.Context, x1: float, y1: float, x2: float, y2: float, r: float) -> None:
@@ -47,12 +32,12 @@ BOX_PADDING = 8
 async def format(bot: Bot, format_data: FormatData) -> Message:
   group_data = STATE(format_data.gid)
   user_data = group_data.get_user(format_data.uid)
-  http = resources.http()
+  http = util.http()
   async with http.get(f"https://q1.qlogo.cn/g?b=qq&nk={format_data.uid}&s=0") as response:
     raw_avatar = Image.open(BytesIO(await response.read())).convert("RGBA")
   avatar = Image.new("RGB", raw_avatar.size, (255, 255, 255))
   avatar.paste(raw_avatar, mask=raw_avatar)
-  im = avatar.resize((640, 640), Image.ANTIALIAS)
+  im = avatar.resize((640, 640), util.scale_resample)
   im = im.filter(ImageFilter.GaussianBlur(8))
   im = ImageEnhance.Brightness(im).enhance(0.5)
   center_x = im.width // 2
@@ -85,12 +70,11 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
     rounded_rect(cr, BOX_MARGIN, y, im.width - BOX_MARGIN, box_y2, 24)
     cr.set_source_rgba(0, 0, 0, 0.2)
     cr.fill()
-    b, g, r, a = Image.frombytes("RGBa", im.size, bytes(surface.get_data())).convert("RGBA").split()
-    overlay = Image.merge("RGBA", (r, g, b, a))
+    overlay = util.cairo_to_pil(surface)
   im.paste(overlay, mask=overlay)
 
-  avatar = avatar.resize((256, 256), Image.ANTIALIAS)
-  circle(avatar)
+  avatar = avatar.resize((256, 256), util.scale_resample)
+  util.circle(avatar)
   im.paste(avatar, (192, avatar_y - avatar.height // 2), avatar)
 
   y += BOX_PADDING
@@ -98,35 +82,34 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
   content_w = box_w - BOX_PADDING * 2
   info = await bot.get_group_member_info(group_id=format_data.gid, user_id=format_data.uid)
 
-  text_im = text.render(
-    info["card"] or info["nickname"], "sans bold", 28,
-    box=content_w, mode=text.ELLIPSIZE_MIDDLE, color=(255, 255, 255))
-  im.paste(text_im, (center_x - text_im.width // 2, y), text_im)
-  y += text_im.height
+  y += text.paste(
+    im, (center_x, y), info["card"] or info["nickname"], "sans bold", 28,
+    anchor="mt", box=content_w, mode=text.ELLIPSIZE_MIDDLE, color=(255, 255, 255)
+  ).height
 
   rank = group_data.rank.index(format_data.uid) + 1
   if format_data.coin == -1:
     s = f"#{rank} 已经签到过了"
   else:
     s = f"#{rank} 签到成功"
-  text_im = text.render(s, "sans", 24, box=box_w, color=(255, 255, 255))
-  im.paste(text_im, (center_x - text_im.width // 2, y), text_im)
-  y += text_im.height
+  y += text.paste(
+    im, (center_x, y), s, "sans", 24, anchor="mt", box=box_w, color=(255, 255, 255)
+  ).height
 
   coin = currency.get_coin(format_data.gid, format_data.uid)
   s = f"连续{user_data.combo_days + 1}天 总计{user_data.total_days}天 {coin}金币"
   if format_data.coin != -1:
     s += f"(+{format_data.coin})"
-  text_im = text.render(s, "sans", 24, box=box_w, color=(255, 255, 255))
-  im.paste(text_im, (center_x - text_im.width // 2, y), text_im)
-  y += text_im.height
+  y += text.paste(
+    im, (center_x, y), s, "sans", 24, anchor="mt", box=box_w, color=(255, 255, 255)
+  ).height
 
   async with http.get("https://v1.hitokoto.cn/") as response:
     data = await response.json()
   text_im = text.render(data["hitokoto"], "sans", 20, color=(255, 255, 255))
   if text_im.width > content_w:
     content_h = int(text_im.height / text_im.width * content_w)
-    text_im = text_im.resize((content_w, content_h), Image.ANTIALIAS)
+    text_im = text_im.resize((content_w, content_h), util.scale_resample)
   y = (y + box_y2 - BOX_PADDING) // 2 - text_im.height // 2
   im.paste(text_im, (center_x - text_im.width // 2, y), text_im)
 

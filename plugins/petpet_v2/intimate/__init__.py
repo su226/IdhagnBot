@@ -7,9 +7,9 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
-from ..util import circle, get_image_and_user, segment_animated_image
+from ..util import get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -46,18 +46,18 @@ async def handler(
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
     avatar2, _ = await get_image_and_user(bot, event, args.source, event.user_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  circle(avatar)
-  circle(avatar2)
+  util.circle(avatar)
+  util.circle(avatar2)
   frames: list[Image.Image] = []
   for i in range(6):
     frame = Image.open(os.path.join(plugin_dir, f"{i}.png"))
     x, y, w, h = OTHER_BOXES[i]
-    other_head = avatar.resize((w, h), Image.ANTIALIAS)
+    other_head = avatar.resize((w, h), util.scale_resample)
     frame.paste(other_head, (x, y), mask=other_head)
     x, y, w, h, angle = SELF_BOXES[i]
-    self_head = avatar2.resize((w, h), Image.ANTIALIAS).rotate(angle, Image.BICUBIC, True)
+    self_head = avatar2.resize((w, h), util.scale_resample).rotate(angle, util.resample, True)
     frame.paste(self_head, (x, y), mask=self_head)
     frames.append(frame)
   await matcher.finish(segment_animated_image(args.format, frames, 50))

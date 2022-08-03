@@ -7,7 +7,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper, text
+from util import command, text, util
 
 from ..util import get_image_and_user, segment_animated_image
 
@@ -43,12 +43,12 @@ async def handler(
       avatar2 = Image.open(os.path.join(plugin_dir, "huaji.png"))
     else:
       avatar2, _ = await get_image_and_user(bot, event, args.source, event.user_id)
-      avatar2 = avatar2.resize((120, 120), Image.ANTIALIAS)
-  except helper.AggregateError as e:
+      avatar2 = avatar2.resize((120, 120), util.scale_resample)
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
 
   frames: list[Image.Image] = []
-  avatar = avatar.resize((120, 120), Image.ANTIALIAS)
+  avatar = avatar.resize((120, 120), util.scale_resample)
 
   template = Image.new("RGB", (600, 280), (255, 255, 255))
   template.paste(avatar, (50, 50), avatar)
@@ -59,7 +59,7 @@ async def handler(
     await matcher.finish("文本过长")
   text_im = text.render(layout)
   if w > 550:
-    text_im = text_im.resize((550, h * 550 // w), Image.ANTIALIAS)
+    text_im = text_im.resize((550, h * 550 // w), util.scale_resample)
   template.paste(text_im, (300 - text_im.width // 2, 215 - text_im.height // 2), text_im)
 
   for i in range(5):

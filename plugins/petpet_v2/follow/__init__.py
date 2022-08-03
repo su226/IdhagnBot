@@ -7,9 +7,9 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, context, helper, text
+from util import command, context, text, util
 
-from ..util import get_image_and_user, circle
+from ..util import get_image_and_user
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument(
@@ -31,7 +31,7 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, user = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   if args.name is not None:
     name = args.name
@@ -45,8 +45,8 @@ async def handler(
       name = info["nickname"]
   else:
     name = "男同"
-  avatar = avatar.resize((200, 200), Image.ANTIALIAS)
-  circle(avatar)
+  avatar = avatar.resize((200, 200), util.scale_resample)
+  util.circle(avatar)
   text_im = text.render(name, "sans", 60)
   text2_im = text.render("关注了你", "sans", 60, color=(127, 127, 127))
   text_width = max(text_im.width, text2_im.width)

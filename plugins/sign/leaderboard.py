@@ -1,11 +1,12 @@
 import asyncio
+import html
 from io import BytesIO
 from typing import Any
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageOps
 
-from util import command, context, resources, text
+from util import command, context, text, util
 
 from .config import STATE
 
@@ -37,7 +38,7 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
   group_data = STATE(gid)
   group_data.update()
   rank = group_data.rank
-  http = resources.http()
+  http = util.http()
   infos: list[tuple[str, Image.Image]] = await asyncio.gather(*(fetch_data(uid) for uid in rank))
 
   lines = max(len(infos), MIN_LINES)
@@ -56,40 +57,31 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
 
     draw.rectangle((0, y, line_h - 1, y + line_h - 1), placeholder_color)
     if i >= len(rank):
-      time_im = text.render("?", "sans", line_h * 0.5, color=(255, 255, 255))
-      text_x = (line_h - time_im.width) // 2
-      text_y = y + (line_h - time_im.height) // 2
-      im.paste(time_im, (text_x, text_y), time_im)
-
-      time_im = text.render("虚位以待", "sans", line_h * 0.3, color=(255, 255, 255))
-      name_x = round(line_h * 1.2)
-      name_y = y + (line_h - time_im.height) // 2
-      im.paste(time_im, (name_x, name_y), time_im)
+      text.paste(
+        im, (line_h // 2, y + line_h // 2), "?", "sans", line_h * 0.5,
+        anchor="mm", color=(255, 255, 255))
+      text.paste(
+        im, (round(line_h * 1.2), y + line_h // 2), "虚位以待", "sans", line_h * 0.3,
+        anchor="lm", color=(255, 255, 255))
     else:
       name, avatar = infos[i]
-      bg = ImageOps.fit(avatar, (WIDTH - line_h, line_h), Image.BILINEAR)
+      bg = ImageOps.fit(avatar, (WIDTH - line_h, line_h), util.scale_resample)
       bg = bg.filter(ImageFilter.GaussianBlur(8))
       mask = Image.new("L", (2, 1))
       mask.putpixel((0, 0), 64)
       mask.putpixel((1, 0), 8)
-      mask = mask.resize(bg.size, Image.BILINEAR)
+      mask = mask.resize(bg.size, util.scale_resample)
       bg.putalpha(ImageChops.multiply(bg.getchannel("A"), mask))
       im.paste(bg, (line_h, y), bg)
-      avatar = avatar.resize((line_h, line_h), Image.BILINEAR)
+      avatar = avatar.resize((line_h, line_h), util.scale_resample)
       im.paste(avatar, (0, y), avatar)
 
       name_x = round(line_h * 1.2)
-      name_box = WIDTH - name_x - 16
-      name_im = text.render(
-        name, "sans", line_h * 0.3, color=(255, 255, 255), box=name_box, mode=text.ELLIPSIZE_END)
-
       user_data = group_data.get_user(rank[i])
-      time_str = user_data.time.strftime("%H:%M:%S")
-      time_im = text.render(time_str, "sans", line_h * 0.2, color=(255, 255, 255))
-
-      name_y = y + (line_h - name_im.height - time_im.height) // 2
-      im.paste(name_im, (name_x, name_y), name_im)
-      im.paste(time_im, (name_x, name_y + name_im.height), time_im)
+      markup = f"{html.escape(name)}\n<span size='66%'>{user_data.time:%H:%M:%S}</span>"
+      text.paste(
+        im, (name_x, y + line_h // 2), markup, "sans", line_h * 0.3, anchor="lm", markup=True,
+        color=(255, 255, 255), box=WIDTH - name_x - 16, mode=text.ELLIPSIZE_END)
 
     y += line_h
 

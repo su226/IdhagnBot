@@ -11,7 +11,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageDraw, ImageOps
 
-from util import command, context, helper, text
+from util import command, context, text, util
 
 from ..util import get_image_and_user
 
@@ -38,7 +38,7 @@ async def get_all(
     if name:
       return avatar, name
     if user is None:
-      raise helper.AggregateError(f"请指定第 {i} 人的名字")
+      raise util.AggregateError(f"请指定第 {i} 人的名字")
     try:
       info = await bot.get_group_member_info(group_id=ctx, user_id=user)
       name = cast(str, info["card"] or info["nickname"])
@@ -48,17 +48,17 @@ async def get_all(
   ctx = context.get_event_context(event)
   coros = [
     get_one(i, target, name) for i, (target, name) in enumerate(zip(targets, default_names), 1)]
-  errors: list[helper.AggregateError] = []
+  errors: list[util.AggregateError] = []
   avatars: list[Image.Image] = []
   names: list[str] = []
   for i in await asyncio.gather(*coros, return_exceptions=True):
-    if isinstance(i, helper.AggregateError):
+    if isinstance(i, util.AggregateError):
       errors.append(i)
     else:
       avatars.append(i[0])
       names.append(i[1])
   if errors:
-    raise helper.AggregateError(*errors)
+    raise util.AggregateError(*errors)
   return avatars, names
 
 parser = ArgumentParser(add_help=False)
@@ -86,14 +86,14 @@ async def handler(
     default_names[i - 1] = name
   try:
     avatars, names = await get_all(bot, event, args.targets, default_names)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
 
   im = Image.open(os.path.join(plugin_dir, "template.png"))
-  avatar = ImageOps.fit(avatars[0], (350, 400), Image.ANTIALIAS)
+  avatar = ImageOps.fit(avatars[0], (350, 400), util.scale_resample)
   im.paste(avatar, (25, 35), avatar)
   for avatar in avatars[1:]:
-    avatar = ImageOps.fit(avatar, (350, 400), Image.ANTIALIAS)
+    avatar = ImageOps.fit(avatar, (350, 400), util.scale_resample)
     im.paste(avatar, (10 + random.randint(0, 50), 20 + random.randint(0, 70)), avatar)
 
   layout = text.layout(PREFIX + names[0], "sans bold", 70)
@@ -102,7 +102,7 @@ async def handler(
     await matcher.finish(f"名字太长：{names[0]}")
   text_im = text.render(layout)
   if text_w > 800:
-    text_im = text_im.resize((800, text_h * 800 // text_w), Image.ANTIALIAS)
+    text_im = text_im.resize((800, text_h * 800 // text_w), util.scale_resample)
   text_x = (im.width - text_im.width) // 2
   text_y = 520 - text_im.height // 2
   im.paste(text_im, (text_x, text_y), text_im)
@@ -123,7 +123,7 @@ async def handler(
       await matcher.finish(f"名字太长：{name}")
     text_im = text.render(layout)
     if text_w > 400:
-      text_im = text_im.resize((400, text_h * 400 // text_w), Image.ANTIALIAS)
+      text_im = text_im.resize((400, text_h * 400 // text_w), util.scale_resample)
     text_x = name_x - text_im.width // 2
     text_y -= int(text_im.height * 0.8)
     im.paste(text_im, (text_x, text_y), text_im)

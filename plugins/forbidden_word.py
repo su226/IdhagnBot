@@ -10,7 +10,7 @@ from nonebot.rule import ArgumentParser
 from nonebot.typing import T_State
 from pydantic import Field
 
-from util import command, context, helper
+from util import command, context, util
 from util.config import BaseConfig, BaseState
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -130,8 +130,8 @@ async def handle_recall(event: MessageEvent, bot: Bot, state: T_State):
       suffix = "，已禁言警告"
     elif CONFIG.show_ban:
       suffix = (
-        f"，{helper.format_time(CONFIG.ban_timeout)}内发送超过{CONFIG.ban_thresold}条"
-        f"将会禁言{helper.format_time(CONFIG.ban_duration)}警告")
+        f"，{util.format_time(CONFIG.ban_timeout)}内发送超过{CONFIG.ban_thresold}条"
+        f"将会禁言{util.format_time(CONFIG.ban_duration)}警告")
     else:
       suffix = "，否则可能会禁言警告"
   else:

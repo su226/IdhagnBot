@@ -1,7 +1,6 @@
 import os
 from argparse import Namespace
 from io import BytesIO
-from typing import Any
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
@@ -9,12 +8,18 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
-from util import command, helper
+from util import command, util
 
-from ..util import RemapTransform, get_image_and_user
+from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-TRANSFORM: Any = RemapTransform((220, 160), ((0, 39), (225, 0), (236, 145), (25, 197)))
+# pylama: skip=1
+# RemapTransform((220, 160), ((0, 39), (225, 0), (236, 145), (25, 197)))
+OLD_SIZE = 220, 160
+NEW_SIZE = 236, 197
+TRANSFORM = (
+  0.8469606952031231, -0.13401276822833844, 5.226497960904075, 0.15932974592085844,
+  0.9192100726203283, -35.84919283219329, -0.0004890372852200551, -0.00027999415409538726)
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument(
@@ -34,12 +39,12 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   template = Image.open(os.path.join(plugin_dir, "template.png"))
   im = Image.new("RGB", template.size, (0, 0, 0))
-  avatar = ImageOps.pad(avatar, (220, 160), Image.ANTIALIAS).transform(
-    TRANSFORM.new_size, TRANSFORM, resample=Image.BICUBIC)
+  avatar = ImageOps.pad(avatar, OLD_SIZE, util.scale_resample).transform(
+    NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, resample=util.resample)
   im.paste(avatar, (162, 119), avatar)
   im.paste(template, mask=template)
   f = BytesIO()

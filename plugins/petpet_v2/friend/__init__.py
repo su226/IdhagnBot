@@ -8,7 +8,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
-from util import command, context, helper, text
+from util import command, context, text, util
 
 from ..util import get_image_and_user
 
@@ -34,7 +34,7 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, user = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   if args.name is not None:
     name = args.name
@@ -49,17 +49,17 @@ async def handler(
   else:
     await matcher.finish("请使用 -name 指定名字")
   overlay = Image.open(plugin_dir / "template.png")
-  avatar = avatar.resize((1000, 1000), Image.ANTIALIAS)
+  avatar = avatar.resize((1000, 1000), util.scale_resample)
   im = Image.new("RGB", avatar.size, (255, 255, 255))
   im.paste(avatar, mask=avatar)
-  avatar1 = im.resize((250, 250), Image.ANTIALIAS).rotate(9, Image.BICUBIC, True)
-  avatar2 = im.resize((55, 55), Image.ANTIALIAS).rotate(9, Image.BICUBIC)
+  avatar1 = im.resize((250, 250), util.scale_resample).rotate(9, util.resample, True)
+  avatar2 = im.resize((55, 55), util.scale_resample).rotate(9, util.resample)
   im.paste(avatar1, (im.width - 257, im.height - 155))
   im.paste(avatar2, (im.width - 160, im.height - 273))
   im.paste(overlay, (im.width - overlay.width, im.height - overlay.height), overlay)
   text_im = text.render(name, "sans", 20, color=(255, 255, 255), box=230, mode=text.ELLIPSIZE_END)
   text_im = ImageOps.pad(text_im, (230, text_im.height), centering=(0, 0))
-  text_im = text_im.rotate(9, Image.BICUBIC, True)
+  text_im = text_im.rotate(9, util.resample, True)
   im.paste(text_im, (im.width - 281, im.height - 345), text_im)
   f = BytesIO()
   im.save(f, "png")

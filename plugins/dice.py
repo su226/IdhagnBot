@@ -3,11 +3,10 @@ import random
 import re
 from typing import Callable
 
-import numpy
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
 
-from util import command
+from util import binomial, command
 
 CONFIG = {
   "limit": 10000,
@@ -27,7 +26,7 @@ def dice_simulation(count: int, faces: int) -> list[int]:
 def dice_binomial(count: int, faces: int) -> list[int]:
   results = []
   for used in range(faces):
-    current = numpy.random.binomial(count, 1.0 / (faces - used))
+    current = binomial.sample(count, 1.0 / (faces - used))
     results.append(current)
     count -= current
   return results

@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 from . import amd, nvidia
 from .common import Info
@@ -13,6 +14,8 @@ VENDORS = {
 
 
 def get_gpu_info() -> list[Info]:
+  if sys.platform != "linux":
+    return []
   gpus = [i for i in os.listdir("/sys/class/drm") if re.match(r"^card\d+$", i)]
   result = []
   for i in gpus:

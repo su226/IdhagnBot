@@ -1,21 +1,24 @@
+import html
 import math
 import random
 from io import BytesIO
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from util import command, resources
+from util import command, text
 
-OMEGA = 0.2
+SIZE = 32
+PADDING = SIZE
+OMEGA = 0.00005 / SIZE
 
 
-def rainbow(x: float, phi: float) -> tuple[int, int, int]:
+def rainbow(x: float, phi: float) -> str:
   r = math.sin(OMEGA * x + phi) * 127 + 128
   g = math.sin(OMEGA * x + phi + math.pi * 2 / 3) * 127 + 128
   b = math.sin(OMEGA * x + phi + math.pi * 4 / 3) * 127 + 128
-  return (int(r), int(g), int(b))
+  return f"#{int(r):02x}{int(g):02x}{int(b):02x}"
 
 
 USAGE = '''\
@@ -30,26 +33,20 @@ lolcat = (
 
 @lolcat.handle()
 async def handle_lolcat(arg: Message = CommandArg()):
-  text = arg.extract_plain_text().strip() or USAGE
-  font_size = 32
-  font = resources.font("sans", font_size)
-  w, h = font.getsize_multiline(text, spacing=0)
-  _, line_height = font.getsize("A")
-  h += font.getmetrics()[1]
-  im = Image.new("RGB", (w + 128, h + 128), (33, 33, 33))
-  draw = ImageDraw.Draw(im)
-  y = 64
-  rainbow_x = 0
+  content = arg.extract_plain_text().strip() or USAGE
+  layout = text.layout(content, "sans", SIZE)
+  pieces = []
   phi = random.uniform(0, 2 * math.pi)
-  for i, line in enumerate(text.splitlines()):
-    x = 64
-    rainbow_x = i
-    for char in line:
-      cw, _ = font.getsize(char)
-      draw.text((x, y), char, rainbow(rainbow_x, phi), font)
-      x += cw
-      rainbow_x += cw / font_size
-    y += line_height
+  it = layout.get_iter()
+  for ch in content:
+    rect = it.get_char_extents()
+    color = rainbow(rect.x + rect.y, phi)
+    pieces.append(f"<span color='{color}'>{html.escape(ch)}</span>")
+    it.next_char()
+  layout.set_markup("".join(pieces))
+  _, rect = layout.get_pixel_extents()
+  im = Image.new("RGB", (rect.width + PADDING * 2, rect.height + PADDING * 2), (33, 33, 33))
+  text.paste(im, (PADDING, PADDING), layout)
   f = BytesIO()
-  im.save(f, "png")
-  await lolcat.send(MessageSegment.image(f))
+  im.save(f, "PNG")
+  await lolcat.finish(MessageSegment.image(f))

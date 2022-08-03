@@ -4,7 +4,7 @@ import random
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import CommandArg
 
-from util import account_aliases, command, context, helper
+from util import account_aliases, command, context, util
 
 super_poke = (
   command.CommandBuilder("super_poke", "戳亿戳", "poke")
@@ -27,7 +27,7 @@ async def handle_super_poke(bot: Bot, event: Event, arg: Message = CommandArg())
   for pattern in args[1:]:
     try:
       all_uids.extend(await account_aliases.match_uid(bot, event, pattern, True))
-    except helper.AggregateError as e:
+    except util.AggregateError as e:
       all_errors.extend(e)
   if len(all_errors):
     await super_poke.send("\n".join(all_errors))

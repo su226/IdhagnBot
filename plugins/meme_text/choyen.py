@@ -1,5 +1,4 @@
 from io import BytesIO
-import os
 
 import cairo
 import gi
@@ -10,10 +9,9 @@ from util import command, text
 
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
-from gi.repository import Pango, PangoCairo
+from gi.repository import Pango, PangoCairo  # type: ignore
 
 
-PAGE = "file://" + os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html")
 TOP_X = 70
 TOP_Y = 0
 BOTTOM_X = 250

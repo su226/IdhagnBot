@@ -6,9 +6,9 @@ from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageOps
 
-from util import command, helper, resources
+from util import command, text, util
 
 from ..util import get_image_and_user
 
@@ -32,17 +32,14 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   im = Image.new("RGB", (500, 500), (255, 255, 255))
-  draw = ImageDraw.Draw(im)
-  font = resources.font("sans-bold", 64)
-  draw.text((250, 0), "很抱歉打扰你…", (0, 0, 0), font, "ma")
-  avatar = ImageOps.fit(avatar, (500, 300), Image.ANTIALIAS)
+  text.paste(im, (250, 0), "很抱歉打扰你…", "sans bold", 64, anchor="mt")
+  avatar = ImageOps.fit(avatar, (500, 300), util.scale_resample)
   im.paste(avatar, (0, 100), avatar)
-  font = resources.font("sans-bold", 32)
-  draw.text((250, 400), "可是你今天甚至没有给我", (0, 0, 0), font, "ma")
-  draw.text((250, 445), "一个像样的亲亲诶", (0, 0, 0), font, "ma")
+  text.paste(im, (250, 400), "可是你今天甚至没有给我", "sans bold", 32, anchor="mt")
+  text.paste(im, (250, 445), "一个像样的亲亲诶", "sans bold", 32, anchor="mt")
   f = BytesIO()
   im.save(f, "PNG")
   await matcher.finish(MessageSegment.image(f))

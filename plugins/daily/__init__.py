@@ -8,7 +8,7 @@ from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
 from nonebot.exception import ActionFailed
 from pydantic import BaseModel, Field
 
-from util import command, config_v2, resources
+from util import command, config_v2, util
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
@@ -62,7 +62,7 @@ TODAY_API = "https://www.ipip5.com/today/api.php?type=json"
 
 
 async def fetch_history() -> str:
-  http = resources.http()
+  http = util.http()
   async with http.get(TODAY_API) as response:
     data = await response.json()
   result = []
@@ -72,7 +72,7 @@ async def fetch_history() -> str:
 
 
 async def fetch_sentence() -> tuple[bytes, str]:
-  http = resources.http()
+  http = util.http()
   async with http.get(SENTENCE_API) as response:
     data = await response.json(content_type=None)
   async with http.get(data["fenxiang_img"]) as response:
@@ -80,13 +80,13 @@ async def fetch_sentence() -> tuple[bytes, str]:
 
 
 async def fetch_news() -> bytes:
-  http = resources.http()
+  http = util.http()
   async with http.get(NEWS_API) as response:
     return await response.read()
 
 
 async def fetch_moyu() -> bytes:
-  http = resources.http()
+  http = util.http()
   async with http.get(MOYU_API) as response:
     data = await response.json()
   async with http.get(data["data"]["moyu_url"]) as response:

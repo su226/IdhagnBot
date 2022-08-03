@@ -8,7 +8,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageDraw, PyAccess
 
-from util import command, context, helper, text
+from util import command, context, text, util
 
 from ..util import get_image_and_user
 
@@ -73,7 +73,7 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, user = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   name = args.name
   gender = args.gender
@@ -92,7 +92,7 @@ async def handler(
   if name is None:
     await matcher.finish("请使用 -name 指定名字")
 
-  avatar = avatar.resize((640, 640), Image.ANTIALIAS)
+  avatar = avatar.resize((640, 640), util.scale_resample)
   gradient_h = 150
   x = 30
   y = avatar.height - gradient_h

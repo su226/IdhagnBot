@@ -7,9 +7,9 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
-from ..util import circle, get_image_and_user, segment_animated_image
+from ..util import get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 SOURCE_BOXES = [(6, 18), (6, 18), (6, 18), (7, 18)]
@@ -43,12 +43,12 @@ async def handler(
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
     avatar2, _ = await get_image_and_user(bot, event, args.source, event.user_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  avatar = avatar.resize((22, 22), Image.ANTIALIAS)
-  avatar2 = avatar2.resize((30, 30), Image.ANTIALIAS)
-  circle(avatar)
-  circle(avatar2)
+  avatar = avatar.resize((22, 22), util.scale_resample)
+  avatar2 = avatar2.resize((30, 30), util.scale_resample)
+  util.circle(avatar)
+  util.circle(avatar2)
   frames: list[Image.Image] = []
   for i in range(4):
     frame = Image.open(os.path.join(plugin_dir, f"{i}.png"))

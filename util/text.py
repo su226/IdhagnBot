@@ -1,15 +1,16 @@
 import math
-from typing import Literal, overload
+from typing import Literal, TypeAlias, overload
 
 import cairo
 import gi
 from PIL import Image
 
+from util import util
 from util.color import RGB, split_rgb
 
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
-from gi.repository import Pango, PangoCairo  # type: ignore
+from gi.repository import GLib, Pango, PangoCairo  # type: ignore
 
 WRAP_WORD = 0
 WRAP_CHAR = 1
@@ -17,6 +18,7 @@ WRAP_WORD_CHAR = 2
 ELLIPSIZE_START = 3
 ELLIPSIZE_MIDDLE = 4
 ELLIPSIZE_END = 5
+Layout: TypeAlias = Pango.Layout
 Mode = Literal[0, 1, 2, 3, 4, 5]
 Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
 Align = Literal["l", "m", "r"]
@@ -25,10 +27,12 @@ Align = Literal["l", "m", "r"]
 def layout(
   content: str, font: str, size: float, *, box: tuple[int, int] | int | None = None, mode: Mode = 0,
   markup: bool = False, align: Align = "l", spacing: int = 0
-) -> Pango.Layout:
+) -> Layout:
   context = Pango.Context()
   context.set_font_map(PangoCairo.FontMap.get_default())
   layout = Pango.Layout(context)
+  if value := util.CONFIG().font_substitute.get(font, None):
+    font = value
   desc = Pango.FontDescription.from_string(font)
   desc.set_absolute_size(Pango.SCALE * size)
   layout.set_font_description(desc)
@@ -48,7 +52,12 @@ def layout(
   if align == "r":
     layout.set_alignment(Pango.Alignment.RIGHT)
   if markup:
-    layout.set_markup(content, -1)
+    try:
+      Pango.parse_markup(content, -1, "\0")
+    except GLib.Error as e:
+      layout.set_text(f"解析失败: {e.message}", -1)
+    else:
+      layout.set_markup(content, -1)
   else:
     layout.set_text(content, -1)
   return layout
@@ -56,7 +65,7 @@ def layout(
 
 @overload
 def render(
-  content: Pango.Layout, *, color: RGB | int = ..., stroke: float = ...,
+  content: Layout, *, color: RGB | int = ..., stroke: float = ...,
   stroke_color: RGB | int = ...
 ) -> Image.Image: ...
 
@@ -70,14 +79,14 @@ def render(
 
 
 def render(
-  content: str | Pango.Layout, *args, color: RGB | int = (0, 0, 0), stroke: float = 0,
+  content: str | Layout, *args, color: RGB | int = (0, 0, 0), stroke: float = 0,
   stroke_color: RGB | int = (255, 255, 255), **kw
 ) -> Image.Image:
   if isinstance(content, Pango.Layout):
     l = content
   else:
     l = layout(content, *args, **kw)
-  w, h = l.get_pixel_size()  # type: ignore
+  w, h = l.get_pixel_size()
   margin = math.ceil(stroke)
   w += margin * 2
   h += margin * 2
@@ -96,18 +105,12 @@ def render(
     cr.move_to(margin, margin)
     cr.set_source_rgb(color[0] / 255, color[1] / 255, color[2] / 255)
     PangoCairo.show_layout(cr, l)
-    data = surface.get_data()
-    if data:  # 如果文字为空，图片大小是0x0，data为None
-      im = Image.frombytes("RGBA", (w, h), bytes(data))
-    else:
-      return Image.new("RGBA", (w, h))
-  b, g, r, a = im.split()  # 交换红蓝通道，因为PIL不支持Cairo用的BGRa
-  return Image.merge("RGBa", (r, g, b, a)).convert("RGBA")  # type: ignore
+    return util.cairo_to_pil(surface)
 
 
 @overload
 def paste(
-  im: Image.Image, xy: tuple[int, int], content: Pango.Layout, *, anchor: Anchor = ...,
+  im: Image.Image, xy: tuple[int, int], content: Layout, *, anchor: Anchor = ...,
   color: RGB | int = ..., stroke: float = ..., stroke_color: RGB | int = ...
 ) -> Image.Image: ...
 

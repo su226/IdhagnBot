@@ -1,13 +1,14 @@
+import html
 import random
 from io import BytesIO
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from util import command, resources
+from util import command, text
 
-COLORS = [(66, 133, 244), (234, 67, 53), (251, 188, 5), (52, 168, 83)]
+COLORS = ["4285f4", "ea4335", "fbbc05", "34a853"]
 PADDING = 32
 
 USAGE = "/谷歌 <文本>"
@@ -19,27 +20,22 @@ google = (
 
 @google.handle()
 async def handle_google(args: Message = CommandArg()):
-  text = args.extract_plain_text().rstrip() or USAGE
-  font = resources.font("sans-bold", 64)
-  line_height = font.getsize("A")[1] + 4
-  w, h = font.getsize_multiline(text)
-  h += font.getmetrics()[1]
-  im = Image.new("RGB", (w + PADDING * 2, h + PADDING * 2), (255, 255, 255))
-  draw = ImageDraw.Draw(im)
-  x = 0
-  y = 0
+  content = args.extract_plain_text().rstrip() or USAGE
   colors = COLORS.copy()
   random.shuffle(colors)
-  for ch in text:
+  pieces = []
+  for ch in content:
     if ch == "\n":
-      x = 0
-      y += line_height
+      pieces.append(ch)
       continue
     # 防止两个相同的颜色挨在一起
     i = random.randrange(len(colors) - 1)
-    draw.text((PADDING + x, PADDING + y), ch, colors[i], font)
+    pieces.append(f"<span color='#{colors[i]}'>{html.escape(ch)}</span>")
     colors[i], colors[-1] = colors[-1], colors[i]
-    x += font.getsize(ch)[0]
+  text_im = text.render("".join(pieces), "sans", 64, markup=True)
+  p = PADDING * 2
+  im = Image.new("RGB", (text_im.width + p, text_im.height + p), (255, 255, 255))
+  im.paste(text_im, (PADDING, PADDING), text_im)
   f = BytesIO()
   im.save(f, "png")
   await google.finish(MessageSegment.image(f))

@@ -5,9 +5,9 @@ from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ActionFailed, ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from util import command, context, helper, resources, text
+from util import command, context, text, util
 
 from ..util import get_image_and_user
 
@@ -42,7 +42,7 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, user = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   name = args.name
   gender = args.gender
@@ -62,7 +62,6 @@ async def handler(
     await matcher.finish("请使用 -name 指定名字")
 
   im = Image.new("RGB", (600, 730), (255, 255, 255))
-  draw = ImageDraw.Draw(im)
 
   layout = text.layout(f"请问你们看到{name}了吗?", "sans bold", 70)
   width, height = layout.get_pixel_size()
@@ -70,19 +69,18 @@ async def handler(
     await matcher.finish("名字过长")
   im2 = text.render(layout)
   if width > 560:
-    im2 = im2.resize((560, int(height / width * 560)), Image.ANTIALIAS)
+    im2 = im2.resize((560, int(height / width * 560)), util.scale_resample)
   im.paste(im2, (300 - im2.width // 2, 50 - im2.height // 2), im2)
 
-  avatar = avatar.resize((500, 500), Image.ANTIALIAS)
+  avatar = avatar.resize((500, 500), util.scale_resample)
   im.paste(avatar, (50, 110), avatar)
 
-  font = resources.font("sans-bold", 48)
-  draw.text((300, 610), "非常可爱！简直就是小天使", (0, 0, 0), font, "ma")
-
-  font = resources.font("sans-bold", 26)
-  draw.text(
-    (300, 680), f"{GENDERS[gender]}没失踪也没怎么样  我只是觉得你们都该看一下",
-    (0, 0, 0), font, "ma")
+  text.paste(
+    im, (300, 610), "非常可爱！简直就是小天使",
+    "sans bold", 48, anchor="mt")
+  text.paste(
+    im, (300, 680), f"{GENDERS[gender]}没失踪也没怎么样  我只是觉得你们都该看一下",
+    "sans bold", 26, anchor="mt")
 
   f = BytesIO()
   im.save(f, "PNG")

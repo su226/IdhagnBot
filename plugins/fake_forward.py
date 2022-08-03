@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, Message
 from nonebot.exception import ActionFailed
 from nonebot.params import CommandArg
 
-from util import account_aliases, command, helper
+from util import account_aliases, command, util
 
 
 async def get_name_or_card(bot: Bot, event: MessageEvent, uid: int, gid: int) -> str:
@@ -50,7 +50,7 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
   errors = []
   for i in done:
     if (e := i.exception()):
-      errors.extend(cast(helper.AggregateError, e))
+      errors.extend(cast(util.AggregateError, e))
   if errors:
     await fake_forward.finish("\n".join(errors))
 

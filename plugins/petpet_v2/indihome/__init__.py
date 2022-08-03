@@ -8,9 +8,9 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
-from ..util import circle, get_image_and_user, segment_animated_image
+from ..util import get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -31,7 +31,7 @@ def lerp(box1: tuple[int, ...], box2: tuple[int, ...], r2: float) -> tuple[int, 
 
 
 def paste(im: Image.Image, im2: Image.Image, box: tuple[int, int, int, int]):
-  im2 = im2.resize((box[2] - box[0], box[3] - box[1]), Image.ANTIALIAS)
+  im2 = im2.resize((box[2] - box[0], box[3] - box[1]), util.scale_resample)
   im.paste(im2, box, im2)
 
 
@@ -68,10 +68,10 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  avatar = avatar.resize((360, 360), Image.ANTIALIAS)
-  circle(avatar)
+  avatar = avatar.resize((360, 360), util.scale_resample)
+  util.circle(avatar)
   frames: list[Image.Image] = []
   durations: list[int] = []
   for i in range(SLIDE_FRAMES):

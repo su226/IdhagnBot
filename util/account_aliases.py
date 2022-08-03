@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from util import context
 from util.config import BaseConfig
-from util.helper import AggregateError
+from util.util import AggregateError
 
 
 class Alias(BaseModel):

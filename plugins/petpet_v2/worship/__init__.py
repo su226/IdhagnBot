@@ -1,6 +1,5 @@
 import os
 from argparse import Namespace
-from typing import Any
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
 from nonebot.exception import ParserExit
@@ -8,12 +7,18 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, helper
+from util import command, util
 
-from ..util import RemapTransform, get_image_and_user, segment_animated_image
+from ..util import get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-TRANSFORM: Any = RemapTransform((150, 150), ((0, -30), (135, 17), (135, 145), (0, 140)))
+# pylama: skip=1
+# RemapTransform((150, 150), ((0, -30), (135, 17), (135, 145), (0, 140)))
+OLD_SIZE = 150, 150
+NEW_SIZE = 135, 145
+TRANSFORM = (
+  0.8366013071895618, 1.2128331252511345e-14, -3.561263629370086e-12, -0.3071895424836637,
+  0.8823529411764716, 26.47058823529454, -0.0018300653594771486, 3.1736140776801494e-17)
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument(
@@ -39,11 +44,11 @@ async def handler(
     await matcher.finish(args.message)
   try:
     avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
-  except helper.AggregateError as e:
+  except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   frames: list[Image.Image] = []
-  avatar = avatar.resize(TRANSFORM.old_size, Image.ANTIALIAS).transform(
-    TRANSFORM.new_size, TRANSFORM, resample=Image.BICUBIC)
+  avatar = avatar.resize(OLD_SIZE, util.scale_resample).transform(
+    NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, resample=util.resample)
   for i in range(10):
     template = Image.open(os.path.join(plugin_dir, f"{i}.png"))
     im = Image.new("RGB", template.size, (255, 255, 255))
