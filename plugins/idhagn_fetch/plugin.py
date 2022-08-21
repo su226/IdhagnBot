@@ -87,7 +87,7 @@ bot_start_time = time.time()
 
 def get_cpu_usage():
   cpu_util = round(psutil.cpu_percent())
-  cpu_freq = round(psutil.cpu_freq().current * 1024)
+  cpu_freq = round(psutil.cpu_freq().current)
   temps = psutil.sensors_temperatures()
   if "k10temp" in temps:  # AMD
     cpu_temp = f"{round(temps['k10temp'][0].current)}°C"
@@ -184,11 +184,9 @@ async def handle_uptime(bot: Bot):
   if config.enable_header:
     im.paste(header_im, (64, 64), header_im)
   if config.avatar_size != 0:
-    async with ClientSession() as http:
-      response = await http.get(f"https://q1.qlogo.cn/g?b=qq&nk={login['user_id']}&s=0")
-      avatar = Image.open(BytesIO(await response.read()))
+    avatar = await util.get_avatar(login["user_id"])
     avatar_size = config.avatar_size * 2
-    avatar = avatar.resize((avatar_size, avatar_size), util.scale_resample).convert("RGBA")
+    avatar = avatar.resize((avatar_size, avatar_size), util.scale_resample)
     im.paste(avatar, (64, info_y), avatar)
   if config.enable_account:
     im.paste(account_im, (info_x, info_y), account_im)
