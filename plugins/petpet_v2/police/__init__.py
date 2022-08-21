@@ -3,7 +3,7 @@ from argparse import Namespace
 from io import BytesIO
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.exception import ActionFailed, ParserExit
+from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
@@ -43,20 +43,14 @@ async def handler(
   if args.name is not None:
     name = args.name
   elif user is not None:
-    try:
-      info = await bot.get_group_member_info(
-        group_id=context.get_event_context(event), user_id=user)
-      name = info["card"] or info["nickname"]
-    except ActionFailed:
-      info = await bot.get_stranger_info(user_id=user)
-      name = info["nickname"]
+    name = await context.get_card_or_name(bot, event, user)
   else:
     await matcher.finish("请使用 -name 指定名字")
   large = avatar.resize((460, 460), util.scale_resample).rotate(-17, util.resample, True)
   pre_small = avatar.resize((118, 118), util.scale_resample)
   small = Image.new("RGBA", (120, 120))
   small.paste(pre_small, (1, 1), pre_small)
-  small = small.transform((200, 200), *AVATAR_TRANSFORM, resample=util.resample)
+  small = small.transform((200, 200), *AVATAR_TRANSFORM, util.resample)
   im = Image.new("RGB", (600, 600), (255, 255, 255))
   im.paste(large, (84, 114), large)
   template = Image.open(os.path.join(plugin_dir, "template.png"))

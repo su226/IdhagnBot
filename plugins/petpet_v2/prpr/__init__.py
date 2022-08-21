@@ -1,18 +1,18 @@
-import os
 from argparse import Namespace
 from io import BytesIO
+from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image
+from PIL import Image, ImageOps
 
 from util import command, util
 
-from ..util import get_image_and_user
+from ..util import get_image_and_user, segment_animated_image
 
-plugin_dir = os.path.dirname(os.path.abspath(__file__))
+plugin_dir = Path(__file__).resolve().parent
 # pylama: skip=1
 # RemapTransform((330, 330), ((0, 19), (236, 0), (287, 264), (66, 351)))
 OLD_SIZE = 330, 330
@@ -23,11 +23,19 @@ TRANSFORM = (
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument(
-  "target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接")
+  "target", nargs="?", default="", metavar="目标",
+  help="可使用@、QQ号、昵称、群名片或图片链接（可传入动图）")
+group = parser.add_mutually_exclusive_group()
+group.add_argument(
+  "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
+  help="使用WebP而非GIF格式（如果传入动图）")
+group.add_argument(
+  "--png", "--apng", "-p", action="store_const", dest="format", const="png",
+  help="使用APNG而非GIF格式（如果传入动图）")
 matcher = (
-  command.CommandBuilder("petpet_v2.prpr", "舔", "prpr")
+  command.CommandBuilder("petpet_v2.prpr", "舔", "舔屏", "prpr")
   .category("petpet_v2")
-  .brief("少舔屏，小心屏幕进水")
+  .brief("[动]少舔屏，小心屏幕进水")
   .shell(parser)
   .build())
 
@@ -39,15 +47,25 @@ async def handler(
   if isinstance(args, ParserExit):
     await matcher.finish(args.message)
   try:
-    avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id)
+    avatar, _ = await get_image_and_user(bot, event, args.target, event.self_id, raw=True)
   except util.AggregateError as e:
     await matcher.finish("\n".join(e))
-  template = Image.open(os.path.join(plugin_dir, "template.png"))
-  avatar = avatar.resize(OLD_SIZE, util.scale_resample).transform(
-    NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, resample=util.resample)
-  im = Image.new("RGB", template.size, (255, 255, 255))
-  im.paste(avatar, (56, 284), avatar)
-  im.paste(template, mask=template)
-  f = BytesIO()
-  im.save(f, "png")
-  await matcher.finish(MessageSegment.image(f))
+
+  template = Image.open(plugin_dir / "template.png")
+  frames: list[Image.Image] = []
+  frametime = avatar.info.get("duration", 0)
+  for raw in util.frames(avatar):
+    frame = ImageOps.fit(raw.convert("RGBA"), OLD_SIZE, util.scale_resample)
+    frame = frame.transform(NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, util.resample)
+    im = Image.new("RGB", template.size, (0, 0, 0))
+    im.paste(frame, (56, 284), frame)
+    im.paste(template, mask=template)
+    frames.append(im)
+
+  if len(frames) > 1:
+    segment = segment_animated_image(args.format, frames, frametime)
+  else:
+    f = BytesIO()
+    frames[0].save(f, "png")
+    segment = MessageSegment.image(f)
+  await matcher.finish(segment)

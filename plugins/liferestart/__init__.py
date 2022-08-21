@@ -3,7 +3,7 @@ import itertools
 import random
 from argparse import Namespace
 from io import BytesIO
-from typing import Callable, Generator, Iterable, TypeVar, cast
+from typing import Callable, Iterable, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
@@ -60,20 +60,6 @@ def random_alloc(game: Game, total: int) -> list[int]:
   for _ in range(total):
     result[random.choice([i for i, v in enumerate(result) if v < game.config.stat.max])] += 1
   return result
-
-
-TItem = TypeVar("TItem")
-
-
-def groupbyn(iterable: Iterable[TItem], n: int) -> Generator[list[TItem], None, None]:
-  result: list[TItem] = []
-  for i in iterable:
-    result.append(i)
-    if len(result) == n:
-      yield result
-      result.clear()
-  if result:
-    yield result
 
 
 RARITY_COLOR = {
@@ -278,7 +264,7 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
   game.statistics.inherited_talent = talents[0].id
   STATE.dump()
 
-  for part in groupbyn(messages, CONFIG.progress_group_by):
+  for part in util.groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
     make_image(itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
@@ -324,7 +310,7 @@ async def handle_character_list(bot: Bot, event: MessageEvent, args: Namespace):
   for i in STATE.statistics.values():
     if ch := i.character:
       messages.append(get_character_segments(ch))
-  for part in groupbyn(messages, CONFIG.character_group_by):
+  for part in util.groupbyn(messages, CONFIG.character_group_by):
     f = BytesIO()
     make_image(itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))
@@ -397,7 +383,7 @@ async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace):
 
   messages = get_messages(game)
   STATE.dump()
-  for part in groupbyn(messages, CONFIG.progress_group_by):
+  for part in util.groupbyn(messages, CONFIG.progress_group_by):
     f = BytesIO()
     make_image(itertools.chain.from_iterable(part)).save(f, "png")
     await liferestart.send(MessageSegment.image(f))

@@ -3,10 +3,9 @@ import os
 import random
 from argparse import Namespace
 from io import BytesIO
-from typing import cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.exception import ActionFailed, ParserExit
+from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageDraw, ImageOps
@@ -39,13 +38,8 @@ async def get_all(
       return avatar, name
     if user is None:
       raise util.AggregateError(f"请指定第 {i} 人的名字")
-    try:
-      info = await bot.get_group_member_info(group_id=ctx, user_id=user)
-      name = cast(str, info["card"] or info["nickname"])
-    except ActionFailed:
-      name = cast(str, (await bot.get_stranger_info(user_id=user))["nickname"])
+    name = await context.get_card_or_name(bot, event, user)
     return avatar, name
-  ctx = context.get_event_context(event)
   coros = [
     get_one(i, target, name) for i, (target, name) in enumerate(zip(targets, default_names), 1)]
   errors: list[util.AggregateError] = []
@@ -102,7 +96,7 @@ async def handler(
     await matcher.finish(f"名字太长：{names[0]}")
   text_im = text.render(layout)
   if text_w > 800:
-    text_im = text_im.resize((800, text_h * 800 // text_w), util.scale_resample)
+    text_im = util.resize_width(text_im, 800)
   text_x = (im.width - text_im.width) // 2
   text_y = 520 - text_im.height // 2
   im.paste(text_im, (text_x, text_y), text_im)
@@ -123,7 +117,7 @@ async def handler(
       await matcher.finish(f"名字太长：{name}")
     text_im = text.render(layout)
     if text_w > 400:
-      text_im = text_im.resize((400, text_h * 400 // text_w), util.scale_resample)
+      text_im = util.resize_width(text_im, 400)
     text_x = name_x - text_im.width // 2
     text_y -= int(text_im.height * 0.8)
     im.paste(text_im, (text_x, text_y), text_im)

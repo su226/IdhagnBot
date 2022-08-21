@@ -3,7 +3,7 @@ from io import BytesIO
 from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.exception import ActionFailed, ParserExit
+from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
@@ -39,13 +39,7 @@ async def handler(
   if args.name is not None:
     name = args.name
   elif user is not None:
-    try:
-      info = await bot.get_group_member_info(
-        group_id=context.get_event_context(event), user_id=user)
-      name = info["card"] or info["nickname"]
-    except ActionFailed:
-      info = await bot.get_stranger_info(user_id=user)
-      name = info["nickname"]
+    name = await context.get_card_or_name(bot, event, user)
   else:
     await matcher.finish("请使用 -name 指定名字")
   overlay = Image.open(plugin_dir / "template.png")

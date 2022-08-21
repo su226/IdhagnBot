@@ -48,7 +48,7 @@ async def handler(
     await matcher.finish("\n".join(e))
   frames: list[Image.Image] = []
   avatar = avatar.resize(OLD_SIZE, util.scale_resample).transform(
-    NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, resample=util.resample)
+    NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, util.resample)
   for i in range(10):
     template = Image.open(os.path.join(plugin_dir, f"{i}.png"))
     im = Image.new("RGB", template.size, (255, 255, 255))

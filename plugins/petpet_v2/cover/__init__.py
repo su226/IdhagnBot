@@ -44,7 +44,7 @@ async def handler(
   template = Image.open(os.path.join(plugin_dir, "template.png"))
   im = Image.new("RGB", template.size, (255, 255, 255))
   avatar = avatar.resize(OLD_SIZE, util.scale_resample).transform(
-    NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, resample=util.resample)
+    NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, util.resample)
   im.paste(avatar, (120, 154), avatar)
   im.paste(template, mask=template)
   f = BytesIO()

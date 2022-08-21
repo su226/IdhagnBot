@@ -3,7 +3,7 @@ import math
 import random
 import re
 from io import BytesIO
-from typing import Any, cast
+from typing import Any, Generator, cast
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
@@ -48,22 +48,22 @@ LINK_RE = re.compile(r"^https?://.+$")
 IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
 
 
-async def download_image(url: str, crop: bool) -> Image.Image:
-  async with aiohttp.ClientSession() as http:
-    response = await http.get(url)
-    data = await response.read()
-  image = Image.open(BytesIO(data)).convert("RGBA")
+async def download_image(url: str, *, crop: bool = True, raw: bool = False) -> Image.Image:
+  async with util.http().get(url) as response:
+    image = Image.open(BytesIO(await response.read()))
+  if raw:
+    return image
   if crop and image.width != image.height:
     new_width = min(image.width, image.height)
     x = (image.width - new_width) // 2
     y = (image.height - new_width) // 2
     image = image.crop((x, y, x + new_width, y + new_width))
-  return image
+  return image.convert("RGBA")
 
 
-async def get_image_from_link(url: str, crop: bool) -> Image.Image:
+async def get_image_from_link(url: str, **kw) -> Image.Image:
   try:
-    return await asyncio.wait_for(download_image(url, crop), 10)
+    return await asyncio.wait_for(download_image(url, **kw), 10)
   except asyncio.TimeoutError as e:
     raise util.AggregateError(f"下载图片超时：{url}") from e
   except aiohttp.ClientError as e:
@@ -72,8 +72,18 @@ async def get_image_from_link(url: str, crop: bool) -> Image.Image:
     raise util.AggregateError(f"无效图片：{url}") from e
 
 
+async def get_avatar(uid: int, *, crop: bool = True, raw: bool = False) -> Image.Image:
+  try:
+    return await asyncio.wait_for(util.get_avatar(uid, raw=raw), 10)
+  except asyncio.TimeoutError:
+    # 以防有笨b（其实是我自己）眼瞎，这里的错误信息和上面的不一样
+    raise util.AggregateError(f"下载头像超时：{uid}")
+  except aiohttp.ClientError:
+    raise util.AggregateError(f"下载头像失败：{uid}")
+
+
 async def get_image_and_user(
-  bot: Bot, event: MessageEvent, pattern: str, default: int, *, crop: bool = True
+  bot: Bot, event: MessageEvent, pattern: str, default: int, **kw
 ) -> tuple[Image.Image, int | None]:
   if pattern in ("-", "发送"):
     await bot.send(event, "请发送一张图片")
@@ -83,9 +93,9 @@ async def get_image_and_user(
   elif match := AT_RE.match(pattern):
     uid = int(match[1])
   elif IMAGE_RE.match(pattern):
-    return await get_image_from_link(Message(pattern)[0].data["url"], crop), None
+    return await get_image_from_link(Message(pattern)[0].data["url"], **kw), None
   elif match := LINK_RE.match(pattern):
-    return await get_image_from_link(pattern, crop), None
+    return await get_image_from_link(pattern, **kw), None
   elif pattern in ("~", "自己"):
     uid = event.user_id
   elif pattern in ("0", "机器人"):
@@ -94,16 +104,11 @@ async def get_image_and_user(
     if not event.reply:
       raise util.AggregateError("没有回复")
     uid = event.reply.sender.user_id
+    if not uid:
+      raise util.AggregateError("没有回复")
   else:
     uid = await account_aliases.match_uid(bot, event, pattern)
-  try:
-    # s 有 100, 160, 640 分别对应最大 3 个尺寸（可以小）和 0 对应原图（不能不填或者自定义）
-    return await asyncio.wait_for(
-      download_image(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0", crop), 10), uid
-  except asyncio.TimeoutError:
-    raise util.AggregateError(f"下载头像超时：{uid}")
-  except aiohttp.ClientError:
-    raise util.AggregateError(f"下载头像失败：{uid}")
+  return await get_avatar(uid, **kw), uid
 
 
 def save_transparent_gif(f: Any, frames: list[Image.Image], **kw):
@@ -146,3 +151,12 @@ def segment_animated_image(
   else:
     frames[0].save(f, format, append_images=frames[1:], save_all=True, duration=duration)
   return MessageSegment.image(f)
+
+
+def frames(im: Image.Image) -> Generator[Image.Image, None, None]:
+  if not getattr(im, "is_animated", False):
+    yield im
+    return
+  for i in range(im.n_frames):
+    im.seek(i)
+    yield im

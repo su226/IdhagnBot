@@ -47,7 +47,7 @@ async def handler(
   except util.AggregateError as e:
     await matcher.finish("\n".join(e))
   frames: list[Image.Image] = []
-  for i in range(23):
+  for i in range(38):
     frames.append(Image.open(os.path.join(plugin_dir, f"{i}.png")))
   for i, (x, y, w, h) in enumerate(BOXES):
     frame = Image.new('RGBA', (480, 400), (255, 255, 255, 0))
@@ -59,5 +59,5 @@ async def handler(
     result_frames.extend(frames[0:12])
   result_frames.extend(frames[0:8])
   result_frames.extend(frames[12:18])
-  result_frames.extend(frames[18:23])
+  result_frames.extend(frames[18:38])
   await matcher.finish(segment_animated_image(args.format, result_frames, 60))

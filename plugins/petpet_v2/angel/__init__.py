@@ -69,7 +69,7 @@ async def handler(
     await matcher.finish("名字过长")
   im2 = text.render(layout)
   if width > 560:
-    im2 = im2.resize((560, int(height / width * 560)), util.scale_resample)
+    im2 = util.resize_width(im2, 560)
   im.paste(im2, (300 - im2.width // 2, 50 - im2.height // 2), im2)
 
   avatar = avatar.resize((500, 500), util.scale_resample)

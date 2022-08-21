@@ -20,9 +20,10 @@ dependencies = [
 all = [
   "jieba<1.0.0,>=0.42.1",
   "libzim<2.0.0,>=1.0.0",
-  "mctools<2.0.0,>=1.1.2", 
+  "mctools<2.0.0,>=1.1.2",
   "psutil<6.0.0,>=5.9.0",
   "pyppeteer<2.0.0,>=1.0.2",
+  "opencv-python-headless>=4.6.0.66",
 ]
 
 [build-system]
@@ -34,8 +35,9 @@ includes = []
 
 [tool.pdm.dev-dependencies]
 dev = [
-  "pylama[eradicate,isort,pycodestyle,pyflakes]<9.0.0,>=8.3.8",
+  "pylama[eradicate]<9.0.0,>=8.3.8",
   "types-Pillow>=9.2.1",  # Pyright自带那个有点老……
+  "numpy>=1.23.2",
 ]
 
 [tool.pdm.scripts]

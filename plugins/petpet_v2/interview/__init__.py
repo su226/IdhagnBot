@@ -59,7 +59,7 @@ async def handler(
     await matcher.finish("文本过长")
   text_im = text.render(layout)
   if w > 550:
-    text_im = text_im.resize((550, h * 550 // w), util.scale_resample)
+    text_im = util.resize_width(text_im, 550)
   template.paste(text_im, (300 - text_im.width // 2, 215 - text_im.height // 2), text_im)
 
   for i in range(5):
