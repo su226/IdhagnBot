@@ -25,7 +25,7 @@ Align = Literal["l", "m", "r"]
 
 
 def layout(
-  content: str, font: str, size: float, *, box: tuple[int, int] | int | None = None, mode: Mode = 0,
+  content: str, font: str, size: float, *, box: tuple[int, int] | int | None = None, mode: Mode = 1,
   markup: bool = False, align: Align = "l", spacing: int = 0
 ) -> Layout:
   context = Pango.Context()
@@ -86,7 +86,7 @@ def render(
     l = content
   else:
     l = layout(content, *args, **kw)
-  w, h = l.get_pixel_size()
+  w, h = l.get_pixel_size()  # type: ignore
   margin = math.ceil(stroke)
   w += margin * 2
   h += margin * 2

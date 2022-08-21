@@ -24,7 +24,7 @@ async def handle_addict(args: Message = CommandArg()):
     await addict.finish(USAGE)
   im = Image.open(os.path.join(plugin_dir, "template.png"))
   text_im = text.render(content, "sans medium", 50, color=(255, 255, 255))
-  text_im = ImageOps.pad(text_im, (290, 72), util.scale_resample)
+  text_im = util.center(text_im, 290, 72)
   im.paste(text_im, (398, 648), text_im)
   f = BytesIO()
   im.save(f, "png")

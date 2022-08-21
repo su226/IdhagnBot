@@ -47,9 +47,7 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
   im.paste(rank_im, (624, 32), rank_im)
 
   # 头像
-  async with ClientSession() as http:
-    async with http.get(f"https://q1.qlogo.cn/g?b=qq&nk={format_data.uid}&s=0") as response:
-      avatar = Image.open(BytesIO(await response.read())).convert("RGB")
+  avatar = await util.get_avatar(format_data.uid)
   avatar = avatar.resize((96, 96), util.scale_resample)
   util.circle(avatar)
   im.paste(avatar, (32, 32), avatar)

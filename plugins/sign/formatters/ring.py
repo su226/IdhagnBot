@@ -32,11 +32,7 @@ BOX_PADDING = 8
 async def format(bot: Bot, format_data: FormatData) -> Message:
   group_data = STATE(format_data.gid)
   user_data = group_data.get_user(format_data.uid)
-  http = util.http()
-  async with http.get(f"https://q1.qlogo.cn/g?b=qq&nk={format_data.uid}&s=0") as response:
-    raw_avatar = Image.open(BytesIO(await response.read())).convert("RGBA")
-  avatar = Image.new("RGB", raw_avatar.size, (255, 255, 255))
-  avatar.paste(raw_avatar, mask=raw_avatar)
+  avatar = await util.get_avatar(format_data.uid)
   im = avatar.resize((640, 640), util.scale_resample)
   im = im.filter(ImageFilter.GaussianBlur(8))
   im = ImageEnhance.Brightness(im).enhance(0.5)
@@ -104,6 +100,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
     im, (center_x, y), s, "sans", 24, anchor="mt", box=box_w, color=(255, 255, 255)
   ).height
 
+  http = util.http()
   async with http.get("https://v1.hitokoto.cn/") as response:
     data = await response.json()
   text_im = text.render(data["hitokoto"], "sans", 20, color=(255, 255, 255))

@@ -25,20 +25,13 @@ leaderboard = (
 
 @leaderboard.handle()
 async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
-  async def fetch_avatar(uid: int) -> Image.Image:
-    async with http.get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0") as response:
-      data = await response.read()
-    im = Image.open(BytesIO(data)).convert("RGBA")
-    return im
-
   async def fetch_data(uid: int) -> tuple[str, Image.Image]:
-    return await asyncio.gather(context.get_card_or_name(bot, event, uid), fetch_avatar(uid))
+    return await asyncio.gather(context.get_card_or_name(bot, event, uid), util.get_avatar(uid))
 
   gid = context.get_event_context(event)
   group_data = STATE(gid)
   group_data.update()
   rank = group_data.rank
-  http = util.http()
   infos: list[tuple[str, Image.Image]] = await asyncio.gather(*(fetch_data(uid) for uid in rank))
 
   lines = max(len(infos), MIN_LINES)
