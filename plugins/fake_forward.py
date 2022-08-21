@@ -1,22 +1,10 @@
 import asyncio
 from typing import Awaitable, cast
 
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, Message, MessageEvent
-from nonebot.exception import ActionFailed
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
 
-from util import account_aliases, command, util
-
-
-async def get_name_or_card(bot: Bot, event: MessageEvent, uid: int, gid: int) -> str:
-  try:
-    if gid == -1:
-      raise RuntimeError
-    info = await bot.get_group_member_info(group_id=gid, user_id=uid)
-    return info["card"] or info["nickname"]
-  except (RuntimeError, ActionFailed):
-    return (await bot.get_stranger_info(user_id=uid))["nickname"]
-
+from util import account_aliases, command, context, util
 
 USAGE = "/我有一个朋友 <用户> <消息> [-- <用户> <消息>...]"
 fake_forward = (
@@ -55,30 +43,17 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
     await fake_forward.finish("\n".join(errors))
 
   async def fetch_name(uid: int) -> None:
-    uid_to_name[uid] = await get_name_or_card(bot, event, uid, gid)
+    uid_to_name[uid] = await context.get_card_or_name(bot, event, uid)
 
   uid_to_name: dict[int, str] = {}
-  gid = event.group_id if isinstance(event, GroupMessageEvent) else -1
   await asyncio.gather(*[fetch_name(uid) for uid in uids])
 
-  nodes = [
-    {
-      "type": "node",
-      "data": {
-        "name": uid_to_name[event.self_id],
-        "uin": event.self_id,
-        "content": "免责声明：本消息由机器人发送，仅供娱乐，切勿当真！"
-      }
-    }, *({
-      "type": "node",
-      "data": {
-        "name": uid_to_name[match_to_uid[match]],
-        "uin": match_to_uid[match],
-        "content": content
-      }
-    } for match, content in messages)
-  ]
-  if isinstance(event, GroupMessageEvent):
-    await bot.call_api("send_group_forward_msg", group_id=event.group_id, messages=nodes)
-  else:
-    await bot.call_api("send_private_forward_msg", user_id=event.user_id, messages=nodes)
+  await util.send_forward_msg(bot, event, MessageSegment("node", {
+    "name": uid_to_name[event.self_id],
+    "uin": event.self_id,
+    "content": "免责声明：本消息由机器人发送，仅供娱乐，切勿当真！"
+  }), *(MessageSegment("node", {
+    "name": uid_to_name[match_to_uid[match]],
+    "uin": match_to_uid[match],
+    "content": content
+  }) for match, content in messages))

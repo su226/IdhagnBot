@@ -3,13 +3,15 @@ import itertools
 import random
 from contextlib import asynccontextmanager
 from datetime import timedelta
-from typing import TYPE_CHECKING, Any, AsyncIterator, Literal, Sequence, TypeVar
+from io import BytesIO
+from typing import (
+  TYPE_CHECKING, Any, AsyncIterator, Generator, Iterable, Literal, Sequence, TypeVar)
 
 import aiohttp
 import cairo
 import nonebot
-from nonebot.adapters.onebot.v11 import Message, MessageEvent
-from PIL import Image, ImageChops, ImageDraw
+from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent, MessageSegment
+from PIL import Image, ImageChops, ImageDraw, ImageOps
 from pydantic import BaseModel, Field
 
 from util.config_v2 import SharedConfig
@@ -19,18 +21,20 @@ if TYPE_CHECKING:
 
 __all__ = [
   "AggregateError", "browser", "Config", "CONFIG", "format_time", "http", "prompt", "resample",
-  "scale_resample", "special_font", "weighted_choice"]
+  "scale_resample", "special_font", "weighted_choice", "center", "resize_width", "resize_height",
+  "forward_node", "send_forward_msg", "groupbyn"]
 
 
 T = TypeVar("T")
 Resample = Literal["nearest", "bilinear", "bicubic"]
 ScaleResample = Resample | Literal["box", "hamming", "lanczos"]
+AnyMessage = str | Message | MessageSegment
 
 
 class AggregateError(Exception, Sequence[str]):
-  def __init__(self, *errors: "str | AggregateError") -> None:
+  def __init__(self, *errors: str | Iterable[str]) -> None:
     super().__init__(*itertools.chain.from_iterable(
-      error if isinstance(error, AggregateError) else [error]
+      [error] if isinstance(error, str) else error
       for error in errors))
 
   def __len__(self) -> int:
@@ -157,3 +161,90 @@ def cairo_to_pil(surface: cairo.ImageSurface) -> Image.Image:
     return Image.new("RGBA", (w, h))
   b, g, r, a = Image.frombytes("RGBa", (w, h), bytes(data)).convert("RGBA").split()
   return Image.merge("RGBA", (r, g, b, a))  # BGRa -> BGRA -> RGBA
+
+
+def center(im: Image.Image, width: int, height: int) -> Image.Image:
+  if im.width > width or im.height > height:
+    padded_im = ImageOps.pad(im, (width, height), scale_resample)
+  else:
+    padded_im = Image.new("RGBA", (width, height))
+    padded_im.paste(im, ((width - im.width) // 2, (height - im.height) // 2))
+  return padded_im
+
+
+def resize_width(im: Image.Image, width: int) -> Image.Image:
+  return ImageOps.contain(im, (width, 99999), scale_resample)
+
+
+def resize_height(im: Image.Image, height: int) -> Image.Image:
+  return ImageOps.contain(im, (99999, height), scale_resample)
+
+
+def forward_node(id: int, name: str = "", content: AnyMessage = "") -> MessageSegment:
+  if not name:
+    return MessageSegment("node", {"id": id})
+  return MessageSegment("node", {"uin": id, "name": name, "content": content})
+
+
+async def send_forward_msg(bot: Bot, event: Event, *nodes: MessageSegment | dict) -> Any:
+  if gid := getattr(event, "group_id", None):
+    return await bot.call_api("send_group_forward_msg", group_id=gid, messages=nodes)
+  elif uid := getattr(event, "user_id", None):
+    # 需要至少 go-cqhttp 1.0.0-rc2
+    return await bot.call_api("send_private_forward_msg", user_id=uid, messages=nodes)
+  raise ValueError("event 没有 group_id 和 user_id")
+
+
+def groupbyn(iterable: Iterable[T], n: int) -> Generator[list[T], None, None]:
+  result: list[T] = []
+  for i in iterable:
+    result.append(i)
+    if len(result) == n:
+      yield result
+      result = []
+  if result:
+    yield result
+
+
+async def get_avatar(
+  uid: int, *, raw: bool = False, bg: tuple[int, int, int] | bool = False
+) -> Image.Image:
+    # s 有 100, 160, 640, 1080 分别对应 4 个最大尺寸（可以小）和 0 对应原图（不能不填或者自定义）
+  async with http().get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0") as response:
+    raw_avatar = Image.open(BytesIO(await response.read()))
+  if raw:
+    return raw_avatar
+  if bg is False:
+    return raw_avatar.convert("RGBA")
+  if "A" in raw_avatar.getbands():
+    if bg is True:
+      bgcolor = (255, 255, 255)
+    else:
+      bgcolor = bg
+    avatar = Image.new("RGB", raw_avatar.size, bgcolor)
+    avatar.paste(raw_avatar, mask=raw_avatar.getchannel("A"))  # 也许可能有LA的头像？
+    return avatar
+  else:
+    return raw_avatar.convert("RGB")
+
+
+def frames(im: Image.Image) -> Generator[Image.Image, None, None]:
+  if not getattr(im, "is_animated", False):
+    yield im
+    return
+  for i in range(im.n_frames):
+    im.seek(i)
+    yield im
+
+
+def paste_alpha(
+  dst: Image.Image, src: Image.Image, box: tuple[int, int], mask: Image.Image | None = None
+) -> None:
+  if "A" in src.getbands():
+    if mask:
+      paste_mask = ImageChops.multiply(mask, src.getchannel("A"))
+    else:
+      paste_mask = src.getchannel("A")
+  else:
+    paste_mask = mask
+  dst.paste(src, box, paste_mask)
