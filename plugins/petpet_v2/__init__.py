@@ -7,7 +7,7 @@ from . import (
   lying, marry, message, mirror, need, ori, pad, paint, painter, pat, perfect, petpet, play, police,
   police2, pound, protogen, prpr, punch, rip, roll, rub, safe_sense, shock, slap, spin, suck,
   support, teach, think, throw, throw2, trash, tv, wallpaper, wantwant, watermelon, why_at_me, wife,
-  windows, work, worship)
+  windows, work, worship, patina)
 
 category = help.CategoryItem.find("petpet_v2", True)
 category.brief = "梗图生成器"
