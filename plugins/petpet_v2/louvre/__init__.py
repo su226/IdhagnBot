@@ -1,6 +1,7 @@
 from argparse import Namespace
 from io import BytesIO
 from pathlib import Path
+from typing import Callable
 
 import cairo
 import cv2
@@ -22,41 +23,45 @@ def kernel_average(size: int) -> np.ndarray:
   return np.full((size, size), 1 / size ** 2)
 
 
-KERNELS = {
-  "THIN": kernel_average(5),
-  "NORMAL": kernel_average(7),
-  "SEMIBOLD": kernel_average(9),
-  "BOLD": kernel_average(11),
-  "BLACK": kernel_average(13),
-  "EMBOSS": np.array([
+KERNELS: dict[str, np.ndarray] = {
+  "thin": kernel_average(5),
+  "normal": kernel_average(7),
+  "semibold": kernel_average(9),
+  "bold": kernel_average(11),
+  "black": kernel_average(13),
+  "emboss": np.array([
     [1, 1, 1],
     [1, 1, -1],
     [-1, -1, -1],
   ]),
 }
-KERNEL_NAME = "NORMAL"
-SHADE_LIMIT = 108
+# 这些选项在原网站不可调
 SHADE_LIGHT = 80
-DENOISE = True
 LIGHT_CUT = 128
-DARK_CUT = 118
 
 
-def make_mask(im: Image.Image, pencil: Image.Image) -> Image.Image:
-  shade = im.point(lambda v: 0 if v > SHADE_LIMIT else 255, "L")
+def make_mask(
+  im: Image.Image,
+  pencil: Image.Image,
+  kernel: str = "normal",
+  dark_cut: int = 118,  # 对应原网站线迹轻重
+  shade_limit: int = 108,  # 对应原网站调子数量
+  denoise: bool = True  # 对应原网站降噪
+) -> Image.Image:
+  shade = im.point(lambda v: 0 if v > shade_limit else 255, "L")
   shade = shade.filter(ImageFilter.BoxBlur(3))
   shade = ImageChops.multiply(shade, ImageChops.invert(pencil))
   shade = ImageChops.multiply(shade, Image.new("L", shade.size, SHADE_LIGHT))
 
-  if DENOISE:
+  if denoise:
     im = im.filter(ImageFilter.Kernel((3, 3), [1] * 9, 9))
 
   # 因为PIL只支持3x3和5x5的卷积核，NumPy的卷积是一维的，要用OpenCV
-  im1 = Image.fromarray(cv2.filter2D(np.array(im), -1, KERNELS[KERNEL_NAME]))
+  im1 = Image.fromarray(cv2.filter2D(np.array(im), -1, KERNELS[kernel]))
   im = ImageChops.subtract(im, im1, 1, 128)
 
-  scale = (255 - LIGHT_CUT - DARK_CUT) / 255
-  im = ImageChops.subtract(im, Image.new("L", im.size, DARK_CUT), scale)
+  scale = (255 - LIGHT_CUT - dark_cut) / 255
+  im = ImageChops.subtract(im, Image.new("L", im.size, dark_cut), scale)
 
   return ImageChops.lighter(ImageChops.invert(im), shade)
 
@@ -77,10 +82,32 @@ def make_gradient(width: int, height: int) -> Image.Image:
     return util.cairo_to_pil(surface)
 
 
+def range_int(min_value: int, max_value: int) -> Callable[[str], int]:
+  def func(str_value: str) -> int:
+    int_value = int(str_value)
+    if int_value < min_value or int_value > max_value:
+      raise ValueError(f"取值范围在 [{min_value}, {max_value}]")
+    return int_value
+  return func
+
+
 parser = ArgumentParser(add_help=False)
 parser.add_argument(
   "target", nargs="?", default="", metavar="目标",
   help="可使用@、QQ号、昵称、群名片或图片链接（可传入动图）")
+parser.add_argument(
+  "--style", "-s", choices=list(KERNELS), default="normal",
+  help="线条风格，可用: thin (精细)、normal (一般)、semibold (稍粗)、bold (超粗)、black (极粗)"
+       "、emboss (浮雕)，默认: normal")
+parser.add_argument(
+  "--edge", "-e", type=range_int(80, 126), default=118,
+  help="边缘强度，为 [80, 126] 之间的整数，默认: 118")
+parser.add_argument(
+  "--shade", "-a", type=range_int(20, 200), default=108,
+  help="暗部强度，为 [20, 200] 之间的整数，默认: 108")
+parser.add_argument(
+  "--no-denoise", "-d", action="store_false", dest="denoise",
+  help="不进行降噪")
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
@@ -117,7 +144,7 @@ async def handler(
     l, a = raw.convert("LA").split()
     frame = Image.new("L", l.size, 255)
     frame.paste(l, mask=a)
-    mask = make_mask(frame, pencil)
+    mask = make_mask(frame, pencil, args.style, args.edge, args.shade, args.denoise)
     frame = Image.new("RGB", l.size, (255, 255, 255))
     frame.paste(gradient, mask=mask)
     frames.append(frame)
