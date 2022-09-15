@@ -37,7 +37,7 @@ async def handler(
     template = Image.open(os.path.join(plugin_dir, "template_panda.png"))
   else:
     try:
-      avatar, _ = await get_image_and_user(bot, event, args.target, event.user_id)
+      avatar, _ = await get_image_and_user(bot, event, args.source, event.user_id)
     except util.AggregateError as e:
       await matcher.finish("\n".join(e))
     template = Image.new("RGBA", (1080, 804))

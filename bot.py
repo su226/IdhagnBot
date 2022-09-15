@@ -29,7 +29,7 @@ if args.export_html:
   permissions = permission.export_html()
   with open(args.export_html, "w") as f:
     f.write(
-      "<meta name=\"viewport\" content=\"width=device-width\">"
+      "<meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width\">"
       f"<h2>命令帮助</h2>{commands}<h2>命令大纲</h2>{index}<h2>已知权限节点</h2>{permissions}")
   print("已导出所有命令帮助和权限节点")
 else:

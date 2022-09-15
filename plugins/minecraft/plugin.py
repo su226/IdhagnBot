@@ -3,19 +3,18 @@ from typing import Generator, cast
 import nonebot
 from mctools import PINGClient
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from util import command, permission
-from util.config import BaseConfig
+from util.config_v2 import SharedConfig
 
 
-class Config(BaseConfig):
-  __file__ = "minecraft"
-  local_address: str = "127.0.0.1"
-  extern_addresses: list[str] = Field(default_factory=list)
+class Config(BaseModel):
+  stat_address: str = ""
+  ping_addresses: list[str] = Field(default_factory=list)
 
 
-CONFIG = Config.load()
+CONFIG = SharedConfig("minecraft", Config)
 
 
 def parse_server(raw: str) -> tuple[str, int]:
@@ -42,12 +41,15 @@ minecraft = (
   command.CommandBuilder("minecraft", "minecraft", "mc")
   .brief("查询Minecraft服务器的状态")
   .usage("如有异常会自动发送反馈")
+  .rule(lambda: bool(CONFIG().stat_address))
+  .help_condition(lambda _: bool(CONFIG().stat_address))
   .build())
 
 
 @minecraft.handle()
 async def handle_minecraft(bot: Bot):
-  host, port = parse_server(CONFIG.local_address)
+  config = CONFIG()
+  host, port = parse_server(config.stat_address)
   try:
     with PINGClient(host, port, format_method=PINGClient.REMOVE) as ping:
       stats = cast(dict, ping.get_stats())
@@ -64,7 +66,7 @@ async def handle_minecraft(bot: Bot):
   segments.append(f"{online}/{limit}名玩家：{players}")
   segments.append("地址：")
   errors = []
-  for addr in CONFIG.extern_addresses:
+  for addr in config.ping_addresses:
     host, port = parse_server(addr)
     try:
       with PINGClient(host, port) as ping:

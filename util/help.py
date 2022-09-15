@@ -1,10 +1,14 @@
 import html
 import math
+from typing import Callable
 
 from pydantic import Field
 
 from util import context, permission
 from util.config import BaseConfig, BaseModel
+
+
+def NOOP_CONDITION(_): return True
 
 
 class CommonData(BaseModel):
@@ -14,6 +18,7 @@ class CommonData(BaseModel):
   in_group: list[int] = Field(default_factory=list)
   private: bool | None = None
   level: permission.Level = permission.Level.MEMBER
+  condition: Callable[["ShowData"], bool] = NOOP_CONDITION
 
   @property
   def node(self) -> permission.Node | None:
@@ -103,7 +108,7 @@ class Item:
       return False
     if self.data.private is not None and data.private != self.data.private:
       return False
-    return True
+    return self.data.condition(data)
 
 
 class StringItem(Item):

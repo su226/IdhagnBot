@@ -20,9 +20,10 @@ if TYPE_CHECKING:
   from pyppeteer.browser import Browser
 
 __all__ = [
-  "AggregateError", "browser", "Config", "CONFIG", "format_time", "http", "prompt", "resample",
-  "scale_resample", "special_font", "weighted_choice", "center", "resize_width", "resize_height",
-  "forward_node", "send_forward_msg", "groupbyn"]
+  "AggregateError", "browser", "cairo_to_pil", "circle", "Config", "CONFIG", "format_time",
+  "frames", "get_avatar", "groupbyn", "http", "paste_alpha", "prompt", "resample", "scale_resample",
+  "special_font", "weighted_choice", "center", "resize_width", "resize_height", "forward_node",
+  "send_forward_msg"]
 
 
 T = TypeVar("T")
@@ -209,7 +210,7 @@ def groupbyn(iterable: Iterable[T], n: int) -> Generator[list[T], None, None]:
 async def get_avatar(
   uid: int, *, raw: bool = False, bg: tuple[int, int, int] | bool = False
 ) -> Image.Image:
-    # s 有 100, 160, 640, 1080 分别对应 4 个最大尺寸（可以小）和 0 对应原图（不能不填或者自定义）
+  # s 有 100, 160, 640, 1080 分别对应 4 个最大尺寸（可以小）和 0 对应原图（不能不填或者自定义）
   async with http().get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0") as response:
     raw_avatar = Image.open(BytesIO(await response.read()))
   if raw:

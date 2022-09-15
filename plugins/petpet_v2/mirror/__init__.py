@@ -45,21 +45,21 @@ async def handler(
     direction = random.choice(DIRECTIONS)
 
   match direction:
-    case "top", "t":
+    case "top" | "t":
       flipped = avatar.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
       y = math.ceil(avatar.height / 2)
       avatar.paste(flipped.crop((0, y, avatar.width - 1, avatar.height - 1)), (0, y))
-    case "bottom", "b":
+    case "bottom" | "b":
       flipped = avatar.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
       avatar.paste(flipped.crop((0, 0, avatar.width - 1, avatar.height // 2 - 1)))
-    case "left", "l":
+    case "left" | "l":
       flipped = avatar.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
       x = math.ceil(avatar.width / 2)
       avatar.paste(flipped.crop((x, 0, avatar.width - 1, avatar.height - 1)), (x, 0))
-    case "right", "r":
+    case "right" | "r":
       flipped = avatar.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
       avatar.paste(flipped.crop((0, 0, avatar.width // 2 - 1, avatar.height - 1)))
-  
+
   f = BytesIO()
   avatar.save(f, "PNG")
   await matcher.finish(MessageSegment.image(f))
