@@ -1,13 +1,12 @@
 import asyncio
 import math
-import random
 import re
 from io import BytesIO
-from typing import Any, Generator, cast
+from typing import Any, Generator
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
-from PIL import Image
+from PIL import Image, ImagePalette
 
 from util import account_aliases, util
 
@@ -114,29 +113,16 @@ async def get_image_and_user(
 def save_transparent_gif(f: Any, frames: list[Image.Image], **kw):
   '''保存GIF动图，保留透明度'''
   p_frames = [frame.convert("P") for frame in frames]
-  for i, p_frame in enumerate(p_frames):
-    palette = cast(bytes, p_frame.palette.tobytes())
-    transparent_index = 0
+  for frame in p_frames:
+    palette: ImagePalette.ImagePalette = frame.palette
+    if palette.mode != "RGBA":
+      continue
+    data = palette.tobytes()
     for j in range(256):
-      if palette[j * 4 + 3] == 0:
-        transparent_index = j
+      if data[j * 4 + 3] == 0:
+        frame.info["transparency"] = j
         break
-    if transparent_index != 0:
-      dest = [transparent_index]
-      for j in range(transparent_index):
-        dest.append(j)
-      while len(dest) < 256:
-        dest.append(len(dest))
-      p_frame = p_frame.remap_palette(dest)
-      # 1. remap_palette似乎会把RGBA色板变成RGB色板，把这个色板变回来
-      # 2. 把透明色设置成随机颜色，防止遇到黑底头像
-      palette = (
-        random.randbytes(3) + b'\0'
-        + palette[:transparent_index * 4] + palette[transparent_index * 4 + 4:])
-      p_frame.putpalette(palette, "RGBA")
-      p_frames[i] = p_frame
-  p_frames[0].save(
-    f, "GIF", append_images=p_frames[1:], save_all=True, loop=0, transparency=0, disposal=2, **kw)
+  p_frames[0].save(f, "GIF", append_images=p_frames[1:], save_all=True, loop=0, disposal=2, **kw)
 
 
 def segment_animated_image(
@@ -144,10 +130,7 @@ def segment_animated_image(
 ) -> MessageSegment:
   f = BytesIO()
   if format.lower() == "gif":
-    if frames[0].mode == "RGBA":
-      save_transparent_gif(f, frames, duration=duration)
-    else:
-      frames[0].save(f, "GIF", append_images=frames[1:], save_all=True, duration=duration, loop=0)
+    save_transparent_gif(f, frames, duration=duration)
   else:
     frames[0].save(f, format, append_images=frames[1:], save_all=True, duration=duration)
   return MessageSegment.image(f)
