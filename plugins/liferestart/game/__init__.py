@@ -196,7 +196,7 @@ class Game:
           if by_rarity[rarity]:
             rarities.append(rarity)
             weights.append(weight.get(rarity))
-        if not len(rarities):
+        if not rarities:
           break
         rarity = self._random.choices(rarities, weights)[0]
         talent = self._random.choice(by_rarity[rarity])
@@ -325,7 +325,8 @@ class Game:
     while event is not None:
       self._alive = [False, self._alive, True][event.life + 1]
       self._age += event.age
-      self._add_stats(event.charm, event.intelligence, event.strength, event.money, event.spirit, 0)
+      self._add_stats(
+        event.charm, event.intelligence, event.strength, event.money, event.spirit, 0)
       self._update_vars()
       self.statistics.events.add(event.id)
       self._events.add(event.id)
@@ -343,7 +344,8 @@ class Game:
     for achievement in ACHIEVEMENT.values():
       if (
         achievement.id not in self.statistics.achievements
-        and achievement.opportunity == opportunity and achievement.condition(**self._condition_vars)
+        and achievement.opportunity == opportunity
+        and achievement.condition(**self._condition_vars)
       ):
         achievements.append(achievement)
         self.statistics.achievements.add(achievement.id)
@@ -398,7 +400,11 @@ class Game:
 
   def end(self) -> End:
     overall = sum([
-      self._max_charm, self._max_intelligence, self._max_strength, self._max_money, self._max_spirit
+      self._max_charm,
+      self._max_intelligence,
+      self._max_strength,
+      self._max_money,
+      self._max_spirit
     ]) * 2 + self._max_age // 2
     self.statistics.finished_games += 1
     self._condition_vars["SUM"] = overall

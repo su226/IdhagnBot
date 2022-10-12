@@ -46,6 +46,5 @@ async def handler(
     im = Image.new("RGB", template.size, (255, 255, 255))
     im.paste(avatar, (2, 40), avatar)
     im.paste(template, mask=template)
-    im.save(f"a{i}.png")
     frames.append(im)
   await matcher.finish(segment_animated_image(args.format, frames, 50))

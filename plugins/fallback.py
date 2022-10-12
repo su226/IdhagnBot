@@ -2,7 +2,7 @@ from typing import Generator, Iterable
 
 import nonebot
 from aiohttp.client_exceptions import ClientError
-from nonebot.adapters.onebot.v11 import ActionFailed, Bot, Message, MessageEvent
+from nonebot.adapters.onebot.v11 import ActionFailed, Bot, Event, Message, MessageEvent
 from nonebot.message import event_postprocessor, run_postprocessor, run_preprocessor
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
@@ -66,7 +66,9 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception):
 
 
 @event_postprocessor
-async def post_event(bot: Bot, event: MessageEvent, state: T_State):
+async def post_event(bot: Bot, event: Event, state: T_State) -> None:
+  if not isinstance(event, MessageEvent):
+    return
   prefix = state["_prefix"]
   if "special" not in prefix and (prefix["command"] is None or "run" not in prefix):
     if event.message.extract_plain_text().lstrip().startswith("/"):

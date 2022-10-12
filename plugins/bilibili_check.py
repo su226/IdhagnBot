@@ -5,7 +5,6 @@ from io import BytesIO
 from typing import Any
 from urllib.parse import quote as urlencode
 
-import aiohttp
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageDraw, ImageOps
@@ -39,12 +38,13 @@ VTB_APIS = [
 GRADIENT_45DEG_WH = 362.038671968  # 256 * sqrt(2)
 
 
-async def update_vtbs(http: aiohttp.ClientSession) -> bool:
+async def update_vtbs() -> bool:
   async def get_single(url: str):
     async with http.get(url) as resp:
       return await resp.json()
   state = STATE()
   config = CONFIG()
+  http = util.http()
   now = time.time()
   if state.timestamp > now - config.update_interval:
     return True
@@ -194,40 +194,41 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
   name = arg.extract_plain_text().rstrip()
   if not name:
     await bilibili_check.finish("/查成分 <用户名或ID>")
-  async with aiohttp.ClientSession() as http:
-    if not await update_vtbs(http):
-      await bilibili_check.finish("更新VTB数据失败")
-    try:
-      uid = int(name)
-    except ValueError:
-      async with http.get(SEARCH_API.format(urlencode(name))) as resp:
-        data = await resp.json()
-      if "result" not in data.get("data", {}):
-        await bilibili_check.finish(f"找不到用户：{name}")
-      uid = data["data"]["result"][0]["mid"]
-    async with http.get(FOLLOW_API.format(uid)) as resp:
-      data = await resp.json(content_type=None)
-    async with http.get(data["card"]["face"]) as resp:
-      avatar = Image.open(BytesIO(await resp.read()))
-    name = data["card"]["name"]
-    fans = data["card"]["fans"]
-    following_count = data["card"]["attention"]
-    followings = data["card"]["attentions"]
-    private = following_count != 0 and not followings
-    names = STATE().name_cache
-    vtbs = sorted(
-      ((following, names[following]) for following in followings if following in names),
-      key=lambda x: x[1])
-    medals: dict[str, Medal] = {}
-    cookie = CONFIG().cookie
-    if cookie:
-      async with http.get(MEDAL_API.format(uid), headers={"cookie": cookie}) as resp:
-        data = await resp.json()
-      for i in data["data"]["list"]:
-        info = i["medal_info"]
-        medals[info["target_id"]] = Medal(
-          info["level"], info["medal_name"],
-          info["medal_color_start"], info["medal_color_end"], info["medal_color_border"])
+  if not await update_vtbs():
+    await bilibili_check.finish("更新VTB数据失败")
+  headers = {
+    "Cookie": CONFIG().cookie
+  }
+  http = util.http()
+  try:
+    uid = int(name)
+  except ValueError:
+    async with http.get(SEARCH_API.format(urlencode(name)), headers=headers) as resp:
+      data = await resp.json()
+    if "result" not in data.get("data", {}):
+      await bilibili_check.finish(f"找不到用户：{name}")
+    uid = data["data"]["result"][0]["mid"]
+  async with http.get(FOLLOW_API.format(uid)) as resp:
+    data = await resp.json(content_type=None)
+  async with http.get(data["card"]["face"]) as resp:
+    avatar = Image.open(BytesIO(await resp.read()))
+  name = data["card"]["name"]
+  fans = data["card"]["fans"]
+  following_count = data["card"]["attention"]
+  followings = data["card"]["attentions"]
+  private = following_count != 0 and not followings
+  names = STATE().name_cache
+  vtbs = sorted(
+    ((following, names[following]) for following in followings if following in names),
+    key=lambda x: x[1])
+  medals: dict[str, Medal] = {}
+  async with http.get(MEDAL_API.format(uid), headers=headers) as resp:
+    data = await resp.json()
+  for i in data["data"]["list"]:
+    info = i["medal_info"]
+    medals[info["target_id"]] = Medal(
+      info["level"], info["medal_name"],
+      info["medal_color_start"], info["medal_color_end"], info["medal_color_border"])
   items = [make_list_item(name, uid, medals.get(uid, None)) for uid, name in vtbs]
   header = make_header(avatar, name, uid, fans, following_count, len(vtbs))
 

@@ -41,9 +41,8 @@ def format_dice(func: Callable[[int, int], list[int]], count: int, faces: int) -
   if len(segments) > CONFIG["max_lines"]:
     segments = segments[:CONFIG["max_lines"] - 1]
     segments.append("……")
-  return (
-    f"你抛出了 {count} 个 {faces} 面{SPECIAL_NAMES.get(faces, '骰子')}，结果如下：\n"
-    + "\n".join(segments) + f"\n总和为 {sum_value}")
+  return f"你抛出了 {count} 个 {faces} 面{SPECIAL_NAMES.get(faces, '骰子')}，结果如下：\n" \
+    + "\n".join(segments) + f"\n总和为 {sum_value}"
 
 
 SPECIAL_NAMES = {

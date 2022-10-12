@@ -2,7 +2,7 @@
 # 现在只有上帝明白了
 import os
 import shutil
-from typing import Any, Callable, ClassVar, Generic, Iterable, TypeVar
+from typing import Any, Callable, ClassVar, Generic, Iterable, Literal, TypeVar
 
 import yaml
 from loguru import logger
@@ -11,8 +11,7 @@ from pydantic.json import pydantic_encoder
 from typing_extensions import TypeVarTuple, Unpack
 
 try:
-  from yaml import CSafeDumper as SafeDumper
-  from yaml import CSafeLoader as SafeLoader
+  from yaml import CSafeDumper as SafeDumper, CSafeLoader as SafeLoader
 except ImportError:
   logger.info("似乎没有安装libyaml，将使用纯Python的YAML解析器")
   from yaml import SafeDumper, SafeLoader
@@ -32,6 +31,7 @@ def encode(data: Any) -> Any:
 TModel = TypeVar("TModel", bound=BaseModel)
 TParam = TypeVarTuple("TParam")
 LoadHandler = Callable[[TModel | None, TModel, Unpack[TParam]], None]
+Reloadable = Literal[False, "eager", "lazy"]
 
 
 class BaseConfig(Generic[TModel, Unpack[TParam]]):
@@ -39,10 +39,10 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
   all: ClassVar[list["BaseConfig"]] = []
   model: type[TModel]
   cache: dict[tuple[Unpack[TParam]], TModel]
-  reloadable: bool
+  reloadable: Reloadable
   handler: LoadHandler | None
 
-  def __init__(self, model: type[TModel], reloadable: bool = True) -> None:
+  def __init__(self, model: type[TModel], reloadable: Reloadable = "lazy") -> None:
     self.model = model
     self.cache = {}
     self.reloadable = reloadable
@@ -82,11 +82,9 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     with open(file, "w") as f:
       yaml.dump(data, f, SafeDumper, allow_unicode=True)
 
-  def onload(self, immediate: bool = True) -> Callable[[LoadHandler], LoadHandler]:
+  def onload(self) -> Callable[[LoadHandler], LoadHandler]:
     def decorator(handler: LoadHandler) -> LoadHandler:
       self.handler = handler
-      if immediate:
-        self.load_all()
       return handler
     return decorator
 
@@ -97,11 +95,20 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     for i in self.get_all():
       self.load(*i)
 
+  def reload(self) -> None:
+    if self.reloadable == "eager":
+      for key in self.cache:
+        self.load(*key)
+    elif self.reloadable == "lazy":
+      self.cache.clear()
+    else:
+      raise ValueError(f"{self} 不可重载")
+
 
 class SharedConfig(BaseConfig[TModel]):
   base_dir: ClassVar = "configs"
 
-  def __init__(self, name: str, model: type[TModel], reloadable: bool = True) -> None:
+  def __init__(self, name: str, model: type[TModel], reloadable: Reloadable = "lazy") -> None:
     super().__init__(model, reloadable)
     self.name = name
 
@@ -120,7 +127,7 @@ class SharedState(SharedConfig[TModel]):
 class GroupConfig(BaseConfig[TModel, int]):
   base_dir: ClassVar = "configs"
 
-  def __init__(self, name: str, model: type[TModel], reloadable: bool = True) -> None:
+  def __init__(self, name: str, model: type[TModel], reloadable: Reloadable = "lazy") -> None:
     super().__init__(model, reloadable)
     self.name = name
 

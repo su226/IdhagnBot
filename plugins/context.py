@@ -4,7 +4,8 @@ from nonebot.params import CommandArg
 
 from util import command
 from util.context import (
-  ANY_GROUP, GROUP_IDS, GROUP_NAMES, PRIVATE, enter_context, exit_context, get_event_context)
+  ANY_GROUP, GROUP_IDS, GROUP_NAMES, PRIVATE, enter_context, exit_context, get_event_context
+)
 
 aliases = (
   command.CommandBuilder("context.alias", "别名", "alias")

@@ -326,7 +326,9 @@ async def handle_purchase(
 
 
 @purchase.got("choice")
-async def got_purchase(bot: Bot, event: MessageEvent, state: T_State, choice: str = ArgPlainText()):
+async def got_purchase(
+  bot: Bot, event: MessageEvent, state: T_State, choice: str = ArgPlainText()
+) -> None:
   if choice.strip() != "确定":
     await purchase.finish("购买已取消")
   ctx = context.get_event_context(event)

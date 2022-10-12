@@ -1,12 +1,13 @@
 from typing import Any
 
-FORMAT = '''\
-🤔 {username} 发布了……一些东西
-https://t.bilibili.com/{id}
-目前机器人还不能理解这个qwq'''
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
+
+from util import bilibili_activity
 
 
-def handle(content: Any) -> str:
-  return FORMAT.format(
-    username=content["desc"]["user_profile"]["info"]["uname"],
-    id=content["desc"]["dynamic_id_str"])
+async def format(activity: bilibili_activity.Activity[Any]) -> Message:
+  return Message(MessageSegment.text(
+    f"{activity.name} 发布了动态\n"
+    "IdhagnBot 暂不支持解析此类动态\n"
+    f"https://t.bilibili.com/{activity.id}"
+  ))

@@ -37,7 +37,7 @@ async def handle_auto_poke(bot: Bot, event: MessageEvent, arg: Message = Command
         all_uids.extend(await account_aliases.match_uid(bot, event, pattern, True))
       except util.AggregateError as e:
         all_errors.extend(e)
-    if len(all_errors):
+    if all_errors:
       await auto_poke.send("\n".join(all_errors))
       return
     uids[ctx] = set(all_uids)

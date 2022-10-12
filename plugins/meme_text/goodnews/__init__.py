@@ -3,7 +3,7 @@ from io import BytesIO
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-from PIL import Image, ImageOps
+from PIL import Image
 
 from util import command, text, util
 

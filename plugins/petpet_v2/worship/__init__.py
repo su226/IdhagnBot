@@ -12,8 +12,7 @@ from util import command, util
 from ..util import get_image_and_user, segment_animated_image
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-# pylama: skip=1
-# RemapTransform((150, 150), ((0, -30), (135, 17), (135, 145), (0, 140)))
+# RemapTransform((150, 150), ((0, -30), (135, 17), (135, 145), (0, 140)))  # noqa
 OLD_SIZE = 150, 150
 NEW_SIZE = 135, 145
 TRANSFORM = (

@@ -1,79 +1,187 @@
-import time
-from typing import cast
+import asyncio
+from collections import deque
+from datetime import datetime, timedelta
+from typing import AsyncGenerator, cast
 
-import aiohttp
 import nonebot
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_MISSED, JobEvent
 from loguru import logger
-from nonebot.adapters.onebot.v11 import Bot, Event, Message
+from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
+from nonebot.exception import ActionFailed
 from nonebot.params import CommandArg
 
-from util import command, context
+from util import bilibili_activity, command, context
 
-from . import contents, util
+from . import common, contents
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 driver = nonebot.get_driver()
-info_api = "https://api.bilibili.com/x/space/acc/info?mid={uid}"
-list_api = (
-  "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history"
-  "?host_uid={uid}&offset_dynamic_id={offset}")
-detail_api = (
-  "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail?dynamic_id={id}")
-user_agent = "Mozilla/5.0 (X11; Linux x86_64; rv:101.0) Gecko/20100101 Firefox/101.0"
+queue: deque[common.User] = deque()
 
 
-@driver.on_startup
-async def startup():
-  async with aiohttp.ClientSession(headers={"User-Agent": user_agent}) as http:
-    for user in util.CONFIG.users:
-      try:
-        user._name = (await (await http.get(info_api.format(uid=user.uid))).json())["data"]["name"]
-      except aiohttp.ClientError:  # 防止作为系统服务开机时出现网络错误，获取不到名字而导致整个功能出错
-        user._name = f"未知_{user.uid}"
-      user._time = time.time()
-      logger.info(f"B站动态: {user.uid} -> {user._name}")
+@common.CONFIG.onload()
+def onload(prev: common.Config | None, curr: common.Config) -> None:
+  global queue
+  queue = deque()
+  for i in curr.users:
+    queue.append(i)
+  date = datetime.now()
+  if not curr.immediate:
+    date += timedelta(seconds=curr.interval)
+  schedule(date)
 
 
-async def new_activities(http: aiohttp.ClientSession, user: util.User):
-  offset = 0
-  while True:
-    data = (await (await http.get(list_api.format(uid=user.uid, offset=offset))).json())["data"]
-    for card in data["cards"]:
-      # 更新用户名（防止启动时出现网络错误或UP主改了名字）
-      user._name = card["desc"]["user_profile"]["info"]["uname"]
-      if card["desc"]["timestamp"] <= user._time:
-        return
-      yield card
-    if not data["has_next"]:
+def schedule(date: datetime) -> None:
+  async def check_activity() -> None:
+    try:
+      bot = cast(Bot, nonebot.get_bot())
+    except ValueError:
       return
-    offset = data["next_offset"]
+    try:
+      await try_check_all(bot)
+    except asyncio.CancelledError:
+      pass  # 这里仅仅是防止在关闭机器人时日志出现 CancelledError
+  scheduler.add_job(
+    check_activity, "date", id="bilibili_activity", replace_existing=True, run_date=date
+  )
 
 
-@scheduler.scheduled_job("interval", seconds=util.CONFIG.interval)
-async def check() -> bool:
-  bot = cast(Bot, nonebot.get_bot())
-  result = False
-  async with aiohttp.ClientSession() as http:
-    for user in util.CONFIG.users:
-      logger.debug(f"检查 {user._name} 的动态更新")
-      async for activity in new_activities(http, user):
-        activity_id = activity["desc"]["dynamic_id_str"]
-        try:
-          message = contents.handle(activity)
-        except util.IgnoredException as e:
-          logger.info(f"{user._name} 的动态 {activity_id} 已被忽略: {e}")
-          continue
-        logger.info(f"推送 {user._name} 的动态 {activity_id}")
-        for target in user.targets:
-          if isinstance(target, util.GroupTarget):
-            await bot.send_group_msg(group_id=target.group, message=message)
-          else:
-            await bot.send_private_msg(user_id=target.user, message=message)
-        result = True
-      user._time = time.time()
-  return result
+def schedule_next(event: JobEvent) -> None:
+  if event.job_id == "bilibili_activity":
+    date = datetime.now() + timedelta(seconds=common.CONFIG().interval)
+    schedule(date)
+scheduler.add_listener(schedule_next, EVENT_JOB_EXECUTED | EVENT_JOB_MISSED)
+
+
+@driver.on_bot_connect
+async def on_bot_connect() -> None:
+  common.CONFIG.load()
+
+
+def tp(x):  # TODO: 调试用，记得删掉这里（）
+  try:
+    return bilibili_activity.Activity.grpc_parse(x)
+  except Exception:
+    logger.warning(f"解析动态失败: {x}")
+    raise
+
+
+async def new_activities(user: common.User) -> AsyncGenerator[bilibili_activity.Activity, None]:
+  config = common.CONFIG()
+  offset = ""
+  while offset is not None:
+    if config.grpc:
+      raw, next_offset = await bilibili_activity.grpc_fetch(user.uid, offset)
+      activities = [tp(x) for x in raw]
+    else:
+      raw, next_offset = await bilibili_activity.json_fetch(user.uid, offset)
+      activities = [bilibili_activity.Activity.json_parse(x) for x in raw]
+    for activity in activities:
+      if not user._offset or int(activity.id) > int(user._offset):
+        yield activity
+      elif not activity.top:
+        return
+    offset = next_offset
+
+
+async def try_check(bot: Bot, user: common.User) -> int:
+  async def try_send(
+    activity: bilibili_activity.Activity, message: Message, target: common.AnyTarget
+  ) -> None:
+    if isinstance(target, common.GroupTarget):
+      kw = {"group_id": target.group}
+    else:
+      kw = {"user_id": target.user}
+    try:
+      await bot.send_msg(message=message, **kw)
+    except ActionFailed:
+      logger.exception(
+        f"推送 {user._name}({user.uid}) 的动态 {activity.id} 到目标 {target} 失败！\n"
+        f"动态内容: {activity}"
+      )
+      try:
+        await bot.send_msg(message=(
+          f"{user._name} 更新了一条动态，但在推送时发送消息失败。"
+          f"https://t.bilibili.com/{activity.id}"
+        ), **kw)
+      except ActionFailed:
+        pass
+
+  async def try_send_all(activity: bilibili_activity.Activity) -> None:
+    logger.info(f"推送 {user._name}({user.uid}) 的动态 {activity.id}")
+    try:
+      message = await contents.format(activity)
+    except common.IgnoredException:
+      logger.info(f"{user._name}({user.uid}) 的动态 {activity.id} 含有忽略的关键字")
+      return
+    except Exception:
+      logger.exception(
+        f"格式化 {user._name}({user.uid}) 的动态 {activity.id} 失败！\n"
+        f"动态内容: {activity}"
+      )
+      message = Message(MessageSegment.text(
+        f"{user._name} 更新了一条动态，但在推送时格式化消息失败。"
+        f"https://t.bilibili.com/{activity.id}"
+      ))
+    await asyncio.gather(*[try_send(activity, message, target) for target in user.targets])
+
+  if user._offset == "-1":
+    try:
+      config = common.CONFIG()
+      if config.grpc:
+        raw, _ = await bilibili_activity.grpc_fetch(user.uid)
+        activities = [bilibili_activity.Activity.grpc_parse(x) for x in raw]
+      else:
+        raw, _ = await bilibili_activity.json_fetch(user.uid)
+        activities = [bilibili_activity.Activity.json_parse(x) for x in raw]
+      if len(activities) > 1:
+        user._offset = str(max(int(activities[0].id), int(activities[1].id)))
+      elif activities:
+        user._offset = activities[0].id
+      else:
+        user._offset = ""
+      if activities:
+        user._name = activities[0].name
+      else:
+        user._name = "未知用户"
+      logger.success(f"初始化 {user._name}({user.uid}) 的动态推送完成 {user._offset}")
+    except Exception:
+      logger.exception(f"初始化 {user.uid} 的动态推送失败")
+    return 0
+
+  try:
+    activities: list[bilibili_activity.Activity] = []
+    async for activity in new_activities(user):
+      activities.append(activity)
+    activities.reverse()
+    for activity in activities:
+      user._name = activity.name
+      user._offset = activity.id
+      await try_send_all(activity)
+    logger.debug(f"检查 {user._name}({user.uid}) 的动态更新完成")
+    return len(activities)
+  except Exception:
+    logger.exception(f"检查 {user._name}({user.uid}) 的动态更新失败")
+    return 0
+
+
+async def try_check_all(bot: Bot, concurrency: int | None = None) -> tuple[int, int]:
+  if concurrency is None:
+    concurrency = common.CONFIG().concurrency
+  queue_ = queue
+  if concurrency == 0:
+    users = list(queue_)
+    queue_.clear()
+  else:
+    users = []
+    while queue_ and len(users) < concurrency:
+      users.append(queue_.popleft())
+  results = await asyncio.gather(*[try_check(bot, user) for user in users])
+  queue_.extend(users)
+  return len([x for x in results if x]), sum(results)
+
 
 FORCE_PUSH_USAGE = '''\
 /推送动态 <动态号>
@@ -90,16 +198,19 @@ force_push = (
 @force_push.handle()
 async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg()):
   args = arg.extract_plain_text().rstrip()
-  ctx = context.get_event_context(event)
   if len(args) == 0:
     await force_push.send(FORCE_PUSH_USAGE)
     return
-  async with aiohttp.ClientSession() as http:
-    data = (await (await http.get(detail_api.format(id=args))).json())["data"]
-  if "card" not in data:
-    await force_push.send("无法获取这条动态")
-    return
-  message = contents.handle(data["card"])
+  config = common.CONFIG()
+  try:
+    if config.grpc:
+      activity = bilibili_activity.Activity.grpc_parse(await bilibili_activity.grpc_get(args))
+    else:
+      activity = bilibili_activity.Activity.json_parse(await bilibili_activity.json_get(args))
+  except Exception:
+    await force_push.finish("无法获取这条动态")
+  message = await contents.format(activity)
+  ctx = context.get_event_context(event)
   real_ctx = getattr(event, "group_id", -1)
   if ctx != real_ctx:
     await bot.send_group_msg(group_id=ctx, message=message)
@@ -115,6 +226,9 @@ check_now = (
 
 
 @check_now.handle()
-async def handle_check_now():
-  if not await check():
-    await check_now.send("检查动态更新完成，没有可推送的内容")
+async def handle_check_now(bot: Bot):
+  users, activities = await try_check_all(bot, 0)
+  if users:
+    await check_now.finish(f"检查动态更新完成，推送了 {users} 个UP主的 {activities} 条动态。")
+  else:
+    await check_now.finish("检查动态更新完成，没有可推送的内容。")

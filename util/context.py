@@ -125,7 +125,8 @@ def refresh_context(uid: int):
   STATE.contexts[uid].expire = date
   STATE.dump()
   return scheduler.add_job(
-    timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date)
+    timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date
+  )
 
 
 async def timeout_exit(uid: int):
@@ -199,10 +200,14 @@ def build_permission(node: permission.Node, default: permission.Level) -> BotPer
   return BotPermission(checker)
 
 
-async def get_card_or_name(bot: Bot, event: Event, uid: int) -> str:
-  try:
-    info = await bot.get_group_member_info(group_id=get_event_context(event), user_id=uid)
-    return info["card"] or info["nickname"]
-  except ActionFailed:
-    info = await bot.get_stranger_info(user_id=uid)
-    return info["nickname"]
+async def get_card_or_name(bot: Bot, group_id: Event | int, user_id: int) -> str:
+  if isinstance(group_id, Event):
+    group_id = get_event_context(group_id)
+  if group_id != -1:
+    try:
+      info = await bot.get_group_member_info(group_id=group_id, user_id=user_id)
+      return info["card"] or info["nickname"]
+    except ActionFailed:
+      pass
+  info = await bot.get_stranger_info(user_id=user_id)
+  return info["nickname"]

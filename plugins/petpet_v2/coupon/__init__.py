@@ -6,7 +6,7 @@ from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, ImageOps
+from PIL import Image
 
 from util import command, context, text, util
 

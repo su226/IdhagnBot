@@ -11,7 +11,6 @@ gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import Pango, PangoCairo  # type: ignore
 
-
 TOP_X = 70
 TOP_Y = 0
 BOTTOM_X = 250

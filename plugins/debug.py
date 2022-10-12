@@ -4,7 +4,8 @@ from pprint import pformat
 import yaml
 from loguru import logger
 from nonebot.adapters.onebot.v11 import (
-  Bot, GroupMessageEvent, Message, MessageEvent, PrivateMessageEvent)
+  Bot, GroupMessageEvent, Message, MessageEvent, PrivateMessageEvent
+)
 from nonebot.exception import ActionFailed
 from nonebot.message import handle_event
 from nonebot.params import CommandArg
@@ -167,5 +168,5 @@ reload = (
 async def handle_reload():
   for config in config_v2.BaseConfig.all:
     if config.reloadable:
-      config.load_all()
+      config.reload()
   await reload.finish("已重载所有配置")

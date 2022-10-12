@@ -67,7 +67,7 @@ class State(BaseState):
 
   def del_scheduled(self, ctx: int, id: str):
     del self.scheduled[ctx][id]
-    if not len(self.scheduled[ctx]):
+    if not self.scheduled[ctx]:
       del self.scheduled[ctx]
     self.dump()
 
@@ -136,7 +136,7 @@ async def handle_schedule(event: MessageEvent, msg: Message = CommandArg()):
     for id, content in STATE.scheduled[ctx].items():
       job = cast(Job, scheduler.get_job(f"scheduled_message_{id}"))
       trigger = cast(DateTrigger, job.trigger)
-      segments.append(f"{id} {trigger.run_date.isoformat('T')} {ellipsis(content.message, 16)}")
+      segments.append(f"{id} {trigger.run_date:%Y-%m-%d %H:%M:%S} {ellipsis(content.message, 16)}")
     await schedule.send("\n".join(segments))
   elif args[0] in ("预览", "preview"):
     if len(args) < 2:

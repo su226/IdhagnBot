@@ -58,7 +58,8 @@ def split(delim: T, l: Sequence[T]) -> Generator[Sequence[T], None, None]:
 
 
 async def render(
-  bot: Bot, event: MessageEvent, args: Message, *, max_height: int = 10000, padding_bottom: int = 20
+  bot: Bot, event: MessageEvent, args: Message,
+  *, max_height: int = 10000, padding_bottom: int = 20
 ) -> Image.Image:
   async def parse_message(argv: Sequence[str]) -> ParsedMessage:
     try:

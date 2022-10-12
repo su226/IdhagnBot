@@ -40,7 +40,7 @@ async def handler(
   avatar = ImageOps.fit(avatar, (240, 345), util.scale_resample)
   im.paste(avatar, (125, 91), avatar)
   im.paste(template, mask=template)
-  
+
   f = BytesIO()
   im.save(f, "PNG")
   await matcher.finish(MessageSegment.image(f))

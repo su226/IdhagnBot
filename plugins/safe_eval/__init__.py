@@ -29,7 +29,7 @@ python = (
 @python.handle()
 async def handle_python(args: Message = CommandArg()):
   code = args.extract_plain_text().rstrip()
-  if not len(code):
+  if not code:
     await python.finish(python.__doc__)
   killed, returncode, stdout, stderr = await eval_py(code, TIMEOUT, NPROC, MEMORY, OUTPUT)
   segments = []
@@ -38,14 +38,14 @@ async def handle_python(args: Message = CommandArg()):
   else:
     segments.append(f"退出代码：{returncode}")
   stdout = stdout.decode(errors='ignore')
-  if not len(stdout):
+  if not stdout:
     segments.append("标准输出：（空）")
   elif stdout.endswith("\n"):
     segments.append(f"标准输出：\n{stdout[:-1]}")
   else:
     segments.append(f"标准输出：（末尾没有换行）\n{stdout}")
   stderr = stderr.decode(errors='ignore')
-  if not len(stderr):
+  if not stderr:
     segments.append("标准错误：（空）")
   elif stderr.endswith("\n"):
     segments.append(f"标准错误：\n{stderr[:-1]}")
@@ -73,7 +73,7 @@ js = (
 @js.handle()
 async def handle_js(args: Message = CommandArg()):
   code = args.extract_plain_text().rstrip()
-  if not len(code):
+  if not code:
     await js.finish(js.__doc__)
   killed, returncode, stdout, stderr = await eval_js(code, TIMEOUT, NPROC, JS_MEMORY, OUTPUT)
   segments = []
@@ -82,14 +82,14 @@ async def handle_js(args: Message = CommandArg()):
   else:
     segments.append(f"退出代码：{returncode}")
   stdout = stdout.decode(errors='ignore')
-  if not len(stdout):
+  if not stdout:
     segments.append("标准输出：（空）")
   elif stdout.endswith("\n"):
     segments.append(f"标准输出：\n{stdout[:-1]}")
   else:
     segments.append(f"标准输出：（末尾没有换行）\n{stdout}")
   stderr = stderr.decode(errors='ignore')
-  if not len(stderr):
+  if not stderr:
     segments.append("标准错误：（空）")
   elif stderr.endswith("\n"):
     segments.append(f"标准错误：\n{stderr[:-1]}")

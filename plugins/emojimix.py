@@ -317,9 +317,9 @@ async def handle_emojimix(bot: Bot, event: Event, args: Message = CommandArg()):
   cache1 = os.path.abspath(f"{CACHE_DIR}/{file1}.png")
   cache2 = os.path.abspath(f"{CACHE_DIR}/{file2}.png")
   if os.path.exists(cache1):
-    await emojimix.finish(MessageSegment.image("file://" + cache1))
+    await emojimix.finish(util.local_image(cache1))
   if os.path.exists(cache2):
-    await emojimix.finish(MessageSegment.image("file://" + cache2))
+    await emojimix.finish(util.local_image(cache2))
   if file1 in STATE.unsupported or file2 in STATE.unsupported:
     await emojimix.finish("似乎不能这么组合")
   async with aiohttp.ClientSession() as http:

@@ -4,7 +4,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageChops, ImageDraw
 
-from util import command, text, util
+from util import command, text
 
 BG = (28, 11, 27)
 FG1 = (0, 242, 234)

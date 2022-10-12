@@ -1,8 +1,7 @@
 import codecs
-from dataclasses import dataclass
 import os
-import random
 import posixpath
+import random
 import re
 from argparse import Namespace
 from typing import Sequence

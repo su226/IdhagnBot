@@ -3,8 +3,7 @@ import re
 import sys
 
 from . import amd, nvidia
-from .common import Info
-from .common import read as read_unknown
+from .common import Info, read as read_unknown
 
 VENDORS = {
   # 0x8086: intel,

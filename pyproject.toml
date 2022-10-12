@@ -1,5 +1,5 @@
 [project]
-name = "idhagn_bot"
+name = "idhagnbot"
 description = "Simple chatbot for Tencent QQ."
 authors = [
   {name = "su226", email = "thesu226@outlook.com"},
@@ -20,11 +20,14 @@ dependencies = [
 
 [project.optional-dependencies]
 jieba = ["jieba<1.0.0,>=0.42.1"]
-libzim = ["libzim<2.0.0,>=1.0.0"]
+libzim = ["libzim<2.0.0,>=1.0.0"] # 维基百科也需要 pyppeteer
 mctools = ["mctools<2.0.0,>=1.1.2"]
 psutil = ["psutil<6.0.0,>=5.9.0"]
 pyppeteer = ["pyppeteer<2.0.0,>=1.0.2"]
 opencv = ["opencv-python-headless>=4.6.0.66"]
+sql = ["sqlmodel>=0.0.8", "aiosqlite>=0.17.0"]
+wordcloud = ["wordcloud>=1.8.2.2"] # 词云也需要 sql 和 jieba
+grpc = ["protobuf>=4.21.6", "grpcio>=1.49.1"]
 
 [project.urls]
 Homepage = "https://idhagnbot.su226.tk"
@@ -39,20 +42,31 @@ build-backend = "pdm.pep517.api"
 includes = []
 
 [tool.pdm.dev-dependencies]
-dev = [
-  "pylama[eradicate]<9.0.0,>=8.3.8",
-  "types-Pillow>=9.2.1",  # Pyright自带那个有点老……
-  "numpy>=1.23.2",
+lint = [
+  "pylama[eradicate,toml]>=8.4.1",
+  "isort>=5.10.1",
 ]
 
 [tool.pdm.scripts]
 start = "python bot.py"
 
 [tool.isort]
-multi_line_output = 4
-line_length = 100
+multi_line_output = 5
+combine_as_imports = true
+line_length = 99
 indent = "  "
 
 [tool.pyright]
 typeCheckingMode = "basic"
 strict = ["plugins/liferestart/game"]
+ignore = ["util/bilibili_activity/protos"]
+
+[tool.pylama]
+linters = "eradicate,pycodestyle,pyflakes,isort"
+skip = ".venv/*,util/bilibili_activity/protos/*"
+async = true
+
+[tool.pylama.linter.pycodestyle]
+ignore = "E128,E302,E305,E402,E741,E704,W503"
+indent_size = 2
+max_line_length = 99

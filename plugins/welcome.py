@@ -1,6 +1,7 @@
 import nonebot
 from nonebot.adapters.onebot.v11 import (
-  Bot, GroupDecreaseNoticeEvent, GroupIncreaseNoticeEvent, Message)
+  Bot, GroupDecreaseNoticeEvent, GroupIncreaseNoticeEvent, Message
+)
 from pydantic import Field
 
 from util.config import BaseConfig

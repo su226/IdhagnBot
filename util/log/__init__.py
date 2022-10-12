@@ -1,9 +1,10 @@
 import linecache
 import os
 import sys
+import tracemalloc
 import warnings
 from io import StringIO
-from typing import TYPE_CHECKING, Literal, TextIO
+from typing import TYPE_CHECKING, Literal
 
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -31,7 +32,7 @@ class SpecialTarget(Target):
 class Config(BaseModel):
   sinks: list[FileTarget | SpecialTarget] = Field(default_factory=lambda: [SpecialTarget()])
   warnings_as_log: bool = True
-  stdio_as_log: bool = True
+  stdio_as_log: bool = False
 
 
 class LoggerStream:
@@ -56,16 +57,16 @@ class LoggerStream:
     pass
 
 
-CONFIG = config_v2.SharedConfig("log", Config)
-showwarning_orig = warnings.showwarning
+CONFIG = config_v2.SharedConfig("log", Config, "eager")
+showwarning_orig = warnings._showwarnmsg_impl  # type: ignore
 
 
-@CONFIG.onload(False)
+@CONFIG.onload()
 def config_onload(_: Config | None, cur: Config) -> None:
   if cur.warnings_as_log:
-    warnings.showwarning = showwarning
+    warnings._showwarnmsg_impl = showwarning  # type: ignore
   else:
-    warnings.showwarning = showwarning_orig
+    warnings._showwarnmsg_impl = showwarning_orig  # type: ignore
   if cur.stdio_as_log:
     sys.stdout = LoggerStream("<lvl>STDOUT</lvl>", "INFO")
     sys.stderr = LoggerStream("<lvl>STDERR</lvl>", "ERROR")
@@ -104,19 +105,29 @@ def init():
   CONFIG.load()
 
 
-def showwarning(
-  message: Warning | str, category: type[Warning], filename: str, lineno: int,
-  file: TextIO | None = None, line: str | None = None
-):
-  if line is None:
-    line = linecache.getline(filename, lineno)
-  line = line.strip()
+def colorize_filename(filename: str) -> str:
   if not filename.startswith("<"):
     dirname, basename = os.path.split(filename)
-    dirname = dirname.rstrip(os.path.sep + (os.path.altsep or ""))
     filename = f"{dirname}{os.path.sep}<b>{basename}</b>"
+  return filename
+
+
+def showwarning(msg: warnings.WarningMessage) -> None:
+  line = msg.line
+  if line is None:
+    line = linecache.getline(msg.filename, msg.lineno)
+  line = line.strip()
   log = logger.opt(colors=True, depth=2)
-  log.warning(f"<b><y>{category.__name__}</y>: {str(message).strip()}</b>")
-  log.warning(f"<g>{filename}</g>:<y>{lineno}</y>")
+  log.warning(f"<b><y>{msg.category.__name__}</y>: {str(msg.message).strip()}</b>")
+  log.warning(f"  <g>{colorize_filename(msg.filename)}</g>:<y>{msg.lineno}</y>")
   if line:
-    log.warning(line)
+    log.warning("    " + line)
+  if msg.source is not None:
+    if not tracemalloc.is_tracing():
+      log.warning("启用 tracemalloc 以查看对象分配栈。")
+    elif (tb := tracemalloc.get_object_traceback(msg.source)):
+      log.warning("<b><y>对象分配于</y>:</b>")
+      for frame in tb:
+        log.warning(f"  <g>{colorize_filename(frame.filename)}</g>:<y>{frame.lineno}</y>")
+        line = linecache.getline(frame.filename, frame.lineno).strip()
+        log.warning("    " + line.strip())

@@ -22,7 +22,9 @@ class ShellCommandRule:
   def __init__(self, parser: ArgumentParser):
     self.parser = parser
 
-  async def __call__(self, state: T_State, msg: Message = CommandArg()) -> bool:
+  async def __call__(self, state: T_State, msg: Message | None = CommandArg()) -> bool:
+    if msg is None:  # 去掉这里虽然不影响功能，但 DEBUG 日志等级下会刷屏
+      return False
     try:
       argv = self.split(msg)
       state[SHELL_ARGV] = argv

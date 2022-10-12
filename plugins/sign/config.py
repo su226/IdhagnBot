@@ -68,5 +68,5 @@ class FormatData:
   rank_bonus: float | None
 
 
-CONFIG = SharedConfig("sign", Config)
+CONFIG = SharedConfig("sign", Config, "eager")
 STATE = GroupState("sign", GroupData)

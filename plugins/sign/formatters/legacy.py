@@ -5,11 +5,10 @@ from datetime import date
 from io import BytesIO
 from typing import Any
 
-from aiohttp import ClientSession
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
-from PIL import Image, ImageDraw
+from PIL import Image
 
-from util import text, currency, util
+from util import currency, text, util
 
 from ..config import CONFIG, STATE, FormatData
 
@@ -54,8 +53,8 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
 
   # 用户名
   text.paste(
-    im, (152, 32), infos[format_data.uid]["card"] or infos[format_data.uid]["nickname"], "sans", 32,
-    box=336, mode=text.ELLIPSIZE_END)
+    im, (152, 32), infos[format_data.uid]["card"] or infos[format_data.uid]["nickname"],
+    "sans", 32, box=336, ellipsize=text.ELLIPSIZE_END)
 
   # 群名
   text.paste(

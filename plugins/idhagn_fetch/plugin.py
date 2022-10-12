@@ -6,7 +6,6 @@ from typing import Any, Callable, Literal
 
 import nonebot
 import psutil
-from aiohttp import ClientSession
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 from PIL import Image, ImageDraw
 from pydantic import BaseModel, Field

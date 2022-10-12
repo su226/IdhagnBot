@@ -161,6 +161,8 @@ def get_override_level(bot: Bot, user: int, group: int = -1) -> Level | None:
 
 
 async def get_group_level(bot: Bot, user: int, group: int) -> Level | None:
+  if group == -1:
+    return None
   try:
     info = await bot.get_group_member_info(group_id=group, user_id=user)
   except ActionFailed:

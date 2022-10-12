@@ -44,7 +44,8 @@ async def handler(
   text.paste(
     im, (400, 150), "青", "sans bold", 80, color=(255, 255, 255), stroke=2, stroke_color=COLOR)
   text.paste(
-    im, (310, 270), "YOASOBI", "sans bold", 40, color=(255, 255, 255), stroke=2, stroke_color=COLOR)
+    im, (310, 270), "YOASOBI", "sans bold", 40, color=(255, 255, 255), stroke=2, stroke_color=COLOR
+  )
   f = BytesIO()
   im.save(f, "PNG")
   await matcher.finish(MessageSegment.image(f))

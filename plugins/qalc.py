@@ -5,7 +5,6 @@ from nonebot.params import CommandArg
 
 from util import command
 
-
 USAGE = '''\
 /qalc <表达式>
 基于Qalculator的，非常强大的计算器。

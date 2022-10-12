@@ -16,16 +16,15 @@ def parse_boolean(value: str) -> bool:
   raise ValueError("Not a vaild truthy or falsy")
 
 
-match = (
-  command.CommandBuilder("account_aliases.match", "匹配", "match")
-  .brief("从名字匹配群成员")
+match = command.CommandBuilder("account_aliases.match", "匹配", "match") \
+  .brief("从名字匹配群成员") \
   .usage('''\
 /匹配 <QQ号> - 显示成员的所有名字
 /匹配 <昵称、群名片或别名> - 查找名字对应的成员
 只接受中文、英文和数字
 不能有空格，不区分大小写
-特殊符号、emoji等会被忽略''')
-  .build())
+特殊符号、emoji等会被忽略''') \
+  .build()
 
 
 @match.handle()

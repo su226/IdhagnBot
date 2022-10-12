@@ -1,6 +1,6 @@
-from typing import cast, overload
 from argparse import Namespace
 from io import BytesIO
+from typing import cast, overload
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ActionFailed, ParserExit

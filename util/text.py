@@ -12,25 +12,30 @@ gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import GLib, Pango, PangoCairo  # type: ignore
 
-WRAP_WORD = 0
-WRAP_CHAR = 1
-WRAP_WORD_CHAR = 2
-ELLIPSIZE_START = 3
-ELLIPSIZE_MIDDLE = 4
-ELLIPSIZE_END = 5
 Layout: TypeAlias = Pango.Layout
-Mode = Literal[0, 1, 2, 3, 4, 5]
+Wrap = Literal[0, 1, 2]
+Ellipsize = Literal[0, 1, 2, 3]
 Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
 Align = Literal["l", "m", "r"]
 
+WRAP_WORD = 0
+WRAP_CHAR = 1
+WRAP_WORD_CHAR = 2
+ELLIPSIZE_NONE = 0
+ELLIPSIZE_START = 1
+ELLIPSIZE_MIDDLE = 2
+ELLIPSIZE_END = 3
+
+CONTEXT = Pango.Context()
+CONTEXT.set_font_map(PangoCairo.FontMap.get_default())
+
 
 def layout(
-  content: str, font: str, size: float, *, box: tuple[int, int] | int | None = None, mode: Mode = 1,
-  markup: bool = False, align: Align = "l", spacing: int = 0
+  content: str, font: str, size: float, *, box: tuple[int, int] | int | None = None,
+  wrap: Wrap = WRAP_WORD, ellipsize: Ellipsize = ELLIPSIZE_NONE, markup: bool = False,
+  align: Align = "l", spacing: int = 0, lines: int = 0
 ) -> Layout:
-  context = Pango.Context()
-  context.set_font_map(PangoCairo.FontMap.get_default())
-  layout = Pango.Layout(context)
+  layout = Pango.Layout(CONTEXT)
   if value := util.CONFIG().font_substitute.get(font, None):
     font = value
   desc = Pango.FontDescription.from_string(font)
@@ -42,11 +47,15 @@ def layout(
       layout.set_height(box[1] * Pango.SCALE)
     else:
       layout.set_width(box * Pango.SCALE)
-    if mode > 2:
-      layout.set_ellipsize(mode - 2)
-    else:
-      layout.set_wrap(mode)
+  layout.set_ellipsize(ellipsize)
+  layout.set_wrap(wrap)
+  spacing *= Pango.SCALE
   layout.set_spacing(spacing)
+  if lines:
+    # 使用Pango.FontMetrics.get_height获取到的行高可能差一像素
+    # 直接获取空Layout的高度即为一倍行高
+    line_height = layout.get_size().height
+    layout.set_height(line_height * lines + spacing * (lines - 1))
   if align == "m":
     layout.set_alignment(Pango.Alignment.CENTER)
   if align == "r":
@@ -73,8 +82,9 @@ def render(
 @overload
 def render(
   content: str, font: str, size: float, *, color: RGB | int = ..., stroke: float = ...,
-  stroke_color: RGB | int = ..., box: tuple[int, int] | int | None = ..., mode: Mode = ...,
-  markup: bool = ..., align: Align = ..., spacing: int = ...
+  stroke_color: RGB | int = ..., box: tuple[int, int] | int | None = ..., wrap: Wrap = ...,
+  ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
+  lines: int = ...
 ) -> Image.Image: ...
 
 
@@ -119,8 +129,8 @@ def paste(
 def paste(
   im: Image.Image, xy: tuple[int, int], content: str, font: str, size: float, *,
   anchor: Anchor = ..., color: RGB | int = ..., stroke: float = ..., stroke_color: RGB | int = ...,
-  box: tuple[int, int] | int | None = ..., mode: Mode = ..., markup: bool = ..., align: Align = ...,
-  spacing: int = ...
+  box: tuple[int, int] | int | None = ..., wrap: Wrap = ..., ellipsize: Ellipsize = ...,
+  markup: bool = ..., align: Align = ..., spacing: int = ..., lines: int = ...
 ) -> Image.Image: ...
 
 

@@ -1,7 +1,7 @@
 # 代码移植至 https://github.com/stdlib-js/random-base-binomial/blob/main/lib/sample2.js
 # 至少不依赖NumPy了（）
-import random as random_
 import math
+import random as random_
 
 ONE_SIXTH = 1 / 6
 ONE_12 = 1 / 12

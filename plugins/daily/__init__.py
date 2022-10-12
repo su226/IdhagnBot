@@ -1,53 +1,139 @@
 import asyncio
+from dataclasses import dataclass
 from datetime import date, datetime, time
-from typing import Awaitable, cast
+from typing import Awaitable, Literal, cast
 
 import nonebot
 from apscheduler.job import Job
-from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
+from loguru import logger
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.exception import ActionFailed
 from pydantic import BaseModel, Field
 
-from util import command, config_v2, util
+from util import command, config_v2, context, util
+
+from .modules import Module
+from .modules.countdown import Countdown, CountdownModule
+from .modules.history import HistoryModule
+from .modules.moyu import MoyuModule, moyu_cache
+from .modules.news import NewsModule, news_cache
+from .modules.rank import RankModule
+from .modules.sentence import SentenceModule, sentence_cache
+from .modules.string import StringModule
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
+_time = time
 
-class Countdown(BaseModel):
-  date: date
-  before: str = ""
-  exact: str = ""
-  after: str = ""
+
+class BaseModuleConfig(BaseModel):
+  type: str
+
+  def create_module(self, group_id: int) -> Module:
+    raise NotImplementedError
+
+
+class StringModuleConfig(BaseModuleConfig):
+  type: Literal["string"]
+  string: str = "七点几勒，起床先啦！各位兽受们早上好"
+
+  def create_module(self, group_id: int) -> Module:
+    return StringModule(self.string)
+
+
+class CountdownModuleConfig(BaseModuleConfig):
+  type: Literal["countdown"]
+  countdowns: list[Countdown]
+
+  def create_module(self, group_id: int) -> Module:
+    return CountdownModule(self.countdowns)
+
+
+class NewsModuleConfig(BaseModuleConfig):
+  type: Literal["news"]
+
+  def create_module(self, group_id: int) -> Module:
+    return NewsModule()
+
+
+class MoyuModuleConfig(BaseModuleConfig):
+  type: Literal["moyu"]
+
+  def create_module(self, group_id: int) -> Module:
+    return MoyuModule()
+
+
+class HistoryModuleConfig(BaseModuleConfig):
+  type: Literal["history"]
+
+  def create_module(self, group_id: int) -> Module:
+    return HistoryModule()
+
+
+class SentenceModuleConfig(BaseModuleConfig):
+  type: Literal["sentence"]
+
+  def create_module(self, group_id: int) -> Module:
+    return SentenceModule()
+
+
+class RankModuleConfig(BaseModuleConfig):
+  type: Literal["rank"]
+  limit: int = 10
+
+  def create_module(self, group_id: int) -> Module:
+    return RankModule(group_id, self.limit)
+
+
+AnyModuleConfig = \
+  StringModuleConfig | \
+  CountdownModuleConfig | \
+  NewsModuleConfig | \
+  MoyuModuleConfig | \
+  HistoryModuleConfig | \
+  SentenceModuleConfig | \
+  RankModuleConfig
+
+
+class GroupConfig(BaseModel):
+  time: _time | None = None
+  modules: list[AnyModuleConfig | list[AnyModuleConfig]] | None = None
 
 
 class Config(BaseModel):
-  _time = time
-  time: _time = _time(7, 0, 0)
-  groups: list[int] = Field(default_factory=list)
-  countdown: list[Countdown] = Field(default_factory=list)
+  default_time: _time = _time(7, 0, 0)
+  default_modules: list[AnyModuleConfig | list[AnyModuleConfig]] = \
+    Field(default_factory=list)
+  groups: dict[int, GroupConfig] = Field(default_factory=dict)
 
 
 class State(BaseModel):
-  last_send: date = date.min
+  last_send: dict[int, date] = Field(default_factory=dict)
 
 
-CONFIG = config_v2.SharedConfig("daily", Config)
+CONFIG = config_v2.SharedConfig("daily", Config, "eager")
 STATE = config_v2.SharedState("daily", State)
 driver = nonebot.get_driver()
-job: Job | None = None
+jobs: list[Job] = []
 
 
-@CONFIG.onload(False)
+@CONFIG.onload()
 def onload(prev: Config | None, curr: Config):
-  global job
-  now = datetime.now()
-  if job:
+  for job in jobs:
     job.remove()
-  job = scheduler.add_job(
-    send_daily, "cron", hour=curr.time.hour, minute=curr.time.minute, second=curr.time.second)
-  if now.time() >= curr.time:
-    asyncio.create_task(send_daily())
+  jobs.clear()
+  for group, group_config in curr.groups.items():
+    time = group_config.time or curr.default_time
+    job = scheduler.add_job(
+      check_daily, "cron", (group,), hour=time.hour, minute=time.minute, second=time.second)
+    if datetime.now().time() > time:
+      asyncio.create_task(check_daily(group))
+
+
+@dataclass
+class Forward:
+  nodes: list[MessageSegment]
 
 
 @driver.on_bot_connect
@@ -55,89 +141,73 @@ async def on_bot_connect() -> None:
   CONFIG.load()
 
 
-SENTENCE_API = "http://open.iciba.com/dsapi/"
-NEWS_API = "https://api.qqsuu.cn/api/60s"
-MOYU_API = "https://api.j4u.ink/v1/store/other/proxy/remote/moyu.json"
-TODAY_API = "https://www.ipip5.com/today/api.php?type=json"
+async def format_one(group_id: int, module_config: BaseModuleConfig) -> util.AnyMessage:
+  try:
+    return await module_config.create_module(group_id).format()
+  except Exception:
+    logger.exception(f"每日推送模块运行失败: {module_config}")
+    return f"模块运行失败：{module_config.type}"
 
 
-async def fetch_history() -> str:
-  http = util.http()
-  async with http.get(TODAY_API) as response:
-    data = await response.json()
-  result = []
-  for i in data["result"][:-1]:
-    result.append(f"{i['year']}: {i['title']}")
-  return "\n".join(result)
+async def format_forward(
+  bot_id: int, bot_name: str, group_id: int, modules: list[AnyModuleConfig]
+) -> Forward:
+  coros = [format_one(group_id, module) for module in modules]
+  messages = await asyncio.gather(*coros)
+  return Forward([util.forward_node(bot_id, bot_name, message) for message in messages])
 
 
-async def fetch_sentence() -> tuple[bytes, str]:
-  http = util.http()
-  async with http.get(SENTENCE_API) as response:
-    data = await response.json(content_type=None)
-  async with http.get(data["fenxiang_img"]) as response:
-    return await response.read(), data["tts"]
-
-
-async def fetch_news() -> bytes:
-  http = util.http()
-  async with http.get(NEWS_API) as response:
-    return await response.read()
-
-
-async def fetch_moyu() -> bytes:
-  http = util.http()
-  async with http.get(MOYU_API) as response:
-    data = await response.json()
-  async with http.get(data["data"]["moyu_url"]) as response:
-    return await response.read()
-
-
-async def build_daily_message() -> Message:
-  (sentence, _), news, moyu = await asyncio.gather(fetch_sentence(), fetch_news(), fetch_moyu())
+async def format_all(group_id: int) -> list[util.AnyMessage | Forward]:
   config = CONFIG()
-  today = date.today()
-  countdowns: list[str] = []
-  for i in config.countdown:
-    delta = (i.date - today).days
-    if delta > 0 and i.before:
-      countdowns.append(i.before.format(delta))
-    elif delta == 0 and i.exact:
-      countdowns.append(i.exact)
-    elif delta < 0 and i.after:
-      countdowns.append(i.after.format(-delta))
-  return (
-    f"大家好，今天是{today.year}年{today.month}月{today.day}日，也是：\n"
-    + "\n".join(countdowns) + "\n还可以试试发送 /历史 看看历史上的今天"
-    + "\n今天的「摸鱼日历」是：\n" + MessageSegment.image(moyu)
-    + "\n再用「60秒」看看世界：\n" + MessageSegment.image(news)
-    + "\n最后送上「每日一句」：\n" + MessageSegment.image(sentence)
-    + "\n你可以发送 /摸鱼、/60s 或者 /一句 重新查看上面的内容，也可以发送 /今天 再次看到以上全部")
+  if group_id not in config.groups:
+    modules = config.default_modules
+  else:
+    modules = config.groups[group_id].modules or config.default_modules
+  bot = cast(Bot, nonebot.get_bot())
+  bot_id = int(bot.self_id)
+  if group_id == -1:
+    info = await bot.get_login_info()
+    bot_name = info["nickname"]
+  else:
+    info = await bot.get_group_member_info(group_id=group_id, user_id=bot_id)
+    bot_name = info["card"] or info["nickname"]
+  coros: list[Awaitable[util.AnyMessage | Forward]] = []
+  for module in modules:
+    if isinstance(module, list):
+      coros.append(format_forward(bot_id, bot_name, group_id, module))
+    else:
+      coros.append(format_one(group_id, module))
+  return await asyncio.gather(*coros)
 
 
-async def send_daily() -> None:
+async def try_send(bot: Bot, group_id: int, message: util.AnyMessage | Forward) -> None:
+  if isinstance(message, MessageSegment):
+    message = Message(message)
+  try:
+    if isinstance(message, Forward):
+      await bot.call_api("send_group_forward_msg", group_id=group_id, messages=message.nodes)
+    else:
+      await bot.send_group_msg(group_id=group_id, message=message)
+  except ActionFailed:
+    logger.exception(f"发送部分每日推送到群聊 {group_id} 失败: {message}")
+    try:
+      await bot.send_group_msg(
+        group_id=group_id, message="发送部分每日推送失败，可运行 /今天 重新查看"
+      )
+    except ActionFailed:
+      pass
+
+
+async def check_daily(group_id: int) -> None:
   state = STATE()
   today = date.today()
-  if today <= state.last_send:
+  if today <= state.last_send.get(group_id, date.min):
     return
-  config = CONFIG()
-  coros: list[Awaitable[None]] = []
-  try:
-    message = await build_daily_message()
-  except Exception:
-    message = "获取每日推送失败，本消息仅做续火之用"
+  logger.info(f"向 {group_id} 发送每日推送")
   bot = cast(Bot, nonebot.get_bot())
-
-  async def send(group: int) -> None:
-    try:
-      await bot.send_group_msg(group_id=group, message=message)
-    except ActionFailed:
-      await bot.send_group_msg(group_id=group, message="发送每日推送失败，本消息仅做续火之用")
-
-  for group in config.groups:
-    coros.append(send(group))
-  await asyncio.gather(*coros)
-  state.last_send = today
+  for message in await format_all(group_id):
+    await try_send(bot, group_id, message)
+  state.last_send[group_id] = today
   STATE.dump()
 
 
@@ -149,8 +219,13 @@ today = (
 
 
 @today.handle()
-async def handle_today() -> None:
-  await today.finish(await build_daily_message())
+async def handle_today(bot: Bot, event: MessageEvent) -> None:
+  messages = await format_all(context.get_event_context(event))
+  for message in messages:
+    if isinstance(message, Forward):
+      await util.send_forward_msg(bot, event, *message.nodes)
+    else:
+      await today.send(message)
 
 
 moyu = (
@@ -162,7 +237,8 @@ moyu = (
 
 @moyu.handle()
 async def handle_moyu() -> None:
-  await today.finish(MessageSegment.image(await fetch_moyu()))
+  await moyu_cache.ensure()
+  await today.finish(util.local_image(moyu_cache.path))
 
 
 news = (
@@ -174,7 +250,8 @@ news = (
 
 @news.handle()
 async def handle_news() -> None:
-  await today.finish(MessageSegment.image(await fetch_news()))
+  await news_cache.ensure()
+  await today.finish(util.local_image(news_cache.path))
 
 
 sentence = (
@@ -186,9 +263,9 @@ sentence = (
 
 @sentence.handle()
 async def handle_sentence() -> None:
-  image, speech = await fetch_sentence()
-  await today.send(MessageSegment.image(image))
-  await today.finish(MessageSegment.record(speech))
+  await sentence_cache.ensure()
+  await today.send(util.local_image(sentence_cache.path))
+  await today.finish(util.local_record(sentence_cache.audio_path))
 
 
 history = (
@@ -200,6 +277,4 @@ history = (
 
 @history.handle()
 async def handle_history() -> None:
-  today = date.today()
-  header = f"今天是{today.year}年{today.month}月{today.day}日，历史上的今天是：\n"
-  await history.finish(header + await fetch_history())
+  await history.send(await HistoryModule().format())

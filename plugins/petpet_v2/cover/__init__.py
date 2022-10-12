@@ -13,8 +13,7 @@ from util import command, util
 from ..util import get_image_and_user
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
-# pylama:skip=1
-# RemapTransform((450, 450), ((15, 11), (448, 0), (445, 452), (0, 461)))
+# RemapTransform((450, 450), ((15, 11), (448, 0), (445, 452), (0, 461)))  # noqa
 OLD_SIZE = 450, 450
 NEW_SIZE = 448, 461
 TRANSFORM = (

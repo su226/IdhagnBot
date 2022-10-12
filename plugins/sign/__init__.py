@@ -1,7 +1,7 @@
 import asyncio
 import random
 from argparse import Namespace
-from datetime import date, datetime
+from datetime import datetime
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
 from nonebot.exception import ParserExit
@@ -10,11 +10,10 @@ from nonebot.rule import ArgumentParser
 
 from util import account_aliases, command, context, currency, help, util
 
-from . import leaderboard
+from . import leaderboard  # noqa
 from .config import CONFIG, STATE, Config, FormatData
 from .formatters.legacy import format as formatter_legacy
 from .formatters.ring import format as formatter_ring
-
 
 FORMATTERS = {
   "legacy": formatter_legacy,
@@ -35,6 +34,7 @@ def onload(_: Config | None, cur: Config):
   item.raw_usage = f'''\
 每天签到可获得{cur.min_coin}至{cur.max_coin}金币
 连续签到或前{len(cur.first_award)}名可获得更多金币'''
+CONFIG.load()
 
 
 @sign.handle()

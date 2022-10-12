@@ -1,11 +1,13 @@
 import asyncio
 import itertools
+import os
 import random
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from io import BytesIO
 from typing import (
-  TYPE_CHECKING, Any, AsyncIterator, Generator, Iterable, Literal, Sequence, TypeVar)
+  TYPE_CHECKING, Any, AsyncIterator, Generator, Iterable, Literal, Sequence, TypeVar
+)
 
 import aiohttp
 import cairo
@@ -19,11 +21,12 @@ from util.config_v2 import SharedConfig
 if TYPE_CHECKING:
   from pyppeteer.browser import Browser
 
+
 __all__ = [
   "AggregateError", "browser", "cairo_to_pil", "circle", "Config", "CONFIG", "format_time",
-  "frames", "get_avatar", "groupbyn", "http", "paste_alpha", "prompt", "resample", "scale_resample",
-  "special_font", "weighted_choice", "center", "resize_width", "resize_height", "forward_node",
-  "send_forward_msg"]
+  "frames", "get_avatar", "groupbyn", "http", "paste_alpha", "prompt", "resample",
+  "scale_resample", "special_font", "weighted_choice", "center", "resize_width", "resize_height",
+  "forward_node", "send_forward_msg"]
 
 
 T = TypeVar("T")
@@ -56,12 +59,14 @@ class Config(BaseModel):
   chromium: str = ""
   resample: Resample = "bicubic"
   scale_resample: ScaleResample = "bicubic"
+  backend_local: bool = True
 
 
-CONFIG = SharedConfig("util", Config)
+CONFIG = SharedConfig("util", Config, "eager")
 resample = Image.Resampling.BICUBIC
 scale_resample = Image.Resampling.BICUBIC
 http_session: aiohttp.ClientSession | None = None
+driver = nonebot.get_driver()
 
 
 @CONFIG.onload()
@@ -69,6 +74,7 @@ def config_onload(old: Config | None, cur: Config) -> None:
   global resample, scale_resample
   resample = Image.Resampling[cur.resample.upper()]
   scale_resample = Image.Resampling[cur.scale_resample.upper()]
+CONFIG.load()
 
 
 def special_font(name: str, fallback: str) -> str:
@@ -92,6 +98,12 @@ def http() -> aiohttp.ClientSession:
   if http_session is None:
     http_session = aiohttp.ClientSession()
   return http_session
+
+
+@driver.on_shutdown
+async def on_shutdown():
+  if http_session:
+    await http_session.close()
 
 
 def weighted_choice(choices: list[T | tuple[T, float]]) -> T:
@@ -128,9 +140,8 @@ def format_time(seconds: float | timedelta) -> str:
 
 def prompt(event: MessageEvent) -> asyncio.Future[Message]:
   async def check_prompt(event2: MessageEvent):
-    return (
-      event.user_id == event2.user_id
-      and getattr(event, "group_id", -1) == getattr(event2, "group_id", -1))
+    return event.user_id == event2.user_id \
+      and getattr(event, "group_id", -1) == getattr(event2, "group_id", -1)
 
   async def handle_prompt(event2: MessageEvent):
     future.set_result(event2.get_message())
@@ -225,8 +236,7 @@ async def get_avatar(
     avatar = Image.new("RGB", raw_avatar.size, bgcolor)
     avatar.paste(raw_avatar, mask=raw_avatar.getchannel("A"))  # 也许可能有LA的头像？
     return avatar
-  else:
-    return raw_avatar.convert("RGB")
+  return raw_avatar.convert("RGB")
 
 
 def frames(im: Image.Image) -> Generator[Image.Image, None, None]:
@@ -249,3 +259,19 @@ def paste_alpha(
   else:
     paste_mask = mask
   dst.paste(src, box, paste_mask)
+
+
+def local_image(path: str) -> MessageSegment:
+  config = CONFIG()
+  if config.backend_local:
+    return MessageSegment.image("file://" + os.path.abspath(path))
+  with open(path, "rb") as f:
+    return MessageSegment.image(f.read())
+
+
+def local_record(path: str) -> MessageSegment:
+  config = CONFIG()
+  if config.backend_local:
+    return MessageSegment.record("file://" + os.path.abspath(path))
+  with open(path, "rb") as f:
+    return MessageSegment.record(f.read())

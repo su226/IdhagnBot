@@ -1,5 +1,5 @@
-import random
 import hashlib
+import random
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent
 from nonebot.exception import ActionFailed

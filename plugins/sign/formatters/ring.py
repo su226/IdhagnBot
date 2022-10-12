@@ -5,7 +5,7 @@ from io import BytesIO
 
 import cairo
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
-from PIL import Image, ImageEnhance, ImageFilter
+from PIL import ImageEnhance, ImageFilter
 
 from util import currency, text, util
 
@@ -67,7 +67,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
     cr.set_source_rgba(0, 0, 0, 0.2)
     cr.fill()
     overlay = util.cairo_to_pil(surface)
-  im.paste(overlay, mask=overlay)
+  im.alpha_composite(overlay)
 
   avatar = avatar.resize((256, 256), util.scale_resample)
   util.circle(avatar)
@@ -80,7 +80,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
 
   y += text.paste(
     im, (center_x, y), info["card"] or info["nickname"], "sans bold", 28,
-    anchor="mt", box=content_w, mode=text.ELLIPSIZE_MIDDLE, color=(255, 255, 255)
+    anchor="mt", box=content_w, ellipsize=text.ELLIPSIZE_MIDDLE, color=(255, 255, 255)
   ).height
 
   rank = group_data.rank.index(format_data.uid) + 1

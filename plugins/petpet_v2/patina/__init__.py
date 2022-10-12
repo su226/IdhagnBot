@@ -9,7 +9,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
-from util import command, text, util, context
+from util import command, context, text, util
 
 from ..util import get_image_and_user, segment_animated_image
 

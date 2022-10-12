@@ -15,8 +15,7 @@ from pydantic import Field
 from util import command, context, text, util
 from util.config import BaseConfig, BaseState
 
-from .game import Config as GameConfig
-from .game import Game, GeneratedCharacter, Statistics
+from .game import Config as GameConfig, Game, GeneratedCharacter, Statistics
 from .game.config import StatRarityItem
 from .game.data import ACHIEVEMENT, CHARACTER, EVENT, TALENT
 from .game.struct.character import Character

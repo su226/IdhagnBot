@@ -11,7 +11,6 @@ from util import command, util
 
 from ..util import get_image_and_user, segment_animated_image
 
-
 plugin_dir = Path(__file__).resolve().parent
 
 
