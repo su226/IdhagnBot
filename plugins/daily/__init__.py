@@ -14,6 +14,7 @@ from util import command, config_v2, context, util
 
 from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
+from .modules.furbot import FurbotModule
 from .modules.history import HistoryModule
 from .modules.moyu import MoyuModule, moyu_cache
 from .modules.news import NewsModule, news_cache
@@ -86,6 +87,13 @@ class RankModuleConfig(BaseModuleConfig):
     return RankModule(group_id, self.limit)
 
 
+class FurbotModuleConfig(BaseModuleConfig):
+  type: Literal["furbot"]
+
+  def create_module(self, group_id: int) -> Module:
+    return FurbotModule()
+
+
 AnyModuleConfig = \
   StringModuleConfig | \
   CountdownModuleConfig | \
@@ -93,7 +101,8 @@ AnyModuleConfig = \
   MoyuModuleConfig | \
   HistoryModuleConfig | \
   SentenceModuleConfig | \
-  RankModuleConfig
+  RankModuleConfig | \
+  FurbotModuleConfig
 
 
 class GroupConfig(BaseModel):
