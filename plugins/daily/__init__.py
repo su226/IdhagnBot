@@ -126,7 +126,9 @@ def onload(prev: Config | None, curr: Config):
   for group, group_config in curr.groups.items():
     time = group_config.time or curr.default_time
     job = scheduler.add_job(
-      check_daily, "cron", (group,), hour=time.hour, minute=time.minute, second=time.second)
+      check_daily, "cron", (group,), hour=time.hour, minute=time.minute, second=time.second
+    )
+    jobs.append(job)
     if datetime.now().time() > time:
       asyncio.create_task(check_daily(group))
 
