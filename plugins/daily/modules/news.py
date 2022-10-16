@@ -4,7 +4,7 @@ from util import util
 
 from . import DailyCache, Module
 
-NEWS_API = "https://api.qqsuu.cn/api/60s"
+NEWS_API = "https://api.qqsuu.cn/api/dm-60s"
 
 
 class NewsCache(DailyCache):
