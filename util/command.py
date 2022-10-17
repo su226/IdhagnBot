@@ -6,7 +6,7 @@ from nonebot.adapters.onebot.v11 import Message
 from nonebot.consts import SHELL_ARGS, SHELL_ARGV
 from nonebot.exception import ParserExit
 from nonebot.matcher import Matcher
-from nonebot.params import CommandArg
+from nonebot.params import CommandArg, ShellCommandArgs
 from nonebot.rule import ArgumentParser, Rule
 from nonebot.typing import T_RuleChecker, T_State
 from typing_extensions import Self
@@ -50,13 +50,19 @@ class ShellCommandRule:
     return args
 
 
+def add_reject_handler(matcher: type[Matcher]) -> None:
+  async def handler(args: ParserExit = ShellCommandArgs()) -> None:
+    await matcher.finish(args.message)
+  matcher.handle()(handler)
+
+
 class CommandBuilder:
   def __init__(self, node: str, name: str, *names: str) -> None:
     self.node = node
     self.names = [name, *names]
     self.rule_ = Rule()
     self.level_ = permission.Level.MEMBER
-    self.parser_ = None
+    self.auto_reject_ = False
 
     self.brief_ = ""
     self.usage_ = ""
@@ -104,6 +110,10 @@ class CommandBuilder:
       self.usage_ = parser.format_help()
     return self
 
+  def auto_reject(self) -> Self:
+    self.auto_reject_ = True
+    return self
+
   def private(self, private: bool) -> Self:
     self.help_data.private = private
     return self
@@ -116,6 +126,10 @@ class CommandBuilder:
     cat = help.CategoryItem.find(self.category_, True)
     cat.add(help.CommandItem(self.names, self.brief_, self.usage_, self.help_data))
     permission_ = context.build_permission(tuple(self.node.split(".")), self.level_)
-    return nonebot.on_command(
+    matcher = nonebot.on_command(
       self.names[0], self.rule_, set(self.names[1:]), permission=permission_,
-      _depth=1)  # type: ignore
+      _depth=1  # type: ignore
+    )
+    if self.auto_reject_:
+      add_reject_handler(matcher)
+    return matcher

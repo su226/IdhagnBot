@@ -6,14 +6,14 @@ from contextlib import asynccontextmanager
 from datetime import timedelta
 from io import BytesIO
 from typing import (
-  TYPE_CHECKING, Any, AsyncIterator, Generator, Iterable, Literal, Sequence, TypeVar
+  TYPE_CHECKING, Any, AsyncIterator, Generator, Iterable, Literal, Sequence, TypeVar, overload
 )
 
 import aiohttp
 import cairo
 import nonebot
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent, MessageSegment
-from PIL import Image, ImageChops, ImageDraw, ImageOps
+from PIL import Image, ImageChops, ImageDraw, ImageOps, ImagePalette
 from pydantic import BaseModel, Field
 
 from util.config_v2 import SharedConfig
@@ -23,16 +23,19 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-  "AggregateError", "browser", "cairo_to_pil", "circle", "Config", "CONFIG", "format_time",
-  "frames", "get_avatar", "groupbyn", "http", "paste_alpha", "prompt", "resample",
-  "scale_resample", "special_font", "weighted_choice", "center", "resize_width", "resize_height",
-  "forward_node", "send_forward_msg"]
+  "AggregateError", "Anchor", "AnyMessage", "CONFIG", "Config", "Resample", "ScaleResample",
+  "browser", "cairo_to_pil", "center", "circle", "contain_down", "format_time", "forward_node",
+  "frames", "get_avatar", "groupbyn", "http", "local_image", "local_record", "paste", "pil_image",
+  "prompt", "resample", "resize_height", "resize_width", "sample_frames", "save_gif",
+  "scale_resample", "send_forward_msg", "special_font", "weighted_choice"
+]
 
 
 T = TypeVar("T")
 Resample = Literal["nearest", "bilinear", "bicubic"]
 ScaleResample = Resample | Literal["box", "hamming", "lanczos"]
 AnyMessage = str | Message | MessageSegment
+Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
 
 
 class AggregateError(Exception, Sequence[str]):
@@ -184,6 +187,12 @@ def center(im: Image.Image, width: int, height: int) -> Image.Image:
   return padded_im
 
 
+def contain_down(im: Image.Image, width: int, height: int) -> Image.Image:
+  if im.width > width or im.height > height:
+    return ImageOps.contain(im, (width, height), scale_resample)
+  return im
+
+
 def resize_width(im: Image.Image, width: int) -> Image.Image:
   return ImageOps.contain(im, (width, 99999), scale_resample)
 
@@ -248,9 +257,31 @@ def frames(im: Image.Image) -> Generator[Image.Image, None, None]:
     yield im
 
 
-def paste_alpha(
-  dst: Image.Image, src: Image.Image, box: tuple[int, int], mask: Image.Image | None = None
+def sample_frames(im: Image.Image, frametime: int) -> Generator[Image.Image, None, None]:
+  if not getattr(im, "is_animated", False):
+    while True:
+      yield im
+  main_pos = 0
+  sample_pos = 0
+  i = 0
+  while True:
+    duration = im.info["duration"]
+    while sample_pos <= main_pos < sample_pos + duration:
+      yield im
+      main_pos += frametime
+    sample_pos += duration
+    i += 1
+    if i == im.n_frames:
+      i = 0
+    im.seek(i)
+
+
+def paste(
+  dst: Image.Image, src: Image.Image, xy: tuple[int, int] = (0, 0),
+  mask: Image.Image | None = None, anchor: Anchor = "lt"
 ) -> None:
+  if src.mode == "P" and "transparency" in src.info:
+    src = src.convert("RGBA")
   if "A" in src.getbands():
     if mask:
       paste_mask = ImageChops.multiply(mask, src.getchannel("A"))
@@ -258,7 +289,17 @@ def paste_alpha(
       paste_mask = src.getchannel("A")
   else:
     paste_mask = mask
-  dst.paste(src, box, paste_mask)
+  x, y = xy
+  xa, ya = anchor
+  if xa == "m":
+    x -= src.width // 2
+  elif xa == "r":
+    x -= src.width
+  if ya == "m":
+    y -= src.height // 2
+  elif ya == "b":
+    y -= src.height
+  dst.paste(src, (x, y), paste_mask)
 
 
 def local_image(path: str) -> MessageSegment:
@@ -275,3 +316,49 @@ def local_record(path: str) -> MessageSegment:
     return MessageSegment.record("file://" + os.path.abspath(path))
   with open(path, "rb") as f:
     return MessageSegment.record(f.read())
+
+
+def save_gif(f: Any, frames: list[Image.Image], **kw):
+  '''保存GIF动图，保留透明度'''
+  p_frames = [frame.convert("P") for frame in frames]
+  for frame in p_frames:
+    palette: ImagePalette.ImagePalette = frame.palette
+    if palette.mode != "RGBA":
+      continue
+    data = palette.tobytes()
+    for j in range(256):
+      if data[j * 4 + 3] == 0:
+        frame.info["transparency"] = j
+        break
+  p_frames[0].save(f, "GIF", append_images=p_frames[1:], save_all=True, loop=0, disposal=2, **kw)
+
+
+@overload
+def pil_image(
+  im: Image.Image, *, fmt: str = ..., **kw
+) -> MessageSegment: ...
+@overload
+def pil_image(
+  im: list[Image.Image], duration: list[int] | int | Image.Image, *, afmt: str = ..., **kw
+) -> MessageSegment: ...
+def pil_image(
+  im: Image.Image | list[Image.Image], duration: list[int] | int | Image.Image = 0, *,
+  fmt: str = "png", afmt: str = "gif", **kw
+) -> MessageSegment:
+  if not isinstance(im, list):
+    im = [im]
+  f = BytesIO()
+  if len(im) > 1:
+    if isinstance(duration, Image.Image):
+      d_im = duration
+      duration = []
+      for i in range(d_im.n_frames):
+        d_im.seek(i)
+        duration.append(d_im.info["duration"])
+    if afmt.lower() == "gif":
+      save_gif(f, im, duration=duration, **kw)
+    else:
+      im[0].save(f, afmt, append_images=im[1:], save_all=True, duration=duration, **kw)
+  else:
+    im[0].save(f, fmt, **kw)
+  return MessageSegment.image(f)

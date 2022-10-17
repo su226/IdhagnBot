@@ -2,11 +2,10 @@ import asyncio
 import math
 import re
 from io import BytesIO
-from typing import Any, Generator
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
-from PIL import Image, ImagePalette
+from PIL import Image
 
 from util import account_aliases, util
 
@@ -110,36 +109,8 @@ async def get_image_and_user(
   return await get_avatar(uid, **kw), uid
 
 
-def save_transparent_gif(f: Any, frames: list[Image.Image], **kw):
-  '''保存GIF动图，保留透明度'''
-  p_frames = [frame.convert("P") for frame in frames]
-  for frame in p_frames:
-    palette: ImagePalette.ImagePalette = frame.palette
-    if palette.mode != "RGBA":
-      continue
-    data = palette.tobytes()
-    for j in range(256):
-      if data[j * 4 + 3] == 0:
-        frame.info["transparency"] = j
-        break
-  p_frames[0].save(f, "GIF", append_images=p_frames[1:], save_all=True, loop=0, disposal=2, **kw)
-
-
 def segment_animated_image(
   format: str, frames: list[Image.Image], duration: int | list[int]
 ) -> MessageSegment:
-  f = BytesIO()
-  if format.lower() == "gif":
-    save_transparent_gif(f, frames, duration=duration)
-  else:
-    frames[0].save(f, format, append_images=frames[1:], save_all=True, duration=duration)
-  return MessageSegment.image(f)
-
-
-def frames(im: Image.Image) -> Generator[Image.Image, None, None]:
-  if not getattr(im, "is_animated", False):
-    yield im
-    return
-  for i in range(im.n_frames):
-    im.seek(i)
-    yield im
+  # TODO: 删掉这个函数
+  return util.pil_image(frames, duration, afmt=format)

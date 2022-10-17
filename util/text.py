@@ -15,7 +15,6 @@ from gi.repository import GLib, Pango, PangoCairo  # type: ignore
 Layout: TypeAlias = Pango.Layout
 Wrap = Literal[0, 1, 2]
 Ellipsize = Literal[0, 1, 2, 3]
-Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
 Align = Literal["l", "m", "r"]
 
 WRAP_WORD = 0
@@ -77,8 +76,6 @@ def render(
   content: Layout, *, color: RGB | int = ..., stroke: float = ...,
   stroke_color: RGB | int = ...
 ) -> Image.Image: ...
-
-
 @overload
 def render(
   content: str, font: str, size: float, *, color: RGB | int = ..., stroke: float = ...,
@@ -86,8 +83,6 @@ def render(
   ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
   lines: int = ...
 ) -> Image.Image: ...
-
-
 def render(
   content: str | Layout, *args, color: RGB | int = (0, 0, 0), stroke: float = 0,
   stroke_color: RGB | int = (255, 255, 255), **kw
@@ -120,31 +115,20 @@ def render(
 
 @overload
 def paste(
-  im: Image.Image, xy: tuple[int, int], content: Layout, *, anchor: Anchor = ...,
+  im: Image.Image, xy: tuple[int, int], content: Layout, *, anchor: util.Anchor = ...,
   color: RGB | int = ..., stroke: float = ..., stroke_color: RGB | int = ...
 ) -> Image.Image: ...
-
-
 @overload
 def paste(
   im: Image.Image, xy: tuple[int, int], content: str, font: str, size: float, *,
-  anchor: Anchor = ..., color: RGB | int = ..., stroke: float = ..., stroke_color: RGB | int = ...,
-  box: tuple[int, int] | int | None = ..., wrap: Wrap = ..., ellipsize: Ellipsize = ...,
-  markup: bool = ..., align: Align = ..., spacing: int = ..., lines: int = ...
+  anchor: util.Anchor = ..., color: RGB | int = ..., stroke: float = ...,
+  stroke_color: RGB | int = ..., box: tuple[int, int] | int | None = ..., wrap: Wrap = ...,
+  ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
+  lines: int = ...
 ) -> Image.Image: ...
-
-
-def paste(im: Image.Image, xy: tuple[int, int], *args, anchor: Anchor = "lt", **kw) -> Image.Image:
+def paste(
+  im: Image.Image, xy: tuple[int, int], *args, anchor: util.Anchor = "lt", **kw
+) -> Image.Image:
   text = render(*args, **kw)
-  x, y = xy
-  xa, ya = anchor
-  if xa == "m":
-    x -= text.width // 2
-  elif xa == "r":
-    x -= text.width
-  if ya == "m":
-    y -= text.height // 2
-  elif ya == "b":
-    y -= text.height
-  im.paste(text, (x, y), text)
+  util.paste(im, text, xy, anchor=anchor)
   return text
