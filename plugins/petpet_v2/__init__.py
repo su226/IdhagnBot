@@ -10,8 +10,8 @@ from . import (  # noqa
   kidnap, kiss, knock, laptop, loading, love, lying, marry, message, miragetank, mirror, need,
   not_responding, ori, pad, paint, painter, pat, perfect, petpet, play, police, police2, pound,
   protogen, prpr, punch, rip, rip2, roll, rub, safe_sense, sign, slap, spin, suck, support, teach,
-  think, throw, throw2, together, tomb, trash, tv, wallpaper, wantwant, watermelon, why_at_me,
-  wife, windows, work, worship, zoom
+  think, throw, throw2, together, tomb, trash, tv, virgin, wallpaper, wantwant, watermelon,
+  why_at_me, wife, windows, work, worship, zoom
 )
 
 for file in ("fisheye", "louvre", "patina", "shock"):
@@ -120,6 +120,7 @@ category.add(help.StringItem("标有[动]的可以传入动图"))
 # tomb           自制
 # trash          nonebot-plugin-petpet 垃圾/垃圾桶
 # tv             自制
+# virgin         自制
 # wallpaper      nonebot-plugin-petpet 墙纸
 # wantwant       自制
 # watermelon     自制
