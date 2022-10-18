@@ -4,15 +4,11 @@ import nonebot
 from nonebot.adapters.onebot.v11 import MessageEvent
 from nonebot.rule import Rule
 
-from util import context
+from util import context, util
 
 last_message: dict[int, str] = {}
 repeated: set[int] = set()
 ORIGINAL_EMOTE_RE = re.compile(r"^&#91;[A-Za-z0-9\u4e00-\u9fa5]+&#93;$")
-
-
-def is_command(event: MessageEvent) -> bool:
-  return event.message.extract_plain_text().lstrip().startswith("/")
 
 
 def is_original_emote(event: MessageEvent) -> bool:
@@ -24,7 +20,9 @@ async def can_repeat(event: MessageEvent) -> bool:
   ctx = context.get_event_context(event)
   result = False
   if event.raw_message == last_message.get(ctx, None):
-    result = ctx not in repeated and not (is_command(event) or is_original_emote(event))
+    result = ctx not in repeated and not (
+      util.is_command(event.message) or is_original_emote(event)
+    )
   elif ctx in repeated:
     repeated.remove(ctx)
   last_message[ctx] = event.raw_message

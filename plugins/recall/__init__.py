@@ -36,8 +36,7 @@ manual_recall = nonebot.on_message(manual_recall_rule)
 
 
 @manual_recall.handle()
-async def handle_manual_recall(bot: Bot, event: MessageEvent, state: T_State) -> None:
-  state["_prefix"]["special"] = True
+async def handle_manual_recall(bot: Bot, event: MessageEvent) -> None:
   try:
     await bot.delete_msg(message_id=cast(Reply, event.reply).message_id)
   except ActionFailed:

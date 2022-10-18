@@ -12,7 +12,10 @@ from typing import (
 import aiohttp
 import cairo
 import nonebot
+from loguru import logger
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent, MessageSegment
+from nonebot.params import Depends
+from nonebot.typing import T_State
 from PIL import Image, ImageChops, ImageDraw, ImageOps, ImagePalette
 from pydantic import BaseModel, Field
 
@@ -23,11 +26,12 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-  "AggregateError", "Anchor", "AnyMessage", "CONFIG", "Config", "Resample", "ScaleResample",
-  "browser", "cairo_to_pil", "center", "circle", "contain_down", "format_time", "forward_node",
-  "frames", "get_avatar", "groupbyn", "http", "local_image", "local_record", "paste", "pil_image",
-  "prompt", "resample", "resize_height", "resize_width", "sample_frames", "save_gif",
-  "scale_resample", "send_forward_msg", "special_font", "weighted_choice"
+  "AggregateError", "Anchor", "AnyMessage", "CONFIG", "Config", "NotCommand", "Resample",
+  "ScaleResample", "browser", "cairo_to_pil", "center", "circle", "command_start", "contain_down",
+  "format_time", "forward_node", "frames", "get_avatar", "groupbyn", "http", "is_command",
+  "local_image", "local_record", "paste", "pil_image", "prompt", "resample", "resize_height",
+  "resize_width", "sample_frames", "save_gif", "scale_resample", "send_forward_msg",
+  "special_font", "weighted_choice"
 ]
 
 
@@ -280,8 +284,8 @@ def paste(
   dst: Image.Image, src: Image.Image, xy: tuple[int, int] = (0, 0),
   mask: Image.Image | None = None, anchor: Anchor = "lt"
 ) -> None:
-  if src.mode == "P" and "transparency" in src.info:
-    src = src.convert("RGBA")
+  if src.mode == "P" and "A" in src.palette.mode:
+    src = src.convert(src.palette.mode)  # RGBA (也可能是LA？)
   if "A" in src.getbands():
     if mask:
       paste_mask = ImageChops.multiply(mask, src.getchannel("A"))
@@ -362,3 +366,28 @@ def pil_image(
   else:
     im[0].save(f, fmt, **kw)
   return MessageSegment.image(f)
+
+
+def NotCommand() -> Any:
+  def not_command(state: T_State) -> None:
+    if "run" in state["_prefix"]:
+      logger.warning("util.NotCommand 应该被用于 Rule 而非 Handler 的参数中！")
+    state["_as_command"] = False
+  return Depends(not_command)
+
+
+def command_start() -> str:
+  for i in driver.config.command_start:
+    return i
+  return ""
+
+
+def is_command(message: Message) -> bool:
+  seg = message[0]
+  if not seg.is_text():
+    return False
+  seg = str(seg).lstrip()
+  for i in driver.config.command_start:
+    if i and seg.startswith(i):
+      return True
+  return False

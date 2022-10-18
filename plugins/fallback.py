@@ -8,7 +8,7 @@ from nonebot.params import CommandArg
 from nonebot.typing import T_State
 from pydantic import Field
 
-from util import command, context, permission
+from util import command, context, permission, util
 from util.config import BaseState
 
 
@@ -28,7 +28,8 @@ driver = nonebot.get_driver()
 
 @run_preprocessor
 async def pre_run(state: T_State):
-  state["_prefix"]["run"] = True
+  if state.get("_as_command", True):
+    state["_prefix"]["run"] = True
 
 
 def convert_superusers(superusers: Iterable[str]) -> Generator[int, None, None]:
@@ -69,12 +70,13 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception):
 async def post_event(bot: Bot, event: Event, state: T_State) -> None:
   if not isinstance(event, MessageEvent):
     return
-  prefix = state["_prefix"]
-  if "special" not in prefix and (prefix["command"] is None or "run" not in prefix):
-    if event.message.extract_plain_text().lstrip().startswith("/"):
-      await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
-    elif event.is_tome():
-      await bot.send(event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）")
+  group_id = getattr(event, "group_id", None)
+  if group_id in STATE.suppress or "run" in state["_prefix"]:
+    return
+  if util.is_command(event.message):
+    await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
+  elif event.is_tome():
+    await bot.send(event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）")
 
 SUPPRESS_USAGE = '''\
 /suppress - 查看是否已禁用本群错误消息

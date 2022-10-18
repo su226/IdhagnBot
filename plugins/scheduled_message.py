@@ -14,7 +14,7 @@ from nonebot.message import handle_event
 from nonebot.params import CommandArg
 from pydantic import Field
 
-from util import command, context
+from util import command, context, util
 from util.config import BaseModel, BaseState
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -28,8 +28,9 @@ class Scheduled(BaseModel):
 
   async def send(self, group: int, id: str):
     bot = nonebot.get_bot()
-    message = "/" + self.message
-    msg = Message(message)
+    msg = Message(self.message)
+    if not util.is_command(msg):
+      msg[0].data["text"] = util.command_start() + msg[0].data["text"]
     await handle_event(bot, GroupMessageEvent(
       time=int(time.time()),
       self_id=int(bot.self_id),
@@ -40,7 +41,7 @@ class Scheduled(BaseModel):
       message_id=0,
       message=msg,
       original_message=deepcopy(msg),
-      raw_message=message,
+      raw_message=str(msg),
       font=0,
       sender=Sender(),
       group_id=group))

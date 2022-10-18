@@ -10,7 +10,7 @@ from nonebot.exception import ActionFailed
 from nonebot.message import handle_event
 from nonebot.params import CommandArg
 
-from util import command, config_v2, context
+from util import command, config_v2, context, util
 
 
 def get_message(msg: Message) -> str:
@@ -151,8 +151,8 @@ execute = (
 
 @execute.handle()
 async def handle_execute(bot: Bot, event: MessageEvent, msg: Message = CommandArg()):
-  if not (text := msg[0].data["text"]).startswith("/"):
-    msg[0].data["text"] = "/" + text
+  if not util.is_command(msg):
+    msg[0].data["text"] = util.command_start() + msg[0].data["text"]
   if await redirect(bot, event, msg):
     await execute.send(
       f"已在 {context.GROUP_IDS[context.get_event_context(event)].name} 中执行命令")

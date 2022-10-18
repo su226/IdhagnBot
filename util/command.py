@@ -11,7 +11,9 @@ from nonebot.rule import ArgumentParser, Rule
 from nonebot.typing import T_RuleChecker, T_State
 from typing_extensions import Self
 
-from . import context, help, permission
+from . import context, help, permission, util
+
+driver = nonebot.get_driver()
 
 
 class ShellCommandRule:
@@ -104,7 +106,7 @@ class CommandBuilder:
 
   def shell(self, parser: ArgumentParser, set_prog: bool = True) -> Self:
     if set_prog:
-      parser.prog = "/" + self.names[0]
+      parser.prog = util.command_start() + self.names[0]
     self.rule(ShellCommandRule(parser))
     if not self.usage_:
       self.usage_ = parser.format_help()
