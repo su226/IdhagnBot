@@ -22,7 +22,8 @@ class SQLModel(BaseSQLModel):
 
 
 class Received(SQLModel, table=True):
-  message_id: int = SQLField(primary_key=True)
+  id: int | None = SQLField(primary_key=True, default=None)
+  message_id: int  # 我是做梦也没想到 go-cqhttp 的消息 ID 居然会重复（）
   time: datetime
   user_id: int
   group_id: int | None
@@ -30,7 +31,8 @@ class Received(SQLModel, table=True):
 
 
 class Sent(SQLModel, table=True):
-  message_id: int = SQLField(primary_key=True)
+  id: int | None = SQLField(primary_key=True, default=None)
+  message_id: int
   time: datetime
   is_group: bool
   target_id: int
