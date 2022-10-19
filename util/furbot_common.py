@@ -1,7 +1,7 @@
 import hashlib
 import time
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Literal, Protocol
 
 import nonebot
 from aiohttp.client import _RequestContextManager
@@ -18,6 +18,7 @@ class Config(BaseModel):
   host: str = "https://api.tail.icu"
   keyword: str = "来只毛"
   universal_keyword: str = "来只"
+  universal_prefer: Literal["furbot", "foxtail", ""] = ""
 CONFIG = config_v2.SharedConfig("furbot", Config)
 
 
@@ -155,7 +156,7 @@ class Source(Protocol):
 
 
 universal_keyword_registered = False
-universal_sources: list[Source] = []
+universal_sources: dict[str, Source] = {}
 
 
 async def check_universal_keyword(msg: Message = EventMessage()) -> bool:
@@ -169,12 +170,15 @@ async def check_universal_keyword(msg: Message = EventMessage()) -> bool:
 async def handle_universal_keyword(bot: Bot, event: Event, msg: Message = EventMessage()) -> None:
   config = CONFIG()
   args = msg.extract_plain_text().lstrip().removeprefix(config.universal_keyword).strip()
-  sources = [x for x in universal_sources if x.available()]
-  if len(sources) > 1:
-    message = "\n".join(f"如需使用{x.name()}，请发送“{x.keyword()} {args}”" for x in sources)
-    await bot.send(event, message)
-    return
-  await sources[0].handle(bot, event, args)
+  source = universal_sources.get(config.universal_prefer, None)
+  if source is None or not source.available():
+    sources = [x for x in universal_sources.values() if x.available()]
+    if len(sources) > 1:
+      message = "\n".join(f"如需使用{x.name()}，请发送“{x.keyword()} {args}”" for x in sources)
+      await bot.send(event, message)
+      return
+    source = sources[0]
+  await source.handle(bot, event, args)
 
 
 def register_universal_keyword() -> None:

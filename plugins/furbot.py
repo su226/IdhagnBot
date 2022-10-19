@@ -81,7 +81,7 @@ class Source:
       return
     header = f"{HEADER}\nID: {pic.cid or pic.id}\n名字: {pic.name}"
     await bot.send(event, header + MessageSegment.image(pic.url))
-furbot_common.universal_sources.append(Source)
+furbot_common.universal_sources["furbot"] = Source
 
 
 def help_condition(_) -> bool:
@@ -174,6 +174,8 @@ async def handle_daily(bot: Bot, event: Event, message: Message = CommandArg()):
     await query.finish(IDHAGN_EASTER_EGG)
   if args == "绒狸":
     await query.finish(EASTER_EGG_1)
+  if not args:
+    coro = furbot_common.get_daily_random()
   else:
     try:
       id = int(args)
