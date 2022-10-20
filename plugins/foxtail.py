@@ -1,6 +1,7 @@
 import base64
 import re
 import time
+from collections import defaultdict
 from typing import Literal
 from urllib.parse import quote as urlencode
 
@@ -33,6 +34,8 @@ def onload(prev: Config | None, curr: Config):
 RANDOM_API = "https://cloud.foxtail.cn/api/function/random?name={}&type={}"
 INFO_API = "https://cloud.foxtail.cn/api/function/pullpic?picture={}&model={}"
 DOWNLOAD_API = "https://cloud.foxtail.cn/api/function/pictures?picture={}&model={}"
+SEARCH_API = "https://cloud.foxtail.cn/api/function/pulllist?name={}"
+SUBMIT_GUI_URL = "https://idhagnbot.su226.tk/docs/misc/foxtail-submit"
 UID_RE = re.compile(r"([A-Za-z0-9]{5}-){3}[A-Za-z0-9]{5}")
 STR_TO_TYPE = {
   "设定": 0,
@@ -51,7 +54,7 @@ HEADER = "======== 兽云祭 ========"
 USAGE_TYPES = "类型包括：设定(0)、毛图(1)、插画(2)"
 USAGE_BASE = f'''\
 /兽云祭 [名字] [类型] - 发送随机兽图，名字和类型都可省略
-/兽云祭 <图片SID或UID> - 发送指定兽图
+/兽云祭 <图片SID或UID> - 发送指定兽图（或查询审核状态）
 内容来自兽云祭 API，官网：furbot.cn
 {USAGE_TYPES}'''
 USAGE_KEYWORD = "也可以使用关键词“{}”触发"
@@ -60,9 +63,15 @@ USAGE = USAGE_BASE
 
 async def send_pic(bot: Bot, event: Event, data: dict) -> None:
   http = util.http()
-  async with http.get(DOWNLOAD_API.format(data["picture"], 0)) as response:
-    image_data = await response.json()
-    image_url = image_data["url"]
+  status = int(data["examine"])
+  if status == 1:
+    async with http.get(DOWNLOAD_API.format(data["picture"], 0)) as response:
+      image_data = await response.json()
+      image_segment = MessageSegment.image(image_data["url"])
+  elif status == 2:
+    image_segment = MessageSegment.text("图片未过审")
+  else:
+    image_segment = MessageSegment.text("图片正在审核")
   stime = time.gmtime(int(data["timestamp"]))
   upload_time = time.strftime("%Y-%m-%d %H:%M:%S", stime)
   if (content := data["suggest"]):
@@ -81,7 +90,7 @@ UID: {data["picture"]}
 点赞: {data["thumbs"]}
 收藏: {data["Collection"]}
 '''
-  await bot.send(event, header + MessageSegment.image(image_url))
+  await bot.send(event, header + image_segment)
 
 
 class Source:
@@ -183,6 +192,33 @@ async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()
   await Source.handle(bot, event, args.strip())
 
 
+SEARCH_USAGE = "/兽云祭搜索 <名字> - 搜索兽图"
+search = command.CommandBuilder("foxtail.search", "兽云祭搜索") \
+  .category("foxtail") \
+  .brief("搜索兽图") \
+  .usage(SEARCH_USAGE) \
+  .build()
+@search.handle()
+async def handle_search(message: Message = CommandArg()) -> None:
+  name = message.extract_plain_text().rstrip()
+  if not name:
+    await search.finish(SEARCH_USAGE)
+  http = util.http()
+  async with await http.get(SEARCH_API.format(name)) as response:
+    data = await response.json()
+  result: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+  for i in data["open"]:
+    result[i["name"]][i["type"]].append(i["id"])
+  segments: list[str] = []
+  for name, pics in result.items():
+    lines: list[str] = []
+    lines.append(name)
+    for type, ids in pics.items():
+      lines.append(TYPE_TO_STR[int(type)] + "：" + "、".join(ids))
+    segments.append("\n".join(lines))
+  await search.finish(HEADER + "\n" + "\n----------------\n".join(segments))
+
+
 class SubmitData(BaseModel):
   name: str
   type: Literal[0, 1, 2]
@@ -190,24 +226,23 @@ class SubmitData(BaseModel):
   note: str
 
 
-SUBMIT_URL = "https://idhagnbot.su226.tk/docs/misc/foxtail-submit"
 submit = command.CommandBuilder("foxtail.submit", "兽云祭投稿") \
   .category("foxtail") \
   .brief("投稿兽图") \
   .usage(f'''\
 /兽云祭投稿 <投稿数据>
-投稿数据可在这里生成：{SUBMIT_URL}''') \
+请在此处生成投稿命令：{SUBMIT_GUI_URL}''') \
   .build()
 @submit.handle()
 async def handle_submit(state: T_State, arg: Message = CommandArg()) -> None:
   text = arg.extract_plain_text().rstrip()
   if not text:
-    await submit.finish(f"请先在此处生成投稿数据：{SUBMIT_URL}")
+    await submit.finish(f"请在此处生成投稿命令：{SUBMIT_GUI_URL}")
   try:
     raw = base64.b64decode(text)
     data = SubmitData.parse_raw(raw)
   except ValueError:
-    await submit.finish(f"无效投稿数据，请重新生成：{SUBMIT_URL}")
+    await submit.finish(f"无效投稿数据，请重新生成：{SUBMIT_GUI_URL}")
   state["data"] = data
   await submit.send("请发送要投稿的图片，发送不是图片的内容将取消投稿")
 
@@ -259,7 +294,7 @@ info = command.CommandBuilder("foxtail.info", "兽云祭信息") \
   .brief("兽云祭服务器信息") \
   .build()
 @info.handle()
-async def handle_info(message: Message = CommandArg()) -> None:
+async def handle_info() -> None:
   http = util.http()
   async with http.get("https://cloud.foxtail.cn/api/information/feedback") as response:
     data = await response.json()
