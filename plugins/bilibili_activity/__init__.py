@@ -1,4 +1,5 @@
 import asyncio
+import time
 from collections import deque
 from datetime import datetime, timedelta
 from typing import AsyncGenerator, cast
@@ -27,10 +28,11 @@ def onload(prev: common.Config | None, curr: common.Config) -> None:
   queue = deque()
   for i in curr.users:
     queue.append(i)
-  date = datetime.now()
-  if not curr.immediate:
-    date += timedelta(seconds=curr.interval)
-  schedule(date)
+  if curr.grpc:
+    delta = timedelta(seconds=1)
+  else:
+    delta = timedelta(seconds=curr.interval)
+  schedule(datetime.now() + delta)
 
 
 def schedule(date: datetime) -> None:
@@ -50,8 +52,7 @@ def schedule(date: datetime) -> None:
 
 def schedule_next(event: JobEvent) -> None:
   if event.job_id == "bilibili_activity":
-    date = datetime.now() + timedelta(seconds=common.CONFIG().interval)
-    schedule(date)
+    schedule(datetime.now() + timedelta(seconds=common.CONFIG().interval))
 scheduler.add_listener(schedule_next, EVENT_JOB_EXECUTED | EVENT_JOB_MISSED)
 
 
@@ -69,17 +70,23 @@ def tp(x):  # TODO: 调试用，记得删掉这里（）
 
 
 async def new_activities(user: common.User) -> AsyncGenerator[bilibili_activity.Activity, None]:
-  config = common.CONFIG()
   offset = ""
+  use_grpc = common.CONFIG().grpc
   while offset is not None:
-    if config.grpc:
+    if use_grpc:
       raw, next_offset = await bilibili_activity.grpc_fetch(user.uid, offset)
       activities = [tp(x) for x in raw]
     else:
       raw, next_offset = await bilibili_activity.json_fetch(user.uid, offset)
       activities = [bilibili_activity.Activity.json_parse(x) for x in raw]
     for activity in activities:
-      if not user._offset or int(activity.id) > int(user._offset):
+      user._name = activity.name
+      is_new = (
+        not user._offset or int(activity.id) > int(user._offset)
+        if activity.time is None
+        else activity.time > user._time
+      )
+      if is_new:
         yield activity
       elif not activity.top:
         return
@@ -127,15 +134,10 @@ async def try_check(bot: Bot, user: common.User) -> int:
       ))
     await asyncio.gather(*[try_send(activity, message, target) for target in user.targets])
 
-  if user._offset == "-1":
+  if user._offset == "-1" and common.CONFIG().grpc:
     try:
-      config = common.CONFIG()
-      if config.grpc:
-        raw, _ = await bilibili_activity.grpc_fetch(user.uid)
-        activities = [bilibili_activity.Activity.grpc_parse(x) for x in raw]
-      else:
-        raw, _ = await bilibili_activity.json_fetch(user.uid)
-        activities = [bilibili_activity.Activity.json_parse(x) for x in raw]
+      raw, _ = await bilibili_activity.grpc_fetch(user.uid)
+      activities = [bilibili_activity.Activity.grpc_parse(x) for x in raw]
       if len(activities) > 1:
         user._offset = str(max(int(activities[0].id), int(activities[1].id)))
       elif activities:
@@ -144,8 +146,6 @@ async def try_check(bot: Bot, user: common.User) -> int:
         user._offset = ""
       if activities:
         user._name = activities[0].name
-      else:
-        user._name = "未知用户"
       logger.success(f"初始化 {user._name}({user.uid}) 的动态推送完成 {user._offset}")
     except Exception:
       logger.exception(f"初始化 {user.uid} 的动态推送失败")
@@ -157,9 +157,9 @@ async def try_check(bot: Bot, user: common.User) -> int:
       activities.append(activity)
     activities.reverse()
     for activity in activities:
-      user._name = activity.name
       user._offset = activity.id
       await try_send_all(activity)
+    user._time = time.time()
     logger.debug(f"检查 {user._name}({user.uid}) 的动态更新完成")
     return len(activities)
   except Exception:

@@ -1,1 +1,3 @@
-from . import addict, choyen, goodnews, google, lolcat, luxun, nokia, orly, pornhub, tiktok  # noqa
+from util import importing
+
+importing.load_children(__name__)

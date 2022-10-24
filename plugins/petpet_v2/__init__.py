@@ -1,24 +1,6 @@
-from loguru import logger
+from util import help, importing
 
-from util import help
-
-from . import (  # noqa
-  addict, alike, angel, anya, asciiart, ask, away, away2, bite, blood_pressure, blue, book,
-  call_110, captain, china, confuse, coupon, cover, cxk, decent_kiss, dianzhongdian, disc,
-  distracted, eat, fencing, flat, follow, forever, friend, getout, gun, hammer, hit, hit_screen,
-  hold, hug_leg, icon, impolite, indihome, interview, intimate, jiji_king, jiujiu, keep, keep_keep,
-  kidnap, kiss, knock, laptop, loading, love, lying, marry, message, miragetank, mirror, need,
-  not_responding, ori, pad, paint, painter, pat, perfect, petpet, play, police, police2, pound,
-  protogen, prpr, punch, rip, rip2, roll, rub, safe_sense, sign, slap, spin, suck, support, teach,
-  think, throw, throw2, together, tomb, trash, tv, virgin, wallpaper, wantwant, watermelon,
-  why_at_me, wife, windows, work, worship, zoom
-)
-
-for file in ("fisheye", "louvre", "patina", "shock"):
-  try:
-    __import__(__package__, fromlist=(file,))
-  except ImportError as e:
-    logger.warning(f"{__package__}.{file} 缺失依赖: {e}")
+importing.load_children(__name__)
 
 category = help.CategoryItem.find("petpet_v2", True)
 category.brief = "梗图生成器"

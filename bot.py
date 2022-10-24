@@ -5,7 +5,7 @@ import nonebot
 import yaml
 from nonebot.adapters.onebot.v11 import Adapter
 
-from util import config_v2, log
+from util import config_v2, log, importing
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--export-html")
@@ -19,8 +19,7 @@ if os.path.exists("configs/nonebot.yaml"):
 log.init()
 nonebot.init(**bot_config, apscheduler_autostart=True)
 nonebot.get_driver().register_adapter(Adapter)
-nonebot.load_plugins("plugins")
-nonebot.load_plugins("user_plugins")
+importing.load_plugins()
 
 if args.export_html:
   from util import help, permission

@@ -12,9 +12,19 @@ from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 
 from util import command, util
+from util.config import BaseConfig
 
-from .config import CONFIG
 
+class Config(BaseConfig):
+  __file__ = "wikipedia"
+  zim: str = ""
+  page_size: int = 10
+  width: int = 800
+  scale: float = 1
+  use_opencc: bool = True
+
+
+CONFIG = Config.load()
 ZIM = Archive(CONFIG.zim)
 # 简繁转换代码来自 https://github.com/nk2028/opencc-js ，MIT协议
 OPENCC_SCRIPT = '''function () {

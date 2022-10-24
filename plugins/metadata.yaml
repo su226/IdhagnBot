@@ -1,0 +1,20 @@
+requirements:
+  idhagn_fetch: [psutil]
+  minecraft: [mctools]
+  petpet_v2.fisheye: [cv2]
+  petpet_v2.louvre: [cv2]
+  petpet_v2.patina: [numpy]
+  petpet_v2.shock: [cv2]
+  text_generator.ero: [jieba]
+  wikipedia: [libzim, pyppeteer]
+  wordcloud: [wordcloud, jieba, sqlmodel]
+groups:
+  wordcloud: wordcloud
+  jieba: jieba
+  sqlmodel: sql
+  libzim: libzim
+  pyppeteer: pyppeteer
+  mctools: mctools
+  psutil: psutil
+  numpy: opencv
+  cv2: opencv
