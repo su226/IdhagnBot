@@ -14,6 +14,7 @@ from util import command, config_v2, context, util
 
 from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
+from .modules.everyfurry import EveryFurryModule
 from .modules.furbot import FurbotModule
 from .modules.history import HistoryModule
 from .modules.moyu import MoyuModule, moyu_cache
@@ -94,6 +95,13 @@ class FurbotModuleConfig(BaseModuleConfig):
     return FurbotModule()
 
 
+class EveryFurryModuleConfig(BaseModuleConfig):
+  type: Literal["everyfurry"]
+
+  def create_module(self, group_id: int) -> Module:
+    return EveryFurryModule()
+
+
 AnyModuleConfig = \
   StringModuleConfig | \
   CountdownModuleConfig | \
@@ -102,7 +110,8 @@ AnyModuleConfig = \
   HistoryModuleConfig | \
   SentenceModuleConfig | \
   RankModuleConfig | \
-  FurbotModuleConfig
+  FurbotModuleConfig | \
+  EveryFurryModuleConfig
 
 
 class GroupConfig(BaseModel):
@@ -225,10 +234,9 @@ async def check_daily(group_id: int) -> None:
 today = (
   command.CommandBuilder("daily.today", "今天")
   .brief("今天的问好你看了吗")
-  .usage("包含 /摸鱼、/60s 和 /一句 的内容")
-  .build())
-
-
+  .usage("通常包含 /摸鱼、/60s 和 /一句 的内容")
+  .build()
+)
 @today.handle()
 async def handle_today(bot: Bot, event: MessageEvent) -> None:
   messages = await format_all(context.get_event_context(event))
@@ -243,9 +251,8 @@ moyu = (
   command.CommandBuilder("daily.moyu", "摸鱼日历", "摸鱼")
   .brief("今天也要开心摸鱼哦")
   .usage("接口来自https://api.j4u.ink")
-  .build())
-
-
+  .build()
+)
 @moyu.handle()
 async def handle_moyu() -> None:
   await moyu_cache.ensure()
@@ -256,9 +263,8 @@ news = (
   command.CommandBuilder("daily.news", "60秒", "60s")
   .brief("用60秒迅速看世界")
   .usage("接口来自https://api.qqsuu.cn")
-  .build())
-
-
+  .build()
+)
 @news.handle()
 async def handle_news() -> None:
   await news_cache.ensure()
@@ -269,9 +275,8 @@ sentence = (
   command.CommandBuilder("daily.sentence", "每日一句", "一句")
   .brief("是中英双语的")
   .usage("接口来自http://open.iciba.com")
-  .build())
-
-
+  .build()
+)
 @sentence.handle()
 async def handle_sentence() -> None:
   await sentence_cache.ensure()
@@ -283,9 +288,18 @@ history = (
   command.CommandBuilder("daily.history", "历史")
   .brief("看看历史上的今天")
   .usage("接口来自https://www.ipip5.com/today/")
-  .build())
-
-
+  .build()
+)
 @history.handle()
 async def handle_history() -> None:
   await history.send(await HistoryModule().format())
+
+
+everyfurry = (
+  command.CommandBuilder("daily.everyfurry", "今日兽兽")
+  .usage("接口来自https://hifurry.cn")
+  .build()
+)
+@everyfurry.handle()
+async def handle_everyfurry() -> None:
+  await everyfurry.send(await EveryFurryModule().format())
