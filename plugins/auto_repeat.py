@@ -1,14 +1,23 @@
 import re
+from typing import Any
 
 import nonebot
-from nonebot.adapters.onebot.v11 import MessageEvent
+from nonebot.adapters.onebot.v11 import Event, MessageEvent
 from nonebot.rule import Rule
 
-from util import context, util
+from util import context, hook, util
 
 last_message: dict[int, str] = {}
 repeated: set[int] = set()
 ORIGINAL_EMOTE_RE = re.compile(r"^&#91;[A-Za-z0-9\u4e00-\u9fa5]+&#93;$")
+
+
+@hook.on_message_sent
+async def on_message_sent(
+  event: Event | None, is_group: bool, target_id: int, message: Any, message_id: int
+) -> None:
+  if is_group and target_id in last_message:
+    del last_message[target_id]
 
 
 def is_original_emote(event: MessageEvent) -> bool:
@@ -27,10 +36,7 @@ async def can_repeat(event: MessageEvent) -> bool:
     repeated.remove(ctx)
   last_message[ctx] = event.raw_message
   return result
-
 auto_repeat = nonebot.on_message(Rule(can_repeat), priority=2)
-
-
 @auto_repeat.handle()
 async def handle_auto_repeat(event: MessageEvent):
   for seg in event.message:
