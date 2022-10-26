@@ -1,7 +1,7 @@
 import asyncio
 import shlex
 from collections import deque
-from typing import Callable, Literal
+from typing import Any, Callable, Literal
 
 import nonebot
 from apscheduler.job import Job
@@ -65,9 +65,9 @@ def add_reject_handler(matcher: type[Matcher]) -> None:
 
 
 class TokenBucket:
-  def __init__(self, capacity: int) -> None:
+  def __init__(self, capacity: int, frequency: float | None) -> None:
     self.capacity = capacity
-    self.frequency = 1 / capacity
+    self.frequency = 1 / capacity if frequency is None else frequency
     self.tokens = capacity
     self.queue: deque[asyncio.Future[None]] = deque()
     self.job: Job | None = None
@@ -98,7 +98,9 @@ class TokenBucket:
     return (len(self.queue) + 1) * self.frequency
 
 
-def add_throttle_handler(matcher: type[Matcher], name: str, capacity: int) -> None:
+def add_throttle_handler(
+  matcher: type[Matcher], name: str, capacity: int, frequency: float | None
+) -> None:
   async def handle_throttle():
     estimated = token.estimate()
     if estimated >= 60:
@@ -107,7 +109,7 @@ def add_throttle_handler(matcher: type[Matcher], name: str, capacity: int) -> No
       await matcher.send(f"当前使用 /{name} 的人数较多，请等待大约 {int(estimated)} 秒。")
     await token.acquire()
 
-  token = TokenBucket(capacity)
+  token = TokenBucket(capacity, frequency)
   matcher.handle()(handle_throttle)
 
 
@@ -118,7 +120,10 @@ class CommandBuilder:
     self._rule = Rule()
     self._level = permission.Level.MEMBER
     self._auto_reject = False
-    self._throttle = 0
+    self._state: dict[str, Any] = {}
+
+    self._capacity = 0
+    self._frequency = None
 
     self._brief = ""
     self._usage = ""
@@ -163,15 +168,16 @@ class CommandBuilder:
       parser.prog = util.command_start() + self.names[0]
     self.rule(ShellCommandRule(parser))
     if not self._usage:
-      self._usage = parser.format_help()
+      self._usage: str = parser.format_help()
     return self
 
   def auto_reject(self) -> Self:
     self._auto_reject = True
     return self
 
-  def throttle(self, capacity: int) -> Self:
-    self._throttle = capacity
+  def throttle(self, capacity: int, frequency: float | None = None) -> Self:
+    self._capacity = capacity
+    self._frequency = frequency
     return self
 
   def private(self, private: bool) -> Self:
@@ -182,16 +188,21 @@ class CommandBuilder:
     self.help_data.condition = condition
     return self
 
+  def state(self, **kw) -> Self:
+    self._state.update(kw)
+    return self
+
   def build(self) -> type[Matcher]:
-    cat = help.CategoryItem.find(self._category, True)
-    cat.add(help.CommandItem(self.names, self._brief, self._usage, self.help_data))
-    permission_ = context.build_permission(tuple(self.node.split(".")), self._level)
+    category = help.CategoryItem.find(self._category, True)
+    category.add(help.CommandItem(self.names, self._brief, self._usage, self.help_data))
+    _permission = context.build_permission(tuple(self.node.split(".")), self._level)
     matcher = nonebot.on_command(
-      self.names[0], self._rule, set(self.names[1:]), permission=permission_,
+      self.names[0], self._rule, set(self.names[1:]), permission=_permission, state=self._state,
       _depth=1  # type: ignore
     )
-    if self._throttle:
-      add_throttle_handler(matcher, self.names[0], self._throttle)
+    matcher.__doc__ = self._usage
+    if self._capacity:
+      add_throttle_handler(matcher, self.names[0], self._capacity, self._frequency)
     if self._auto_reject:
       add_reject_handler(matcher)
     return matcher
