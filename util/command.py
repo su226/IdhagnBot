@@ -41,6 +41,7 @@ class ShellCommandRule:
       state[SHELL_ARGS] = ParserExit(127, "解析命令行参数失败：" + str(e))
       return True
     try:
+      setattr(self.parser, "_message", "")
       args = self.parser.parse_args(argv)
       state[SHELL_ARGS] = args
     except ParserExit as e:
