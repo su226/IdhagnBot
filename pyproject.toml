@@ -59,11 +59,11 @@ indent = "  "
 [tool.pyright]
 typeCheckingMode = "basic"
 strict = ["plugins/liferestart/game"]
-ignore = ["util/bilibili_activity/protos"]
+ignore = ["util/api_common/*/protos"]
 
 [tool.pylama]
 linters = "eradicate,pycodestyle,pyflakes,isort"
-skip = ".venv/*,util/bilibili_activity/protos/*"
+skip = ".venv/*,util/api_common/*/protos/*"
 async = true
 
 [tool.pylama.linter.pycodestyle]
