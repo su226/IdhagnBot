@@ -6,13 +6,27 @@ import nonebot
 from loguru import logger
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
 from nonebot.matcher import current_event
+from pydantic import parse_obj_as
+
+from . import util
 
 __all__ = ["on_message_sent", "MessageSentHook"]
 
 send_event: ContextVar[Event | None] = ContextVar("send_event", default=None)
-MessageSentHook = Callable[[Event | None, bool, int, Any, int], Awaitable[None]]
+MessageSentHook = Callable[[Event | None, bool, int, Message, int], Awaitable[None]]
 message_sent_hook: list[MessageSentHook] = []
 driver = nonebot.get_driver()
+
+
+def normalize_message(raw: Any) -> Message:
+  if isinstance(raw, MessageSegment):
+    message = Message(raw)
+  else:
+    message = parse_obj_as(Message, raw)
+  for seg in message:
+    if seg.type == "node" and "content" in seg.data:
+      seg.data["content"] = normalize_message(seg.data["content"])
+  return message
 
 
 @Bot.on_called_api
@@ -25,6 +39,7 @@ async def on_called_api(_, e: Exception | None, api: str, params: dict[str, Any]
     message = params["messages"]
   else:
     return
+  message = normalize_message(message)
   event = cast(Event, current_event.get(None)) or send_event.get()
   is_group = "group_id" in params
   target_id = params["group_id" if is_group else "user_id"]
@@ -37,7 +52,7 @@ async def on_called_api(_, e: Exception | None, api: str, params: dict[str, Any]
     logger.exception("执行 on_message_sent 失败！")
 
 
-async def bot_send(self: Bot, event: Event, message: str | Message | MessageSegment, **kw) -> Any:
+async def bot_send(self: Bot, event: Event, message: util.AnyMessage, **kw) -> Any:
   token = send_event.set(event)
   try:
     return await bot_send_original(self, event, message, **kw)

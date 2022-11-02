@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
-from typing import Any, AsyncGenerator
+from typing import AsyncGenerator
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Event, MessageEvent
+from nonebot.adapters.onebot.v11 import Event, Message, MessageEvent
 from nonebot.typing import T_State
 
 from util import hook
@@ -17,7 +17,7 @@ class Record:
     self.messages: dict[int, set[int]] = {}
 
   async def on_message_sent(
-    self, event: Event | None, is_group: bool, target_id: int, message: Any, message_id: int
+    self, event: Event | None, is_group: bool, target_id: int, message: Message, message_id: int
   ) -> None:
     if isinstance(event, MessageEvent) and event.message_id and message_id:
       recall_time = datetime.fromtimestamp(event.time) + timedelta(seconds=120)

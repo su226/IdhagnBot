@@ -5,10 +5,9 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Iterable
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Event, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import Event, Message, MessageEvent, MessageSegment
 from nonebot.message import event_postprocessor
 from pydantic.json import pydantic_encoder
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -64,52 +63,36 @@ async def on_startup():
     await connection.run_sync(SQLModel.metadata.create_all)
 
 
-AnySegment = str | MessageSegment | dict
-AnyMessage = Iterable[MessageSegment | dict]
-
-
-def process_segment(segment: AnySegment) -> tuple[list[CacheEntry], dict]:
-  if isinstance(segment, str):
-    return [], {"type": "text", "data": {"text": segment}}
-  elif isinstance(segment, MessageSegment):
-    type = segment.type
-    data = segment.data
-  else:
-    type = segment["type"]
-    data = segment["data"]
+def process_segment(segment: MessageSegment) -> list[CacheEntry]:
   caches = []
-  if type in ("image", "record", "video"):
-    file = data.get("file", "")
+  if segment.type in ("image", "record", "video"):
+    file = segment.data.get("file", "")
     if file.startswith("base64://"):
       content = base64.b64decode(file[9:])
       md5 = hashlib.md5(content).hexdigest()
-      basedir = os.path.abspath(f"states/messages/{type}")
+      basedir = os.path.abspath(f"states/messages/{segment.type}")
       path = os.path.join(basedir, md5)
       if not os.path.exists(path):
         os.makedirs(basedir, exist_ok=True)
         with open(path, "wb") as f:
           f.write(content)
-      data["file"] = f"file://{path}"
-      caches.append(CacheEntry(type, md5))
-  elif type == "node":
-    caches, data["content"] = process_message(data["content"])
-  return caches, {"type": type, "data": data}
+      segment.data["file"] = f"file://{path}"
+      caches.append(CacheEntry(segment.type, md5))
+  elif segment.type == "node":
+    forward_caches, message = process_message(segment.data["content"])
+    caches.extend(forward_caches)
+    segment.data["content"] = message
+  return caches
 
 
-def process_message(message: AnySegment | AnyMessage) -> tuple[list[CacheEntry], list]:
-  if isinstance(message, AnySegment):
-    caches, segment = process_segment(message)
-    return caches, [segment]
+def process_message(message: Message) -> tuple[list[CacheEntry], list[MessageSegment]]:
   caches: list[CacheEntry] = []
-  segments: list[dict] = []
-  for raw in message:
-    cache, segment = process_segment(raw)
-    caches.extend(cache)
-    segments.append(segment)
-  return caches, segments
+  for segment in message:
+    caches.extend(process_segment(segment))
+  return caches, list(message)
 
 
-def serialize_message(message: AnySegment | AnyMessage) -> tuple[list[CacheEntry], str]:
+def serialize_message(message: Message) -> tuple[list[CacheEntry], str]:
   caches, segments = process_message(message)
   return caches, json.dumps(segments, ensure_ascii=False, default=pydantic_encoder)
 
@@ -129,7 +112,7 @@ async def process_caches(session: AsyncSession, caches: list[CacheEntry]) -> Non
 
 @hook.on_message_sent
 async def on_message_sent(
-  event: Event | None, is_group: bool, target_id: int, message: Any, message_id: int
+  event: Event | None, is_group: bool, target_id: int, message: Message, message_id: int
 ) -> None:
   if not message_id:
     return
