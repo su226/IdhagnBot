@@ -3,7 +3,8 @@ from datetime import date, timedelta
 from typing import cast
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Bot
+from loguru import logger
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
 
 from util import context
 
@@ -17,16 +18,17 @@ class RankModule(Module):
     self.group_id = group_id
     self.limit = 10
 
-  async def format(self) -> str:
+  async def format(self) -> list[Message]:
     if self.group_id == -1:
-      return "rank 模块在私聊上下文中不可用"
+      return []  # rank 模块在私聊上下文中不可用
     try:
       from sqlalchemy.ext.asyncio import AsyncSession
       from sqlmodel import desc, func, select
 
       from util import record
     except ImportError:
-      return "没有安装 SQL 相关依赖，不能使用 rank 模块。"
+      logger.warning("没有安装 SQL 相关依赖，不能使用 rank 模块。")
+      return []
     today = date.today()
     yesterday = today - timedelta(1)
     async with AsyncSession(record.engine) as session:
@@ -45,9 +47,9 @@ class RankModule(Module):
         .limit(self.limit)
       )
     members = list(result)
-    lines = ["昨天最能水的成员："]
     if not members:
-      lines.append("似乎什么都没有")
+      return []
+    lines = ["昨天最能水的成员："]
     bot = cast(Bot, nonebot.get_bot())
     infos = await asyncio.gather(*(
       context.get_card_or_name(bot, self.group_id, user_id) for user_id, _ in members
@@ -58,4 +60,4 @@ class RankModule(Module):
       else:
         prefix = f"{i + 1}."
       lines.append(f"{prefix} {name} - {count} 条")
-    return "\n".join(lines)
+    return [Message(MessageSegment.text("\n".join(lines)))]

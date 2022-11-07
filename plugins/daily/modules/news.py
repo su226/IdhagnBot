@@ -23,7 +23,6 @@ news_cache = NewsCache()
 
 
 class NewsModule(Module):
-  async def format(self) -> Message:
+  async def format(self) -> list[Message]:
     await news_cache.ensure()
-    return util.local_image(news_cache.path) \
-      + "你可以发送 /60秒 再次查看"
+    return [util.local_image(news_cache.path) + "\n你可以发送 /60秒 再次查看"]

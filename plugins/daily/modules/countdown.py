@@ -1,5 +1,6 @@
 from datetime import date
 
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from pydantic import BaseModel
 
 from . import Module
@@ -18,7 +19,7 @@ class CountdownModule(Module):
   def __init__(self, countdowns: list[Countdown]) -> None:
     self.countdowns = countdowns
 
-  async def format(self) -> str:
+  async def format(self) -> list[Message]:
     lines = ["今天是："]
     today = date.today()
     for countdown in self.countdowns:
@@ -29,4 +30,4 @@ class CountdownModule(Module):
         lines.append(countdown.exact)
       elif delta < 0 and countdown.after:
         lines.append(countdown.after.format(-delta))
-    return "\n".join(lines)
+    return [Message(MessageSegment.text("\n".join(lines)))]

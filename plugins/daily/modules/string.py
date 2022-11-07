@@ -7,5 +7,5 @@ class StringModule(Module):
   def __init__(self, string: str) -> None:
     self.string = string
 
-  async def format(self) -> Message:
-    return Message(self.string)
+  async def format(self) -> list[Message]:
+    return [Message(self.string)]

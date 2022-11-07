@@ -31,7 +31,6 @@ sentence_cache = SentenceCache()
 
 
 class SentenceModule(Module):
-  async def format(self) -> Message:
+  async def format(self) -> list[Message]:
     await sentence_cache.ensure()
-    return util.local_image(sentence_cache.path) \
-      + "你可以发送 /一句 再次查看"
+    return [util.local_image(sentence_cache.path) + "\n你可以发送 /一句 再次查看"]

@@ -2,11 +2,11 @@ import asyncio
 import os
 from datetime import date
 
-from util import util
+from nonebot.adapters.onebot.v11 import Message
 
 
 class Module:
-  async def format(self) -> util.AnyMessage:
+  async def format(self) -> list[Message]:
     raise NotImplementedError
 
 

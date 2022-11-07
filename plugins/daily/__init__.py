@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 from dataclasses import dataclass
 from datetime import date, datetime, time
 from typing import Awaitable, Literal, cast
@@ -14,6 +15,7 @@ from util import command, config_v2, context, util
 
 from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
+from .modules.epicgames import EpicGamesModule
 from .modules.everyfurry import EveryFurryModule
 from .modules.furbot import FurbotModule
 from .modules.history import HistoryModule
@@ -102,6 +104,14 @@ class EveryFurryModuleConfig(BaseModuleConfig):
     return EveryFurryModule()
 
 
+class EpicGamesModuleConfig(BaseModuleConfig):
+  type: Literal["epicgames"]
+  force: bool = False
+
+  def create_module(self, group_id: int) -> Module:
+    return EpicGamesModule(self.force)
+
+
 AnyModuleConfig = \
   StringModuleConfig | \
   CountdownModuleConfig | \
@@ -111,18 +121,19 @@ AnyModuleConfig = \
   SentenceModuleConfig | \
   RankModuleConfig | \
   FurbotModuleConfig | \
-  EveryFurryModuleConfig
+  EveryFurryModuleConfig | \
+  EpicGamesModuleConfig
+ModuleOrForward = AnyModuleConfig | list[AnyModuleConfig]
 
 
 class GroupConfig(BaseModel):
   time: _time | None = None
-  modules: list[AnyModuleConfig | list[AnyModuleConfig]] | None = None
+  modules: list[ModuleOrForward] | None = None
 
 
 class Config(BaseModel):
   default_time: _time = _time(7, 0, 0)
-  default_modules: list[AnyModuleConfig | list[AnyModuleConfig]] = \
-    Field(default_factory=list)
+  default_modules: list[ModuleOrForward] = Field(default_factory=list)
   groups: dict[int, GroupConfig] = Field(default_factory=dict)
 
 
@@ -142,6 +153,8 @@ def onload(prev: Config | None, curr: Config):
     job.remove()
   jobs.clear()
   for group, group_config in curr.groups.items():
+    if group == -1:
+      continue
     time = group_config.time or curr.default_time
     job = scheduler.add_job(
       check_daily, "cron", (group,), hour=time.hour, minute=time.minute, second=time.second
@@ -161,12 +174,12 @@ async def on_bot_connect() -> None:
   CONFIG.load()
 
 
-async def format_one(group_id: int, module_config: BaseModuleConfig) -> util.AnyMessage:
+async def format_one(group_id: int, module_config: BaseModuleConfig) -> list[Message]:
   try:
     return await module_config.create_module(group_id).format()
   except Exception:
     logger.exception(f"每日推送模块运行失败: {module_config}")
-    return f"模块运行失败：{module_config.type}"
+    return [Message(MessageSegment.text(f"模块运行失败：{module_config.type}"))]
 
 
 async def format_forward(
@@ -174,10 +187,13 @@ async def format_forward(
 ) -> Forward:
   coros = [format_one(group_id, module) for module in modules]
   messages = await asyncio.gather(*coros)
-  return Forward([util.forward_node(bot_id, bot_name, message) for message in messages])
+  return Forward([
+    util.forward_node(bot_id, bot_name, message)
+    for message in itertools.chain.from_iterable(messages)
+  ])
 
 
-async def format_all(group_id: int) -> list[util.AnyMessage | Forward]:
+async def format_all(group_id: int) -> list[Message | Forward]:
   config = CONFIG()
   if group_id not in config.groups:
     modules = config.default_modules
@@ -191,31 +207,19 @@ async def format_all(group_id: int) -> list[util.AnyMessage | Forward]:
   else:
     info = await bot.get_group_member_info(group_id=group_id, user_id=bot_id)
     bot_name = info["card"] or info["nickname"]
-  coros: list[Awaitable[util.AnyMessage | Forward]] = []
+  coros: list[Awaitable[list[Message] | Forward]] = []
   for module in modules:
     if isinstance(module, list):
       coros.append(format_forward(bot_id, bot_name, group_id, module))
     else:
       coros.append(format_one(group_id, module))
-  return await asyncio.gather(*coros)
-
-
-async def try_send(bot: Bot, group_id: int, message: util.AnyMessage | Forward) -> None:
-  if isinstance(message, MessageSegment):
-    message = Message(message)
-  try:
-    if isinstance(message, Forward):
-      await bot.call_api("send_group_forward_msg", group_id=group_id, messages=message.nodes)
+  result: list[Message | Forward] = []
+  for i in await asyncio.gather(*coros):
+    if isinstance(i, Forward):
+      result.append(i)
     else:
-      await bot.send_group_msg(group_id=group_id, message=message)
-  except ActionFailed:
-    logger.exception(f"发送部分每日推送到群聊 {group_id} 失败: {message}")
-    try:
-      await bot.send_group_msg(
-        group_id=group_id, message="发送部分每日推送失败，可运行 /今天 重新查看"
-      )
-    except ActionFailed:
-      pass
+      result.extend(i)
+  return result
 
 
 async def check_daily(group_id: int) -> None:
@@ -225,8 +229,23 @@ async def check_daily(group_id: int) -> None:
     return
   logger.info(f"向 {group_id} 发送每日推送")
   bot = cast(Bot, nonebot.get_bot())
+  failed = False
   for message in await format_all(group_id):
-    await try_send(bot, group_id, message)
+    try:
+      if isinstance(message, Forward):
+        await bot.call_api("send_group_forward_msg", group_id=group_id, messages=message.nodes)
+      else:
+        await bot.send_group_msg(group_id=group_id, message=message)
+    except ActionFailed:
+      logger.exception(f"发送部分每日推送到群聊 {group_id} 失败: {message}")
+      failed = True
+  if failed:
+    try:
+      await bot.send_group_msg(
+        group_id=group_id, message="发送部分每日推送失败，可运行 /今天 重新查看"
+      )
+    except ActionFailed:
+      pass
   state.last_send[group_id] = today
   STATE.dump()
 
@@ -292,7 +311,7 @@ history = (
 )
 @history.handle()
 async def handle_history() -> None:
-  await history.send(await HistoryModule().format())
+  await history.finish(await HistoryModule().raw_format())
 
 
 everyfurry = (
@@ -302,4 +321,7 @@ everyfurry = (
 )
 @everyfurry.handle()
 async def handle_everyfurry() -> None:
-  await everyfurry.send(await EveryFurryModule().format())
+  messages = await EveryFurryModule().format()
+  if not messages:
+    await everyfurry.finish("似乎没有今日兽兽")
+  await everyfurry.finish(messages[0])
