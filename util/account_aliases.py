@@ -81,7 +81,7 @@ async def get_aliases(bot: Bot, event: Event) -> AliasesDict:
       aliases[key].names.extend(alias.names)
   if ctx == context.PRIVATE:
     return aliases
-  for user in await bot.get_group_member_list(group_id=ctx):
+  for user in await bot.call_api("get_group_member_list", group_id=ctx, no_cache=True):
     users = (user["user_id"],)
     key = hash(users)
     if key not in aliases:
@@ -107,7 +107,10 @@ async def match(bot: Bot, event: Event, pattern: str) -> tuple[dict[int, Match],
         get(exact, id, alias).patterns.append(matched)
       elif pattern in name:
         matched = MatchPattern(name, False)
-        get(inexact, id, alias).patterns.append(matched)
+        if id in exact:
+          exact[id].patterns.append(matched)
+        else:
+          get(inexact, id, alias).patterns.append(matched)
   return exact, inexact
 
 
@@ -115,14 +118,10 @@ async def match(bot: Bot, event: Event, pattern: str) -> tuple[dict[int, Match],
 async def match_uid(
   bot: Bot, event: Event, raw_pattern: str, multiple: Literal[False] = ...
 ) -> int: ...
-
-
 @overload
 async def match_uid(
   bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = ...
 ) -> tuple[int]: ...
-
-
 async def match_uid(
   bot: Bot, event: Event, raw_pattern: str, multiple: bool = False
 ) -> int | tuple[int]:
@@ -137,7 +136,7 @@ async def match_uid(
   if not pattern:
     raise AggregateError(f"有效名字为空：{raw_pattern}")
   exact, inexact = await match(bot, event, pattern)
-  matches = list((inexact if len(exact) == 0 else exact).values())
+  matches = list((exact or inexact).values())
   if len(matches) > 1:
     count = len(exact) + len(inexact)
     segments = [f"{pattern} 具有歧义，可以指："]
