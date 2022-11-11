@@ -7,26 +7,26 @@ import nonebot
 from aiohttp.client import _RequestContextManager
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import EventMessage
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 
-from util import config_v2, util
+from util import configs, misc
 
 
 class Config(BaseModel):
   qq: int = 0
-  token: str = ""
+  token: SecretStr = SecretStr("")
   host: str = "https://api.tail.icu"
   keyword: str = "来只毛"
   universal_keyword: str = "来只"
   universal_prefer: Literal["furbot", "foxtail", ""] = ""
-CONFIG = config_v2.SharedConfig("furbot", Config)
+CONFIG = configs.SharedConfig("furbot", Config)
 
 
 def request(api: str, **kw: str) -> _RequestContextManager:
   config = CONFIG()
-  http = util.http()
+  http = misc.http()
   t = str(int(time.time()))
-  sign = hashlib.md5(f"{api}-{t}-{config.token}".encode()).hexdigest()
+  sign = hashlib.md5(f"{api}-{t}-{config.token.get_secret_value()}".encode()).hexdigest()
   params = {
     "qq": str(config.qq),
     "timestamp": t,

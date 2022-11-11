@@ -1,3 +1,4 @@
+import asyncio
 import time
 from io import BytesIO
 from typing import Awaitable, Callable, Pattern, TypeVar
@@ -6,7 +7,8 @@ from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
 from pydantic import BaseModel, Field, PrivateAttr
 
-from util import bilibili_activity, config_v2, util
+from util import configs, misc
+from util.api_common import bilibili_activity
 
 
 class GroupTarget(BaseModel):
@@ -53,7 +55,7 @@ class Config(BaseModel):
     return self.concurrency_
 
 
-CONFIG = config_v2.SharedConfig("bilibili_activity", Config, "eager")
+CONFIG = configs.SharedConfig("bilibili_activity", Config, "eager")
 IMAGE_GAP = 10
 
 TContent = TypeVar("TContent", bound=bilibili_activity.Content)
@@ -73,5 +75,9 @@ def check_ignore(forward: bool, content: str):
 
 
 async def fetch_image(url: str) -> Image.Image:
-  async with util.http().get(url) as response:
+  async with misc.http().get(url) as response:
     return Image.open(BytesIO(await response.read()))
+
+
+async def fetch_images(*urls: str) -> list[Image.Image]:
+  return await asyncio.gather(*(fetch_image(url) for url in urls))

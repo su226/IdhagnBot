@@ -2,10 +2,9 @@ import html
 import math
 from typing import Callable
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from util import context, permission
-from util.config import BaseConfig, BaseModel
+from util import configs, context, permission
 
 
 def NOOP_CONDITION(_): return True
@@ -51,20 +50,47 @@ class UserCommand(UserData):
   usage: str = ""
 
 
-class Config(BaseConfig):
+class UserCategory(UserData):
+  brief: str = ""
+
+
+class Config(BaseModel):
   __file__ = "help"
   page_size: int = 10
-  user_helps: list[str | UserString | UserCommand] = Field(default_factory=list)
+  user_helps: list[str | UserString | UserCommand | UserCategory] = Field(default_factory=list)
   category_brief: dict[str, str] = Field(default_factory=dict)
 
 
-CONFIG = Config.load()
+CONFIG = configs.SharedConfig("help", Config)
+
+
+@CONFIG.onload()
+def onload(prev: Config | None, curr: Config) -> None:
+  if prev:
+    CommandItem.remove_user_items()
+    CategoryItem.ROOT.remove_user_items()
+  for item in curr.user_helps:
+    if isinstance(item, str):
+      CategoryItem.ROOT.add(UserStringItem(item))
+    elif isinstance(item, UserCategory):
+      category = UserCategoryItem.find(item.category, True)
+      if not isinstance(category, UserCategoryItem):
+        continue
+      category.brief = item.brief
+      category.data = item
+    elif isinstance(item, UserString):
+      UserCategoryItem.find(item.category, True).add(UserStringItem(item.string, item))
+    else:
+      UserCategoryItem.find(item.category, True).add(
+        UserCommandItem(item.command, item.brief, item.usage, item)
+      )
 
 
 def check_permission(data: CommonData, show: ShowData) -> bool:
   node = data.node
   if node:
-    if (result := permission.check(node, show.user_id, show.current_group)) is not None:
+    result = permission.check(node, show.user_id, show.current_group, show.level)
+    if result is not None:
       return result
     command_level = permission.get_node_level(node) or data.level
   else:
@@ -139,13 +165,16 @@ class CommandItem(Item):
   }
 
   def __init__(
-    self, names: list[str] = [], brief: str = "", usage: str = "", data: CommonData | None = None
+    self, names: list[str] = [], brief: str = "", usage: str | Callable[[], str] = "",
+    data: CommonData | None = None
   ) -> None:
     super().__init__(data)
     self.names = names
     self.raw_usage = usage
     self.brief = brief
     for i in self.names:
+      if i in self.commands:
+        raise ValueError(f"重复的命令名: {i}")
       self.commands[i] = self
 
   def html(self) -> str:
@@ -153,7 +182,8 @@ class CommandItem(Item):
       info = f"\n{info}"
     return (
       f"<details id=\"{html.escape(self.names[0])}\"><summary>{html.escape(self())}</summary>"
-      f"<pre>{html.escape(self.format(False))}{info}</pre></details>")
+      f"<pre>{html.escape(self.format(False))}{info}</pre></details>"
+    )
 
   def get_order(self) -> int:
     return self.data.level.order
@@ -170,13 +200,26 @@ class CommandItem(Item):
     segments = []
     if brief:
       segments.append(self())
-    if len(self.raw_usage) == 0:
+    if isinstance(self.raw_usage, str):
+      raw_usage = self.raw_usage
+    else:
+      raw_usage = self.raw_usage()
+    if len(raw_usage) == 0:
       segments.append("没有用法说明")
     else:
-      segments.append(self.raw_usage)
+      segments.append(raw_usage)
     if len(self.names) > 1:
       segments.append("该命令有以下别名：" + "、".join(self.names[1:]))
     return "\n".join(segments)
+
+  @staticmethod
+  def remove_user_items() -> None:
+    remove_keys: list[str] = []
+    for k, v in CommandItem.commands.items():
+      if isinstance(v, UserCommandItem):
+        remove_keys.append(k)
+    for i in remove_keys:
+      del CommandItem.commands[i]
 
 
 class CategoryItem(Item):
@@ -207,8 +250,8 @@ class CategoryItem(Item):
   def get_order(self) -> int:
     return -2
 
-  @staticmethod
-  def find(path: str | list[str], create: bool = False) -> "CategoryItem":
+  @classmethod
+  def find(cls, path: str | list[str], create: bool = False) -> "CategoryItem":
     cur = CategoryItem.ROOT
     if isinstance(path, str):
       path = [x for x in path.split(".") if x]
@@ -216,48 +259,67 @@ class CategoryItem(Item):
       if name not in cur.subcategories:
         if not create:
           raise KeyError(f"子分类 {'.'.join(path[:i])} 不存在")
-        sub = CategoryItem(name)
+        sub = cls(name)
         cur.add(sub)
       cur = cur.subcategories[name]
     return cur
 
   def add(self, item: Item):
-    self.items.append(item)
     if isinstance(item, CategoryItem):
+      if item.name in self.subcategories:
+        raise ValueError(f"重复的子分类名: {item.name}")
       self.subcategories[item.name] = item
+    self.items.append(item)
 
   def format(self, page_id: int, show_data: ShowData) -> str:
     vaild_items = ["使用 /帮助 <命令名> 查看详细用法"]
     vaild_items.extend(x[-1] for x in sorted(
-      (-x.data.priority, x.get_order(), x()) for x in self.items if x.can_show(show_data)))
-    pages = math.ceil(len(vaild_items) / CONFIG.page_size)
+      (-x.data.priority, x.get_order(), x()) for x in self.items if x.can_show(show_data)
+    ))
+    config = CONFIG()
+    pages = math.ceil(len(vaild_items) / config.page_size)
     if page_id < 1 or page_id > pages:
       return f"页码范围从 1 到 {pages}"
-    start = (page_id - 1) * CONFIG.page_size
-    end = min(page_id * CONFIG.page_size, len(vaild_items))
+    start = (page_id - 1) * config.page_size
+    end = min(page_id * config.page_size, len(vaild_items))
     pageid = f"第 {page_id} 页，共 {pages} 页\n"
     return pageid + "\n".join(vaild_items[start:end])
 
+  def remove_user_items(self) -> None:
+    self.items = [item for item in self.items if not isinstance(item, UserItem)]
+    remove_keys: list[str] = []
+    for k, v in self.subcategories.items():
+      if isinstance(v, UserCategoryItem):
+        remove_keys.append(k)
+      else:
+        v.remove_user_items()
+    for k in remove_keys:
+      del self.subcategories[k]
+
 
 CategoryItem.ROOT = CategoryItem("root")
+
+
+class UserItem(Item):
+  pass
+
+
+class UserStringItem(StringItem, UserItem):
+  pass
+
+
+class UserCommandItem(CommandItem, UserItem):
+  pass
+
+
+class UserCategoryItem(CategoryItem, UserItem):
+  pass
 
 
 def export_index_html() -> str:
   segments = (
     f"<li><a href=\"#{html.escape(command.names[0])}\">"
     f"{CommandItem.prefixes[command.data.level]}{html.escape(name)}</a></li>"
-    for name, command in sorted(CommandItem.commands.items(), key=lambda x: x[0]))
+    for name, command in sorted(CommandItem.commands.items(), key=lambda x: x[0])
+  )
   return f"<ul>{''.join(segments)}</ul>"
-
-
-for item in CONFIG.user_helps:
-  if isinstance(item, str):
-    CategoryItem.ROOT.add(StringItem(item))
-  elif isinstance(item, UserString):
-    CategoryItem.find(item.category, True).add(StringItem(item.string, item))
-  else:
-    CategoryItem.find(item.category, True).add(
-      CommandItem(item.command, item.brief, item.usage, item))
-
-for path, brief in CONFIG.category_brief.items():
-  CategoryItem.find(path, True).brief = brief

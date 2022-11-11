@@ -8,7 +8,7 @@ import yaml
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from . import config_v2
+from . import configs
 
 
 class Config(BaseModel):
@@ -30,11 +30,11 @@ class Missing:
   groups: list[str]
 
 
-CONFIG = config_v2.SharedConfig("plugins", Config, False)
+CONFIG = configs.SharedConfig("plugins", Config, False)
 ROOT_DIR = Path(__file__).resolve().parents[1]
 MODULES: dict[str, bool] = {}
 with open(ROOT_DIR / "plugins" / "metadata.yaml") as f:
-  METADATA = Metadata.parse_obj(yaml.load(f, config_v2.SafeLoader))
+  METADATA = Metadata.parse_obj(yaml.load(f, configs.SafeLoader))
 
 
 def children(parent: str) -> tuple[list[str], list[Missing]]:

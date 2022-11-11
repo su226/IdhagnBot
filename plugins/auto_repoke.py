@@ -12,4 +12,4 @@ auto_repoke = nonebot.on_notice(Rule(is_poke) & to_me())
 
 @auto_repoke.handle()
 async def handle_auto_repoke(event: PokeNotifyEvent):
-  await auto_repoke.send(MessageSegment("poke", {"qq": event.user_id}))
+  await auto_repoke.finish(MessageSegment("poke", {"qq": event.user_id}))

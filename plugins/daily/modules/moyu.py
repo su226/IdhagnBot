@@ -1,6 +1,6 @@
 from nonebot.adapters.onebot.v11 import Message
 
-from util import util
+from util import misc
 
 from . import DailyCache, Module
 
@@ -12,7 +12,7 @@ class MoyuCache(DailyCache):
     super().__init__("moyu.png")
 
   async def update(self) -> None:
-    http = util.http()
+    http = misc.http()
     async with http.get(MOYU_API) as response:
       data = await response.json()
     with open(self.path, "wb") as f:
@@ -27,4 +27,4 @@ moyu_cache = MoyuCache()
 class MoyuModule(Module):
   async def format(self) -> list[Message]:
     await moyu_cache.ensure()
-    return [util.local_image(moyu_cache.path) + "\n你可以发送 /摸鱼 再次查看"]
+    return [misc.local("image", moyu_cache.path) + "\n你可以发送 /摸鱼 再次查看"]

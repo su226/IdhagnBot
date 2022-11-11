@@ -2,7 +2,7 @@ import json
 from html.parser import HTMLParser
 from urllib.parse import unquote
 
-from aiohttp import ClientSession
+from util import misc
 
 from .common import Item
 
@@ -36,8 +36,8 @@ def extract_data(value: str):
 
 
 async def get_data() -> list[Item]:
-  async with ClientSession() as http:
-    response = await http.get(URL, headers={"User-Agent": UA})
+  http = misc.http()
+  async with http.get(URL, headers={"User-Agent": UA}) as response:
     data = extract_data(await response.text())
   result = []
   for i in data["hotsearch"]:

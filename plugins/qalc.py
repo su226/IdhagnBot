@@ -5,7 +5,10 @@ from nonebot.params import CommandArg
 
 from util import command
 
-USAGE = '''\
+qalc = (
+  command.CommandBuilder("qalc", "qalc", "计算")
+  .brief("强大的计算器")
+  .usage('''\
 /qalc <表达式>
 基于Qalculator的，非常强大的计算器。
 
@@ -20,19 +23,14 @@ USAGE = '''\
 25 × 摄氏度 = 77 °F
 汇率转换（自动更新）：
 /qalc 100CNY to USD
-100 × CNY ≈ $14.79230869'''
-qalc = (
-  command.CommandBuilder("qalc", "qalc", "计算")
-  .brief("强大的计算器")
-  .usage(USAGE)
-  .build())
-
-
+100 × CNY ≈ $14.79230869''')
+  .build()
+)
 @qalc.handle()
 async def handle_qalc(arg: Message = CommandArg()):
   expr = str(arg).rstrip()
   if not expr:
-    await qalc.finish(USAGE)
+    await qalc.finish(qalc.__doc__)
   proc = await asyncio.create_subprocess_exec(
     "qalc", expr, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
   result, _ = await proc.communicate(b"y")  # 更新汇率

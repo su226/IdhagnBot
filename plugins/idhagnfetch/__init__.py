@@ -10,7 +10,7 @@ from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 from PIL import Image
 from pydantic import BaseModel, Field
 
-from util import color, command, config_v2, text, util
+from util import colorutil, command, configs, imutil, misc, textutil
 
 from .gpu import get_gpu_info
 
@@ -32,7 +32,6 @@ Items = Literal[
 
 
 class Config(BaseModel):
-  __file__ = "idhagn_fetch"
   avatar_size: int = 320
   enable_header: bool = True
   enable_account: bool = True
@@ -48,7 +47,7 @@ class Config(BaseModel):
     )
 
 
-CONFIG = config_v2.SharedConfig("idhagn_fetch", Config)
+CONFIG = configs.SharedConfig("idhagnfetch", Config)
 HEADER = "IdhagnFetch - 绝对不是参考的screenfetch或者neofetch"
 KILO = 1024
 MEGA = 1024 ** 2
@@ -154,13 +153,13 @@ def get_battery():
   if battery_info.power_plugged:
     info_str = f"{percent}% (充电中)"
   else:
-    info_str = f"{percent}% (剩余 {util.format_time(battery_info.secsleft)})"
+    info_str = f"{percent}% (剩余 {misc.format_time(battery_info.secsleft)})"
   return [("电池", info_str)]
 
 
 ITEMS: dict[Items, Callable[[], list[tuple[str, str]]]] = {
   "system": lambda: [("系统", SYSTEM)],
-  "uptime": lambda: [("系统在线", util.format_time(time.time() - psutil.boot_time()))],
+  "uptime": lambda: [("系统在线", misc.format_time(time.time() - psutil.boot_time()))],
   "cpu": lambda: [("CPU", CPU_MODEL)],
   "cpu_usage": get_cpu_usage,
   "gpus_and_usage": get_gpus_and_usage,
@@ -171,7 +170,7 @@ ITEMS: dict[Items, Callable[[], list[tuple[str, str]]]] = {
   "python": lambda: [("Python", PYTHON_VER)],
   "nonebot": lambda: [("Nonebot", nonebot.__version__)],
   "idhagnbot": lambda: [("IdhagnBot", IDHAGNBOT_VER)],
-  "bot_uptime": lambda: [("机器人在线", util.format_time(time.time() - BOT_START_TIME))]
+  "bot_uptime": lambda: [("机器人在线", misc.format_time(time.time() - BOT_START_TIME))]
 }
 
 
@@ -185,7 +184,7 @@ idhagnfetch = (
 )
 @idhagnfetch.handle()
 async def handle_idhagnfetch(bot: Bot):
-  login, avatar = await asyncio.gather(bot.get_login_info(), util.get_avatar(int(bot.self_id)))
+  login, avatar = await asyncio.gather(bot.get_login_info(), imutil.get_avatar(int(bot.self_id)))
 
   def make() -> MessageSegment:
     nonlocal avatar
@@ -196,19 +195,19 @@ async def handle_idhagnfetch(bot: Bot):
 
     info_x = 64
     info_y = 64
-    info_im = text.render("\n".join(info_lines), "sans", 32, markup=True)
+    info_im = textutil.render("\n".join(info_lines), "sans", 32, markup=True)
     info_w, info_h = info_im.size
     im_w = 128
     _bound: Any = None  # HACK
     header_im = _bound
     account_im = _bound
     if config.enable_header:
-      header_im = text.render(HEADER, "sans", 32, color=(255, 255, 255))
+      header_im = textutil.render(HEADER, "sans", 32, color=(255, 255, 255))
       im_w += header_im.width
       info_y += header_im.height + 16
     if config.enable_account:
       account_markup = config.format(login["nickname"], f"({login['user_id']})")
-      account_im = text.render(account_markup, "sans", 32, markup=True)
+      account_im = textutil.render(account_markup, "sans", 32, markup=True)
       info_w = max(info_w, account_im.width)
       info_h += account_im.height + 16
     if config.avatar_size:
@@ -217,22 +216,22 @@ async def handle_idhagnfetch(bot: Bot):
     im_w = max(im_w, info_x + info_w + 64)
     im_h = info_y + info_h + 64
 
-    im = Image.new("RGB", (im_w, im_h), color.split_rgb(config.background_color))
+    im = Image.new("RGB", (im_w, im_h), colorutil.split_rgb(config.background_color))
     if config.enable_header:
       im.paste(header_im, (64, 64), header_im)
     if config.avatar_size != 0:
       avatar_size = config.avatar_size * 2
-      avatar = avatar.resize((avatar_size, avatar_size), util.scale_resample)
+      avatar = avatar.resize((avatar_size, avatar_size), imutil.scale_resample())
       im.paste(avatar, (64, info_y), avatar)
     if config.enable_account:
       im.paste(account_im, (info_x, info_y), account_im)
-      im.paste(color.split_rgb(config.secondary_color), (
+      im.paste(colorutil.split_rgb(config.secondary_color), (
         info_x, info_y + account_im.height + 6,
         info_x + account_im.width, info_y + account_im.height + 10
       ))
       info_y += account_im.height + 16
     im.paste(info_im, (info_x, info_y), info_im)
 
-    return util.pil_image(im)
+    return imutil.to_segment(im)
 
   await idhagnfetch.finish(await asyncio.to_thread(make))

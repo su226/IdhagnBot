@@ -24,7 +24,7 @@ from typing import Any
 
 from nonebot.adapters.onebot.v11 import Message
 
-from util import bilibili_activity
+from util.api_common import bilibili_activity
 
 from ..common import Handler
 from . import article, audio, forward, image, text, unknown, video

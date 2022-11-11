@@ -1,12 +1,15 @@
+from collections import deque
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-from typing import Any, Literal
+from typing import Any, Generic, Iterable, Literal, TypeVar, cast
 
 from loguru import logger
-from nonebot.adapters.onebot.v11 import Adapter, Bot
+from nonebot.adapters.onebot.v11 import Bot
 from nonebot.exception import ActionFailed
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 
-from .config_v2 import GroupState, SharedState
+from util import configs, misc
 
 Node = tuple[str, ...]
 
@@ -14,12 +17,25 @@ Node = tuple[str, ...]
 class Entry(BaseModel):
   node_str: str = Field(alias="node")
   value: bool
+  expire: datetime | None = None
+  context: dict[str, str] = Field(default_factory=dict)
+  _node: tuple[str, ...] = PrivateAttr()
+
+  def __init__(self, **kw: Any) -> None:
+    super().__init__(**kw)
+    self._node = tuple(self.node_str.split("."))
 
   @property
-  def node(self) -> Node:
-    if self.node_str == ".":
-      return ()
-    return tuple(self.node_str.split("."))
+  def node(self) -> tuple[str, ...]:
+    return self._node
+
+  def matches(self, time: datetime, context: dict[str, str]) -> bool:
+    if self.expire and self.expire < time:
+      return False
+    for k, v in self.context.items():
+      if k not in context or context[k] != v:
+        return False
+    return True
 
 
 class Role(BaseModel):
@@ -28,10 +44,66 @@ class Role(BaseModel):
   entries: list[Entry] = Field(default_factory=list)
 
 
+@dataclass
+class RoleEntry:
+  role_name: str
+  role: Role
+  entry: Entry
+
+  def __lt__(self, other: "RoleEntry") -> bool:
+    return (-self.role.priority, self.role_name) < (-other.role.priority, other.role_name)
+
+
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+class Trie(Generic[K, V]):
+  def __init__(self) -> None:
+    self.data: list[V] = []
+    self.children: dict[K, "Trie[K, V]"] = {}
+    self.parent: "Trie[K, V]" = self
+    self.depth = 0
+
+  def get_most(self, key: Iterable[K]) -> "Trie[K, V]":
+    cur = self
+    for i in key:
+      if i not in cur.children:
+        break
+      cur = cur.children[i]
+    return cur
+
+  def __setitem__(self, key: Iterable[K], value: V) -> None:
+    cur = self
+    for i in key:
+      if i not in cur.children:
+        child = Trie()
+        child.parent = cur
+        child.depth = cur.depth + 1
+        cur.children[i] = child
+        cur = child
+      else:
+        cur = cur.children[i]
+    cur.data.append(value)
+
+  def sort(self, recursive: bool = True) -> None:
+    cast(list[Any], self.data).sort()
+    if recursive:
+      for i in self.children.values():
+        i.sort()
+
+
 class User(BaseModel):
   roles: list[str] = Field(default_factory=list)
   entries: list[Entry] = Field(default_factory=list)
   level: Literal[None, "member", "admin", "owner"] = None
+  _tree: Trie[str, Entry] = PrivateAttr()
+
+  def __init__(self, **kw: Any) -> None:
+    super().__init__(**kw)
+    self._tree = Trie()
+    for entry in self.entries:
+      self._tree[entry.node] = entry
 
 
 class Command(BaseModel):
@@ -42,11 +114,17 @@ class State(BaseModel):
   roles: dict[str, Role] = Field(default_factory=dict)
   users: dict[int, User] = Field(default_factory=dict)
   commands: dict[str, Command] = Field(default_factory=dict)
+  _tree: Trie[str, RoleEntry] = PrivateAttr()
 
-  def get_role(self, name: str) -> Role:
-    if name == "default" and name not in self.roles:
-      self.roles[name] = Role()
-    return self.roles[name]
+  def __init__(self, **kw: Any) -> None:
+    super().__init__(**kw)
+    self._tree = Trie()
+    for name, role in self.roles.items():
+      for entry in role.entries:
+        self._tree[entry.node] = RoleEntry(name, role, entry)
+    self._tree.sort()
+    if "default" not in self.roles:
+      self.roles["default"] = Role()
 
   def get_command_level(self, node: Node) -> str | None:
     key = "." if not node else ".".join(node)
@@ -55,9 +133,7 @@ class State(BaseModel):
     return None
 
 
-SHARED_STATE = SharedState("permission_override", State)
-GROUP_STATE = GroupState("permission", State)
-ADAPTER_NAME = Adapter.get_name().split(None, 1)[0].lower()
+CONFIG = configs.SharedConfig("permission", State)
 LEVELS: dict[str, "Level"] = {}
 
 
@@ -97,66 +173,12 @@ class Level(Enum):
     return LEVELS[value]
 
 
-def tuple_startswith(value: tuple[Any, ...], prefix: tuple[Any, ...]) -> bool:
-  return len(value) >= len(prefix) and value[:len(prefix)] == prefix
-
-
-def check_in(node: Node, state: State, user: int) -> bool | None:
-  entries: list[list[Entry]] = [[] for _ in range(len(node))]
-  if user in state.users:
-    data = state.users[user]
-    role_names = set(data.roles)
-    roles = [state.get_role(i) for i in role_names]
-    for entry in data.entries:
-      if tuple_startswith(node, entry.node):
-        entries[len(node) - len(entry.node)].append(entry)
-  else:
-    role_names = set()
-    roles = []
-  for role in roles:
-    for name in role.parents:
-      if name not in role_names:
-        role_names.add(name)
-        roles.append(state.get_role(name))
-  if "default" not in role_names:
-    roles.append(state.get_role("default"))
-  roles.sort(key=lambda x: x.priority, reverse=True)
-  for role in roles:
-    for entry in role.entries:
-      if tuple_startswith(node, entry.node):
-        entries[len(node) - len(entry.node)].append(entry)
-  for e in entries:
-    for e2 in e:
-      # TODO: 如果有需求，增加condition，比如阻止某个用户在特定群使用某个命令
-      return e2.value
-  return None
-
-
-def check(node: Node, user: int, group: int = 1) -> bool | None:
-  shared_state = SHARED_STATE()
-  if (result := check_in(node, shared_state, user)) is not None:
-    return result
-  if group != -1:
-    group_state = GROUP_STATE(group)
-    if (result := check_in(node, group_state, user)) is not None:
-      return result
-  return None
-
-
-def is_superuser(bot: Bot, user: int) -> bool:
-  return f"{ADAPTER_NAME}:{user}" in bot.config.superusers or str(user) in bot.config.superusers
-
-
 def get_override_level(bot: Bot, user: int, group: int = -1) -> Level | None:
-  if is_superuser(bot, user):
+  if misc.is_superuser(bot, user):
     return Level.SUPER
-  state = SHARED_STATE()
-  if user in state.users and (level := state.users[user].level) is not None:
+  config = CONFIG()
+  if user in config.users and (level := config.users[user].level) is not None:
     return Level.parse(level)
-  if group != -1:
-    state = GROUP_STATE(group)
-    if user in state.users and (level := state.users[user].level) is not None:
-      return Level.parse(level)
   return None
 
 
@@ -173,10 +195,58 @@ async def get_group_level(bot: Bot, user: int, group: int) -> Level | None:
 
 
 def get_node_level(node: Node, group: int = -1) -> Level | None:
-  if (level_name := SHARED_STATE().get_command_level(node)) is not None:
+  config = CONFIG()
+  if (level_name := config.get_command_level(node)) is not None:
     return Level.parse(level_name)
-  elif group != -1 and (level_name := GROUP_STATE(group).get_command_level(node)) is not None:
-    return Level.parse(level_name)
+  return None
+
+
+def check(node: Node, user: int, group: int, level: Level) -> bool | None:
+  config = CONFIG()
+  roles: set[str] = set()
+  queue: deque[str] = deque()
+  user_tree = None
+  if user in config.users:
+    data = config.users[user]
+    queue.extend(data.roles)
+    user_tree = data._tree.get_most(node)
+  while queue:
+    i = queue.popleft()
+    if i in roles:
+      continue
+    roles.add(i)
+    queue.extend(config.roles[i].parents)
+  roles.add("default")
+  role_tree = config._tree.get_most(node)
+  context = {
+    "group": str(group),
+    "level": level.key,
+    "admin": str(level >= Level.ADMIN).lower(),
+  }
+  now = datetime.now()
+  if user_tree:
+    while user_tree.depth > role_tree.depth:
+      for entry in user_tree.data:
+        if entry.matches(now, context):
+          return entry.value
+      user_tree = user_tree.parent
+    while role_tree.depth > user_tree.depth:
+      for entry in role_tree.data:
+        if entry.role_name in roles and entry.entry.matches(now, context):
+          return entry.entry.value
+      role_tree = role_tree.parent
+  while True:
+    if user_tree:
+      for entry in user_tree.data:
+        if entry.matches(now, context):
+          return entry.value
+      user_tree = user_tree.parent
+    for entry in role_tree.data:
+      if entry.role_name in roles and entry.entry.matches(now, context):
+        return entry.entry.value
+    role_tree = role_tree.parent
+    if role_tree.depth == 0:
+      break
   return None
 
 

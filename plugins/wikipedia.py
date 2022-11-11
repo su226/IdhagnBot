@@ -2,7 +2,7 @@ import math
 import re
 import socket
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Literal
+from typing import Any, AsyncIterator, Literal
 
 from aiohttp.web import BaseRequest, Response, Server, ServerRunner, TCPSite
 from libzim.reader import Archive  # type: ignore
@@ -10,22 +10,26 @@ from libzim.search import Query, Searcher  # type: ignore
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
+from pydantic import BaseModel, PrivateAttr
 
-from util import command, util
-from util.config import BaseConfig
+from util import command, configs, misc
 
 
-class Config(BaseConfig):
-  __file__ = "wikipedia"
+class Config(BaseModel):
   zim: str = ""
   page_size: int = 10
   width: int = 800
   scale: float = 1
   use_opencc: bool = True
+  _archive: Archive = PrivateAttr()
+
+  def __init__(self, **kw: Any) -> None:
+    super().__init__(**kw)
+    if self.zim:
+      self._archive = Archive(self.zim)
 
 
-CONFIG = Config.load()
-ZIM = Archive(CONFIG.zim)
+CONFIG = configs.SharedConfig("wikipedia", Config)
 # 简繁转换代码来自 https://github.com/nk2028/opencc-js ，MIT协议
 OPENCC_SCRIPT = '''function () {
   const OpenCCJSData = {
@@ -740,7 +744,6 @@ COMMON_SCRIPT = '''function() {
     elem.open = true;
   }
 }'''
-
 CHARSET_RE = re.compile(r";\s*charset=([^;]*)")
 
 
@@ -749,8 +752,9 @@ async def handler(request: BaseRequest):
     nonlocal charset
     charset = match[1]
     return ""
+  config = CONFIG()
   try:
-    entry = ZIM.get_entry_by_path(request.path[1:])
+    entry = config._archive.get_entry_by_path(request.path[1:])
   except KeyError:
     return Response(status=404, text="Not Found")
   item = entry.get_item()
@@ -770,6 +774,7 @@ async def autostop(site: TCPSite) -> AsyncIterator[None]:
 
 
 async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: int = 100):
+  config = CONFIG()
   server = Server(handler)
   runner = ServerRunner(server)
   await runner.setup()
@@ -777,34 +782,38 @@ async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: 
     s.bind(("", 0))
     port = s.getsockname()[1]
   site = TCPSite(runner, "localhost", port)
-  async with autostop(site), util.browser() as browser:
+  async with autostop(site), misc.browser() as browser:
     page = await browser.newPage()
-    await page.setViewport({"width": CONFIG.width, "height": 0, "deviceScaleFactor": CONFIG.scale})
+    await page.setViewport({"width": config.width, "height": 0, "deviceScaleFactor": config.scale})
     await page.goto(f"http://localhost:{port}/{path}")
     await page.evaluate(COMMON_SCRIPT)
-    if CONFIG.use_opencc:
+    if config.use_opencc:
       await page.evaluate(OPENCC_SCRIPT)
     return await page.screenshot(fullPage=True, format=format, quality=quality)
 
 wikipedia = (
   command.CommandBuilder("wikipedia", "维基百科", "维基", "百科", "wikipedia", "wiki", "pedia")
+  .rule(lambda: bool(CONFIG().zim))
+  .help_condition(lambda _: bool(CONFIG().zim))
   .brief("搜索并查看离线维基百科")
   .usage("/维基百科 <搜索内容>")
-  .build())
+  .build()
+)
 
 
 def format_choices(state: T_State):
+  config = CONFIG()
   search = state["search"]
   count = state["count"]
   page = state["page"]
-  begin = page * CONFIG.page_size
+  begin = page * config.page_size
   segments = []
-  for i, v in enumerate(search.getResults(begin, CONFIG.page_size), begin + 1):
+  for i, v in enumerate(search.getResults(begin, config.page_size), begin + 1):
     segments.append(f"{i}: {v[2:]}")
-  pages = math.ceil(count / CONFIG.page_size)
+  pages = math.ceil(count / config.page_size)
   segments.append(f"第 {page + 1} 页，共 {pages} 页，{count} 个结果")
   segments.append("- 发送数字查看页面")
-  if begin + CONFIG.page_size < count:
+  if begin + config.page_size < count:
     segments.append("- 发送“下”加载下一页")
   else:
     state["end"] = True
@@ -817,7 +826,8 @@ async def handle_wikipedia(state: T_State, msg: Message = CommandArg()):
   query = str(msg).rstrip()
   if not query:
     await wikipedia.finish(wikipedia.__doc__)
-  state["search"] = search = Searcher(ZIM).search(Query().set_query(query))
+  config = CONFIG()
+  state["search"] = search = Searcher(config._archive).search(Query().set_query(query))
   state["count"] = count = search.getEstimatedMatches()
   state["page"] = 0
   state["end"] = False

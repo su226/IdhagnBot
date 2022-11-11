@@ -3,7 +3,7 @@ from datetime import date
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
-from util import util
+from util import misc
 
 from . import DailyCache, Module
 
@@ -15,7 +15,7 @@ class HistoryCache(DailyCache):
     super().__init__("history.json")
 
   async def update(self) -> None:
-    http = util.http()
+    http = misc.http()
     async with http.get(HISTORY_API) as response:
       data = await response.json()
     data["result"].pop()

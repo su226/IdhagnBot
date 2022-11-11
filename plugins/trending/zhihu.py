@@ -1,4 +1,4 @@
-from aiohttp import ClientSession
+from util import misc
 
 from .common import Item
 
@@ -7,8 +7,8 @@ URL = "https://www.zhihu.com/question/{}"
 
 
 async def get_data() -> list[Item]:
-  async with ClientSession() as http:
-    response = await http.get(API)
+  http = misc.http()
+  async with http.get(API) as response:
     data = await response.json()
   result = []
   for i in data["data"]:

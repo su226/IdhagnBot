@@ -1,10 +1,11 @@
-from io import BytesIO
+import asyncio
 from typing import Any, Awaitable, Callable
 
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
 
-from util import bilibili_activity
+from util import imutil
+from util.api_common import bilibili_activity
 from util.images.card import Card, CardAuthor, CardCover, CardLine, CardText
 
 from ..common import TContent, check_ignore, fetch_image
@@ -12,7 +13,7 @@ from . import article, audio, image, text, video
 
 Checker = tuple[type[TContent], Callable[[TContent], None]]
 TitleFormatter = tuple[type[TContent], Callable[[TContent], str]]
-CardAppender = tuple[type[TContent], Callable[[TContent, Card], Awaitable[None]]]
+AppenderGetter = tuple[type[TContent], Callable[[TContent], Awaitable[Callable[[Card], None]]]]
 ActivityPGC = bilibili_activity.Activity[bilibili_activity.ContentPGC]
 
 
@@ -32,15 +33,30 @@ def checker(activity: text.ActivityText | image.ActivityImage) -> None:
   check_ignore(True, activity.content.text)
 
 
-async def append_pgc_card(activity: ActivityPGC, card: Card) -> None:
+async def get_pgc_appender(activity: ActivityPGC) -> Callable[[Card], None]:
   if activity.content.season_cover:
     season_cover = await fetch_image(activity.content.season_cover)
-    card.add(CardAuthor(season_cover, activity.content.season_name))
   else:
-    card.add(CardText(activity.content.season_name, 32, 1))
-  card.add(CardText(activity.content.episode_name, 40, 2))
+    season_cover = None
   episode_cover = await fetch_image(activity.content.episode_cover)
-  card.add(CardCover(episode_cover))
+
+  def appender(card: Card) -> None:
+    if season_cover:
+      card.add(CardAuthor(season_cover, activity.content.season_name))
+    else:
+      card.add(CardText(activity.content.season_name, 32, 1))
+    card.add(CardText(activity.content.episode_name, 40, 2))
+    card.add(CardCover(episode_cover))
+
+  return appender
+
+
+def deleted_appender(card: Card) -> None:
+  card.add(CardText("源动态已失效", 32, 2))
+
+
+def unknown_appender(card: Card) -> None:
+  card.add(CardText("IdhagnBot 暂不支持解析此类动态", 32, 2))
 
 
 GENERIC_TITLE = make_title_formatter("动态")
@@ -54,13 +70,13 @@ TITLE_FORMATTERS: list[TitleFormatter[Any]] = [
   (bilibili_activity.ContentArticle, make_title_formatter("专栏")),
   (bilibili_activity.ContentPGC, pgc_title),
 ]
-CARD_APPENDERS: list[CardAppender[Any]] = [
-  (bilibili_activity.ContentText, text.append_card),
-  (bilibili_activity.ContentImage, image.append_card),
-  (bilibili_activity.ContentVideo, video.append_card),
-  (bilibili_activity.ContentAudio, audio.append_card),
-  (bilibili_activity.ContentArticle, article.append_card),
-  (bilibili_activity.ContentPGC, append_pgc_card),
+CARD_APPENDERS: list[AppenderGetter[Any]] = [
+  (bilibili_activity.ContentText, text.get_appender),
+  (bilibili_activity.ContentImage, image.get_appender),
+  (bilibili_activity.ContentVideo, video.get_appender),
+  (bilibili_activity.ContentAudio, audio.get_appender),
+  (bilibili_activity.ContentArticle, article.get_appender),
+  (bilibili_activity.ContentPGC, get_pgc_appender),
 ]
 
 
@@ -85,27 +101,29 @@ async def format(
       title_label = GENERIC_TITLE(activity.content.activity)
 
   avatar = await fetch_image(activity.avatar)
-  card = Card()
-  card.add(CardAuthor(avatar, activity.name))
-  card.add(CardText(activity.content.text, 32, 3))
-  card.add(CardLine())
 
   if activity.content.activity is None:
-    card.add(CardText("源动态已失效", 32, 2))
+    appender = deleted_appender
   else:
-    for type, appender in CARD_APPENDERS:
+    for type, getter in CARD_APPENDERS:
       if isinstance(activity.content.activity.content, type):
-        await appender(activity.content.activity, card)
+        appender = await getter(activity.content.activity)
         break
     else:
-      card.add(CardText("IdhagnBot 暂不支持解析此类动态", 32, 2))
+      appender = unknown_appender
 
-  im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
-  card.render(im, 0, 0)
-  f = BytesIO()
-  im.save(f, "PNG")
+  def make() -> Message:
+    card = Card()
+    card.add(CardAuthor(avatar, activity.name))
+    card.add(CardText(activity.content.text, 32, 3))
+    card.add(CardLine())
+    appender(card)
+    im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
+    card.render(im, 0, 0)
+    return (
+      f"{activity.name} 转发了{title_label}\n"
+      + imutil.to_segment(im)
+      + f"\nhttps://t.bilibili.com/{activity.id}"
+    )
 
-  return \
-    f"{activity.name} 转发了{title_label}\n" + \
-    MessageSegment.image(f) + \
-    f"\nhttps://t.bilibili.com/{activity.id}"
+  return await asyncio.to_thread(make)

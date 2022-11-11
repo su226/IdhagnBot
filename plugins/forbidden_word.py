@@ -8,16 +8,15 @@ from nonebot.params import EventMessage, ShellCommandArgs
 from nonebot.permission import SUPERUSER
 from nonebot.rule import ArgumentParser
 from nonebot.typing import T_State
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from util import command, context, util
-from util.config import BaseConfig, BaseState
+from util import command, configs, context, misc
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 
-class Config(BaseConfig, file="forbidden_word"):
+class Config(BaseModel):
   ban_timeout: int = 60
   ban_thresold: int = 3
   ban_duration: int = 600
@@ -25,12 +24,12 @@ class Config(BaseConfig, file="forbidden_word"):
   show_ban: bool = True
 
 
-class State(BaseState, file="forbidden_word"):
-  words: dict[int, set[str]] = Field(default_factory=dict)
+class State(BaseModel):
+  words: set[str] = Field(default_factory=dict)
 
 
-CONFIG = Config.load()
-STATE = State.load()
+CONFIG = configs.SharedConfig("forbidden_word", Config)
+STATE = configs.GroupState("forbidden_word", State)
 COUNT: dict[tuple[int, int], int] = {}
 
 manage_parser = ArgumentParser("/屏蔽词", add_help=False)
@@ -57,34 +56,30 @@ manage = (
 
 
 @manage.handle()
-async def handle_manage(event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()):
+async def handle_manage(
+  event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+) -> None:
   if isinstance(args, ParserExit):
     await manage.finish(args.message)
   ctx = context.get_event_context(event)
+  state = STATE(ctx)
   if args.subcommand == "view":
-    words = "、".join(
-      f'"{word}"' if '"' in word else word
-      for word in STATE.words.get(ctx, set())
-    )
+    words = "、".join(f'"{word}"' if '"' in word else word for word in state.words)
     await manage.finish("当前屏蔽词：" + words)
   elif args.subcommand == "add":
-    if ctx not in STATE.words:
-      STATE.words[ctx] = set()
-    old_len = len(STATE.words[ctx])
-    STATE.words[ctx].update(args.words)
-    new_len = len(STATE.words[ctx])
+    old_len = len(state.words)
+    state.words.update(args.words)
+    new_len = len(state.words)
     added = new_len - old_len
-    STATE.dump()
+    STATE.dump(ctx)
     await manage.finish(
       f"已添加{added}个，{len(args.words) - added}个之前已经添加，目前共有{new_len}个屏蔽词")
   elif args.subcommand == "delete":
-    if ctx not in STATE.words:
-      STATE.words[ctx] = set()
-    old_len = len(STATE.words[ctx])
-    STATE.words[ctx].difference_update(args.words)
-    new_len = len(STATE.words[ctx])
+    old_len = len(state.words)
+    state.words.difference_update(args.words)
+    new_len = len(state.words)
     removed = old_len - new_len
-    STATE.dump()
+    STATE.dump(ctx)
     await manage.finish(
       f"已删除{removed}个，{len(args.words) - removed}个本就不存在，目前共有{new_len}个屏蔽词")
 
@@ -101,7 +96,7 @@ async def check_recall(
     return False
   str_msg = str(msg)
   ctx = context.get_event_context(event)
-  for word in STATE.words.get(ctx, set()):
+  for word in STATE(ctx).words:
     if word in str_msg:
       state["word"] = word
       return True
@@ -116,22 +111,23 @@ async def handle_recall(event: MessageEvent, bot: Bot, state: T_State):
   except ActionFailed:
     return
   ctx = context.get_event_context(event)
-  if "word" in state and CONFIG.show_word:
+  config = CONFIG()
+  if "word" in state and config.show_word:
     prefix = f"请不要发送“{state['word']}”等违禁内容"
   else:
     prefix = "请不要发送违禁内容"
-  if CONFIG.ban_timeout != 0 and CONFIG.ban_thresold != 0:
+  if config.ban_timeout != 0 and config.ban_thresold != 0:
     key = (ctx, event.user_id)
     COUNT[key] = COUNT.get(key, 0) + 1
     scheduler.add_job(
-      decr_count, "date", (key,), run_date=datetime.now() + timedelta(seconds=CONFIG.ban_timeout))
-    if COUNT[key] >= CONFIG.ban_thresold:
-      await bot.set_group_ban(group_id=ctx, user_id=event.user_id, duration=CONFIG.ban_duration)
+      decr_count, "date", (key,), run_date=datetime.now() + timedelta(seconds=config.ban_timeout))
+    if COUNT[key] >= config.ban_thresold:
+      await bot.set_group_ban(group_id=ctx, user_id=event.user_id, duration=config.ban_duration)
       suffix = "，已禁言警告"
-    elif CONFIG.show_ban:
+    elif config.show_ban:
       suffix = (
-        f"，{util.format_time(CONFIG.ban_timeout)}内发送超过{CONFIG.ban_thresold}条"
-        f"将会禁言{util.format_time(CONFIG.ban_duration)}警告")
+        f"，{misc.format_time(config.ban_timeout)}内发送超过{config.ban_thresold}条"
+        f"将会禁言{misc.format_time(config.ban_duration)}警告")
     else:
       suffix = "，否则可能会禁言警告"
   else:

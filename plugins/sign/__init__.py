@@ -8,10 +8,10 @@ from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 
-from util import account_aliases, command, context, currency, help, util
+from util import command, context, currency, misc, user_aliases
 
 from . import leaderboard  # noqa
-from .config import CONFIG, STATE, Config, FormatData
+from .config import CONFIG, STATE, FormatData
 from .formatters.legacy import format as formatter_legacy
 from .formatters.ring import format as formatter_ring
 
@@ -21,22 +21,18 @@ FORMATTERS = {
 }
 
 
+def sign_usage() -> str:
+  config = CONFIG()
+  return f'''\
+每天签到可获得{config.min_coin}至{config.max_coin}金币
+连续签到或前{len(config.first_award)}名可获得更多金币'''
 sign = (
   command.CommandBuilder("sign.sign", "签到", "sign")
   .in_group()
   .brief("每日签到获取金币")
-  .build())
-
-
-@CONFIG.onload()
-def onload(_: Config | None, cur: Config):
-  item = help.CommandItem.find("签到")
-  item.raw_usage = f'''\
-每天签到可获得{cur.min_coin}至{cur.max_coin}金币
-连续签到或前{len(cur.first_award)}名可获得更多金币'''
-CONFIG.load()
-
-
+  .usage(sign_usage)
+  .build()
+)
 @sign.handle()
 async def handle_sign(bot: Bot, event: MessageEvent):
   uid = event.user_id
@@ -88,20 +84,20 @@ async def match_all(bot: Bot, event: MessageEvent, patterns: list[str]) -> set[i
     if pattern in ("全部", "全体", "all"):
       ctx = context.get_event_context(event)
       return tuple(i["user_id"] for i in await bot.get_group_member_list(group_id=ctx))
-    return await account_aliases.match_uid(bot, event, pattern, True)
+    return await user_aliases.match_uid(bot, event, pattern, True)
   coros = [do_match(i) for i in patterns]
-  errors: list[util.AggregateError] = []
+  errors: list[misc.AggregateError] = []
   users = set()
   for i in await asyncio.gather(*coros, return_exceptions=True):
-    if isinstance(i, util.AggregateError):
+    if isinstance(i, misc.AggregateError):
       errors.append(i)
     else:
       users.update(i)
   if errors:
-    raise util.AggregateError(*errors)
+    raise misc.AggregateError(*errors)
   return users
 
-gold_parser = ArgumentParser("/金币", add_help=False)
+gold_parser = ArgumentParser("/金币")
 gold_parser.add_argument(
   "users", nargs="+", metavar="用户",
   help="可使用昵称、群名片或QQ号，可指定多个，也可使用\"全部\"指代全体成员")
@@ -133,7 +129,7 @@ async def handle_gold(
     await gold.finish(args.message)
   try:
     users = await match_all(bot, event, args.users)
-  except util.AggregateError as e:
+  except misc.AggregateError as e:
     await gold.finish("\n".join(e))
   ctx = context.get_event_context(event)
   if args.add is not None:

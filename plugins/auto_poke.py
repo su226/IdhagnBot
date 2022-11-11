@@ -3,7 +3,7 @@ from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegme
 from nonebot.params import CommandArg
 from nonebot.rule import Rule
 
-from util import account_aliases, command, context, util
+from util import command, context, misc, user_aliases
 
 uids: dict[int, set[str]] = {}
 
@@ -24,24 +24,23 @@ async def handle_auto_poke(bot: Bot, event: MessageEvent, arg: Message = Command
   ctx = context.get_event_context(event)
   args = arg.extract_plain_text().split()
   if len(args) == 0:
-    await auto_poke.send("当前自动戳：\n" + "\n".join(map(str, uids.get(ctx, []))))
+    await auto_poke.finish("当前自动戳：\n" + "\n".join(map(str, uids.get(ctx, []))))
   elif args == ["clear"] or args == ["清除"]:
     if ctx in uids:
       del uids[ctx]
-    await auto_poke.send("已清除自动戳")
+    await auto_poke.finish("已清除自动戳")
   else:
     all_errors = []
     all_uids = []
     for pattern in args:
       try:
-        all_uids.extend(await account_aliases.match_uid(bot, event, pattern, True))
-      except util.AggregateError as e:
+        all_uids.extend(await user_aliases.match_uid(bot, event, pattern, True))
+      except misc.AggregateError as e:
         all_errors.extend(e)
     if all_errors:
-      await auto_poke.send("\n".join(all_errors))
-      return
+      await auto_poke.finish("\n".join(all_errors))
     uids[ctx] = set(all_uids)
-    await auto_poke.send("已设置自动戳：\n" + "\n".join(map(str, uids[ctx])))
+    await auto_poke.finish("已设置自动戳：\n" + "\n".join(map(str, uids[ctx])))
 
 
 async def has_uid(event: MessageEvent) -> bool:
@@ -52,4 +51,4 @@ do_auto_poke = nonebot.on_message(Rule(has_uid), priority=2)
 
 @do_auto_poke.handle()
 async def do_handle_auto_poke(event: MessageEvent):
-  await do_auto_poke.send(MessageSegment("poke", {"qq": event.user_id}))
+  await do_auto_poke.finish(MessageSegment("poke", {"qq": event.user_id}))

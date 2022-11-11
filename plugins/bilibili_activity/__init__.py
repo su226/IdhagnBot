@@ -11,7 +11,8 @@ from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
 from nonebot.exception import ActionFailed
 from nonebot.params import CommandArg
 
-from util import bilibili_activity, command, context
+from util import command, context
+from util.api_common import bilibili_activity
 
 from . import common, contents
 
@@ -58,15 +59,7 @@ scheduler.add_listener(schedule_next, EVENT_JOB_EXECUTED | EVENT_JOB_MISSED)
 
 @driver.on_bot_connect
 async def on_bot_connect() -> None:
-  common.CONFIG.load()
-
-
-def tp(x):  # TODO: 调试用，记得删掉这里（）
-  try:
-    return bilibili_activity.Activity.grpc_parse(x)
-  except Exception:
-    logger.warning(f"解析动态失败: {x}")
-    raise
+  common.CONFIG()
 
 
 async def new_activities(user: common.User) -> AsyncGenerator[bilibili_activity.Activity, None]:
@@ -75,7 +68,7 @@ async def new_activities(user: common.User) -> AsyncGenerator[bilibili_activity.
   while offset is not None:
     if use_grpc:
       raw, next_offset = await bilibili_activity.grpc_fetch(user.uid, offset)
-      activities = [tp(x) for x in raw]
+      activities = [bilibili_activity.Activity.grpc_parse(x) for x in raw]
     else:
       raw, next_offset = await bilibili_activity.json_fetch(user.uid, offset)
       activities = [bilibili_activity.Activity.json_parse(x) for x in raw]
@@ -183,24 +176,21 @@ async def try_check_all(bot: Bot, concurrency: int | None = None) -> tuple[int, 
   return len([x for x in results if x]), sum(results)
 
 
-FORCE_PUSH_USAGE = '''\
-/推送动态 <动态号>
-动态的动态号是t.bilibili.com后面的数字
-视频的动态号只能通过API获取（不是AV或BV号）'''
 force_push = (
   command.CommandBuilder("bilibili_activity.force_push", "推送动态")
   .level("admin")
   .brief("强制推送B站动态")
-  .usage(FORCE_PUSH_USAGE)
-  .build())
-
-
+  .usage('''\
+/推送动态 <动态号>
+动态的动态号是t.bilibili.com后面的数字
+视频的动态号只能通过API获取（不是AV或BV号）''')
+  .build()
+)
 @force_push.handle()
-async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg()):
+async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg()) -> None:
   args = arg.extract_plain_text().rstrip()
   if len(args) == 0:
-    await force_push.send(FORCE_PUSH_USAGE)
-    return
+    await force_push.finish(force_push.__doc__)
   config = common.CONFIG()
   try:
     if config.grpc:
@@ -214,17 +204,18 @@ async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg())
   real_ctx = getattr(event, "group_id", -1)
   if ctx != real_ctx:
     await bot.send_group_msg(group_id=ctx, message=message)
-    await force_push.send(f"已推送到 {context.GROUP_IDS[ctx].name}")
+    name = context.CONFIG().groups[ctx]._name
+    await force_push.finish(f"已推送到 {name}")
   else:
-    await force_push.send(Message(message))
+    await force_push.finish(Message(message))
+
 
 check_now = (
   command.CommandBuilder("bilibili_activity.check_now", "检查动态")
   .level("admin")
   .brief("立即检查B站动态更新")
-  .build())
-
-
+  .build()
+)
 @check_now.handle()
 async def handle_check_now(bot: Bot):
   users, activities = await try_check_all(bot, 0)

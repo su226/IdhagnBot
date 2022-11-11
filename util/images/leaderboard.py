@@ -2,7 +2,7 @@ import html
 
 from PIL import Image, ImageChops, ImageFilter, ImageOps
 
-from util import text, util
+from util import imutil, textutil
 
 WIDTH = 640
 HEIGHTS = [120, 100, 100, 80]
@@ -28,32 +28,35 @@ def render(data: list[tuple[Image.Image, str, str]]) -> Image.Image:
 
     im.paste(placeholder_color, (0, y, line_h, y + line_h))
     if i >= len(data):
-      text.paste(
+      textutil.paste(
         im, (line_h // 2, y + line_h // 2), "?", "sans", line_h * 0.5,
-        anchor="mm", color=(255, 255, 255))
-      text.paste(
+        anchor="mm", color=(255, 255, 255)
+      )
+      textutil.paste(
         im, (round(line_h * 1.2), y + line_h // 2), "虚位以待", "sans", line_h * 0.3,
-        anchor="lm", color=(255, 255, 255))
+        anchor="lm", color=(255, 255, 255)
+      )
     else:
       avatar, name, info = data[i]
-      bg = ImageOps.fit(avatar, (WIDTH - line_h, line_h), util.scale_resample)
+      bg = ImageOps.fit(avatar, (WIDTH - line_h, line_h), imutil.scale_resample())
       bg = bg.filter(ImageFilter.GaussianBlur(8))
       mask = Image.new("L", (2, 1))
       mask.putpixel((0, 0), 64)
       mask.putpixel((1, 0), 8)
-      mask = mask.resize(bg.size, util.scale_resample)
+      mask = mask.resize(bg.size, imutil.scale_resample())
       bg.putalpha(ImageChops.multiply(bg.getchannel("A"), mask))
       im.paste(bg, (line_h, y), bg)
-      avatar = avatar.resize((line_h, line_h), util.scale_resample)
+      avatar = avatar.resize((line_h, line_h), imutil.scale_resample())
       im.paste(avatar, (0, y), avatar)
 
       name_x = round(line_h * 1.2)
       markup = html.escape(name)
       if info:
         markup += f"\n<span size='66%'>{html.escape(info)}</span>"
-      text.paste(
+      textutil.paste(
         im, (name_x, y + line_h // 2), markup, "sans", line_h * 0.3, anchor="lm", markup=True,
-        color=(255, 255, 255), box=WIDTH - name_x - 16, ellipsize=text.ELLIPSIZE_END)
+        color=(255, 255, 255), box=WIDTH - name_x - 16, ellipsize=textutil.ELLIPSIZE_END
+      )
 
     y += line_h
 

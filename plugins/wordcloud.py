@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import desc, func, select
 
-from util import command, config_v2, context, record, util
+from util import command, configs, context, imutil, record
 
 
 class Config(BaseModel):
@@ -34,7 +34,7 @@ class Config(BaseModel):
   stopwords_path: str = ""
   leaderboard_linit: int = 10
 
-CONFIG = config_v2.SharedConfig("wordcloud", Config)
+CONFIG = configs.SharedConfig("wordcloud", Config)
 USAGE = '''\
 /{} [开始日期 [结束日期]]
 范围包含开始日期和结束日期，开始日期不填默认为今天，结束日期不填默认与开始日期相同
@@ -163,7 +163,7 @@ def parse_date(src: str) -> tuple[date, timedelta]:
   raise ValueError(f"不是有效的日期: {src}")
 
 
-def format_wordcloud(messages: list[str]) -> Image.Image:
+def format_wordcloud(messages: list[str]) -> MessageSegment:
   config = CONFIG()
   texts: list[str] = []
   for i in messages:
@@ -190,7 +190,8 @@ def format_wordcloud(messages: list[str]) -> Image.Image:
     background_color=config.bg,  # type: ignore
     colormap=config.fg
   )
-  return wc.generate_from_frequencies({word: weight for word, weight in tags}).to_image()
+  im = wc.generate_from_frequencies({word: weight for word, weight in tags}).to_image()
+  return imutil.to_segment(im)
 
 
 async def handle_wordcloud(bot: Bot, event: MessageEvent, arg: Message, is_user: bool) -> None:
@@ -245,7 +246,7 @@ async def handle_wordcloud(bot: Bot, event: MessageEvent, arg: Message, is_user:
     title = f"{name} {title}"
   await bot.send(event, title)
   try:
-    im = await asyncio.to_thread(format_wordcloud, messages)
+    seg = await asyncio.to_thread(format_wordcloud, messages)
   except Exception:
     logger.opt(exception=True).warning(
       f"生成个人词云失败 群: {group_id} 用户: {user_id} 从: {start_datetime} 到: {end_datetime}"
@@ -254,19 +255,17 @@ async def handle_wordcloud(bot: Bot, event: MessageEvent, arg: Message, is_user:
     )
     await bot.send(event, "似乎什么都没有")
   else:
-    f = BytesIO()
-    im.save(f, "PNG")
-    await bot.send(event, MessageSegment.image(f))
+    await bot.send(event, seg)
 
 
 GROUP_USAGE = USAGE.format("群词云")
-group_wordcloud = command.CommandBuilder(
-  "wordcloud.wordcloud.group", "群词云", "词云"
-) \
-  .brief("查看最近的群词云") \
-  .usage(GROUP_USAGE) \
-  .in_group() \
+group_wordcloud = (
+  command.CommandBuilder("wordcloud.wordcloud.group", "群词云", "词云")
+  .brief("查看最近的群词云")
+  .usage(GROUP_USAGE)
+  .in_group()
   .build()
+)
 @group_wordcloud.handle()
 async def handle_group_wordcloud(
   bot: Bot, event: MessageEvent, arg: Message = CommandArg()
@@ -275,12 +274,12 @@ async def handle_group_wordcloud(
 
 
 PERSONAL_USAGE = USAGE.format("个人词云")
-personal_wordcloud = command.CommandBuilder(
-  "wordcloud.wordcloud.personal", "个人词云", "我的词云"
-) \
-  .brief("查看最近的个人词云") \
-  .usage(GROUP_USAGE) \
+personal_wordcloud = (
+  command.CommandBuilder("wordcloud.wordcloud.personal", "个人词云", "我的词云")
+  .brief("查看最近的个人词云")
+  .usage(PERSONAL_USAGE)
   .build()
+)
 @personal_wordcloud.handle()
 async def handle_personal_wordcloud(
   bot: Bot, event: MessageEvent, arg: Message = CommandArg()
@@ -324,56 +323,60 @@ async def handle_statistics(
       .group_by("date")
     )
     result = result.all()
-  labels = []
-  counts = []
-  i = 0
-  curtime = begin_time
-  while curtime <= today:
-    labels.append(curtime.strftime("%Y-%m") if is_year else curtime.strftime("%m-%d"))
-    if i < len(result) and result[i][0] == str(curtime):
-      counts.append(result[i][1])
-      i += 1
-    else:
-      counts.append(0)
-    if is_year:
-      if curtime.month == 12:
-        curtime = date(curtime.year + 1, 1, 1)
+
+  def make() -> MessageSegment:
+    labels = []
+    counts = []
+    i = 0
+    curtime = begin_time
+    while curtime <= today:
+      labels.append(curtime.strftime("%Y-%m") if is_year else curtime.strftime("%m-%d"))
+      if i < len(result) and result[i][0] == str(curtime):
+        counts.append(result[i][1])
+        i += 1
       else:
-        curtime = curtime.replace(month=curtime.month + 1)
-    else:
-      curtime += timedelta(1)
-  font = FontProperties(fname=config.font)  # type: ignore
-  fig = Figure()
-  axe = fig.gca()
-  if not is_year:
-    fig.set_figwidth(12.8)
-    fig.subplots_adjust(left=0.0625, right=0.95)
-    axe.set_xmargin(0.025)
-  axe.plot(labels, counts)
-  for label, count in zip(labels, counts):
-    axe.text(
-      label, count, str(count), ha="center", va="center", fontproperties=font, color="white",
-      bbox={"boxstyle": "circle", "facecolor": "#1f77b4", "linewidth": 0}
-    )
-  axe.set_title(title, fontproperties=font)
-  for text in axe.get_xticklabels():
-    text.update({"rotation": 30, "ha": "right", "fontproperties": font})
-  for text in axe.get_yticklabels():
-    text.update({"fontproperties": font})
-  f = BytesIO()
-  fig.savefig(f)
-  await bot.send(event, MessageSegment.image(f))
+        counts.append(0)
+      if is_year:
+        if curtime.month == 12:
+          curtime = date(curtime.year + 1, 1, 1)
+        else:
+          curtime = curtime.replace(month=curtime.month + 1)
+      else:
+        curtime += timedelta(1)
+    font = FontProperties(fname=config.font)  # type: ignore
+    fig = Figure()
+    axe = fig.gca()
+    if not is_year:
+      fig.set_figwidth(12.8)
+      fig.subplots_adjust(left=0.0625, right=0.95)
+      axe.set_xmargin(0.025)
+    axe.plot(labels, counts)
+    for label, count in zip(labels, counts):
+      axe.text(
+        label, count, str(count), ha="center", va="center", fontproperties=font, color="white",
+        bbox={"boxstyle": "circle", "facecolor": "#1f77b4", "linewidth": 0}
+      )
+    axe.set_title(title, fontproperties=font)
+    for text in axe.get_xticklabels():
+      text.update({"rotation": 30, "ha": "right", "fontproperties": font})
+    for text in axe.get_yticklabels():
+      text.update({"fontproperties": font})
+    f = BytesIO()
+    fig.savefig(f)
+    return MessageSegment.image(f)
+
+  await bot.send(event, await asyncio.to_thread(make))
 
 
-group_statistics = command.CommandBuilder(
-  "wordcloud.statistics.personal", "群统计", "统计"
-) \
-  .brief("查看最近的个人发言数") \
+group_statistics = (
+  command.CommandBuilder("wordcloud.statistics.personal", "群统计", "统计")
+  .brief("查看最近的个人发言数")
   .usage('''\
 /群统计 - 查看最近30天的发言数，以天为单位
-/群统计 年 - 查看最近一年的发言数，以月为单位''') \
-  .in_group() \
+/群统计 年 - 查看最近一年的发言数，以月为单位''')
+  .in_group()
   .build()
+)
 @group_statistics.handle()
 async def handle_group_statistics(
   bot: Bot, event: MessageEvent, arg: Message = CommandArg()
@@ -381,14 +384,14 @@ async def handle_group_statistics(
   await handle_statistics(bot, event, arg, False)
 
 
-personal_statistics = command.CommandBuilder(
-  "wordcloud.statistics.personal", "个人统计", "我的统计"
-) \
-  .brief("查看最近的个人发言数") \
+personal_statistics = (
+  command.CommandBuilder("wordcloud.statistics.personal", "个人统计", "我的统计")
+  .brief("查看最近的个人发言数")
   .usage('''\
 /个人统计 - 查看最近30天的发言数，以天为单位
-/个人统计 年 - 查看最近一年的发言数，以月为单位''') \
+/个人统计 年 - 查看最近一年的发言数，以月为单位''')
   .build()
+)
 @personal_statistics.handle()
 async def handle_personal_statistics(
   bot: Bot, event: MessageEvent, arg: Message = CommandArg()
@@ -397,12 +400,12 @@ async def handle_personal_statistics(
 
 
 LEADERBOARD_USAGE = USAGE.format("排行")
-leaderboard = command.CommandBuilder(
-  "wordcloud.leaderboard", "排行"
-) \
-  .brief("查看最近的发言排行") \
-  .usage(LEADERBOARD_USAGE) \
+leaderboard = (
+  command.CommandBuilder("wordcloud.leaderboard", "排行")
+  .brief("查看最近的发言排行")
+  .usage(LEADERBOARD_USAGE)
   .build()
+)
 @leaderboard.handle()
 async def handle_leaderboard(
   bot: Bot, event: MessageEvent, arg: Message = CommandArg()
@@ -449,46 +452,52 @@ async def handle_leaderboard(
     result.reverse()  # matplotlib的y轴是反过来的
   infos: list[tuple[Image.Image, str]] = await asyncio.gather(*[
     asyncio.gather(
-      util.get_avatar(uid, bg=True),
+      imutil.get_avatar(uid, bg=True),
       context.get_card_or_name(bot, event, uid)
     ) for uid, _ in result
   ])
-  names = [name for _, name in infos]
-  counts = [count for _, count in result]
-  font = FontProperties(fname=config.font)  # type: ignore
-  fig = Figure()
-  axe = fig.gca()
-  graph = axe.barh(names, counts)
-  fw = fig.get_figwidth() * fig.dpi
-  fh = fig.get_figheight() * fig.dpi
-  width = 0.125
-  for text in axe.get_xticklabels():
-    text.update({"fontproperties": font})
-  for text in axe.get_yticklabels():
-    text.update({"fontproperties": font})
-    extent = text.get_window_extent()
-    width = max(width, (extent.x1 - extent.x0) / fw + 0.025)
   end_datetime -= timedelta(seconds=1)  # 显示 23:59:59 而不是 00:00:00，以防误会
-  axe.set_title(
-    f"{start_datetime:%Y-%m-%d %H:%M:%S} 到 {end_datetime:%Y-%m-%d %H:%M:%S} 的排行",
-    fontproperties=font,
-  )
-  size = int(min(fh / len(infos), 0.1 * fw))
-  fig.subplots_adjust(left=width, right=1 - (size + 1) / fw)
-  x = fw - size
-  y = fh / 2 - size * len(infos) / 2
-  for i, (avatar, _) in enumerate(infos):
-    avatar: Any = avatar.resize((size, size), util.scale_resample)
-    fig.figimage(avatar, x, y + i * size)
-  for rect, count in zip(graph, counts):
-    x = rect.get_x() + rect.get_width()
-    y = rect.get_y() + rect.get_height() / 2
-    text = axe.text(x, y, str(count), ha="right", va="center", fontproperties=font, color="white")
-    rect_ext = rect.get_window_extent()
-    text_ext = text.get_window_extent()
-    if rect_ext.x1 - rect_ext.x0 < (text_ext.x1 - text_ext.x0) * 1.5:
-      text.set_horizontalalignment("left")
-      text.set_color("black")
-  f = BytesIO()
-  fig.savefig(f)
-  await leaderboard.finish(MessageSegment.image(f))
+
+  def make() -> MessageSegment:
+    names = [name for _, name in infos]
+    counts = [count for _, count in result]
+    font = FontProperties(fname=config.font)  # type: ignore
+    fig = Figure()
+    axe = fig.gca()
+    graph = axe.barh(names, counts)
+    fw = fig.get_figwidth() * fig.dpi
+    fh = fig.get_figheight() * fig.dpi
+    width = 0.125
+    for text in axe.get_xticklabels():
+      text.update({"fontproperties": font})
+    for text in axe.get_yticklabels():
+      text.update({"fontproperties": font})
+      extent = text.get_window_extent()
+      width = max(width, (extent.x1 - extent.x0) / fw + 0.025)
+    axe.set_title(
+      f"{start_datetime:%Y-%m-%d %H:%M:%S} 到 {end_datetime:%Y-%m-%d %H:%M:%S} 的排行",
+      fontproperties=font,
+    )
+    size = int(min(fh / len(infos), 0.1 * fw))
+    fig.subplots_adjust(left=width, right=1 - (size + 1) / fw)
+    x = fw - size
+    y = fh / 2 - size * len(infos) / 2
+    for i, (avatar, _) in enumerate(infos):
+      avatar: Any = avatar.resize((size, size), imutil.scale_resample())
+      fig.figimage(avatar, x, y + i * size)
+    for rect, count in zip(graph, counts):
+      x = rect.get_x() + rect.get_width()
+      y = rect.get_y() + rect.get_height() / 2
+      text = axe.text(
+        x, y, str(count), ha="right", va="center", fontproperties=font, color="white"
+      )
+      rect_ext = rect.get_window_extent()
+      text_ext = text.get_window_extent()
+      if rect_ext.x1 - rect_ext.x0 < (text_ext.x1 - text_ext.x0) * 1.5:
+        text.set_horizontalalignment("left")
+        text.set_color("black")
+    f = BytesIO()
+    fig.savefig(f)
+    return MessageSegment.image(f)
+
+  await leaderboard.finish(await asyncio.to_thread(make))

@@ -17,7 +17,7 @@ from typing_extensions import Self
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
-from . import context, help, permission, util
+from . import context, help, misc, permission
 
 driver = nonebot.get_driver()
 
@@ -156,7 +156,7 @@ class CommandBuilder:
     self._brief = brief
     return self
 
-  def usage(self, usage: str) -> Self:
+  def usage(self, usage: str | Callable[[], str]) -> Self:
     self._usage = usage
     return self
 
@@ -166,14 +166,11 @@ class CommandBuilder:
 
   def shell(self, parser: ArgumentParser, set_prog: bool = True) -> Self:
     if set_prog:
-      parser.prog = util.command_start() + self.names[0]
+      parser.prog = misc.command_start() + self.names[0]
     self.rule(ShellCommandRule(parser))
-    if not self._usage:
-      self._usage: str = parser.format_help()
-    return self
-
-  def auto_reject(self) -> Self:
     self._auto_reject = True
+    if not self._usage:
+      self._usage = parser.format_help()
     return self
 
   def throttle(self, capacity: int, frequency: float | None = None) -> Self:

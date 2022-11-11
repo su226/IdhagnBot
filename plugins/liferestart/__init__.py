@@ -1,19 +1,17 @@
+import asyncio
 import html
 import itertools
 import random
 from argparse import Namespace
-from io import BytesIO
-from typing import Callable, Iterable, cast
+from typing import Awaitable, Callable, Iterable, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
-from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from util import command, context, text, util
-from util.config import BaseConfig, BaseState
+from util import command, configs, context, imutil, misc, textutil
 
 from .game import Config as GameConfig, Game, GeneratedCharacter, Statistics
 from .game.config import StatRarityItem
@@ -23,15 +21,13 @@ from .game.struct.commons import Rarity
 from .game.struct.talent import Talent
 
 
-class Config(BaseConfig):
-  __file__ = "liferestart"
+class Config(BaseModel):
   game: GameConfig = Field(default_factory=GameConfig)
   progress_group_by: int = 50
   character_group_by: int = 25
 
 
-class State(BaseState):
-  __file__ = "liferestart"
+class State(BaseModel):
   statistics: dict[int, Statistics] = Field(default_factory=dict)
 
   def get_statistics(self, id: int) -> Statistics:
@@ -40,15 +36,15 @@ class State(BaseState):
     return self.statistics[id]
 
 
-CONFIG = Config.load()
-STATE = State.load()
+CONFIG = configs.SharedConfig("liferestart", Config)
+STATE = configs.SharedState("liferestart", State)
 
 
 def find_character(name: str) -> Character | None:
   for i in CHARACTER.values():
     if i.name == name:
       return i
-  for i in STATE.statistics.values():
+  for i in STATE().statistics.values():
     if i.character and i.character.name == name:
       return i.character
   return None
@@ -69,9 +65,7 @@ RARITY_COLOR = {
 }
 
 
-def make_image(
-  messages: Iterable[tuple[Rarity, str] | str]
-) -> Image.Image:
+def make_image(messages: Iterable[tuple[Rarity, str] | str]) -> MessageSegment:
   lines = []
   for line in messages:
     if isinstance(line, tuple):
@@ -80,12 +74,12 @@ def make_image(
       rarity = Rarity.COMMON
       content = line
     lines.append(f"<span color=\"#{RARITY_COLOR[rarity]}\">{html.escape(content)}</span>")
-  text_im = text.render("\n".join(lines), "sans", 32, box=576, color=(255, 255, 255), markup=True)
+  text_im = textutil.render(
+    "\n".join(lines), "sans", 32, box=576, color=(255, 255, 255), markup=True
+  )
   im = Image.new("RGB", (text_im.width + 64, text_im.height + 64), (38, 50, 56))
   im.paste(text_im, (32, 32), text_im)
-  f = BytesIO()
-  im.save(f, "jpeg")
-  return im
+  return imutil.to_segment(im)
 
 
 def get_messages(game: Game) -> list[str]:
@@ -103,8 +97,10 @@ def get_messages(game: Game) -> list[str]:
       or progress.spirit != prev_spirit
     ):
       segments.append((
-        Rarity.COMMON, f"颜值 {progress.charm} 智力 {progress.intelligence}"
-        f"体质 {progress.strength} 家境 {progress.money} 快乐 {progress.spirit}"))
+        Rarity.COMMON,
+        f"颜值 {progress.charm} 智力 {progress.intelligence} 体质 {progress.strength} "
+        f"家境 {progress.money} 快乐 {progress.spirit}"
+      ))
     prev_charm = progress.charm
     prev_intelligence = progress.intelligence
     prev_strength = progress.strength
@@ -118,7 +114,8 @@ def get_messages(game: Game) -> list[str]:
         segments.append((game_event.rarity, game_event.post))
     for achievement in progress.achievements:
       segments.append((
-        achievement.rarity, f"获得成就 {achievement.name}: {achievement.description}"))
+        achievement.rarity, f"获得成就 {achievement.name}: {achievement.description}"
+      ))
     age = "出生" if progress.age == -1 else f"{progress.age}岁"
     segments[0] = (segments[0][0], f"{age} - {segments[0][1]}")
     messages.append(segments)
@@ -126,35 +123,54 @@ def get_messages(game: Game) -> list[str]:
   end = game.end()
   segments = [
     "---- 总结 ----",
-    (end.summary_charm.rarity,
-      f"颜值: {end.charm} - {game.config.stat.rarity.messages[end.summary_charm.message_id]}"),
-    (end.summary_intelligence.rarity,
+    (
+      end.summary_charm.rarity,
+      f"颜值: {end.charm} - "
+      + game.config.stat.rarity.messages[end.summary_charm.message_id]
+    ),
+    (
+      end.summary_intelligence.rarity,
       f"智力: {end.intelligence} - "
-      + game.config.stat.rarity.messages[end.summary_intelligence.message_id]),
-    (end.summary_strength.rarity,
+      + game.config.stat.rarity.messages[end.summary_intelligence.message_id]
+    ),
+    (
+      end.summary_strength.rarity,
       f"体质: {end.strength} - "
-      + game.config.stat.rarity.messages[end.summary_strength.message_id]),
-    (end.summary_money.rarity,
-      f"家境: {end.money} - {game.config.stat.rarity.messages[end.summary_money.message_id]}"),
-    (end.summary_spirit.rarity,
-      f"快乐: {end.spirit} - {game.config.stat.rarity.messages[end.summary_spirit.message_id]}"),
-    (end.summary_age.rarity,
-      f"享年: {end.age} - {game.config.stat.rarity.messages[end.summary_age.message_id]}"),
-    (end.summary_overall.rarity,
-      f"总评: {end.overall} - {game.config.stat.rarity.messages[end.summary_overall.message_id]}"),
+      + game.config.stat.rarity.messages[end.summary_strength.message_id]
+    ),
+    (
+      end.summary_money.rarity,
+      f"家境: {end.money} - "
+      + game.config.stat.rarity.messages[end.summary_money.message_id]
+    ),
+    (
+      end.summary_spirit.rarity,
+      f"快乐: {end.spirit} - "
+      + game.config.stat.rarity.messages[end.summary_spirit.message_id]
+    ),
+    (
+      end.summary_age.rarity,
+      f"享年: {end.age} - "
+      + game.config.stat.rarity.messages[end.summary_age.message_id]
+    ),
+    (
+      end.summary_overall.rarity,
+      f"总评: {end.overall} - "
+      + game.config.stat.rarity.messages[end.summary_overall.message_id]
+    ),
   ]
   for achievement in end.achievements:
-    segments.append((achievement.rarity, f"获得成就 {achievement.name}: {achievement.description}"))
+    segments.append(
+      (achievement.rarity, f"获得成就 {achievement.name}: {achievement.description}")
+    )
   messages.append(segments)
   return messages
-
 
 parser = ArgumentParser(add_help=False)
 subparsers = parser.add_subparsers(required=True)
 
-
-async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
-  game = Game(CONFIG.game, STATE.get_statistics(event.user_id))
+async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace) -> None:
+  game = Game(CONFIG().game, STATE().get_statistics(event.user_id))
   seed = game.seed(args.seed)
   seed_shown = False
 
@@ -180,7 +196,10 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
     await liferestart.send("\n".join(segments))
     choice = ""
     while True:
-      msg = await util.prompt(event)
+      try:
+        msg = await misc.prompt(event)
+      except misc.PromptTimeout:
+        await liferestart.finish("等待回应超时，已退出游戏")
       choice = msg.extract_plain_text()
       if choice in ("退", "换", "随"):
         break
@@ -234,7 +253,10 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
   stats: list[int] = []
   choice = ""
   while True:
-    msg = await util.prompt(event)
+    try:
+      msg = await misc.prompt(event)
+    except misc.PromptTimeout:
+      await liferestart.finish("等待回应超时，已退出游戏")
     choice = msg.extract_plain_text()
     if choice in ("退", "随"):
       break
@@ -263,15 +285,14 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace):
   game.statistics.inherited_talent = talents[0].id
   STATE.dump()
 
-  for part in util.groupbyn(messages, CONFIG.progress_group_by):
-    f = BytesIO()
-    make_image(itertools.chain.from_iterable(part)).save(f, "png")
-    await liferestart.send(MessageSegment.image(f))
+  for part in misc.chunked(messages, CONFIG().progress_group_by):
+    await liferestart.send(await asyncio.to_thread(
+      make_image, itertools.chain.from_iterable(part)
+    ))
 
 classic = subparsers.add_parser("经典", aliases=["c"], help="游玩经典模式")
-classic.add_argument("-seed", "-种子", nargs="?", type=int, metavar="种子")
+classic.add_argument("--seed", "-s", nargs="?", type=int, metavar="种子")
 classic.set_defaults(func=handle_classic)
-
 
 def get_character_segments(ch: Character) -> list[str]:
   segments = [f"---- {ch.name} ----"]
@@ -283,14 +304,13 @@ def get_character_segments(ch: Character) -> list[str]:
     segments.append(f"{ta.name} - {ta.description}")
   return segments
 
-
-async def handle_character_view(bot: Bot, event: MessageEvent, args: Namespace):
+async def handle_character_view(bot: Bot, event: MessageEvent, args: Namespace) -> None:
   if args.name:
     ch = find_character(args.name)
     if ch is None:
       await liferestart.finish("没有这个角色")
   else:
-    st = STATE.statistics.get(event.user_id, None)
+    st = STATE().statistics.get(event.user_id, None)
     if st is None or st.character is None:
       await liferestart.finish("你还没有自定义角色")
     ch = st.character
@@ -300,36 +320,39 @@ character_view = subparsers.add_parser("查看角色", help="查看自己或别�
 character_view.add_argument("name", nargs="?", metavar="名字")
 character_view.set_defaults(func=handle_character_view)
 
-
-async def handle_character_list(bot: Bot, event: MessageEvent, args: Namespace):
+async def handle_character_list(bot: Bot, event: MessageEvent, args: Namespace) -> None:
   messages = [["---- 前世名人 ----", ""]]
   for ch in CHARACTER.values():
     messages.append(get_character_segments(ch))
   messages.append(["", "---- 自定义角色 ----", ""])
-  for i in STATE.statistics.values():
+  for i in STATE().statistics.values():
     if ch := i.character:
       messages.append(get_character_segments(ch))
-  for part in util.groupbyn(messages, CONFIG.character_group_by):
-    f = BytesIO()
-    make_image(itertools.chain.from_iterable(part)).save(f, "png")
-    await liferestart.send(MessageSegment.image(f))
+  for part in misc.chunked(messages, CONFIG().character_group_by):
+    await liferestart.send(await asyncio.to_thread(
+      make_image, itertools.chain.from_iterable(part)
+    ))
 
 character_list = subparsers.add_parser("角色列表", help="列出别人的角色")
 character_list.set_defaults(func=handle_character_list)
 
-
-async def handle_character_create(bot: Bot, event: MessageEvent, args: Namespace):
+async def handle_character_create(bot: Bot, event: MessageEvent, args: Namespace) -> None:
   await liferestart.send(
     "一旦创建角色将不能修改或删除，但可重命名，名字中不能有空格"
-    "\n- 发送“退”取消\n- 发送名字创建角色")
-  name = (await util.prompt(event)).extract_plain_text()
+    "\n- 发送“退”取消\n- 发送名字创建角色"
+  )
+  try:
+    msg = await misc.prompt(event)
+  except misc.PromptTimeout:
+    await liferestart.finish("等待回应超时，已退出游戏")
+  name = msg.extract_plain_text().strip()
   if name == "退":
     await liferestart.finish("创建取消")
   elif " " in name:
     await liferestart.finish("创建失败：名字中不能有空格")
   elif find_character(name):
     await liferestart.finish("创建失败：已有这个名字的角色")
-  game = Game(CONFIG.game, STATE.get_statistics(event.user_id))
+  game = Game(CONFIG().game, STATE().get_statistics(event.user_id))
   character = game.create_character()
   STATE.dump()
   await liferestart.finish(f"已创建角色，种子为：{character.seed}")
@@ -337,9 +360,9 @@ async def handle_character_create(bot: Bot, event: MessageEvent, args: Namespace
 character_create = subparsers.add_parser("创建角色", help="创建自己的角色")
 character_create.set_defaults(func=handle_character_create)
 
-
-async def handle_character_rename(bot: Bot, event: MessageEvent, args: Namespace):
-  st = STATE.statistics.get(event.user_id, None)
+async def handle_character_rename(bot: Bot, event: MessageEvent, args: Namespace) -> None:
+  state = STATE()
+  st = state.statistics.get(event.user_id, None)
   if st is None or st.character is None:
     await liferestart.finish("你还没有自定义角色")
   elif args.name == st.character.name:
@@ -354,18 +377,19 @@ character_rename = subparsers.add_parser("重命名角色", help="重命名自�
 character_rename.add_argument("name", nargs="?", metavar="名字")
 character_rename.set_defaults(func=handle_character_rename)
 
-
-async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace):
+async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace) -> None:
+  config = CONFIG()
+  state = STATE()
   if args.name:
     ch = find_character(args.name)
     if ch is None:
       await liferestart.finish("没有这个角色")
   else:
-    st = STATE.statistics.get(event.user_id, None)
+    st = state.statistics.get(event.user_id, None)
     if st is None or st.character is None:
       await liferestart.finish("你还没有自定义角色")
     ch = st.character
-  game = Game(CONFIG.game, STATE.get_statistics(event.user_id))
+  game = Game(config.game, state.get_statistics(event.user_id))
   seed = game.seed(args.seed)
   talents, real_talents = game.set_character(ch)
 
@@ -382,22 +406,21 @@ async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace):
 
   messages = get_messages(game)
   STATE.dump()
-  for part in util.groupbyn(messages, CONFIG.progress_group_by):
-    f = BytesIO()
-    make_image(itertools.chain.from_iterable(part)).save(f, "png")
-    await liferestart.send(MessageSegment.image(f))
+  for part in misc.chunked(messages, config.progress_group_by):
+    await liferestart.send(await asyncio.to_thread(
+      make_image, itertools.chain.from_iterable(part)
+    ))
 
 character_play = subparsers.add_parser("角色", aliases=["h"], help="游玩名人或自定义角色")
 character_play.add_argument("name", nargs="?", metavar="名字")
-character_play.add_argument("-seed", "-种子", nargs="?", type=int, metavar="种子")
+character_play.add_argument("--seed", "-s", nargs="?", type=int, metavar="种子")
 character_play.set_defaults(func=handle_character_play)
 
-
-async def handle_achievements(bot: Bot, event: MessageEvent, args: Namespace):
-  st = STATE.statistics.get(event.user_id, None)
+async def handle_achievements(bot: Bot, event: MessageEvent, args: Namespace) -> None:
+  st = STATE().statistics.get(event.user_id, None)
   if st is None:
     await liferestart.finish("你还没重开过")
-  game = Game(CONFIG.game, st)
+  game = Game(CONFIG().game, st)
   finished_games = game.judge(st.finished_games, game.config.stat.rarity.finished_games)
   achievements = game.judge(len(st.achievements), game.config.stat.rarity.achievements)
   events_value = int(len(st.events) / len(EVENT) * 100)
@@ -406,10 +429,16 @@ async def handle_achievements(bot: Bot, event: MessageEvent, args: Namespace):
   talents = game.judge(talents_value, game.config.stat.rarity.talent_percentage)
   segments = [
     "---- 成就与统计 ----",
-    (finished_games.rarity, f"重开次数: {st.finished_games:3} - "
-      + game.config.stat.rarity.messages[finished_games.message_id]),
-    (achievements.rarity, f"成就数量: {len(st.achievements):3} - "
-      + game.config.stat.rarity.messages[achievements.message_id]),
+    (
+      finished_games.rarity,
+      f"重开次数: {st.finished_games:3} - "
+      + game.config.stat.rarity.messages[finished_games.message_id]
+    ),
+    (
+      achievements.rarity,
+      f"成就数量: {len(st.achievements):3} - "
+      + game.config.stat.rarity.messages[achievements.message_id]
+    ),
     (events.rarity, f"事件收集率: {events_value:3}%"),
     (talents.rarity, f"天赋游玩率: {talents_value:3}%"),
   ]
@@ -420,20 +449,19 @@ async def handle_achievements(bot: Bot, event: MessageEvent, args: Namespace):
     name = "???" if hidden else achievement.name
     description = "隐藏成就" if hidden else achievement.description
     segments.append((achievement.rarity, f"{symbol} {name} - {description}"))
-  f = BytesIO()
-  make_image(segments).save(f, "png")
-  await liferestart.send(MessageSegment.image(f))
+  await liferestart.send(await asyncio.to_thread(make_image, segments))
 
 achievements = subparsers.add_parser("成就", help="查看成就和统计")
 achievements.set_defaults(func=handle_achievements)
 
-
 def leaderboard_factory(
-  getter: Callable[[Statistics], int], rarities: list[StatRarityItem], suffix: str = ""
-):
-  async def handler(bot: Bot, event: MessageEvent, args: Namespace):
-    leaderboard = sorted(
-      ((id, getter(st)) for id, st in STATE.statistics.items()), key=lambda x: x[1], reverse=True)
+  getter: Callable[[Statistics], int],
+  rarities: Callable[[], list[StatRarityItem]], suffix: str = ""
+) -> Callable[[Bot, MessageEvent, Namespace], Awaitable[None]]:
+  async def handler(bot: Bot, event: MessageEvent, args: Namespace) -> None:
+    state = STATE()
+    leaderboard = [(id, getter(st)) for id, st in state.statistics.items()]
+    leaderboard.sort(key=lambda x: x[1], reverse=True)
     segments = []
     ctx = context.get_event_context(event)
     if ctx == -1:
@@ -441,46 +469,46 @@ def leaderboard_factory(
     else:
       members = {
         i["user_id"]: i["card"] or i["nickname"]
-        for i in await bot.get_group_member_list(group_id=ctx)}
+        for i in await bot.get_group_member_list(group_id=ctx)
+      }
     for id, v in leaderboard:
-      judge = Game.judge(v, rarities)
+      judge = Game.judge(v, rarities())
       if id in members:
         name = members[id]
       else:
         name = (await bot.get_stranger_info(user_id=id))["nickname"]
       segments.append((judge.rarity, f"{name} - {v}{suffix}"))
-    f = BytesIO()
-    make_image(segments).save(f, "png")
-    await liferestart.send(MessageSegment.image(f))
+    await liferestart.send(await asyncio.to_thread(make_image, segments))
   return handler
-
 
 finished_leaderboard = subparsers.add_parser("重开排行", help="查看重开次数排行")
 finished_leaderboard.set_defaults(func=leaderboard_factory(
-  lambda x: x.finished_games, CONFIG.game.stat.rarity.finished_games))
+  lambda x: x.finished_games, lambda: CONFIG().game.stat.rarity.finished_games
+))
 achievements_leaderboard = subparsers.add_parser("成就排行", help="查看成就数排行")
 achievements_leaderboard.set_defaults(func=leaderboard_factory(
-  lambda x: len(x.achievements), CONFIG.game.stat.rarity.achievements))
+  lambda x: len(x.achievements), lambda: CONFIG().game.stat.rarity.achievements
+))
 events_leaderboard = subparsers.add_parser("事件排行", help="查看天赋游玩率排行")
 events_leaderboard.set_defaults(func=leaderboard_factory(
-  lambda x: int(len(x.events) / len(EVENT) * 100), CONFIG.game.stat.rarity.event_percentage, "%"))
+  lambda x: int(len(x.events) / len(EVENT) * 100),
+  lambda: CONFIG().game.stat.rarity.event_percentage, "%"
+))
 talents_leaderboard = subparsers.add_parser("天赋排行", help="查看事件收集率排行")
 talents_leaderboard.set_defaults(func=leaderboard_factory(
   lambda x: int(len(x.talents) / len(TALENT) * 100),
-  CONFIG.game.stat.rarity.talent_percentage, "%"))
+  lambda: CONFIG().game.stat.rarity.talent_percentage, "%"
+))
 
 liferestart = (
   command.CommandBuilder(
     "liferestart", "人生重开", "liferestart", "life", "restart", "remake", "人生", "重开")
   .brief("现可在群里快速重开")
   .shell(parser)
-  .build())
-
-
+  .build()
+)
 @liferestart.handle()
 async def handle_liferestart(
-  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
-):
-  if isinstance(args, ParserExit):
-    await liferestart.finish(args.message)
+  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()
+) -> None:
   await args.func(bot, event, args)

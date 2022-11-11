@@ -3,7 +3,7 @@ from typing import Iterable
 
 from pydantic import BaseModel
 
-from util import util
+from util import misc
 
 API = (
   "https://store-site-backend-static-ipv4.ak.epicgames.com/freeGamesPromotions"
@@ -48,7 +48,7 @@ def getimage(game: dict) -> str:
 
 
 async def free_games() -> list[Game]:
-  http = util.http()
+  http = misc.http()
   async with http.get(API) as response:
     data = await response.json()
   games = data["data"]["Catalog"]["searchStore"]["elements"]

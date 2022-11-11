@@ -1,29 +1,47 @@
 import asyncio
-from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 import nonebot
+from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.base import JobLookupError
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
 from nonebot.exception import ActionFailed, IgnoredException
 from nonebot.message import event_preprocessor
 from nonebot.permission import Permission as BotPermission
 from nonebot.rule import Rule
-from pydantic import Field
+from nonebot.typing import T_State
+from pydantic import BaseModel, Field, PrivateAttr
 
-from . import permission, util
-from .config import BaseConfig, BaseModel, BaseState
+from . import configs, misc, permission
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 
-class Config(BaseConfig):
-  __file__ = "context"
-  groups: dict[int, list[str]] = Field(default_factory=dict)
+class Group(BaseModel):
+  __root__: list[str]
+  _name: str = PrivateAttr("")
+
+
+class Config(BaseModel):
+  groups: dict[int, Group] = Field(default_factory=dict)
   private_limit: set[int] = Field(default_factory=set)
   private_limit_whitelist: bool = False
   timeout: int = 600
+
+  _names: dict[str, int] = PrivateAttr(default_factory=dict)
+
+  def __init__(self, **kw) -> None:
+    super().__init__(**kw)
+    for id, info in self.groups.items():
+      for alias in info.__root__:
+        self._names[alias] = id
+
+  async def fetch_names(self) -> None:
+    bot = nonebot.get_bot()
+    for info in await bot.call_api("get_group_list"):
+      if info["group_id"] in self.groups:
+        self.groups[info["group_id"]]._name = info["group_name"]
 
 
 class Context(BaseModel):
@@ -31,82 +49,125 @@ class Context(BaseModel):
   expire: datetime
 
 
-class State(BaseState):
-  __file__ = "context"
+class HasGroupCache:
+  def __init__(self, user: int) -> None:
+    self.created = datetime.now()
+    self.user = user
+    self.results: dict[int, bool] = {}
+    self.tasks: dict[int, asyncio.Future[None]] = {}
+
+  def clear(self) -> None:
+    self.created = datetime.now()
+    self.results.clear()
+    self.tasks.clear()
+
+  async def check(self, bot: Bot, *groups: int) -> bool:
+    delta = datetime.now() - self.created
+    if delta.seconds > 600:
+      self.clear()
+    for group in groups:
+      if self.results.get(group, False) is True:
+        return True
+    tasks: list[asyncio.Future[None]] = []
+    for group in groups:
+      if group not in self.tasks:
+        task = self.tasks[group] = asyncio.create_task(self.check_one(bot, group))
+      else:
+        task = self.tasks[group]
+      tasks.append(task)
+    done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
+    return any(i.exception() is None for i in done)
+
+  async def check_one(self, bot: Bot, group: int) -> None:
+    try:
+      await bot.get_group_member_info(group_id=group, user_id=self.user)
+      self.results[group] = True
+    except ActionFailed as e:
+      self.results[group] = False
+      # asyncio.CancelledError 不会有 Task exception was never retrieved
+      raise asyncio.CancelledError from e
+
+
+class State(BaseModel):
   contexts: dict[int, Context] = Field(default_factory=dict)
 
+  _has_group_cache: dict[int, HasGroupCache] = PrivateAttr(default_factory=dict)
 
-@dataclass
-class Group:
-  id: int
-  name: str
-  aliases: list[str]
+  def __init__(self, **kw) -> None:
+    super().__init__(**kw)
+    now = datetime.now()
+    expired = [id for id, context in self.contexts.items() if context.expire <= now]
+    for user in expired:
+      del self.contexts[user]
 
 
-CONFIG = Config.load()
-STATE = State.load()
-GROUP_IDS: dict[int, Group] = {}
-GROUP_NAMES: dict[str, Group] = {}
+CONFIG = configs.SharedConfig("context", Config, "eager")
+STATE = configs.SharedState("context", State, "eager")
 PRIVATE = -1
 ANY_GROUP = -2
+JOBSTORE = "context_timeout"
+scheduler.add_jobstore(MemoryJobStore(), JOBSTORE)
 driver = nonebot.get_driver()
 
-now = datetime.now()
-expired = []
-for user, context in STATE.contexts.items():
-  if context.expire <= now:
-    expired.append(user)
-for user in expired:
-  del STATE.contexts[user]
 
-for id, aliases in CONFIG.groups.items():
-  group = Group(id, f"未知_{id}", aliases)
-  GROUP_IDS[id] = group
-  for alias in aliases:
-    GROUP_NAMES[alias] = group
+@STATE.onload()
+def state_onload(prev: State | None, curr: State) -> None:
+  scheduler.remove_all_jobs(JOBSTORE)
+  for user, context in curr.contexts.items():
+    scheduler.add_job(
+      timeout_exit, "date", (user,), id=f"{JOBSTORE}_{user}", replace_existing=True,
+      run_date=context.expire, jobstore=JOBSTORE
+    )
+
+
+@CONFIG.onload()
+def config_onload(prev: Config | None, curr: Config) -> None:
+  asyncio.create_task(curr.fetch_names())
 
 
 @driver.on_bot_connect
-async def bot_connect(bot: Bot):
-  for info in await bot.call_api("get_group_list"):
-    if info["group_id"] in GROUP_IDS:
-      GROUP_IDS[info["group_id"]].name = info["group_name"]
+async def on_bot_connect(bot: Bot) -> None:
+  CONFIG()
+  STATE()
 
 
 @event_preprocessor
-async def pre_event(event: Event):
+async def pre_event(event: Event, state: T_State):
+  config = CONFIG()
   if (group_id := getattr(event, "group_id", None)) is not None:
-    if group_id not in GROUP_IDS:
+    if group_id not in config.groups:
       raise IgnoredException("机器人在当前上下文不可用")
   elif (user_id := getattr(event, "user_id", None)) is not None:
-    if CONFIG.private_limit_whitelist:
-      if user_id not in CONFIG.private_limit:
+    if config.private_limit_whitelist:
+      if user_id not in config.private_limit:
         raise IgnoredException("私聊用户不在白名单内")
     else:
-      if user_id in CONFIG.private_limit:
+      if user_id in config.private_limit:
         raise IgnoredException("私聊用户在黑名单内")
     refresh_context(user_id)
 
 
 def enter_context(uid: int, gid: int):
-  STATE.contexts[uid] = Context(group=gid, expire=datetime.min)
+  state = STATE()
+  state.contexts[uid] = Context(group=gid, expire=datetime.min)
   return refresh_context(uid)
 
 
 def exit_context(uid: int) -> bool:
   try:
-    scheduler.remove_job(f"context_timeout_{uid}")
+    scheduler.remove_job(f"{JOBSTORE}_{uid}", JOBSTORE)
   except JobLookupError:
     pass
-  if uid in STATE.contexts:
-    del STATE.contexts[uid]
+  state = STATE()
+  if uid in state.contexts:
+    del state.contexts[uid]
     STATE.dump()
     return True
   return False
 
 
 def get_uid_context(uid: int) -> int:
-  context = STATE.contexts.get(uid, None)
+  context = STATE().contexts.get(uid, None)
   return context.group if context else PRIVATE
 
 
@@ -119,13 +180,16 @@ def get_event_context(event: Event) -> int:
 
 
 def refresh_context(uid: int):
-  if uid not in STATE.contexts:
+  config = CONFIG()
+  state = STATE()
+  if uid not in state.contexts:
     return None
-  date = datetime.now() + timedelta(seconds=CONFIG.timeout)
-  STATE.contexts[uid].expire = date
+  date = datetime.now() + timedelta(seconds=config.timeout)
+  state.contexts[uid].expire = date
   STATE.dump()
   return scheduler.add_job(
-    timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True, run_date=date
+    timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True,
+    run_date=date, jobstore=JOBSTORE
   )
 
 
@@ -133,13 +197,8 @@ async def timeout_exit(uid: int):
   if exit_context(uid):
     await nonebot.get_bot().call_api(
       "send_private_msg", user_id=uid,
-      message=f"由于 {util.format_time(CONFIG.timeout)}内未操作，已退出上下文")
-
-
-for user, context in STATE.contexts.items():
-  scheduler.add_job(
-    timeout_exit, "date", (user,), id=f"context_timeout_{user}", replace_existing=True,
-    run_date=context.expire)
+      message=f"由于 {misc.format_time(CONFIG().timeout)}内未操作，已退出上下文"
+    )
 
 
 def in_group(ctx: int, *contexts: int) -> bool:
@@ -155,22 +214,15 @@ def in_group_rule(*contexts: int) -> Rule:
   return Rule(rule)
 
 
-async def has_group(bot: Bot, user: int, *groups: int) -> bool:
-  tasks = [
-    asyncio.create_task(bot.get_group_member_info(group_id=group, user_id=user))
-    for group in groups]
-  done, pending = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-  for i in pending:
-    i.cancel()
-  return any(i.exception() is None for i in done)
-
-
 def has_group_rule(*groups: int) -> Rule:
   async def check(bot: Bot, event: Event) -> bool:
     if (group_id := getattr(event, "group_id", None)) is not None:
       return group_id in groups
     if (user_id := getattr(event, "user_id", None)) is not None:
-      return await has_group(bot, user_id, *groups)
+      state = STATE()
+      if user_id not in state._has_group_cache:
+        state._has_group_cache[user_id] = HasGroupCache(user_id)
+      return await state._has_group_cache[user_id].check(bot, *groups)
     return False
   return Rule(check)
 
@@ -190,12 +242,13 @@ def build_permission(node: permission.Node, default: permission.Level) -> BotPer
   async def checker(bot: Bot, event: Event) -> bool:
     if (user_id := getattr(event, "user_id", None)) is None:
       return False
-    if (result := permission.check(node, user_id, get_event_context(event))) is not None:
+    event_level = await get_event_level(bot, event)
+    if (result := permission.check(
+      node, user_id, get_event_context(event), event_level
+    )) is not None:
       return result
     command_level = permission.get_node_level(node) or default
-    if command_level == permission.Level.MEMBER:
-      return True
-    return await get_event_level(bot, event) >= command_level
+    return event_level >= command_level
   permission.register_for_export(node, default)
   return BotPermission(checker)
 

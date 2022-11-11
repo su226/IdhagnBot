@@ -2,7 +2,7 @@ import os
 
 from nonebot.adapters.onebot.v11 import Message
 
-from util import util
+from util import misc
 
 from . import DailyCache, Module
 
@@ -15,7 +15,7 @@ class SentenceCache(DailyCache):
     self.audio_path = os.path.splitext(self.path)[0] + ".mp3"
 
   async def update(self) -> None:
-    http = util.http()
+    http = misc.http()
     async with http.get(SENTENCE_API) as response:
       data = await response.json(content_type=None)
     with open(self.path, "wb") as f:
@@ -33,4 +33,4 @@ sentence_cache = SentenceCache()
 class SentenceModule(Module):
   async def format(self) -> list[Message]:
     await sentence_cache.ensure()
-    return [util.local_image(sentence_cache.path) + "\n你可以发送 /一句 再次查看"]
+    return [misc.local("image", sentence_cache.path) + "\n你可以发送 /一句 再次查看"]

@@ -45,6 +45,7 @@ includes = []
 lint = [
   "pylama[eradicate,toml]>=8.4.1",
   "isort>=5.10.1",
+  "pyright>=1.1.278",
 ]
 
 [tool.pdm.scripts]

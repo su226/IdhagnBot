@@ -11,7 +11,7 @@ from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegme
 from nonebot.exception import ActionFailed
 from pydantic import BaseModel, Field
 
-from util import command, config_v2, context, util
+from util import command, configs, context, misc
 
 from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
@@ -141,8 +141,8 @@ class State(BaseModel):
   last_send: dict[int, date] = Field(default_factory=dict)
 
 
-CONFIG = config_v2.SharedConfig("daily", Config, "eager")
-STATE = config_v2.SharedState("daily", State)
+CONFIG = configs.SharedConfig("daily", Config, "eager")
+STATE = configs.SharedState("daily", State)
 driver = nonebot.get_driver()
 jobs: list[Job] = []
 
@@ -171,7 +171,7 @@ class Forward:
 
 @driver.on_bot_connect
 async def on_bot_connect() -> None:
-  CONFIG.load()
+  CONFIG()
 
 
 async def format_one(group_id: int, module_config: BaseModuleConfig) -> list[Message]:
@@ -188,7 +188,7 @@ async def format_forward(
   coros = [format_one(group_id, module) for module in modules]
   messages = await asyncio.gather(*coros)
   return Forward([
-    util.forward_node(bot_id, bot_name, message)
+    misc.forward_node(bot_id, bot_name, message)
     for message in itertools.chain.from_iterable(messages)
   ])
 
@@ -261,7 +261,7 @@ async def handle_today(bot: Bot, event: MessageEvent) -> None:
   messages = await format_all(context.get_event_context(event))
   for message in messages:
     if isinstance(message, Forward):
-      await util.send_forward_msg(bot, event, *message.nodes)
+      await misc.send_forward_msg(bot, event, *message.nodes)
     else:
       await today.send(message)
 
@@ -275,7 +275,7 @@ moyu = (
 @moyu.handle()
 async def handle_moyu() -> None:
   await moyu_cache.ensure()
-  await today.finish(util.local_image(moyu_cache.path))
+  await today.finish(misc.local("image", moyu_cache.path))
 
 
 news = (
@@ -287,7 +287,7 @@ news = (
 @news.handle()
 async def handle_news() -> None:
   await news_cache.ensure()
-  await today.finish(util.local_image(news_cache.path))
+  await today.finish(misc.local("image", news_cache.path))
 
 
 sentence = (
@@ -299,8 +299,8 @@ sentence = (
 @sentence.handle()
 async def handle_sentence() -> None:
   await sentence_cache.ensure()
-  await today.send(util.local_image(sentence_cache.path))
-  await today.finish(util.local_record(sentence_cache.audio_path))
+  await sentence.send(misc.local("image", sentence_cache.path))
+  await sentence.finish(misc.local("record", sentence_cache.audio_path))
 
 
 history = (

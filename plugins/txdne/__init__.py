@@ -1,24 +1,22 @@
-import base64
 from typing import Awaitable, Callable
 
 import aiohttp
-from nonebot.adapters.onebot.v11 import Message
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 
-from util import command
+from util import command, misc
 
-FactoryType = Callable[[], Awaitable[str]]
+FactoryType = Callable[[], Awaitable[MessageSegment]]
 
 
 def simple(url: str) -> FactoryType:
-  async def func() -> str:
+  async def func() -> MessageSegment:
+    http = misc.http()
     try:
-      async with aiohttp.ClientSession() as http:
-        response = await http.get(url)
-        data = await response.read()
+      async with http.get(url) as response:
+        return MessageSegment.image(await response.read())
     except aiohttp.ClientError:
-      return "网络错误"
-    return f"[CQ:image,file=base64://{base64.b64encode(data).decode()}]"
+      return MessageSegment.text("网络错误")
   return func
 
 
@@ -48,7 +46,7 @@ async def handle_txdne(args: Message = CommandArg()):
   site = args.extract_plain_text().rstrip()
   if site in SOURCES_DICT:
     result = await SOURCES_DICT[site]()
-    await txdne.finish(Message(result))
+    await txdne.finish(result)
   segments = []
   if site:
     segments.append(f"未知的来源：{site}")

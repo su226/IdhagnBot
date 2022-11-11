@@ -3,7 +3,7 @@ from pathlib import Path
 from PIL import Image, ImageOps
 from typing_extensions import Self
 
-from util import text, util
+from util import imutil, textutil
 
 PLUGIN_DIR = Path(__file__).resolve().parent
 WIDTH = 640
@@ -35,8 +35,8 @@ class Render:
 
 class CardText(Render):
   def __init__(self, content: str, size: int, lines: int) -> None:
-    self.layout = text.layout(
-      content, "sans", size, box=CONTENT_WIDTH, ellipsize=text.ELLIPSIZE_END, lines=lines)
+    self.layout = textutil.layout(
+      content, "sans", size, box=CONTENT_WIDTH, ellipsize=textutil.ELLIPSIZE_END, lines=lines)
     self.height = self.layout.get_pixel_size().height
 
   def get_width(self) -> int:
@@ -46,7 +46,7 @@ class CardText(Render):
     return self.height
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
-    text.paste(dst, (x + PADDING, y), self.layout)
+    textutil.paste(dst, (x + PADDING, y), self.layout)
 
 
 class CardLine(Render):
@@ -66,9 +66,9 @@ class CardLine(Render):
 class CardCover(Render):
   def __init__(self, im: Image.Image, crop: bool = True) -> None:
     if crop:
-      self.im = ImageOps.fit(im, (WIDTH, WIDTH * 10 // 16), util.scale_resample)
+      self.im = ImageOps.fit(im, (WIDTH, WIDTH * 10 // 16), imutil.scale_resample())
     else:
-      self.im = util.resize_width(im, WIDTH)
+      self.im = imutil.resize_width(im, WIDTH)
 
   def get_width(self) -> int:
     return WIDTH
@@ -82,18 +82,20 @@ class CardCover(Render):
 
 class CardAuthor(Render):
   def __init__(self, avatar: Image.Image, name: str, fans: int = -1) -> None:
-    self.avatar = avatar.convert("RGB").resize((40, 40), util.scale_resample)
-    util.circle(self.avatar)
+    self.avatar = avatar.convert("RGB").resize((40, 40), imutil.scale_resample())
+    imutil.circle(self.avatar)
     name_max = CONTENT_WIDTH - self.avatar.width - AVATAR_MARGIN
     self.height = self.avatar.height
     if fans != -1:
-      self.fans_layout = text.layout(normalize_10k(fans) + "粉", "sans", 32)
+      self.fans_layout = textutil.layout(normalize_10k(fans) + "粉", "sans", 32)
       fans_width, fans_height = self.fans_layout.get_pixel_size()
       name_max -= AVATAR_MARGIN + fans_width
       self.height = max(self.height, fans_height)
     else:
       self.fans_layout = None
-    self.name_layout = text.layout(name, "sans", 32, box=name_max, ellipsize=text.ELLIPSIZE_END)
+    self.name_layout = textutil.layout(
+      name, "sans", 32, box=name_max, ellipsize=textutil.ELLIPSIZE_END
+    )
     name_height = self.name_layout.get_pixel_size().height
     self.height = max(self.height, name_height)
 
@@ -107,14 +109,14 @@ class CardAuthor(Render):
     dst.paste(self.avatar, (x + PADDING, y + (self.height - self.avatar.height) // 2), self.avatar)
     y += self.height // 2
     name_x = PADDING + self.avatar.width + AVATAR_MARGIN
-    text.paste(dst, (x + name_x, y), self.name_layout, anchor="lm")
+    textutil.paste(dst, (x + name_x, y), self.name_layout, anchor="lm")
     if self.fans_layout is not None:
-      text.paste(dst, (x + WIDTH - PADDING, y), self.fans_layout, anchor="rm")
+      textutil.paste(dst, (x + WIDTH - PADDING, y), self.fans_layout, anchor="rm")
 
 
 class InfoText(Render):
   def __init__(self, content: str) -> None:
-    self.layout = text.layout(content, "sans", 32)
+    self.layout = textutil.layout(content, "sans", 32)
     self.width, self.height = self.layout.get_pixel_size()
 
   def get_width(self) -> int:
@@ -124,13 +126,13 @@ class InfoText(Render):
     return self.height
 
   def render(self, dst: Image.Image, x: int, y: int):
-    text.paste(dst, (x, y), self.layout)
+    textutil.paste(dst, (x, y), self.layout)
 
 
 class InfoCount(Render):
   def __init__(self, icon: str, count: int) -> None:
     self.icon = icon
-    self.layout = text.layout(normalize_10k(count), "sans", 32)
+    self.layout = textutil.layout(normalize_10k(count), "sans", 32)
     text_width, text_height = self.layout.get_pixel_size()
     self.width = ICON_SIZE + INFO_ICON_MARGIN + text_width
     self.height = max(ICON_SIZE, text_height)
@@ -144,7 +146,7 @@ class InfoCount(Render):
   def render(self, dst: Image.Image, x: int, y: int):
     icon_im = Image.open(PLUGIN_DIR / (self.icon + ".png"))
     dst.paste(icon_im, (x, y), icon_im)
-    text.paste(
+    textutil.paste(
       dst, (x + ICON_SIZE + INFO_ICON_MARGIN, y + self.height // 2), self.layout, anchor="lm")
 
 

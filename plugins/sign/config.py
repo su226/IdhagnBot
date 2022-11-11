@@ -4,7 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from util.config_v2 import GroupState, SharedConfig
+from util.configs import GroupState, SharedConfig
 
 
 class Config(BaseModel):
@@ -68,5 +68,5 @@ class FormatData:
   rank_bonus: float | None
 
 
-CONFIG = SharedConfig("sign", Config, "eager")
+CONFIG = SharedConfig("sign", Config)
 STATE = GroupState("sign", GroupData)

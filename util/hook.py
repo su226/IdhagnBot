@@ -8,7 +8,7 @@ from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
 from nonebot.matcher import current_event
 from pydantic import parse_obj_as
 
-from . import util
+from . import misc
 
 __all__ = ["on_message_sent", "MessageSentHook"]
 
@@ -52,7 +52,7 @@ async def on_called_api(_, e: Exception | None, api: str, params: dict[str, Any]
     logger.exception("执行 on_message_sent 失败！")
 
 
-async def bot_send(self: Bot, event: Event, message: util.AnyMessage, **kw) -> Any:
+async def bot_send(self: Bot, event: Event, message: misc.AnyMessage, **kw) -> Any:
   token = send_event.set(event)
   try:
     return await bot_send_original(self, event, message, **kw)

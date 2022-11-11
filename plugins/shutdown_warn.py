@@ -5,6 +5,8 @@ import nonebot
 from loguru import logger
 from nonebot.adapters import Bot
 
+from util import misc
+
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
@@ -33,7 +35,7 @@ async def on_bot_connect(bot: Bot) -> None:
     if driver.env == "prod":
       logger.warning(prefix + "，将向超管发送警告！")
       message = prefix + "，请注意！"
-      for user in driver.config.superusers:
+      for user in misc.superusers():
         await bot.send_private_msg(user_id=user, message=message)
     else:
       logger.info(prefix + "，但当前处于调试模式，将不会发送警告。")
@@ -43,7 +45,7 @@ async def on_bot_connect(bot: Bot) -> None:
     prefix = f"后端在 {backend_crash_str} 左右断开"
     logger.warning(prefix + "，将向超管发送警告！")
     message = prefix + "，请注意！"
-    for user in driver.config.superusers:
+    for user in misc.superusers():
       await bot.send_private_msg(user_id=user, message=message)
     backend_crash_time = None
 

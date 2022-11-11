@@ -5,15 +5,13 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from pydantic import BaseModel, Field
 
-from util import command
-from util.config import BaseConfig, BaseState
+from util import command, configs
 
 from . import baidu, bilibili, cctv, weibo, zhihu
 from .common import Item
 
 
-class Config(BaseConfig):
-  __file__ = "trending"
+class Config(BaseModel):
   cache: int = 600
   page_size: int = 10
 
@@ -23,13 +21,12 @@ class Cache(BaseModel):
   items: list[Item] = Field(default_factory=list)
 
 
-class State(BaseState):
-  __file__ = "trending"
+class State(BaseModel):
   cache: dict[str, Cache] = Field(default_factory=dict)
 
 
-CONFIG = Config.load()
-STATE = State.load()
+CONFIG = configs.SharedConfig("trending", Config)
+STATE = configs.SharedState("trending", State)
 SOURCE_LIST = [
   (["百度", "baidu"], baidu.get_data),
   (["央视", "cctv"], cctv.get_data),
@@ -70,11 +67,13 @@ async def handle_trending(msg: Message = CommandArg()):
     await trending.finish("不支持的来源")
   src, func = SOURCE_DICT[args[0]]
   now = time.time()
-  if src not in STATE.cache or STATE.cache[src].time < now - CONFIG.cache:
-    STATE.cache[src] = Cache(time=now, items=await func())
+  config = CONFIG()
+  state = STATE()
+  if src not in state.cache or state.cache[src].time < now - config.cache:
+    state.cache[src] = Cache(time=now, items=await func())
     STATE.dump()
-  items = STATE.cache[src].items
-  pages = math.ceil(len(items) / CONFIG.page_size)
+  items = state.cache[src].items
+  pages = math.ceil(len(items) / config.page_size)
   page = 1
   if len(args) == 2:
     if not args[1].startswith("p"):
@@ -94,8 +93,8 @@ async def handle_trending(msg: Message = CommandArg()):
       if page < 1 or page > pages:
         await trending.finish(f"页码必须在 1 和 {pages} 之间")
   result = []
-  begin = (page - 1) * CONFIG.page_size
-  for i, v in enumerate(items[begin:begin + CONFIG.page_size], begin + 1):
+  begin = (page - 1) * config.page_size
+  for i, v in enumerate(items[begin:begin + config.page_size], begin + 1):
     result.append(f"{i}: {v.title}")
   result.append(f"第 {page} 页，共 {pages} 页 {len(items)} 条")
   await trending.finish(f"现在的{src}热搜有：\n" + "\n".join(result))

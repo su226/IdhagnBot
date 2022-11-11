@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Generic, Sequence, TypeVar, overload
 
-from util import util
+from util import misc
 
 try:
   import grpc
@@ -48,7 +48,7 @@ async def grpc_fetch(uid: int, offset: str = "") -> tuple[Sequence[DynamicItem],
 async def json_fetch(uid: int, offset: str = "") -> tuple[list[dict], str | None]:
   if offset is None:
     offset = ""
-  http = util.http()
+  http = misc.http()
   async with http.get(LIST_API.format(uid=uid, offset=offset)) as response:
     data = await response.json()
   next_offset = data["data"]["offset"] if data["data"]["has_more"] else None
@@ -79,7 +79,7 @@ async def grpc_get(id: str | list[str]) -> DynamicItem | list[DynamicItem]:
 
 
 async def json_get(id: str) -> dict:
-  http = util.http()
+  http = misc.http()
   async with http.get(DETAIL_API.format(id=id)) as response:
     data = await response.json()
   return data["data"]["item"]

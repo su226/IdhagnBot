@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Literal
 from loguru import logger
 from pydantic import BaseModel, Field
 
-from util import config_v2
+from util import configs
 
 if TYPE_CHECKING:
   from loguru import Record
@@ -57,7 +57,7 @@ class LoggerStream:
     pass
 
 
-CONFIG = config_v2.SharedConfig("log", Config, "eager")
+CONFIG = configs.SharedConfig("log", Config, "eager")
 showwarning_orig = warnings._showwarnmsg_impl  # type: ignore
 
 
@@ -102,7 +102,7 @@ def config_onload(_: Config | None, cur: Config) -> None:
 
 
 def init():
-  CONFIG.load()
+  CONFIG()
 
 
 def colorize_filename(filename: str) -> str:

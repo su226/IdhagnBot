@@ -1,32 +1,41 @@
 import random
-from typing import Literal, cast
+from typing import Literal, cast, get_args
 
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
+from pydantic import BaseModel
 
-from util import binomial, command
-from util.config import BaseConfig
+from util import command, configs, misc
 
 
-class Config(BaseConfig):
-  __file__ = "coin"
+class Config(BaseModel):
   front_weight: float = 49.5
   back_weight: float = 49.5
   stand_weight: float = 1
   limit: int = 10000
   binomial_limit: int = 10 ** 15
 
+  @property
+  def fail_str(self) -> str:
+    return USAGE_FAIL.format(self.binomial_limit, self.limit)
 
-CONFIG = Config.load()
-warn_str = f"超过 {CONFIG.limit} 的硬币将会使用二项分布估算"
-fail_str = f"硬币数量必须是不超过 {CONFIG.binomial_limit} 的正整数\n{warn_str}"
 
+CONFIG = configs.SharedConfig("coin", Config)
+
+
+USAGE_BASE = '''\
+/硬币 - 抛出一枚硬币
+/硬币 <硬币数量> - 抛出一把硬币'''
+USAGE_FAIL = "硬币数量必须是不超过 {} 的正整数\n超过 {} 的硬币将会使用二项分布估算"
 FlipResult = Literal["front", "back", "stand"]
 
 
 def flip() -> FlipResult:
-  return cast(FlipResult, random.choices(
-    ["front", "back", "stand"], [CONFIG.front_weight, CONFIG.back_weight, CONFIG.stand_weight])[0])
+  config = CONFIG()
+  result = random.choices(
+    get_args(FlipResult), [config.front_weight, config.back_weight, config.stand_weight]
+  )[0]
+  return cast(FlipResult, result)
 
 
 def flip_multiple(count) -> tuple[int, int, int]:
@@ -45,10 +54,13 @@ def flip_multiple(count) -> tuple[int, int, int]:
 
 
 def flip_binomial(count: int) -> tuple[int, int, int]:
-  stand = binomial.sample(
-    count, CONFIG.stand_weight / (CONFIG.front_weight + CONFIG.back_weight + CONFIG.stand_weight))
-  front = binomial.sample(
-    count - stand, CONFIG.front_weight / (CONFIG.front_weight + CONFIG.back_weight))
+  config = CONFIG()
+  stand = misc.binomial_sample(
+    count, config.stand_weight / (config.front_weight + config.back_weight + config.stand_weight)
+  )
+  front = misc.binomial_sample(
+    count - stand, config.front_weight / (config.front_weight + config.back_weight)
+  )
   back = count - stand - front
   return front, back, stand
 
@@ -66,27 +78,24 @@ def format_one() -> str:
 coin = (
   command.CommandBuilder("coin", "硬币", "coin")
   .brief("试试你的运气")
-  .usage(f'''
-/硬币 - 抛出一枚硬币
-/硬币 <硬币数量> - 抛出一把硬币
-{warn_str}''')
-  .build())
-
-
+  .usage(lambda: USAGE_BASE + "\n" + CONFIG().fail_str)
+  .build()
+)
 @coin.handle()
 async def handle_coin(arg: Message = CommandArg()):
   args = arg.extract_plain_text().strip()
   if len(args) == 0:
     await coin.finish(format_one())
+  config = CONFIG()
   try:
     count = int(args)
   except ValueError:
-    await coin.finish(fail_str)
-  if count < 1 or count > CONFIG.binomial_limit:
-    await coin.finish(fail_str)
+    await coin.finish(config.fail_str)
+  if count < 1 or count > config.binomial_limit:
+    await coin.finish(config.fail_str)
   elif count == 1:
     await coin.finish(format_one())
-  if count > CONFIG.limit:
+  if count > config.limit:
     front, back, stand = flip_binomial(count)
   else:
     front, back, stand = flip_multiple(count)

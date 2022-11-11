@@ -1,6 +1,6 @@
 from typing import Any
 
-from aiohttp import ClientSession
+from util import misc
 
 from .common import Item, strip_html
 
@@ -22,8 +22,8 @@ def get_image(data: Any) -> str:
 
 
 async def get_data() -> list[Item]:
-  async with ClientSession() as http:
-    response = await http.get(API)
+  http = misc.http()
+  async with http.get(API) as response:
     data = await response.json()
   result = []
   i = data["data"]["hotgov"]

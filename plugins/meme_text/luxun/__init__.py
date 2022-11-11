@@ -1,34 +1,30 @@
-import os
-from io import BytesIO
+import asyncio
+from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image
 
-from util import command, text, util
+from util import command, imutil, textutil
 
-plugin_dir = os.path.dirname(os.path.abspath(__file__))
+DIR = Path(__file__).resolve().parent
 
-USAGE = "/鲁迅说 <文本>"
-addict = (
+
+luxun = (
   command.CommandBuilder("meme_text.luxun", "鲁迅说", "鲁迅")
+  .category("meme_word")
   .brief("我没说过这句话")
-  .usage(USAGE)
-  .build())
-
-
-@addict.handle()
-async def handle_addict(args: Message = CommandArg()):
-  content = args.extract_plain_text().rstrip()
-  if not content:
-    content = USAGE
-
-  im = Image.open(os.path.join(plugin_dir, "template.jpg"))
-  text_im = text.render(content, "sans", 38, color=(255, 255, 255), align="m", spacing=5)
-  text_im = util.center(text_im, 440, 100)
-  im.paste(text_im, (20, 300), text_im)
-  text.paste(im, (320, 400), "——鲁迅", "sans", 30, color=(255, 255, 255))
-
-  f = BytesIO()
-  im.save(f, "png")
-  await addict.send(MessageSegment.image(f))
+  .usage("/鲁迅说 <文本>")
+  .build()
+)
+@luxun.handle()
+async def handle_luxun(args: Message = CommandArg()):
+  def make() -> MessageSegment:
+    content = args.extract_plain_text().rstrip() or luxun.__doc__ or ""
+    im = Image.open(DIR / "template.jpg")
+    text_im = textutil.render(content, "sans", 38, color=(255, 255, 255), align="m", spacing=5)
+    text_im = imutil.contain_down(text_im, 440, 100)
+    imutil.paste(im, text_im, (240, 350), anchor="mm")
+    textutil.paste(im, (320, 400), "——鲁迅", "sans", 30, color=(255, 255, 255))
+    return imutil.to_segment(im)
+  await luxun.finish(await asyncio.to_thread(make))

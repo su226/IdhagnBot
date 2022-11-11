@@ -12,23 +12,13 @@ from nonebot.params import Arg, ArgPlainText, CommandArg, EventMessage
 from nonebot.typing import T_State
 from pydantic import BaseModel
 
-from util import command, config_v2, furbot_common, help, util
+from util import command, configs, help, misc
+from util.api_common import furbot
 
 
 class Config(BaseModel):
   keyword: str = "来只兽"
-
-CONFIG = config_v2.SharedConfig("foxtail", Config, "eager")
-
-@CONFIG.onload()
-def onload(prev: Config | None, curr: Config):
-  usage = USAGE_BASE
-  if curr.keyword:
-    usage += "\n" + USAGE_KEYWORD.format(curr.keyword)
-  item = help.CommandItem.find("兽云祭")
-  item.raw_usage = usage
-  global USAGE
-  USAGE = usage
+CONFIG = configs.SharedConfig("foxtail", Config)
 
 
 RANDOM_API = "https://cloud.foxtail.cn/api/function/random?name={}&type={}"
@@ -58,11 +48,10 @@ USAGE_BASE = f'''\
 内容来自兽云祭 API，官网：furbot.cn
 {USAGE_TYPES}'''
 USAGE_KEYWORD = "也可以使用关键词“{}”触发"
-USAGE = USAGE_BASE
 
 
 async def send_pic(bot: Bot, event: Event, data: dict) -> None:
-  http = util.http()
+  http = misc.http()
   status = int(data["examine"])
   if status == 1:
     async with http.get(DOWNLOAD_API.format(data["picture"], 0)) as response:
@@ -108,7 +97,7 @@ class Source:
 
   @staticmethod
   async def handle(bot: Bot, event: Event, args: str) -> None:
-    http = util.http()
+    http = misc.http()
     if match := UID_RE.fullmatch(args):
       async with http.get(INFO_API.format(match[0], 0)) as response:
         data = await response.json()
@@ -148,7 +137,7 @@ class Source:
       name = argv[0]
       type = STR_TO_TYPE[argv[1]]
     else:
-      await bot.send(event, USAGE)
+      await bot.send(event, picture_usage() or "")
       return
 
     url = RANDOM_API.format(urlencode(name), type)
@@ -166,13 +155,22 @@ class Source:
       return
 
     await send_pic(bot, event, data)
-furbot_common.universal_sources["foxtail"] = Source
+furbot.universal_sources["foxtail"] = Source
 
 
-picture = command.CommandBuilder("foxtail.picture", "兽云祭") \
-  .category("foxtail") \
-  .brief("使用兽云祭API的随机兽图") \
+def picture_usage() -> str:
+  config = CONFIG()
+  usage = USAGE_BASE
+  if config.keyword:
+    usage += "\n" + USAGE_KEYWORD.format(config.keyword)
+  return usage
+picture = (
+  command.CommandBuilder("foxtail.picture", "兽云祭")
+  .category("foxtail")
+  .brief("使用兽云祭API的随机兽图")
+  .usage(picture_usage)
   .build()
+)
 @picture.handle()
 async def handle_picture(bot: Bot, event: Event, message: Message = CommandArg()):
   await Source.handle(bot, event, message.extract_plain_text().rstrip())
@@ -192,18 +190,19 @@ async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()
   await Source.handle(bot, event, args.strip())
 
 
-SEARCH_USAGE = "/兽云祭搜索 <名字> - 搜索兽图"
-search = command.CommandBuilder("foxtail.search", "兽云祭搜索") \
-  .category("foxtail") \
-  .brief("搜索兽图") \
-  .usage(SEARCH_USAGE) \
+search = (
+  command.CommandBuilder("foxtail.search", "兽云祭搜索")
+  .category("foxtail")
+  .brief("搜索兽图")
+  .usage("/兽云祭搜索 <名字> - 搜索兽图")
   .build()
+)
 @search.handle()
 async def handle_search(message: Message = CommandArg()) -> None:
   name = message.extract_plain_text().rstrip()
   if not name:
-    await search.finish(SEARCH_USAGE)
-  http = util.http()
+    await search.finish(search.__doc__)
+  http = misc.http()
   async with await http.get(SEARCH_API.format(name)) as response:
     data = await response.json()
   result: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
@@ -226,13 +225,15 @@ class SubmitData(BaseModel):
   note: str
 
 
-submit = command.CommandBuilder("foxtail.submit", "兽云祭投稿") \
-  .category("foxtail") \
-  .brief("投稿兽图") \
+submit = (
+  command.CommandBuilder("foxtail.submit", "兽云祭投稿")
+  .category("foxtail")
+  .brief("投稿兽图")
   .usage(f'''\
 /兽云祭投稿 <投稿数据>
-请在此处生成投稿命令：{SUBMIT_GUI_URL}''') \
+请在此处生成投稿命令：{SUBMIT_GUI_URL}''')
   .build()
+)
 @submit.handle()
 async def handle_submit(state: T_State, arg: Message = CommandArg()) -> None:
   text = arg.extract_plain_text().rstrip()
@@ -242,7 +243,7 @@ async def handle_submit(state: T_State, arg: Message = CommandArg()) -> None:
     raw = base64.b64decode(text)
     data = SubmitData.parse_raw(raw)
   except ValueError:
-    await submit.finish(f"无效投稿数据，请重新生成：{SUBMIT_GUI_URL}")
+    await submit.finish(f"无效投稿命令，请重新生成：{SUBMIT_GUI_URL}")
   state["data"] = data
   await submit.send("请发送要投稿的图片，发送不是图片的内容将取消投稿")
 
@@ -269,7 +270,7 @@ async def got_confirm(state: T_State, confirm: str = ArgPlainText()) -> None:
     await submit.finish("投稿取消")
   data: SubmitData = state["data"]
   image: str = state["image"]
-  http = util.http()
+  http = misc.http()
   async with http.get(image) as response:
     image_data = await response.read()
   form = aiohttp.FormData({
@@ -289,13 +290,15 @@ SID: {result["id"]}
 UID: {result["picture"]}''')
 
 
-info = command.CommandBuilder("foxtail.info", "兽云祭信息") \
-  .category("foxtail") \
-  .brief("兽云祭服务器信息") \
+info = (
+  command.CommandBuilder("foxtail.info", "兽云祭信息")
+  .category("foxtail")
+  .brief("兽云祭服务器信息")
   .build()
+)
 @info.handle()
 async def handle_info() -> None:
-  http = util.http()
+  http = misc.http()
   async with http.get("https://cloud.foxtail.cn/api/information/feedback") as response:
     data = await response.json()
   await info.finish(f'''\
@@ -308,7 +311,6 @@ async def handle_info() -> None:
 运行时长: {data['time']['count']}天''')
 
 
-CONFIG.load()
-furbot_common.register_universal_keyword()
+furbot.register_universal_keyword()
 category = help.CategoryItem.find("foxtail")
 category.brief = "兽云祭"

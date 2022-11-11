@@ -1,30 +1,14 @@
 import os
+import random
 import re
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
 from nonebot.params import CommandArg
-from pydantic import Field
 
-from util import command, context, util
-from util.config import BaseState
-
-
-class State(BaseState):
-  __file__ = "emojimix"
-  unsupported: set[str] = Field(default_factory=set)
-
+from util import command, context, misc
 
 CACHE_DIR = "states/emojimix_cache"
-os.makedirs(CACHE_DIR, exist_ok=True)
-
-
-def write_cache(cache: str, data: bytes):
-  with open(cache, "wb") as f:
-    f.write(data)
-
-
-STATE = State.load()
 API = "https://www.gstatic.com/android/keyboard/emojikitchen"
 EMOJIS: list[tuple[str, str]] = [
   ('☁️', '20201001'),
@@ -264,19 +248,22 @@ IGNORE_RE = re.compile(r"[+\s\u200b\ufe0f\U0001f3fb-\U0001f3ff\U0001F9B0-\U0001F
 
 
 def get_code(emoji: str) -> str:
-  return "_".join(map(lambda ch: "u{:x}".format(ord(ch)), emoji))
+  return "-".join(map(lambda ch: "u{:x}".format(ord(ch)), emoji))
 
 
-def split_emojis(argv: str) -> tuple[tuple[str, str], tuple[str, str]]:
+def split_emojis(argv: str) -> tuple[tuple[str, str], tuple[str, str] | None]:
   argv = IGNORE_RE.sub("", argv)
   first_match: None | tuple[str, str] = None
   for char, date in EMOJIS:
-    if argv.startswith(IGNORE_RE.sub("", char)):
+    stripped = IGNORE_RE.sub("", char)
+    if argv.startswith(stripped):
+      argv = argv.removeprefix(stripped)
       first_match = char, date
       break
   else:
     raise KeyError("No match")
-  argv = argv.removeprefix(first_match[0])
+  if not argv:
+    return first_match, None
   for char, date in EMOJIS:
     if argv == IGNORE_RE.sub("", char):
       return first_match, (char, date)
@@ -284,58 +271,89 @@ def split_emojis(argv: str) -> tuple[tuple[str, str], tuple[str, str]]:
     raise KeyError("No match")
 
 
+async def get_image(emoji1: str, date1: str, emoji2: str, date2: str) -> bytes | None:
+  code1 = get_code(emoji1)
+  code2 = get_code(emoji2)
+  file1 = f"{code1}_{code2}"
+  file2 = f"{code2}_{code1}"
+  cache1 = f"{CACHE_DIR}/{file1}"
+  cache2 = f"{CACHE_DIR}/{file2}"
+  if os.path.exists(f"{cache1}.unsupported") or os.path.exists(f"{cache2}.unsupported"):
+    return None
+  cache1 += ".png"
+  if os.path.exists(cache1):
+    with open(cache1, "rb") as f:
+      return f.read()
+  cache2 += ".png"
+  if os.path.exists(cache2):
+    with open(cache2, "rb") as f:
+      return f.read()
+  http = misc.http()
+  async with http.get(f"{API}/{date1}/{code1}/{file1}.png") as response:
+    if response.status == 200:
+      image = await response.read()
+      with open(f"{CACHE_DIR}/{file1}.png", "wb") as f:
+        f.write(image)
+      return image
+  async with http.get(f"{API}/{date2}/{code2}/{file2}.png") as response:
+    if response.status == 200:
+      image = await response.read()
+      with open(f"{CACHE_DIR}/{file1}.png", "wb") as f:
+        f.write(image)
+      return image
+  with open(f"{CACHE_DIR}/{file1}.unsupported", "w"):
+    pass
+
+
 emojimix = (
   command.CommandBuilder("emojimix", "emojimix", "缝合", "emoji", "mix")
   .brief("缝合两个emoji")
   .usage('''\
 /emojimix - 查看支持的emoji
+/emojimix random - 随机缝合
+/emojimix <emoji> - 半随机缝合
 /emojimix <emoji1>+<emoji2> - 缝合两个emoji
 数据来自 https://tikolu.net/emojimix
 图片来自 Google''')
-  .build())
-
-
+  .build()
+)
 @emojimix.handle()
 async def handle_emojimix(bot: Bot, event: Event, args: Message = CommandArg()):
   argv = args.extract_plain_text().rstrip()
   if not argv:
     self_name = await context.get_card_or_name(bot, event, event.self_id)
-    nodes = [util.forward_node(event.self_id, self_name, "支持的 emoji（并不是所有组合都存在）：")]
-    for i in util.groupbyn(EMOJIS, 50):
+    nodes = [misc.forward_node(event.self_id, self_name, "支持的 emoji（并不是所有组合都存在）：")]
+    for i in misc.chunked(EMOJIS, 50):
       content = " | ".join(x[0] for x in i)
-      nodes.append(util.forward_node(event.self_id, self_name, content))
-    await util.send_forward_msg(bot, event, *nodes)
+      nodes.append(misc.forward_node(event.self_id, self_name, content))
+    await misc.send_forward_msg(bot, event, *nodes)
     await emojimix.finish()
+
+  if argv == "random":
+    emoji1 = emoji2 = ""
+    result = None
+    while result is None:
+      emoji1, date1 = random.choice(EMOJIS)
+      emoji2, date2 = random.choice(EMOJIS)
+      result = await get_image(emoji1, date1, emoji2, date2)
+    await emojimix.finish(f"{emoji1}+{emoji2}=" + MessageSegment.image(result))
+
   try:
-    (emoji1, date1), (emoji2, date2) = split_emojis(argv)
+    (emoji1, date1), pair2 = split_emojis(argv)
   except KeyError:
-    await emojimix.finish("似乎不能这么组合")
-  code1 = get_code(emoji1)
-  code2 = get_code(emoji2)
-  file1 = f"{code1}_{code2}"
-  file2 = f"{code2}_{code1}"
-  cache1 = os.path.abspath(f"{CACHE_DIR}/{file1}.png")
-  cache2 = os.path.abspath(f"{CACHE_DIR}/{file2}.png")
-  if os.path.exists(cache1):
-    await emojimix.finish(util.local_image(cache1))
-  if os.path.exists(cache2):
-    await emojimix.finish(util.local_image(cache2))
-  if file1 in STATE.unsupported or file2 in STATE.unsupported:
-    await emojimix.finish("似乎不能这么组合")
-  async with aiohttp.ClientSession() as http:
-    try:
-      response = await http.get(f"{API}/{date1}/{code1}/{file1}.png")
-      if response.status == 200:
-        image = await response.read()
-        write_cache(cache1, image)
-        await emojimix.finish(MessageSegment.image(image))
-      response = await http.get(f"{API}/{date2}/{code2}/{file2}.png")
-      if response.status == 200:
-        image = await response.read()
-        write_cache(cache2, image)
-        await emojimix.finish(MessageSegment.image(image))
-      STATE.unsupported.add(file1)
-      STATE.dump()
+    await emojimix.finish(emojimix.__doc__)
+  if pair2 is None:
+    emoji2 = ""
+    result = None
+    while result is None:
+      emoji2, date2 = random.choice(EMOJIS)
+      result = await get_image(emoji1, date1, emoji2, date2)
+    await emojimix.finish(f"{emoji1}+{emoji2}=" + MessageSegment.image(result))
+
+  try:
+    result = await get_image(emoji1, date1, pair2[0], pair2[1])
+    if result is None:
       await emojimix.finish("似乎不能这么组合")
-    except aiohttp.ClientError:
-      await emojimix.finish("网络错误")
+    await emojimix.finish(MessageSegment.image(result))
+  except aiohttp.ClientError:
+    await emojimix.finish("网络错误")

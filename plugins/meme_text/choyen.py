@@ -1,3 +1,4 @@
+import asyncio
 from io import BytesIO
 
 import cairo
@@ -5,7 +6,7 @@ import gi
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 
-from util import command, text
+from util import command, textutil
 
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
@@ -156,8 +157,8 @@ def render_bottom(cr: cairo.Context, layout: Pango.Layout):
 
 
 def render(top: str, bottom: str) -> MessageSegment:
-  top_layout = text.layout(top, "sans bold", 100)
-  bottom_layout = text.layout(bottom, "serif bold", 100)
+  top_layout = textutil.layout(top, "sans bold", 100)
+  bottom_layout = textutil.layout(bottom, "serif bold", 100)
   top_width, _ = top_layout.get_pixel_size()
   bottom_width, _ = bottom_layout.get_pixel_size()
   width = max(top_width + TOP_X, bottom_width + BOTTOM_X - 60)
@@ -180,14 +181,12 @@ def render(top: str, bottom: str) -> MessageSegment:
     return MessageSegment.image(f)
 
 
-USAGE = "/5000兆元 <红色文本> [银色文本]"
 choyen = (
   command.CommandBuilder("meme_text.5000choyen", "5000兆元", "兆元", "5000choyen", "choyen")
   .brief("生成想要5000兆元风格文字")
-  .usage(USAGE)
-  .build())
-
-
+  .usage("/5000兆元 <红色文本> [银色文本]")
+  .build()
+)
 @choyen.handle()
 async def handle_choyen(args: Message = CommandArg()):
   text = args.extract_plain_text().split()
@@ -197,5 +196,5 @@ async def handle_choyen(args: Message = CommandArg()):
     top = text[0]
     bottom = ""
   else:
-    await choyen.finish(USAGE)
-  await choyen.finish(render(top, bottom))
+    await choyen.finish(choyen.__doc__)
+  await choyen.finish(await asyncio.to_thread(render, top, bottom))

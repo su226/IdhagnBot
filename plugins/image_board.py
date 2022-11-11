@@ -1,17 +1,15 @@
-import base64
 from argparse import Namespace
 from typing import Any, Literal
 
 import aiohttp
 from aiohttp.http import SERVER_SOFTWARE
-from nonebot.adapters.onebot.v11 import Message
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from pydantic import BaseModel, Field
 
-from util import command
-from util.config import BaseConfig
+from util import command, configs, misc
 
 
 class Site(BaseModel):
@@ -93,16 +91,16 @@ class Command(BaseModel):
       key: value if config[key] is None else config[key] for key, value in preset.items()})
 
 
-class Config(BaseConfig):
-  __file__ = "image_board"
+class Config(BaseModel):
   default_limit: int = 5
   max_limit: int = 10
   presets: dict[str, Site] = Field(default_factory=dict)
   sites: list[Command] = Field(default_factory=list)
 
 
-CONFIG = Config.load()
-presets.update(CONFIG.presets)
+CONFIG = configs.SharedConfig("image_board", Config, False)
+config = CONFIG()
+presets.update(config.presets)
 
 
 def get_by_path(root: dict, path: str) -> Any:
@@ -116,36 +114,47 @@ def register(definition: Command):
   async def handler(args: Namespace | ParserExit = ShellCommandArgs()):
     if isinstance(args, ParserExit):
       await matcher.finish(args.message)
-    if args.limit < 1 or args.limit > CONFIG.max_limit:
-      await matcher.finish(f"每页图片数必须在 1 和 {CONFIG.max_limit} 之间")
-    async with aiohttp.ClientSession(headers=HEADERS) as http:
+    if args.limit < 1 or args.limit > config.max_limit:
+      await matcher.finish(f"每页图片数必须在 1 和 {config.max_limit} 之间")
+
+    http = misc.http()
+    try:
+      async with http.get(
+        API_URL.format(tags=" ".join(args.tags), limit=args.limit, page=args.page),
+        headers=HEADERS, proxy=definition.proxy
+      ) as response:
+        if response.status != 200:
+          if response.status == 503:
+            await matcher.finish("访问过于频繁，请稍后再试")
+          else:
+            await matcher.finish(f"HTTP错误: {response.status}")
+        data = await response.json()
+    except aiohttp.ClientProxyConnectionError as e:
+      await matcher.finish(f"别试了我没挂梯子:\n{e}")
+    except aiohttp.ClientError as e:
+      await matcher.finish(f"网络异常:\n{e}")
+
+    posts = get_by_path(data, site.array_path)
+    if not posts:
+      await matcher.finish("没有结果")
+
+    message = Message()
+    for post in posts:
+      url = POST_URL.format(id=get_by_path(post, site.id_path))
+      if message:
+        url = "\n" + url
       try:
-        response = await http.get(
-          API_URL.format(tags=" ".join(args.tags), limit=args.limit, page=args.page),
-          proxy=definition.proxy)
-      except aiohttp.ClientProxyConnectionError as e:
-        await matcher.finish(f"别试了我没挂梯子:\n{e}")
-      except aiohttp.ClientError as e:
-        await matcher.finish(f"网络异常:\n{e}")
-      if response.status != 200:
-        if response.status == 503:
-          await matcher.finish("访问过于频繁，请稍后再试")
-        else:
-          await matcher.finish(f"HTTP错误: {response.status}")
-      posts = get_by_path(await response.json(), site.array_path)
-      if len(posts) == 0:
-        await matcher.send("没有结果")
-        return
-      segments = []
-      for post in posts:
-        url = POST_URL.format(id=get_by_path(post, site.id_path))
-        segments.append(url)
-        try:
-          response = await http.get(get_by_path(post, site.sample_path), proxy=definition.proxy)
-          segments.append(f"[CQ:image,file=base64://{base64.b64encode(await response.read())}]")
-        except aiohttp.ClientError:
-          segments.append("预览下载失败")
-    await matcher.send(Message("\n".join(segments)))
+        async with http.get(
+          get_by_path(post, site.sample_path), proxy=definition.proxy, headers=HEADERS
+        ) as response:
+          img = await response.read()
+      except aiohttp.ClientError:
+        message.append(MessageSegment.text(url + "\n预览下载失败"))
+      else:
+        message.append(MessageSegment.text(url))
+        message.append(MessageSegment.image(img))
+
+    await matcher.finish(message)
   site = definition.to_site()
   HEADERS = {"User-Agent": definition.user_agent}
   POST_URL = site.origin + site.post_url
@@ -153,8 +162,9 @@ def register(definition: Command):
   parser = ArgumentParser(add_help=False)
   parser.add_argument("tags", nargs="+", metavar="标签")
   parser.add_argument(
-    "-limit", type=int, default=CONFIG.default_limit, metavar="图片数",
-    help=f"每页的图片数，默认为{CONFIG.default_limit}，不能超过{CONFIG.max_limit}")
+    "--limit", "-l", type=int, default=config.default_limit, metavar="图片数",
+    help=f"每页的图片数，默认为{config.default_limit}，不能超过{config.max_limit}"
+  )
   parser.add_argument("-page", type=int, default=1, metavar="页码")
   builder = (
     command.CommandBuilder(f"image_board.{definition.command[0]}", *definition.command)
@@ -168,5 +178,5 @@ def register(definition: Command):
   return matcher
 
 
-for site in CONFIG.sites:
+for site in config.sites:
   register(site)

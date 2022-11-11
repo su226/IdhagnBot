@@ -1,32 +1,26 @@
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from util.config import BaseState
-
-
-class State(BaseState):
-  __file__ = "coin"
-  groups: dict[int, dict[int, int]] = Field(default_factory=dict)
+from util import configs
 
 
-STATE = State.load()
+class State(BaseModel):
+  users: dict[int, int] = Field(default_factory=dict)
+
+
+STATE = configs.GroupState("currency", State)
 
 
 def get_coin(group: int, user: int) -> int:
-  return STATE.groups.get(group, {}).get(user, 0)
+  return STATE(group).users.get(user, 0)
 
 
 def set_coin(group: int, user: int, amount: int):
-  if group not in STATE.groups:
-    STATE.groups[group] = {}
-  STATE.groups[group][user] = amount
-  STATE.dump()
+  state = STATE(group)
+  state.users[user] = amount
+  STATE.dump(group)
 
 
 def add_coin(group: int, user: int, amount: int):
-  if group not in STATE.groups:
-    STATE.groups[group] = {}
-  group_data = STATE.groups[group]
-  if user not in group_data:
-    group_data[user] = 0
-  group_data[user] = max(group_data[user] + amount, 0)
-  STATE.dump()
+  state = STATE(group)
+  state.users[user] = max(state.users.get(user, 0) + amount, 0)
+  STATE.dump(group)

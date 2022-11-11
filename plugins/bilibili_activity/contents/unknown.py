@@ -2,7 +2,7 @@ from typing import Any
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
-from util import bilibili_activity
+from util.api_common import bilibili_activity
 
 
 async def format(activity: bilibili_activity.Activity[Any]) -> Message:

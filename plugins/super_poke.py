@@ -4,7 +4,7 @@ import random
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import CommandArg
 
-from util import account_aliases, command, context, util
+from util import command, context, misc, user_aliases
 
 super_poke = (
   command.CommandBuilder("super_poke", "戳亿戳", "poke")
@@ -20,18 +20,16 @@ async def handle_super_poke(bot: Bot, event: Event, arg: Message = CommandArg())
   ctx = context.get_event_context(event)
   args = arg.extract_plain_text().split()
   if len(args) < 2:
-    await super_poke.send("/戳亿戳 <总次数> <QQ号列表>")
-    return
+    await super_poke.finish("/戳亿戳 <总次数> <QQ号列表>")
   all_errors = []
   all_uids = []
   for pattern in args[1:]:
     try:
-      all_uids.extend(await account_aliases.match_uid(bot, event, pattern, True))
-    except util.AggregateError as e:
+      all_uids.extend(await user_aliases.match_uid(bot, event, pattern, True))
+    except misc.AggregateError as e:
       all_errors.extend(e)
   if all_errors:
-    await super_poke.send("\n".join(all_errors))
-    return
+    await super_poke.finish("\n".join(all_errors))
   cur_uids = []
   await super_poke.send("戳亿戳开始")
   coros = []
@@ -41,6 +39,7 @@ async def handle_super_poke(bot: Bot, event: Event, arg: Message = CommandArg())
       random.shuffle(cur_uids)
     coros.append(bot.send_group_msg(
       group_id=ctx,
-      message=f"[CQ:poke,qq={cur_uids.pop()}]"))
+      message=f"[CQ:poke,qq={cur_uids.pop()}]"
+    ))
   await asyncio.gather(*coros)
-  await super_poke.send("戳亿戳完成")
+  await super_poke.finish("戳亿戳完成")

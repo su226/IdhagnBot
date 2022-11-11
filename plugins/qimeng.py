@@ -10,9 +10,9 @@ from nonebot.adapters.onebot.v11 import (
   Bot, Event, GroupIncreaseNoticeEvent, GroupRequestEvent, Message
 )
 from nonebot.params import CommandArg
-from pydantic import BaseModel
+from pydantic import BaseModel, SecretStr
 
-from util import command, config_v2, context, util
+from util import command, configs, context, misc
 
 
 class Config(BaseModel):
@@ -20,8 +20,12 @@ class Config(BaseModel):
   # 从网页查询有上黑等级、上黑时间、上黑原因和登记人，但使用 API 查询只有上黑原因
   # 并且没有批量查询，没法写查询全群
   # 对不起绮梦老师了
-  token: str = ""
+  token: SecretStr = SecretStr("")
   auto_reject: bool = False
+
+  @property
+  def use_spider(self) -> bool:
+    return self.token.get_secret_value() == "spider"
 
 
 class SingleParser(HTMLParser):
@@ -69,13 +73,13 @@ URL = "https://yunhei.qimeng.fun/"
 BATCH_URL = "https://yunhei.qimeng.fun/Piliang.php"
 CHUNK_SIZE = 200
 INT_RE = re.compile(r"\d+")
-CONFIG = config_v2.SharedConfig("qimeng", Config)
+CONFIG = configs.SharedConfig("qimeng", Config)
 
 
 async def query_openapi(uid: int) -> str | None:
   config = CONFIG()
-  http = util.http()
-  async with http.get(API.format(config.token, uid)) as response:
+  http = misc.http()
+  async with http.get(API.format(config.token.get_secret_value(), uid)) as response:
     data = await response.json(content_type=None)  # text/html
   data = data["info"][0]
   if data["yh"] == "false":
@@ -84,7 +88,7 @@ async def query_openapi(uid: int) -> str | None:
 
 
 async def query_spider(uid: int) -> tuple[int, str]:
-  http = util.http()
+  http = misc.http()
   data = {"qq": uid}
   async with http.post(URL, data=data) as response:
     parser = SingleParser()
@@ -101,7 +105,7 @@ async def query_spider(uid: int) -> tuple[int, str]:
 
 
 async def query_spider_batch(uids: list[int]) -> list[tuple[int, int]]:
-  http = util.http()
+  http = misc.http()
   data = {"qq": "\n".join(str(x) for x in uids)}
   async with http.post(BATCH_URL, data=data) as response:
     parser = BatchParser()
@@ -119,8 +123,6 @@ async def query_spider_batch(uids: list[int]) -> list[tuple[int, int]]:
   return result
 
 
-async def check_query() -> bool:
-  return bool(CONFIG().token)
 query = (
   command.CommandBuilder("qimeng.query", "查云黑")
   .brief("查询趣绮梦Furry云黑")
@@ -130,7 +132,7 @@ query = (
 数据来自 {URL}''')
   .throttle(5, 1)
   .help_condition(lambda _: bool(CONFIG().token))
-  .rule(check_query)
+  .rule(lambda: bool(CONFIG().token))
   .build()
 )
 @query.handle()
@@ -142,7 +144,7 @@ async def handle_query(args: Message = CommandArg()) -> None:
   if not uids:
     await query.finish(query.__doc__)
   config = CONFIG()
-  if config.token == "spider":
+  if config.use_spider:
     if len(uids) > 1:
       result = await query_spider_batch(uids)
       lines = []
@@ -167,8 +169,6 @@ async def handle_query(args: Message = CommandArg()) -> None:
     await query.finish(f"查询账号：{uid}\n该用户已上黑，原因为：" + reason)
 
 
-async def check_query_all() -> bool:
-  return CONFIG().token == "spider"
 query_all = (
   command.CommandBuilder("qimeng.query_all", "查群云黑")
   .brief("批量查询本群群员云黑")
@@ -178,8 +178,8 @@ query_all = (
 数据来自 {URL}''')
   .throttle(1, 10)
   .in_group()
-  .help_condition(lambda _: CONFIG().token == "spider")
-  .rule(check_query_all)
+  .help_condition(lambda _: CONFIG().use_spider)
+  .rule(lambda: CONFIG().use_spider)
   .build()
 )
 @query_all.handle()
@@ -190,7 +190,7 @@ async def handle_query_all(bot: Bot, event: Event) -> None:
   if chunks > 1:
     await query_all.send(f"群员较多，需要分为 {chunks} 批次查询，请稍等。")
   result: list[tuple[int, int]] = []
-  for chunk in util.groupbyn([member["user_id"] for member in members], CHUNK_SIZE):
+  for chunk in misc.chunked([member["user_id"] for member in members], CHUNK_SIZE):
     if result:
       await asyncio.sleep(1)
     result.extend(await query_spider_batch(chunk))
@@ -211,7 +211,7 @@ on_member_join = nonebot.on_notice(check_member_join)
 @on_member_join.handle()
 async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
   config = CONFIG()
-  if config.token == "spider":
+  if config.use_spider:
     type, detail = await query_spider(event.user_id)
     if type == 0:
       return
@@ -221,7 +221,7 @@ async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
       return
     detail = f"原因：{reason}\n详情请参考 {URL}"
   name = await context.get_card_or_name(bot, event, event.user_id)
-  await on_member_join.send(f'''⚠️ 警告 ⚠️
+  await on_member_join.finish(f'''⚠️ 警告 ⚠️
 刚刚加群的用户 {name}({event.user_id}) 已上黑，请注意。
 {detail}''')
 
@@ -232,7 +232,7 @@ on_group_request = nonebot.on_notice(check_group_request)
 @on_group_request.handle()
 async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
   config = CONFIG()
-  if config.token == "spider":
+  if config.use_spider:
     type, detail = await query_spider(event.user_id)
     if type == 0:
       return
@@ -247,6 +247,6 @@ async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
     )
   info = await bot.get_stranger_info(user_id=event.user_id)
   name = info["nickname"]
-  await on_group_request.send(f'''⚠️ 警告 ⚠️
+  await on_group_request.finish(f'''⚠️ 警告 ⚠️
 请求加群的用户 {name}({event.user_id}) 已上黑，请管理员注意。
 {detail}''')

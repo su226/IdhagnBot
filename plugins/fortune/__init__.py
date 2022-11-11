@@ -11,7 +11,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from pydantic import BaseModel
 
-from util import command, config_v2
+from util import command, configs
 
 from . import strfile
 
@@ -21,7 +21,7 @@ class Config(BaseModel):
   offensive: bool = False
 
 
-CONFIG = config_v2.SharedConfig("fortune", Config)
+CONFIG = configs.SharedConfig("fortune", Config)
 RE_033 = re.compile("\033\\[(\\d*;?)*m")
 
 

@@ -2,26 +2,23 @@ import random
 import time
 from copy import deepcopy
 from datetime import datetime
-from typing import cast
 
 import nonebot
-from apscheduler.schedulers.base import Job
-from apscheduler.triggers.date import DateTrigger
+from apscheduler.jobstores.memory import MemoryJobStore
 from loguru import logger
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Message, MessageEvent
 from nonebot.adapters.onebot.v11.event import Sender
 from nonebot.message import handle_event
 from nonebot.params import CommandArg
-from pydantic import Field
+from pydantic import BaseModel, Field
 
-from util import command, context, util
-from util.config import BaseModel, BaseState
+from util import command, configs, context, misc
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 
-class Scheduled(BaseModel):
+class Task(BaseModel):
   user: int
   message: str
   date: datetime
@@ -29,8 +26,8 @@ class Scheduled(BaseModel):
   async def send(self, group: int, id: str):
     bot = nonebot.get_bot()
     msg = Message(self.message)
-    if not util.is_command(msg):
-      msg[0].data["text"] = util.command_start() + msg[0].data["text"]
+    if not misc.is_command(msg):
+      msg[0].data["text"] = misc.command_start() + msg[0].data["text"]
     await handle_event(bot, GroupMessageEvent(
       time=int(time.time()),
       self_id=int(bot.self_id),
@@ -44,57 +41,40 @@ class Scheduled(BaseModel):
       raw_message=str(msg),
       font=0,
       sender=Sender(),
-      group_id=group))
-    STATE.del_scheduled(group, id)
+      group_id=group
+    ))
+    del STATE(group).tasks[id]
 
   def schedule(self, ctx: int, id: str):
     scheduler.add_job(
-      self.send, "date", (ctx, id), id=f"scheduled_message_{id}", run_date=self.date)
+      self.send, "date", (ctx, id), id=f"{JOBSTORE}_{id}", run_date=self.date,
+      jobstore=JOBSTORE
+    )
 
 
-class State(BaseState):
-  __file__ = "scheduled_message"
-  scheduled: dict[int, dict[str, Scheduled]] = Field(default_factory=dict)
-
-  def len_scheduled(self, ctx: int) -> int:
-    if ctx not in self.scheduled:
-      return 0
-    return len(self.scheduled[ctx])
-
-  def has_scheduled(self, ctx: int, id: str) -> bool:
-    if ctx not in self.scheduled:
-      return False
-    return id in self.scheduled[ctx]
-
-  def del_scheduled(self, ctx: int, id: str):
-    del self.scheduled[ctx][id]
-    if not self.scheduled[ctx]:
-      del self.scheduled[ctx]
-    self.dump()
-
-  def set_scheduled(self, ctx: int, id: str, user: int, message: str, date: datetime):
-    if ctx not in self.scheduled:
-      self.scheduled[ctx] = {}
-    scheduled = Scheduled(user=user, message=message, date=date)
-    self.scheduled[ctx][id] = scheduled
-    self.dump()
-    scheduled.schedule(ctx, id)
+class State(BaseModel):
+  tasks: dict[str, Task] = Field(default_factory=dict)
 
 
-STATE = State.load()
-
+STATE = configs.GroupState("scheduled", State)
+JOBSTORE = "scheduled_command"
+scheduler.add_jobstore(MemoryJobStore(), JOBSTORE)
 driver = nonebot.get_driver()
-now = datetime.now()
-expired: list[tuple[int, str]] = []
-for ctx, messages in STATE.scheduled.items():
-  for id, msg in messages.items():
+
+
+@STATE.onload()
+def onload(prev: State | None, curr: State, group_id: int) -> None:
+  scheduler.remove_all_jobs(JOBSTORE)
+  now = datetime.now()
+  expired: list[str] = []
+  for id, msg in curr.tasks.items():
     if msg.date <= now:
       logger.warning(f"ID 为 {id} 的定时任务已过期，其内容为：{msg.message}")
-      expired.append((ctx, id))
+      expired.append(id)
     else:
-      msg.schedule(ctx, id)
-for ctx, id in expired:
-  STATE.del_scheduled(ctx, id)
+      msg.schedule(group_id, id)
+  for id in expired:
+    del curr.tasks[id]
 
 
 def ellipsis(content: str, limit: int) -> str:
@@ -120,57 +100,52 @@ schedule = (
 /定时 列表|list - 显示定时任务
 /定时 预览|preview <任务ID> - 预览定时任务
 /定时 取消|cancel <任务ID> - 取消定时任务''')
-  .build())
-
-
+  .build()
+)
 @schedule.handle()
 async def handle_schedule(event: MessageEvent, msg: Message = CommandArg()):
   args = get_message(msg).rstrip().split(None, 1)
-  ctx = context.get_event_context(event)
   if len(args) == 0:
-    await schedule.send("运行 /帮助 定时 查看使用说明")
-  elif args[0] in ("列表", "list"):
-    if not STATE.len_scheduled(ctx):
-      await schedule.send("没有定时任务")
-      return
+    await schedule.finish("运行 /帮助 定时 查看使用说明")
+
+  ctx = context.get_event_context(event)
+  state = STATE(ctx)
+
+  if args[0] in ("列表", "list"):
+    if not state.tasks:
+      await schedule.finish("没有定时任务")
     segments = ["所有定时任务:"]
-    for id, content in STATE.scheduled[ctx].items():
-      job = cast(Job, scheduler.get_job(f"scheduled_message_{id}"))
-      trigger = cast(DateTrigger, job.trigger)
-      segments.append(f"{id} {trigger.run_date:%Y-%m-%d %H:%M:%S} {ellipsis(content.message, 16)}")
-    await schedule.send("\n".join(segments))
+    for id, content in state.tasks.items():
+      segments.append(f"{id} {content.date:%Y-%m-%d %H:%M:%S} {ellipsis(content.message, 16)}")
+    await schedule.finish("\n".join(segments))
   elif args[0] in ("预览", "preview"):
     if len(args) < 2:
-      await schedule.send("/定时 预览|preview <任务ID>")
-      return
+      await schedule.finish("/定时 预览|preview <任务ID>")
     id = args[1]
-    if not STATE.has_scheduled(ctx, id):
-      await schedule.send("没有这个定时任务")
-      return
-    await schedule.send(STATE.scheduled[ctx][id].message)
+    if id not in state.tasks:
+      await schedule.finish("没有这个定时任务")
+    await schedule.finish(state.tasks[id].message)
   elif args[0] in ("取消", "cancel"):
     if len(args) < 2:
-      await schedule.send("/定时 取消|cancel <任务ID>")
-      return
+      await schedule.finish("/定时 取消|cancel <任务ID>")
     id = args[1]
-    if not STATE.has_scheduled(ctx, id):
-      await schedule.send("没有这条定时任务")
-      return
-    scheduler.remove_job(f"scheduled_message_{id}")
-    STATE.del_scheduled(ctx, id)
-    await schedule.send("已取消定时任务")
+    if id not in state.tasks:
+      await schedule.finish("没有这条定时任务")
+    del state.tasks[id]
+    STATE.dump(ctx)
+    scheduler.remove_job(f"{JOBSTORE}_{id}")
+    await schedule.finish("已取消定时任务")
   else:
     if len(args) < 2:
-      await schedule.send("/定时 <时间> <命令>")
-      return
+      await schedule.finish("/定时 <时间> <命令>")
     try:
       date = datetime.fromisoformat(args[0])
     except ValueError:
-      await schedule.send("时间格式无效")
-      return
+      await schedule.finish("时间格式无效")
     if date < datetime.now():
-      await schedule.send("目标时间比当前时间早")
-      return
-    id = format(random.randint(0, 0xffffffff), "08x")
-    STATE.set_scheduled(ctx, id, event.user_id, args[1], date)
-    await schedule.send(f"已设置在 {date} 时在 {context.GROUP_IDS[ctx].name} 中执行的定时任务，ID 为 {id}")
+      await schedule.finish("目标时间比当前时间早")
+    id = str(random.randint(1000000000, 9999999999))
+    state.tasks[id] = task = Task(user=event.user_id, message=args[1], date=date)
+    task.schedule(ctx, id)
+    name = context.CONFIG().groups[context.get_event_context(event)]._name
+    await schedule.finish(f"已设置在 {date} 时在 {name} 中执行的定时任务，ID 为 {id}")

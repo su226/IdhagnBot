@@ -3,7 +3,7 @@ import os
 
 from nonebot.adapters.onebot.v11 import Message
 
-from util import util
+from util import misc
 
 from . import DailyCache, Module
 
@@ -16,7 +16,7 @@ class EveryFurryCache(DailyCache):
     self.image_path = os.path.splitext(self.path)[0] + ".jpg"
 
   async def update(self) -> None:
-    http = util.http()
+    http = misc.http()
     async with http.get(EVERYFURRY_API) as response:
       data = await response.json()
     with open(self.path, "w") as f:
@@ -45,4 +45,4 @@ class EveryFurryModule(Module):
 作者：{data["AuthorName"]}
 详情：https://furry.lihouse.xyz/index.php?ftime={data["Date"]}
 来源：{data["SourceLink"]}'''
-    return [util.local_image(cache.image_path) + text]
+    return [misc.local("image", cache.image_path) + text]

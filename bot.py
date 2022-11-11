@@ -5,7 +5,7 @@ import nonebot
 import yaml
 from nonebot.adapters.onebot.v11 import Adapter
 
-from util import config_v2, log, importing
+from util import configs, importing, log
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--export-html")
@@ -14,7 +14,7 @@ args = parser.parse_args()
 bot_config = {}
 if os.path.exists("configs/nonebot.yaml"):
   with open("configs/nonebot.yaml") as f:
-    bot_config = yaml.load(f, config_v2.SafeLoader)
+    bot_config = yaml.load(f, configs.SafeLoader)
 
 log.init()
 nonebot.init(**bot_config, apscheduler_autostart=True)

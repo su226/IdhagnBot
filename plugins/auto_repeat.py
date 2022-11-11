@@ -2,10 +2,10 @@ import re
 from contextvars import ContextVar
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Event, Message, MessageEvent
+from nonebot.adapters.onebot.v11 import Event, GroupMessageEvent, Message
 from nonebot.rule import Rule
 
-from util import context, hook, util
+from util import hook, misc
 
 suppress = ContextVar("suppress", default=False)
 last_message: dict[int, tuple[Message, int]] = {}
@@ -20,9 +20,9 @@ async def on_message_sent(
     del last_message[target_id]
 
 
-def is_original_emote(event: MessageEvent) -> bool:
+def is_original_emote(msg: Message) -> bool:
   # 找不到更好的解决方案，只能正则表达式匹配，虽然理论上不会漏判，但是会误判
-  return ORIGINAL_EMOTE_RE.match(str(event.message)) is not None
+  return ORIGINAL_EMOTE_RE.match(str(msg)) is not None
 
 
 def is_same(msg1: Message, msg2: Message) -> bool:
@@ -39,25 +39,27 @@ def is_same(msg1: Message, msg2: Message) -> bool:
   return True
 
 
-async def can_repeat(event: MessageEvent) -> bool:
-  ctx = context.get_event_context(event)
-  if ctx in last_message and is_same(event.message, last_message[ctx][0]):
-    count = last_message[ctx][1] + 1
-    last_message[ctx] = (event.message, count)
-    result = count == 2 and not (util.is_command(event.message) or is_original_emote(event))
+async def can_repeat(event: GroupMessageEvent) -> bool:
+  group_id = event.group_id
+  if group_id in last_message and is_same(event.message, last_message[group_id][0]):
+    count = last_message[group_id][1] + 1
+    last_message[group_id] = (event.message, count)
+    result = count == 2 and not (
+      misc.is_command(event.message) or is_original_emote(event.message)
+    )
   else:
-    last_message[ctx] = (event.message, 1)
+    last_message[group_id] = (event.message, 1)
     result = False
   return result
 auto_repeat = nonebot.on_message(Rule(can_repeat), priority=2)
 @auto_repeat.handle()
-async def handle_auto_repeat(event: MessageEvent):
+async def handle_auto_repeat(event: GroupMessageEvent):
   for seg in event.message:
     if seg.type == "image":
       seg.data["file"] = seg.data["url"]
       del seg.data["url"]
   token = suppress.set(True)
   try:
-    await auto_repeat.send(event.message)
+    await auto_repeat.finish(event.message)
   finally:
     suppress.reset(token)

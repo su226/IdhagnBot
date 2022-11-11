@@ -1,6 +1,6 @@
 import json
 
-from aiohttp import ClientSession
+from util import misc
 
 from .common import Item
 
@@ -8,8 +8,8 @@ API = "https://news.cctv.com/2019/07/gaiban/cmsdatainterface/page/news_1.jsonp"
 
 
 async def get_data() -> list[Item]:
-  async with ClientSession() as http:
-    response = await http.get(API)
+  http = misc.http()
+  async with http.get(API) as response:
     data = await response.text()
   # strip jsonp news()
   data = json.loads(data[5:-1])
