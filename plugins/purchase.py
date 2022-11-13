@@ -4,7 +4,6 @@ import random
 from argparse import Namespace
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
-from nonebot.exception import ParserExit
 from nonebot.params import ArgPlainText, CommandArg, ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from nonebot.typing import T_State
@@ -55,10 +54,8 @@ add_goods = (
 )
 @add_goods.handle()
 async def handle_add_goods(
-  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()
 ) -> None:
-  if isinstance(args, ParserExit):
-    await add_goods.finish(args.message)
   if args.notify is None:
     notify = event.user_id
   else:
@@ -157,10 +154,8 @@ modify_goods = (
 )
 @modify_goods.handle()
 async def handle_modify_goods(
-  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
+  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()
 ) -> None:
-  if isinstance(args, ParserExit):
-    await modify_goods.finish(args.message)
   ctx = context.get_event_context(event)
   try:
     id, goods = find_goods(ctx, args.goods)

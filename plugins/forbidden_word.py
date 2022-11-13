@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import nonebot
 from nonebot.adapters.onebot.v11 import GROUP_MEMBER, Bot, Message, MessageEvent, MessageSegment
-from nonebot.exception import ActionFailed, ParserExit
+from nonebot.exception import ActionFailed
 from nonebot.params import EventMessage, ShellCommandArgs
 from nonebot.permission import SUPERUSER
 from nonebot.rule import ArgumentParser
@@ -56,11 +56,7 @@ manage = (
 
 
 @manage.handle()
-async def handle_manage(
-  event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
-) -> None:
-  if isinstance(args, ParserExit):
-    await manage.finish(args.message)
+async def handle_manage(event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   ctx = context.get_event_context(event)
   state = STATE(ctx)
   if args.subcommand == "view":

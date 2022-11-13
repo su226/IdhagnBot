@@ -6,7 +6,6 @@ import re
 from argparse import Namespace
 from typing import Sequence
 
-from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from pydantic import BaseModel
@@ -91,9 +90,7 @@ class StrFileChoice:
 
 
 @fortune.handle()
-async def handle_fortune(args: Namespace | ParserExit = ShellCommandArgs()) -> None:
-  if isinstance(args, ParserExit):
-    await fortune.finish(args.message)
+async def handle_fortune(args: Namespace = ShellCommandArgs()) -> None:
   config = CONFIG()
   if args.offensive and not config.offensive:
     await fortune.finish("禁止查看可能不雅的文本")

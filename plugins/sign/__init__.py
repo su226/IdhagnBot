@@ -4,7 +4,6 @@ from argparse import Namespace
 from datetime import datetime
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
-from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 
@@ -122,11 +121,7 @@ gold = (
 
 
 @gold.handle()
-async def handle_gold(
-  bot: Bot, event: MessageEvent, args: Namespace | ParserExit = ShellCommandArgs()
-) -> None:
-  if isinstance(args, ParserExit):
-    await gold.finish(args.message)
+async def handle_gold(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   try:
     users = await match_all(bot, event, args.users)
   except misc.AggregateError as e:

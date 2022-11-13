@@ -4,7 +4,6 @@ from typing import Any, Literal
 import aiohttp
 from aiohttp.http import SERVER_SOFTWARE
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
-from nonebot.exception import ParserExit
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from pydantic import BaseModel, Field
@@ -111,9 +110,7 @@ def get_by_path(root: dict, path: str) -> Any:
 
 
 def register(definition: Command):
-  async def handler(args: Namespace | ParserExit = ShellCommandArgs()):
-    if isinstance(args, ParserExit):
-      await matcher.finish(args.message)
+  async def handler(args: Namespace = ShellCommandArgs()) -> None:
     if args.limit < 1 or args.limit > config.max_limit:
       await matcher.finish(f"每页图片数必须在 1 和 {config.max_limit} 之间")
 
