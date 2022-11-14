@@ -13,9 +13,9 @@ from util.user_aliases import AvatarGetter
 DIR = Path(__file__).resolve().parent
 BOXES = [
   (81, 56, 101), (82, 56, 102), (81, 56, 101), (81, 56, 102), (82, 56, 101), (81, 56, 102),
-  (82, 56, 101), (81, 56, 102), (81, 56, 101), (81, 55, 103), (81, 56, 101), (82, 56, 102),
+  (82, 56, 101), (81, 56, 102), (81, 56, 101), (81, 55, 102), (81, 56, 101), (82, 56, 102),
   (81, 56, 101), (81, 56, 102), (82, 56, 101), (81, 56, 102), (82, 56, 101), (81, 56, 102),
-  (81, 56, 101), (81, 56, 102), (81, 56, 101), (81, 55, 103), (81, 56, 101), (82, 56, 102),
+  (81, 56, 101), (81, 56, 102), (81, 56, 101), (81, 55, 102), (81, 56, 101), (82, 56, 102),
   (73, 50, 105), (-69, 40, 185), (-148, 69, 185)
 ]
 FRAMES = [
@@ -75,6 +75,6 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       result_frames.append(frames[frame])
       durations.append(mul * DURATION)
 
-    return imutil.to_segment(frames, durations, afmt=args.format)
+    return imutil.to_segment(result_frames, durations, afmt=args.format)
 
   await matcher.finish(await asyncio.to_thread(make))
