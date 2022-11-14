@@ -17,7 +17,7 @@ from typing_extensions import Self
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
-from . import context, help, misc, permission
+from . import context, help, permission
 
 driver = nonebot.get_driver()
 
@@ -25,13 +25,14 @@ driver = nonebot.get_driver()
 class ShellCommandRule:
   # 修改自 nonebot.rule.ShellCommandRule
   # 特殊处理不是纯文本的消息段，以及 shlex 抛出 ValueError 的情况
-  __slots__ = "parser",
+  __slots__ = "prog", "parser"
 
-  def __init__(self, parser: ArgumentParser):
+  def __init__(self, prog: str, parser: ArgumentParser):
+    self.prog = prog
     self.parser = parser
 
   async def __call__(self, state: T_State, msg: Message | None = CommandArg()) -> bool:
-    if msg is None:  # 去掉这里虽然不影响功能，但 DEBUG 日志等级下会刷屏
+    if msg is None:  # 去掉 None 虽然不影响功能，但 DEBUG 日志等级下会刷屏
       return False
     try:
       argv = self.split(msg)
@@ -40,8 +41,9 @@ class ShellCommandRule:
       state[SHELL_ARGV] = []
       state[SHELL_ARGS] = ParserExit(127, "解析命令行参数失败：" + str(e))
       return True
+    self.parser.prog = self.prog
+    setattr(self.parser, "_message", "")
     try:
-      setattr(self.parser, "_message", "")
       args = self.parser.parse_args(argv)
       state[SHELL_ARGS] = args
     except ParserExit as e:
@@ -156,21 +158,23 @@ class CommandBuilder:
     self._brief = brief
     return self
 
-  def usage(self, usage: str | Callable[[], str]) -> Self:
-    self._usage = usage
+  def usage(self, usage: str | ArgumentParser | Callable[[], str]) -> Self:
+    if isinstance(usage, ArgumentParser):
+      usage.prog = self.names[0]
+      self._usage = usage.format_help()
+    else:
+      self._usage = usage
     return self
 
   def category(self, category: str) -> Self:
     self._category = category
     return self
 
-  def shell(self, parser: ArgumentParser, set_prog: bool = True) -> Self:
-    if set_prog:
-      parser.prog = misc.command_start() + self.names[0]
-    self.rule(ShellCommandRule(parser))
-    self._auto_reject = True
+  def shell(self, parser: ArgumentParser, auto_reject: bool = True) -> Self:
+    self.rule(ShellCommandRule(self.names[0], parser))
+    self._auto_reject = auto_reject
     if not self._usage:
-      self._usage = parser.format_help()
+      self.usage(parser)
     return self
 
   def throttle(self, capacity: int, frequency: float | None = None) -> Self:

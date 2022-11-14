@@ -57,7 +57,7 @@ def split(delim: T, l: Sequence[T]) -> Generator[Sequence[T], None, None]:
     prev_index = index + 1
 
 
-def parse_args(msg: Message) -> list[Namespace]:
+def parse_args(prog: str, msg: Message) -> list[Namespace]:
   try:
     all_argv = list(split("--", shlex.split(str(msg))))
   except ValueError as e:
@@ -65,6 +65,8 @@ def parse_args(msg: Message) -> list[Namespace]:
 
   errors: list[str] = []
   all_args: list[Namespace] = []
+  parser.prog = prog
+  setattr(parser, "_message", "")
   for argv in all_argv:
     try:
       all_args.append(parser.parse_args(argv))
@@ -141,7 +143,7 @@ def render(
 DIR = Path(__file__).resolve().parent
 
 
-parser = ArgumentParser(prog="/截图", add_help=False, epilog="多条消息可使用 -- 分割")
+parser = ArgumentParser(add_help=False, epilog="多条消息可使用 -- 分割")
 parser.add_argument("user", metavar="用户", help="可使用@、QQ号、昵称或群名片")
 parser.add_argument("--name", "-n", metavar="名字", help="自定义显示的名字")
 parser.add_argument("--repeat", "-r", metavar="次数", type=range_int(1, 10), default=1, help=(
@@ -153,13 +155,13 @@ parser.add_argument("content", nargs="+", metavar="内容", help=(
 screenshot = (
   command.CommandBuilder("meme_pic.message.screenshot", "截图")
   .category("meme_pic")
-  .usage(parser.format_help())
+  .usage(parser)
   .build()
 )
 @screenshot.handle()
 async def handle_screenshot(bot: Bot, event: MessageEvent, msg: Message = CommandArg()) -> None:
   try:
-    all_args = parse_args(msg)
+    all_args = parse_args("截图", msg)
   except misc.AggregateError as e:
     await screenshot.finish("\n".join(e))
   async with AvatarGetter(bot, event) as g:
@@ -175,13 +177,13 @@ async def handle_screenshot(bot: Bot, event: MessageEvent, msg: Message = Comman
 scroll = (
   command.CommandBuilder("meme_pic.message.scroll", "滚屏")
   .category("meme_pic")
-  .usage(parser.format_help())
+  .usage(parser)
   .build()
 )
 @scroll.handle()
 async def handle_scroll(bot: Bot, event: MessageEvent, msg: Message = CommandArg()) -> None:
   try:
-    all_args = parse_args(msg)
+    all_args = parse_args("滚屏", msg)
   except misc.AggregateError as e:
     await screenshot.finish("\n".join(e))
   async with AvatarGetter(bot, event) as g:
