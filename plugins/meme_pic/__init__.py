@@ -32,8 +32,10 @@ category.add(help.StringItem("标有[动]的可以传入动图"))
 # disc           nonebot-plugin-petpet 听音乐
 # distracted     nonebot-plugin-petpet 注意力涣散
 # eat            nonebot-plugin-petpet 啃
+# erode          参考自 LaoLittle/DrawMeme（我寻思着 AGPL 我也不敢复制粘贴啊，下同）
 # fencing        nonebot-plugin-petpet 击剑/🤺（有修改）
 # fisheye        nonebot-plugin-petpet 哈哈镜
+# flash          参考自 LaoLittle/DrawMeme
 # flat           nonebot-plugin-petpet 看扁
 # follow         nonebot-plugin-petpet 关注
 # forever        nonebot-plugin-petpet 永远喜欢/我永远喜欢
@@ -63,6 +65,7 @@ category.add(help.StringItem("标有[动]的可以传入动图"))
 # louvre         https://lab.magiconch.com/one-last-image/
 # love           nonebot-plugin-petpet 永远爱你
 # lying          nonebot-plugin-petpet 紧贴/紧紧贴着
+# marble         参考自 LaoLittle/DrawMeme
 # marry          nonebot-plugin-petpet 结婚申请/结婚登记
 # message        nonebot-plugin-petpet 我朋友说/我有个朋友说
 # miragetank     自制（算法来自https://zhuanlan.zhihu.com/p/32532733）

@@ -1,6 +1,7 @@
 requirements:
   idhagnfetch: [psutil]
   minecraft: [mctools]
+  meme_pic.erode: [cv2]
   meme_pic.fisheye: [cv2]
   meme_pic.louvre: [cv2]
   meme_pic.patina: [numpy]
