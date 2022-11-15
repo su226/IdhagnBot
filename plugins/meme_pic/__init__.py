@@ -55,6 +55,7 @@ category.add(help.StringItem("标有[动]的可以传入动图"))
 # keep           nonebot-plugin-petpet 一直
 # keep_keep      nonebot-plugin-petpet 一直一直
 # kidnap         nonebot-plugin-petpet 防诱拐
+# kirby          nonebot-plugin-petpet 卡比重锤
 # kiss           nonebot-plugin-petpet 亲/亲亲
 # knock          nonebot-plugin-petpet 捶
 # laptop         nonebot-plugin-petpet 玩游戏/来玩游戏
@@ -106,6 +107,7 @@ category.add(help.StringItem("标有[动]的可以传入动图"))
 # wallpaper      nonebot-plugin-petpet 墙纸
 # wantwant       自制
 # watermelon     自制
+# wave           nonebot-plugin-petpet 波纹
 # why_at_me      nonebot-plugin-petpet 为什么@我/为什么at我
 # wife           nonebot-plugin-petpet 我老婆
 # windows        自制
