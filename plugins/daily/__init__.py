@@ -222,6 +222,17 @@ async def format_all(group_id: int) -> list[Message | Forward]:
   return result
 
 
+def clean_message(message: Message | Forward) -> None:
+  # 清除消息中的 base64，防止日志过长
+  if isinstance(message, Forward):
+    for node in message.nodes:
+      clean_message(node.data["content"])
+    return
+  for seg in message:
+    if "file" in seg.data and seg.data["file"].startswith("base64://"):
+      seg.data["file"] = "base64://..."
+
+
 async def check_daily(group_id: int) -> None:
   state = STATE()
   today = date.today()
@@ -237,6 +248,7 @@ async def check_daily(group_id: int) -> None:
       else:
         await bot.send_group_msg(group_id=group_id, message=message)
     except ActionFailed:
+      clean_message(message)
       logger.exception(f"发送部分每日推送到群聊 {group_id} 失败: {message}")
       failed = True
   if failed:
