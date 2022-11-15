@@ -119,7 +119,7 @@ async def on_message_sent(
   caused_by = None
   if isinstance(event, MessageEvent) and event.message_id:
     caused_by = event.message_id
-  caches, segments = serialize_message(message)
+  caches, segments = serialize_message(message.copy())
   async with AsyncSession(engine) as session:
     await process_caches(session, caches)
     session.add(Sent(
