@@ -1,11 +1,14 @@
+import asyncio
+
 import nonebot
 from aiohttp.client_exceptions import ClientError
 from nonebot.adapters.onebot.v11 import ActionFailed, Bot, Event, Message, MessageEvent
 from nonebot.message import event_postprocessor, run_postprocessor, run_preprocessor
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
+from PIL import Image
 
-from util import command, context, misc
+from util import command, context, imutil, misc, textutil
 
 
 class ManualException(Exception):
@@ -23,33 +26,87 @@ async def pre_run(state: T_State):
     state["_prefix"]["run"] = True
 
 
+async def try_send(bot: Bot, user: int, message: str) -> None:
+  try:
+    await bot.send_private_msg(user_id=user, message=message)
+  except ActionFailed:
+    pass
+
+
 @run_postprocessor
 async def post_run(bot: Bot, event: MessageEvent, e: Exception):
-  group_id = getattr(event, "group_id", None)
   if isinstance(e, ActionFailed) and e.info.get("msg", None) == "SEND_MSG_API_ERROR":
     reason = "消息发送失败"
+    explain = "可能是发送的内容过长、图片过大、含有敏感内容或者机器人帐号被风控。"
   elif isinstance(e, ClientError):
     reason = "网络错误"
+    explain = "可能是命令使用的在线 API 不稳定，或者机器人服务器的网络问题。"
   elif isinstance(e, ManualException):
-    reason = "手动触发"
+    reason = "管理员手动触发"
+    explain = "如果你不是群管理员，可以忽略这个。"
   elif isinstance(e, misc.PromptTimeout):
     reason = "等待回应超时"
+    explain = "请及时发送消息回应机器人。"
   else:
-    reason = "未知内部错误"
-  result = f"机器人出错\n可能原因：{reason}"
-  if group_id is None:
-    await bot.send(event, result)
-  elif group_id not in suppressed:
-    await bot.send(event, result + "\n[群管] /suppress true - 禁用错误消息")
+    reason = "未知错误"
+    explain = "这可能是 IdhagnBot 的设计缺陷，请向开发者寻求帮助。"
+
+  group_id = getattr(event, "group_id", None)
+  if group_id not in suppressed:
+    markup = '''\
+  <span weight='heavy' size='200%'>这个要慌，问题很大</span>
+  <span color='#ffffff88'>Something really bad happens. Panic!</span>'''
+    header = textutil.render(markup, "sans", 32, color=(255, 255, 255), align="m", markup=True)
+
+    markup = f'''\
+<b>IdhagnBot 遇到了一个内部错误。</b>
+<span color='#f5f543'>可能原因: </span>{reason}
+{explain}'''
+    fallback = f"IdhagnBot 遇到了一个内部错误。\n可能原因：{reason}\n{explain}"
+    if group_id is not None:
+      markup += (
+        "\n<span color='#29b8db'>提示: </span>"
+        "群管理员可以发送 /suppress true 暂时禁用本群错误消息。"
+      )
+      fallback += "\n群管理员可以发送 /suppress true 暂时禁用本群错误消息。"
+    content = textutil.render(
+      markup, "span", 32, color=(255, 255, 255), box=max(640, header.width), markup=True
+    )
+
+    size = (max(header.width, content.width) + 64, header.height + content.height + 80)
+    im = Image.new("RGB", size, (30, 30, 30))
+    im.paste((205, 49, 49), (0, 32, im.width, 32 + header.height))
+    imutil.paste(im, header, (im.width // 2, 32), anchor="mt")
+    im.paste(content, (32, 48 + header.height), content)
+    segment = imutil.to_segment(im)
+    try:
+      await bot.send(event, segment)
+    except ActionFailed:
+      await bot.send(event, fallback)
+
+  exc_type = type(e)
+  exc_typename = exc_type.__qualname__
+  exc_mod = exc_type.__module__
+  if exc_mod not in ("__main__", "builtins"):
+    if not isinstance(exc_mod, str):
+      exc_mod = "<unknown>"
+    exc_typename = exc_mod + '.' + exc_typename
+  try:
+    exc_info = str(e)
+  except Exception:
+    exc_info = ""
+
   user_id = getattr(event, "user_id", None)
   superusers = list(misc.superusers())
   if user_id not in superusers:
     message = str(event.message)
     if len(message) > 50:
       message = message[:50] + "…"
-    notify = result + f"\n群聊: {group_id}, 用户: {user_id}, 消息:\n" + message
-    for user in superusers:
-      await bot.send_private_msg(user_id=user, message=notify)
+    notify = f"机器人出错 - {reason}\n{exc_typename}"
+    if exc_info:
+      notify += f": {exc_info}"
+    notify += f"\n群聊: {group_id}\n用户: {user_id}\n消息: {message}"
+    await asyncio.gather(*(try_send(bot, user, notify) for user in superusers))
 
 
 @event_postprocessor
