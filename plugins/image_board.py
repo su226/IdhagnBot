@@ -39,7 +39,7 @@ presets = {
     sample_path="/large_file_url"
   ),
   # Konachan R18 (https://konachan.com), Konachan G (https://konachan.net)
-  # Yandere (https://yande.re)
+  # Yandere (https://yande.re), Lolibooru (https://lolibooru.moe)
   "konachan": Site(
     origin="https://konachan.com",
     post_url="/post/show/{id}",
