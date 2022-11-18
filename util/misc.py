@@ -37,7 +37,7 @@ T = TypeVar("T")
 Resample = Literal["nearest", "bilinear", "bicubic"]
 ScaleResample = Resample | Literal["box", "hamming", "lanczos"]
 AnyMessage = str | Message | MessageSegment
-Quantize = Literal["none" "mediancut", "maxcoverage", "fastoctree"]
+Quantize = Literal["mediancut", "maxcoverage", "fastoctree"]
 
 
 class AggregateError(Exception, Sequence[str]):
@@ -70,7 +70,7 @@ class Config(BaseModel):
   resample: Resample = "bicubic"
   scale_resample: ScaleResample = "bicubic"
   libimagequant: bool = False
-  quantize: Quantize = "fastoctree"
+  quantize: Quantize = "mediancut"
   dither: bool = True
   backend_local: bool = True
 

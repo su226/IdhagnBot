@@ -1,7 +1,7 @@
 import asyncio
 import math
 from io import BytesIO
-from typing import Generator, Literal, overload
+from typing import Generator, Literal, cast, overload
 
 import cairo
 from loguru import logger
@@ -180,30 +180,54 @@ def paste(
   dst.paste(src, (x, y), paste_mask)
 
 
+def _check_libimagequant() -> bool:
+  global _LIBIMAGEQUANT_AVAILABLE, _LIBIMAGEQUANT_WARNED
+  if _LIBIMAGEQUANT_AVAILABLE is None:
+    _LIBIMAGEQUANT_AVAILABLE = cast(bool, PILFeatures.check("libimagequant"))
+  if not _LIBIMAGEQUANT_AVAILABLE and not _LIBIMAGEQUANT_WARNED:
+    logger.warning(
+      "已启用 libimagequant，但没有安装 libimagequant 或者 Pillow 没有编译 libimagequant 支持，"
+      "请参考 Pillow 和 IdhagnBot 的文档获取帮助。这条警告只会出现一次。"
+    )
+    _LIBIMAGEQUANT_WARNED = True
+  return _LIBIMAGEQUANT_AVAILABLE
+
+
+def _add_transparency(im: Image.Image) -> None:
+  if im.palette.mode != "RGBA":
+    return
+  for i in range(0, len(im.palette.palette), 4):
+    if im.palette.palette[i + 3] == 0:
+      im.info["transparency"] = i // 4
+      break
+
+
 def quantize(im: Image.Image) -> Image.Image:
   config = misc.CONFIG()
-  if config.libimagequant:
-    global _LIBIMAGEQUANT_AVAILABLE, _LIBIMAGEQUANT_WARNED
-    if _LIBIMAGEQUANT_AVAILABLE is None:
-      _LIBIMAGEQUANT_AVAILABLE = PILFeatures.check("libimagequant")
-    if _LIBIMAGEQUANT_AVAILABLE:
-      return im.quantize(method=Image.Quantize.LIBIMAGEQUANT)  # type: ignore
-    elif not _LIBIMAGEQUANT_WARNED:
-      logger.warning(
-        "已启用 libimagequant，但没有安装 libimagequant 或者 Pillow 没有编译 libimagequant 支持，"
-        "请参考 Pillow 和 IdhagnBot 的文档获取帮助。这条警告只会出现一次。"
-      )
-      _LIBIMAGEQUANT_WARNED = True
+  if config.libimagequant is True and _check_libimagequant():
+    # Image.new 在 RGB 模式下不带 color 参数会给隐藏的 Alpha 通道填充 0 而非 255
+    # 也就是颜色实际上是 (0, 0, 0, 0) 而非 (0, 0, 0, 255)
+    # 这会导致 libimagequant 产生的图片变绿
+    # 所以要么给所有的 Image.new 都显式加上 (0, 0, 0) 作为 color 参数
+    # 要么 quantize 前先转换成 RGBA
+    im = im.convert("RGBA").quantize(method=Image.Quantize.LIBIMAGEQUANT)  # type: ignore
+    _add_transparency(im)
+    return im
   if im.mode == "RGBA":
     method = Image.Quantize.FASTOCTREE
   else:
     method = Image.Quantize[config.quantize.upper()]
   # 必须要量化两次才有抖动仿色（除非用 libimagequant）
   # 参见 https://github.com/python-pillow/Pillow/issues/5836
-  palette = im.quantize(method=method, dither=Image.Dither.NONE)  # type: ignore
+  palette = im.quantize(method=method)  # type: ignore
   if not config.dither:
+    _add_transparency(palette)
     return palette
-  return im.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG)
+  # HACK: RGBA 图片的 quantize 方法不能用 palette 参数，因此只能使用 Pillow 的内部 API
+  im = im._new(im.im.convert("P", Image.Dither.FLOYDSTEINBERG, palette.im))  # type: ignore
+  im.palette = palette.palette.copy()
+  _add_transparency(im)
+  return im
 
 
 @overload
@@ -233,11 +257,12 @@ def to_segment(
       if isinstance(duration, list) and len(duration) != len(im):
         raise ValueError
       if afmt.lower() == "gif":
-        # 似乎直接存也可以了？可能是 Pillow 更新了？
-        im = [x if x.mode == "P" else quantize(x) for x in im]  # 还是得先手动抖动仿色
+        im = [x if x.mode == "P" else quantize(x) for x in im]
+        # 只对透明图片使用 disposal，防止不透明图片有鬼影
+        disposal = 2 if any("transparency" in x.info for x in im) else 0
         im[0].save(
-          f, "GIF", append_images=im[1:], save_all=True, loop=0, disposal=2, duration=duration,
-          **kw
+          f, "GIF", append_images=im[1:], save_all=True, loop=0, disposal=disposal,
+          duration=duration, **kw
         )
       return MessageSegment.image(f)
     im = im[0]
