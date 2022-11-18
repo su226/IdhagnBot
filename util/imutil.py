@@ -4,15 +4,16 @@ from io import BytesIO
 from typing import Generator, Literal, overload
 
 import cairo
+from loguru import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
-from PIL import Image, ImageChops, ImageDraw, ImageOps
+from PIL import Image, ImageChops, ImageDraw, ImageOps, features as PILFeatures
 
 from util import misc
 
 __all__ = [
   "Anchor", "background", "from_cairo", "center_pad", "circle", "contain_down", "frames",
-  "get_avatar", "paste", "to_segment", "resize_canvas", "resize_height", "resize_width",
-  "sample_frames", "Point", "Plane", "PerspectiveData", "RemapTransform"
+  "get_avatar", "paste", "quantize", "to_segment", "resize_canvas", "resize_height",
+  "resize_width", "sample_frames", "Point", "Plane", "PerspectiveData", "RemapTransform"
 ]
 
 Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
@@ -20,6 +21,8 @@ Size = tuple[int, int]
 Point = tuple[float, float]
 Plane = tuple[Point, Point, Point, Point]
 PerspectiveData = tuple[float, float, float, float, float, float, float, float]
+_LIBIMAGEQUANT_AVAILABLE: bool | None = None
+_LIBIMAGEQUANT_WARNED: bool = False
 
 
 def resample() -> Image.Resampling:
@@ -177,6 +180,32 @@ def paste(
   dst.paste(src, (x, y), paste_mask)
 
 
+def quantize(im: Image.Image) -> Image.Image:
+  config = misc.CONFIG()
+  if config.libimagequant:
+    global _LIBIMAGEQUANT_AVAILABLE, _LIBIMAGEQUANT_WARNED
+    if _LIBIMAGEQUANT_AVAILABLE is None:
+      _LIBIMAGEQUANT_AVAILABLE = PILFeatures.check("libimagequant")
+    if _LIBIMAGEQUANT_AVAILABLE:
+      return im.quantize(method=Image.Quantize.LIBIMAGEQUANT)  # type: ignore
+    elif not _LIBIMAGEQUANT_WARNED:
+      logger.warning(
+        "已启用 libimagequant，但没有安装 libimagequant 或者 Pillow 没有编译 libimagequant 支持，"
+        "请参考 Pillow 和 IdhagnBot 的文档获取帮助。这条警告只会出现一次。"
+      )
+      _LIBIMAGEQUANT_WARNED = True
+  if im.mode == "RGBA":
+    method = Image.Quantize.FASTOCTREE
+  else:
+    method = Image.Quantize[config.quantize.upper()]
+  # 必须要量化两次才有抖动仿色（除非用 libimagequant）
+  # 参见 https://github.com/python-pillow/Pillow/issues/5836
+  palette = im.quantize(method=method, dither=Image.Dither.NONE)  # type: ignore
+  if not config.dither:
+    return palette
+  return im.quantize(palette=palette, dither=Image.Dither.FLOYDSTEINBERG)
+
+
 @overload
 def to_segment(
   im: Image.Image | cairo.ImageSurface, *, fmt: str = ..., **kw
@@ -205,6 +234,7 @@ def to_segment(
         raise ValueError
       if afmt.lower() == "gif":
         # 似乎直接存也可以了？可能是 Pillow 更新了？
+        im = [x if x.mode == "P" else quantize(x) for x in im]  # 还是得先手动抖动仿色
         im[0].save(
           f, "GIF", append_images=im[1:], save_all=True, loop=0, disposal=2, duration=duration,
           **kw

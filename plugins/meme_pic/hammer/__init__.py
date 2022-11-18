@@ -51,7 +51,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       target1 = target.resize((w, h), imutil.scale_resample())
       im.paste(target1, (x, y), target1)
       im.paste(template, mask=template)
-      frames.append(im.convert("RGBA"))  # 奇怪，RGB下保存有残影，RGBA正常
+      frames.append(im)
     return imutil.to_segment(frames, 70, afmt=args.format)
 
   await matcher.finish(await asyncio.to_thread(make))

@@ -37,6 +37,7 @@ T = TypeVar("T")
 Resample = Literal["nearest", "bilinear", "bicubic"]
 ScaleResample = Resample | Literal["box", "hamming", "lanczos"]
 AnyMessage = str | Message | MessageSegment
+Quantize = Literal["none" "mediancut", "maxcoverage", "fastoctree"]
 
 
 class AggregateError(Exception, Sequence[str]):
@@ -68,6 +69,9 @@ class Config(BaseModel):
   chromium: str = ""
   resample: Resample = "bicubic"
   scale_resample: ScaleResample = "bicubic"
+  libimagequant: bool = False
+  quantize: Quantize = "fastoctree"
+  dither: bool = True
   backend_local: bool = True
 
 
