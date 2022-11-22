@@ -11,7 +11,7 @@ DIR = Path(__file__).resolve().parent
 
 
 goodnews = (
-  command.CommandBuilder("meme_text.goodnews", "喜报")
+  command.CommandBuilder("meme_word.goodnews", "喜报")
   .category("meme_word")
   .brief("NullPointerException")
   .usage("/喜报 <文本>")

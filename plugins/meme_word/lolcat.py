@@ -22,7 +22,8 @@ def rainbow(x: float, phi: float) -> str:
 
 
 lolcat = (
-  command.CommandBuilder("meme_text.lolcat", "lolcat")
+  command.CommandBuilder("meme_word.lolcat", "lolcat")
+  .category("meme_word")
   .brief("彩虹和独角兽！")
   .usage('''\
 /lolcat <文本>

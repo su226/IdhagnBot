@@ -14,7 +14,8 @@ PADDING = 32
 DISPERSION = 3
 
 tiktok = (
-  command.CommandBuilder("meme_text.tiktok", "抖音", "tiktok")
+  command.CommandBuilder("meme_word.tiktok", "抖音", "tiktok")
+  .category("meme_word")
   .brief("记录每种生物")
   .usage("/抖音 <文本>")
   .build()

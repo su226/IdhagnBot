@@ -12,7 +12,8 @@ COLORS = ["4285f4", "ea4335", "fbbc05", "34a853"]
 PADDING = 32
 
 google = (
-  command.CommandBuilder("meme_text.google", "谷歌", "google")
+  command.CommandBuilder("meme_word.google", "谷歌", "google")
+  .category("meme_word")
   .brief("G,O,O,G,L,E,咕噜咕噜")
   .usage("/谷歌 <文本>")
   .build()

@@ -12,7 +12,7 @@ DIR = Path(__file__).resolve().parent
 
 
 osu = (
-  command.CommandBuilder("meme_text.osu", "osu")
+  command.CommandBuilder("meme_word.osu", "osu")
   .category("meme_word")
   .brief("Click the circles?")
   .usage("/osu <文本>\n默认为“osu?”")

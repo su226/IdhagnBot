@@ -182,7 +182,8 @@ def render(top: str, bottom: str) -> MessageSegment:
 
 
 choyen = (
-  command.CommandBuilder("meme_text.5000choyen", "5000兆元", "兆元", "5000choyen", "choyen")
+  command.CommandBuilder("meme_word.5000choyen", "5000兆元", "兆元", "5000choyen", "choyen")
+  .category("meme_word")
   .brief("生成想要5000兆元风格文字")
   .usage("/5000兆元 <红色文本> [银色文本]")
   .build()

@@ -11,7 +11,7 @@ DIR = Path(__file__).resolve().parent
 
 
 nokia = (
-  command.CommandBuilder("meme_text.nokia", "诺基亚", "nokia", "无内鬼")
+  command.CommandBuilder("meme_word.nokia", "诺基亚", "nokia", "无内鬼")
   .category("meme_word")
   .brief("无内鬼，来点涩图")
   .usage('''\

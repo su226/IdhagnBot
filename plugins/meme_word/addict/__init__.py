@@ -11,7 +11,7 @@ DIR = Path(__file__).resolve().parent
 
 
 addict = (
-  command.CommandBuilder("meme_text.addict", "成瘾前后", "成瘾")
+  command.CommandBuilder("meme_word.addict", "成瘾前后", "成瘾")
   .category("meme_word")
   .brief("会露出笑容")
   .usage("/成瘾 <文本>")

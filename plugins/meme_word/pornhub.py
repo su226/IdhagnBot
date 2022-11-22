@@ -60,6 +60,7 @@ def register(node: str, names: list[str], brief: str, theme: Theme):
     await matcher.finish(await asyncio.to_thread(make))
   matcher = (
     command.CommandBuilder(node, *names)
+    .category("meme_word")
     .brief(brief)
     .usage(f"/{names[0]} <左侧文本> <右侧文本>")
     .build()
@@ -67,9 +68,9 @@ def register(node: str, names: list[str], brief: str, theme: Theme):
   matcher.handle()(handler)
 
 
-register("meme_text.pornhub", ["p站", "ph"], "生成你懂得的logo", Theme(
+register("meme_word.pornhub", ["p站", "ph"], "生成你懂得的logo", Theme(
   32, 8, 8, 8, 8, (0, 0, 0), (255, 153, 0), (255, 255, 255), (0, 0, 0)
 ))
-register("meme_text.youtube", ["油管", "yt", "youtube"], "生成油管logo", Theme(
+register("meme_word.youtube", ["油管", "yt", "youtube"], "生成油管logo", Theme(
   32, 6, 9, 9, 21, (255, 255, 255), (205, 32, 31), (0, 0, 0), (255, 255, 255)
 ))

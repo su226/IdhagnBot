@@ -68,7 +68,8 @@ parser.add_argument("--image", "-i", help=(
 ))
 parser.add_argument("--no-grayscale", "-G", action="store_true", help="不对下载的图片去色")
 orly = (
-  command.CommandBuilder("meme_text.orly", "orly", "动物书")
+  command.CommandBuilder("meme_word.orly", "orly", "动物书")
+  .category("meme_word")
   .brief("学计算机的应该不陌生")
   .shell(parser)
   .build()

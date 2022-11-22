@@ -11,7 +11,7 @@ DIR = Path(__file__).resolve().parent
 
 
 luxun = (
-  command.CommandBuilder("meme_text.luxun", "鲁迅说", "鲁迅")
+  command.CommandBuilder("meme_word.luxun", "鲁迅说", "鲁迅")
   .category("meme_word")
   .brief("我没说过这句话")
   .usage("/鲁迅说 <文本>")
