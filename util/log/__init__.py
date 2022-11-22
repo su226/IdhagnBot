@@ -3,6 +3,7 @@ import os
 import sys
 import tracemalloc
 import warnings
+from datetime import time, timedelta
 from io import StringIO
 from typing import TYPE_CHECKING, Literal
 
@@ -19,10 +20,18 @@ class Target(BaseModel):
   level: str | int = "INFO"
   fold_nonebot: bool = True
   format: str = "<g>{time:HH:mm:ss}</g>|<lvl>{level:8}</lvl>| <c>{name}</c> - {message}"
+  colorize: bool | None = None
+  backtrace: bool = True
+  diagnose: bool = False
 
 
 class FileTarget(Target):
   file: str
+  rotation: str | int | time | timedelta | None = None
+  retention: str | int | timedelta | None = None
+  compression: str | None = None
+  encoding: str = "utf8"
+  newline: Literal[None, '\r', '\n', '\r\n'] = None
 
 
 class SpecialTarget(Target):
@@ -76,10 +85,12 @@ def config_onload(_: Config | None, cur: Config) -> None:
 
   logger.remove()
   for sink in cur.sinks:
-    def filter(record: "Record") -> bool:
+    def filter(
+      record: "Record",
+      level=logger.level(sink.level.upper()).no if isinstance(sink.level, str) else sink.level
+    ) -> bool:
       if sink.fold_nonebot and (record["name"] or "").startswith("nonebot."):
         record["name"] = "nonebot"
-      level = logger.level(sink.level.upper()).no if isinstance(sink.level, str) else sink.level
       return record["level"].no >= level
 
     if isinstance(sink, SpecialTarget):
@@ -90,15 +101,26 @@ def config_onload(_: Config | None, cur: Config) -> None:
       else:
         from .syslog import syslog_handler
         real_sink = syslog_handler
+      kw = {}
     else:
       real_sink = sink.file
+      kw = {
+        "rotation": sink.rotation,
+        "retention": sink.retention,
+        "compression": sink.compression,
+        "encoding": sink.encoding,
+        "newline": sink.newline,
+      }
 
     logger.add(
       real_sink,
       filter=filter,
       format=sink.format,
-      colorize=True,
-      diagnose=False)
+      colorize=sink.colorize,
+      diagnose=sink.diagnose,
+      backtrace=sink.backtrace,
+      **kw
+    )
 
 
 def init():
@@ -106,9 +128,12 @@ def init():
 
 
 def colorize_filename(filename: str) -> str:
-  if not filename.startswith("<"):
-    dirname, basename = os.path.split(filename)
-    filename = f"{dirname}{os.path.sep}<b>{basename}</b>"
+  if filename.startswith("<"):
+    return filename.replace("<", "\\<")
+  dirname, basename = os.path.split(filename)
+  dirname = dirname.replace("<", "\\<")
+  basename = basename.replace("<", "\\<")
+  filename = f"{dirname}{os.path.sep}<b>{basename}</b>"
   return filename
 
 
@@ -116,9 +141,11 @@ def showwarning(msg: warnings.WarningMessage) -> None:
   line = msg.line
   if line is None:
     line = linecache.getline(msg.filename, msg.lineno)
-  line = line.strip()
+  line = line.strip().replace("<", "\\<")  # loguru转义
+  category = msg.category.__name__.replace("<", "\\<")
+  message = str(msg.message).strip().replace("<", "\\<")
   log = logger.opt(colors=True, depth=2)
-  log.warning(f"<b><y>{msg.category.__name__}</y>: {str(msg.message).strip()}</b>")
+  log.warning(f"<b><y>{category}</y>: {message}</b>")
   log.warning(f"  <g>{colorize_filename(msg.filename)}</g>:<y>{msg.lineno}</y>")
   if line:
     log.warning("    " + line)
@@ -129,5 +156,5 @@ def showwarning(msg: warnings.WarningMessage) -> None:
       log.warning("<b><y>对象分配于</y>:</b>")
       for frame in tb:
         log.warning(f"  <g>{colorize_filename(frame.filename)}</g>:<y>{frame.lineno}</y>")
-        line = linecache.getline(frame.filename, frame.lineno).strip()
+        line = linecache.getline(frame.filename, frame.lineno).strip().replace("<", "\\<")
         log.warning("    " + line.strip())
