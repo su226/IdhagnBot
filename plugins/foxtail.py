@@ -52,7 +52,7 @@ USAGE_KEYWORD = "也可以使用关键词“{}”触发"
 
 async def send_pic(bot: Bot, event: Event, data: dict) -> None:
   http = misc.http()
-  status = int(data["examine"])
+  status = int(data.get("examine", 1))  # 随机接口没有审核参数
   if status == 1:
     async with http.get(DOWNLOAD_API.format(data["picture"], 0)) as response:
       image_data = await response.json()
