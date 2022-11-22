@@ -32,9 +32,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     target, _ = target_task.result()
     template = Image.open(DIR / "template.png")
     target = target.resize(template.size, imutil.scale_resample())
-    im = Image.new("RGB", template.size, (255, 255, 255))
-    im.paste(target, mask=target)
-    im.paste(template, mask=template)
-    return imutil.to_segment(im)
+    target.paste(template, mask=template)
+    return imutil.to_segment(target)
 
   await matcher.finish(await asyncio.to_thread(make))
