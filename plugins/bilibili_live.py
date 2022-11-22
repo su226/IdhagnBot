@@ -64,7 +64,10 @@ def onload(prev: Config | None, curr: Config) -> None:
   except JobLookupError:
     pass
   if curr.users:
-    asyncio.create_task(prepare())
+    try:
+      asyncio.get_running_loop().create_task(prepare())
+    except RuntimeError:
+      pass  # 否则没法用 --export-html
 
 
 def check_live_usage() -> str:
