@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Literal, cast
+from typing import Literal, Set, Union, cast
 
 from ..condition import Condition
 from ..typing.talent import GradeReplacementDict, TalentDict, TalentReplacementDict
@@ -30,15 +30,16 @@ class Talent:
   condition: Condition
   max_execute: int
   exclusive: bool
-  imcompatible: set[int]  # exclude
+  imcompatible: Set[int]  # exclude
   replacement: Literal[None, "rarity", "talent"]
   weights: Weights
 
   @staticmethod
   def parse(data: TalentDict) -> "Talent":
     effect = data.get("effect", {})
-    replacement: GradeReplacementDict | TalentReplacementDict | EmptyDict = (
-      data.get("replacement", EmptyDict()))
+    replacement: Union[GradeReplacementDict, TalentReplacementDict, EmptyDict] = (
+      data.get("replacement", EmptyDict())
+    )
     condition = data.get("condition", "")
     if "grade" in replacement:
       replacement_type = "rarity"

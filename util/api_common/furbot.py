@@ -1,7 +1,7 @@
 import hashlib
 import time
 from dataclasses import dataclass
-from typing import Literal, Protocol
+from typing import Dict, List, Literal, Optional, Protocol, Tuple
 
 import nonebot
 from aiohttp.client import _RequestContextManager
@@ -39,7 +39,7 @@ def request(api: str, **kw: str) -> _RequestContextManager:
 @dataclass
 class Picture:
   id: int
-  cid: str | None
+  cid: Optional[str]
   name: str
   url: str
   thumb: str
@@ -136,7 +136,7 @@ async def get_by_id(id: int) -> Picture:
   )
 
 
-async def query_id(name: str) -> tuple[str, list[int]]:
+async def query_id(name: str) -> Tuple[str, List[int]]:
   async with request("api/v2/getFursuitFid", name=name) as response:
     data = await response.json()
   if (code := data["code"]) != 200:
@@ -156,7 +156,7 @@ class Source(Protocol):
 
 
 universal_keyword_registered = False
-universal_sources: dict[str, Source] = {}
+universal_sources: Dict[str, Source] = {}
 
 
 async def check_universal_keyword(msg: Message = EventMessage()) -> bool:
@@ -169,7 +169,7 @@ async def check_universal_keyword(msg: Message = EventMessage()) -> bool:
 
 async def handle_universal_keyword(bot: Bot, event: Event, msg: Message = EventMessage()) -> None:
   config = CONFIG()
-  args = msg.extract_plain_text().lstrip().removeprefix(config.universal_keyword).strip()
+  args = misc.removeprefix(msg.extract_plain_text().lstrip(), config.universal_keyword).strip()
   source = universal_sources.get(config.universal_prefer, None)
   if source is None or not source.available():
     sources = [x for x in universal_sources.values() if x.available()]

@@ -1,4 +1,3 @@
-import asyncio
 from io import BytesIO
 
 import cairo
@@ -6,7 +5,7 @@ import gi
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 
-from util import command, textutil
+from util import command, misc, textutil
 
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
@@ -198,4 +197,4 @@ async def handle_choyen(args: Message = CommandArg()):
     bottom = ""
   else:
     await choyen.finish(choyen.__doc__)
-  await choyen.finish(await asyncio.to_thread(render, top, bottom))
+  await choyen.finish(await misc.to_thread(render, top, bottom))

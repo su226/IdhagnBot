@@ -1,6 +1,7 @@
 import os
 import random
 import re
+from typing import List, Optional, Tuple
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
@@ -10,7 +11,7 @@ from util import command, context, misc
 
 CACHE_DIR = "states/emojimix_cache"
 API = "https://www.gstatic.com/android/keyboard/emojikitchen"
-EMOJIS: list[tuple[str, str]] = [
+EMOJIS: List[Tuple[str, str]] = [
   ('☁️', '20201001'),
   ('☕', '20201001'),
   ('☹️', '20201001'),
@@ -251,13 +252,13 @@ def get_code(emoji: str) -> str:
   return "-".join(map(lambda ch: "u{:x}".format(ord(ch)), emoji))
 
 
-def split_emojis(argv: str) -> tuple[tuple[str, str], tuple[str, str] | None]:
+def split_emojis(argv: str) -> Tuple[Tuple[str, str], Optional[Tuple[str, str]]]:
   argv = IGNORE_RE.sub("", argv)
-  first_match: None | tuple[str, str] = None
+  first_match: Optional[Tuple[str, str]] = None
   for char, date in EMOJIS:
     stripped = IGNORE_RE.sub("", char)
     if argv.startswith(stripped):
-      argv = argv.removeprefix(stripped)
+      argv = misc.removeprefix(argv, stripped)
       first_match = char, date
       break
   else:
@@ -271,7 +272,7 @@ def split_emojis(argv: str) -> tuple[tuple[str, str], tuple[str, str] | None]:
     raise KeyError("No match")
 
 
-async def get_image(emoji1: str, date1: str, emoji2: str, date2: str) -> bytes | None:
+async def get_image(emoji1: str, date1: str, emoji2: str, date2: str) -> Optional[bytes]:
   code1 = get_code(emoji1)
   code2 = get_code(emoji2)
   file1 = f"{code1}_{code2}"

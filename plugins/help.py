@@ -1,4 +1,5 @@
 import asyncio
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent
 from nonebot.exception import ActionFailed
@@ -7,7 +8,7 @@ from nonebot.params import CommandArg
 from util import command, context, help
 
 
-async def get_available_groups(bot: Bot, user_id: int) -> list[int]:
+async def get_available_groups(bot: Bot, user_id: int) -> List[int]:
   async def in_group(group_id: int) -> int:
     try:
       await bot.get_group_member_info(group_id=group_id, user_id=user_id)

@@ -1,13 +1,14 @@
 import asyncio
 from argparse import Namespace
 from pathlib import Path
+from typing import List, Optional, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 DIR = Path(__file__).resolve().parent
@@ -28,14 +29,14 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   if len(args.targets) > 5:
     await matcher.finish("最多只能有 5 个目标")
 
-  target_tasks: list[asyncio.Task[tuple[Image.Image, int | None]]] = []
+  target_tasks: List[asyncio.Task[Tuple[Image.Image, Optional[int]]]] = []
   async with AvatarGetter(bot, event) as g:
     for i, pattern in enumerate(args.targets, 1):
       target_tasks.append(g(pattern, event.self_id, f"目标{i}"))
 
   def make() -> MessageSegment:
     targets = [task.result()[0] for task in target_tasks]
-    bg0: Image.Image | None = None
+    bg0: Optional[Image.Image] = None
     im = Image.new("RGB", (640, len(targets) * 420))
     for i, avatar in enumerate(targets):
       if i == len(targets) - 1:
@@ -49,4 +50,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       im.paste(avatar, (350, i * bg.height + 85))
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

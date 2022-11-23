@@ -1,10 +1,8 @@
-import asyncio
-
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageChops
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 BG = (28, 11, 27)
 FG1 = (0, 242, 234)
@@ -36,4 +34,4 @@ async def handle_tiktok(args: Message = CommandArg()):
     im.paste(center, (PADDING + DISPERSION, PADDING + DISPERSION), center)
     im.paste(FG3, (PADDING + DISPERSION, PADDING + DISPERSION), bottomright)
     return imutil.to_segment(im)
-  await tiktok.finish(await asyncio.to_thread(make))
+  await tiktok.finish(await misc.to_thread(make))

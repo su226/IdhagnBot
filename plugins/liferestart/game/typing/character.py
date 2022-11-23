@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import List, TypedDict
 
 
 class CharacterPropertyDict(TypedDict):
@@ -12,4 +12,4 @@ class CharacterDict(TypedDict):
   id: str
   name: str
   property: CharacterPropertyDict
-  talent: list[str]
+  talent: List[str]

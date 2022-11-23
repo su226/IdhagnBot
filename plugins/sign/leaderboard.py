@@ -1,9 +1,10 @@
 import asyncio
+from typing import List, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from PIL import Image
 
-from util import command, context, imutil
+from util import command, context, imutil, misc
 from util.images.leaderboard import render as render_leaderboard
 
 from .config import STATE
@@ -22,7 +23,7 @@ leaderboard = (
 )
 @leaderboard.handle()
 async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
-  async def fetch_data(uid: int) -> tuple[Image.Image, str, str]:
+  async def fetch_data(uid: int) -> Tuple[Image.Image, str, str]:
     avatar, name = await asyncio.gather(
       imutil.get_avatar(uid),
       context.get_card_or_name(bot, event, uid)
@@ -33,7 +34,7 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
 
   group_data = STATE(context.get_event_context(event))
   group_data.update()
-  data: list[tuple[Image.Image, str, str]] = await asyncio.gather(
+  data: List[Tuple[Image.Image, str, str]] = await asyncio.gather(
     *(fetch_data(uid) for uid in group_data.rank)
   )
 
@@ -41,4 +42,4 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
     im = render_leaderboard(data)
     return imutil.to_segment(im)
 
-  await leaderboard.finish(await asyncio.to_thread(make))
+  await leaderboard.finish(await misc.to_thread(make))

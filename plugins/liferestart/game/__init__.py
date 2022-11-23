@@ -1,7 +1,7 @@
 from collections import defaultdict
 from dataclasses import dataclass, field
 from random import Random
-from typing import Any, Generator, TypedDict
+from typing import Any, Dict, Generator, List, Optional, Set, Tuple, TypedDict
 
 from .config import Config, StatRarityItem, TalentBoostItem
 from .data import ACHIEVEMENT, AGE, EVENT, TALENT
@@ -14,7 +14,7 @@ from .struct.talent import Talent
 
 class SerializedGeneratedCharacter(TypedDict):
   name: str
-  talents: list[int]
+  talents: List[int]
   charm: int
   intelligence: int
   strength: int
@@ -47,26 +47,27 @@ class GeneratedCharacter(Character):
       intelligence=serialized["intelligence"],
       strength=serialized["strength"],
       money=serialized["money"],
-      seed=serialized["seed"])
+      seed=serialized["seed"]
+    )
 
 
 class SerializedStatistics(TypedDict):
-  talents: list[int]
-  events: list[int]
-  achievements: list[int]
+  talents: List[int]
+  events: List[int]
+  achievements: List[int]
   finished_games: int
   inherited_talent: int
-  character: SerializedGeneratedCharacter | None
+  character: Optional[SerializedGeneratedCharacter]
 
 
 @dataclass  # dirty hack
 class Statistics:
-  talents: set[int] = field(default_factory=set)
-  events: set[int] = field(default_factory=set)
-  achievements: set[int] = field(default_factory=set)
+  talents: Set[int] = field(default_factory=set)
+  events: Set[int] = field(default_factory=set)
+  achievements: Set[int] = field(default_factory=set)
   finished_games: int = 0
   inherited_talent: int = -1
-  character: GeneratedCharacter | None = None
+  character: Optional[GeneratedCharacter] = None
 
   def serialize(self) -> SerializedStatistics:
     return {
@@ -87,15 +88,16 @@ class Statistics:
       set(serialized["achievements"]),
       serialized["finished_games"],
       serialized["inherited_talent"],
-      GeneratedCharacter.deserialize(character) if character else None)
+      GeneratedCharacter.deserialize(character) if character else None
+    )
 
 
 @dataclass
 class Progress:
   age: int
-  talents: list[Talent]
-  events: list[tuple[Event, bool]]
-  achievements: list[Achievement]
+  talents: List[Talent]
+  events: List[Tuple[Event, bool]]
+  achievements: List[Achievement]
   charm: int
   intelligence: int
   strength: int
@@ -105,8 +107,8 @@ class Progress:
 
 @dataclass
 class End:
-  talents: list[Talent]
-  achievements: list[Achievement]
+  talents: List[Talent]
+  achievements: List[Achievement]
   age: int
   charm: int
   intelligence: int
@@ -129,8 +131,8 @@ class Game:
 
   _random: Random
 
-  _raw_talents: list[Talent]
-  _talents: list[Talent]
+  _raw_talents: List[Talent]
+  _talents: List[Talent]
   _charm: int
   _intelligence: int
   _strength: int
@@ -150,8 +152,8 @@ class Game:
   _age: int
   _max_age: int
   _alive: bool
-  _talent_executed: dict[int, int]
-  _condition_vars: dict[str, Any]
+  _talent_executed: Dict[int, int]
+  _condition_vars: Dict[str, Any]
 
   def __init__(self, config: Config = Config(), statistics: Statistics = Statistics()):
     self.config = config
@@ -172,26 +174,26 @@ class Game:
       "TMS": self.statistics.finished_games,
     }
 
-  def seed(self, seed: int | None = None) -> int:
+  def seed(self, seed: Optional[int] = None) -> int:
     if seed is None:
       self._random.seed(None)
-      seed = int.from_bytes(self._random.randbytes(4), "little")
+      seed = self._random.getrandbits(32)
     self._random.seed(seed)
     return seed
 
-  def random_talents(self) -> Generator[list[Talent], None, None]:
+  def random_talents(self) -> Generator[List[Talent], None, None]:
     weight = self.config.talent.weight * sum([
       self._get_boost(self.config.talent.boost.finished_games, self.statistics.finished_games),
       self._get_boost(self.config.talent.boost.achievements, len(self.statistics.achievements)),
     ], TalentBoostItem.ONE)
-    by_rarity: dict[Rarity, list[Talent]] = {rarity: [] for rarity in Rarity}
+    by_rarity: Dict[Rarity, List[Talent]] = {rarity: [] for rarity in Rarity}
     for i in (i for i in TALENT.values() if not i.exclusive):
       by_rarity[i.rarity].append(i)
     while True:
-      result: list[Talent] = []
+      result: List[Talent] = []
       while len(result) < self.config.talent.choices:
-        rarities: list[Rarity] = []
-        weights: list[float] = []
+        rarities: List[Rarity] = []
+        weights: List[float] = []
         for rarity in Rarity:
           if by_rarity[rarity]:
             rarities.append(rarity)
@@ -206,13 +208,13 @@ class Game:
       for i in result:
         by_rarity[i.rarity].append(i)
 
-  def _get_boost(self, boosts: list[tuple[int, TalentBoostItem]], value: int) -> TalentBoostItem:
+  def _get_boost(self, boosts: List[Tuple[int, TalentBoostItem]], value: int) -> TalentBoostItem:
     for min, boost in reversed(boosts):
       if value >= min:
         return boost
     return TalentBoostItem.ZERO
 
-  def set_talents(self, talents: list[Talent]) -> list[Talent]:
+  def set_talents(self, talents: List[Talent]) -> List[Talent]:
     self._raw_talents = talents
     self._talents = talents.copy()
     for i, talent in enumerate(self._raw_talents):
@@ -224,16 +226,16 @@ class Game:
     self._condition_vars["TLT"] = {talent.id for talent in self._talents}
     return self._talents
 
-  def _get_replacement(self, current: Talent) -> Talent | None:
+  def _get_replacement(self, current: Talent) -> Optional[Talent]:
     if current.replacement == "rarity":
-      by_rarity: dict[int, list[Talent]] = {i: [] for i in current.weights}
+      by_rarity: Dict[int, List[Talent]] = {i: [] for i in current.weights}
       for talent in TALENT.values():
         if not talent.exclusive and talent.rarity in current.weights and not any(
           talent is other or talent.is_imcompatible_with(other) for other in self._talents
         ):
           by_rarity[talent.rarity].append(talent)
-      rarities: list[int] = []
-      weights: list[float] = []
+      rarities: List[int] = []
+      weights: List[float] = []
       for id, weight in current.weights.items():
         if by_rarity[id]:
           rarities.append(id)
@@ -243,8 +245,8 @@ class Game:
         talent = self._random.choice(by_rarity[rarity])
         return talent
     elif current.replacement == "talent":
-      choices: list[Talent] = []
-      weights: list[float] = []
+      choices: List[Talent] = []
+      weights: List[float] = []
       for id, weight in current.weights.items():
         talent = TALENT[id]
         if not any(
@@ -269,7 +271,7 @@ class Game:
     self._update_vars()
 
   def progress(self) -> Generator[Progress, None, None]:
-    self._events: set[int] = set()
+    self._events: Set[int] = set()
     self._condition_vars["EVT"] = self._events
     yield Progress(
       -1,
@@ -294,8 +296,8 @@ class Game:
         self._money,
         self._spirit)
 
-  def _execute_talents(self) -> list[Talent]:
-    talents: list[Talent] = []
+  def _execute_talents(self) -> List[Talent]:
+    talents: List[Talent] = []
     for talent in self._talents:
       if (
         self._talent_executed[talent.id] < talent.max_execute
@@ -309,10 +311,10 @@ class Game:
         talents.append(talent)
     return talents
 
-  def _execute_events(self) -> list[tuple[Event, bool]]:
-    events: list[tuple[Event, bool]] = []
-    choices: list[Event] = []
-    weights: list[float] = []
+  def _execute_events(self) -> List[Tuple[Event, bool]]:
+    events: List[Tuple[Event, bool]] = []
+    choices: List[Event] = []
+    weights: List[float] = []
     for id, weight in AGE[self._age].items():
       event = EVENT[id]
       if (
@@ -339,8 +341,8 @@ class Game:
       event = next_event
     return events
 
-  def _check_achievements(self, opportunity: Opportunity) -> list[Achievement]:
-    achievements: list[Achievement] = []
+  def _check_achievements(self, opportunity: Opportunity) -> List[Achievement]:
+    achievements: List[Achievement] = []
     for achievement in ACHIEVEMENT.values():
       if (
         achievement.id not in self.statistics.achievements
@@ -428,18 +430,18 @@ class Game:
       self.judge(overall, self.config.stat.rarity.overall))
 
   @staticmethod
-  def judge(value: int, standard: list[StatRarityItem]) -> StatRarityItem:
+  def judge(value: int, standard: List[StatRarityItem]) -> StatRarityItem:
     for i in reversed(standard):
       if value > i.min:
         return i
     return standard[0]
 
   def create_character(
-    self, seed: int | None = None, name: str = "独一无二的我"
+    self, seed: Optional[int] = None, name: str = "独一无二的我"
   ) -> GeneratedCharacter:
     random = Random()
     if seed is None:
-      seed = int.from_bytes(random.randbytes(4), "little")
+      seed = random.getrandbits(32)
     random.seed(seed)
     choices, weights = zip(*self.config.character.talent_count_weight.items())
     talent_count = random.choices(choices, weights)[0]
@@ -451,7 +453,7 @@ class Game:
       -1, name, talents, charm, intelligence, strength, money, seed)
     return self.statistics.character
 
-  def set_character(self, character: Character) -> tuple[list[Talent], list[Talent]]:
+  def set_character(self, character: Character) -> Tuple[List[Talent], List[Talent]]:
     talents = [TALENT[id] for id in character.talents]
     real_talents = self.set_talents(talents)
     self.set_stats(character.charm, character.intelligence, character.strength, character.money)

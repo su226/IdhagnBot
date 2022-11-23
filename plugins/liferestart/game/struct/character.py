@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List
 
 from ..typing.character import CharacterDict
 
@@ -7,7 +8,7 @@ from ..typing.character import CharacterDict
 class Character:
   id: int
   name: str
-  talents: list[int]
+  talents: List[int]
   charm: int  # CHR, 颜值
   intelligence: int  # INT, 智力
   strength: int  # STR, 体质

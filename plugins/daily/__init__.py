@@ -2,7 +2,7 @@ import asyncio
 import itertools
 from dataclasses import dataclass
 from datetime import date, datetime, time
-from typing import Awaitable, Literal, cast
+from typing import Awaitable, Dict, List, Literal, Optional, Union, cast
 
 import nonebot
 from apscheduler.job import Job
@@ -48,7 +48,7 @@ class StringModuleConfig(BaseModuleConfig):
 
 class CountdownModuleConfig(BaseModuleConfig):
   type: Literal["countdown"]
-  countdowns: list[Countdown]
+  countdowns: List[Countdown]
 
   def create_module(self, group_id: int) -> Module:
     return CountdownModule(self.countdowns)
@@ -112,43 +112,44 @@ class EpicGamesModuleConfig(BaseModuleConfig):
     return EpicGamesModule(self.force)
 
 
-AnyModuleConfig = \
-  StringModuleConfig | \
-  CountdownModuleConfig | \
-  NewsModuleConfig | \
-  MoyuModuleConfig | \
-  HistoryModuleConfig | \
-  SentenceModuleConfig | \
-  RankModuleConfig | \
-  FurbotModuleConfig | \
-  EveryFurryModuleConfig | \
+AnyModuleConfig = Union[
+  StringModuleConfig,
+  CountdownModuleConfig,
+  NewsModuleConfig,
+  MoyuModuleConfig,
+  HistoryModuleConfig,
+  SentenceModuleConfig,
+  RankModuleConfig,
+  FurbotModuleConfig,
+  EveryFurryModuleConfig,
   EpicGamesModuleConfig
-ModuleOrForward = AnyModuleConfig | list[AnyModuleConfig]
+]
+ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
 
 
 class GroupConfig(BaseModel):
-  time: _time | None = None
-  modules: list[ModuleOrForward] | None = None
+  time: Optional[_time] = None
+  modules: Optional[List[ModuleOrForward]] = None
 
 
 class Config(BaseModel):
   default_time: _time = _time(7, 0, 0)
-  default_modules: list[ModuleOrForward] = Field(default_factory=list)
-  groups: dict[int, GroupConfig] = Field(default_factory=dict)
+  default_modules: List[ModuleOrForward] = Field(default_factory=list)
+  groups: Dict[int, GroupConfig] = Field(default_factory=dict)
 
 
 class State(BaseModel):
-  last_send: dict[int, date] = Field(default_factory=dict)
+  last_send: Dict[int, date] = Field(default_factory=dict)
 
 
 CONFIG = configs.SharedConfig("daily", Config, "eager")
 STATE = configs.SharedState("daily", State)
 driver = nonebot.get_driver()
-jobs: list[Job] = []
+jobs: List[Job] = []
 
 
 @CONFIG.onload()
-def onload(prev: Config | None, curr: Config):
+def onload(prev: Optional[Config], curr: Config):
   for job in jobs:
     job.remove()
   jobs.clear()
@@ -166,7 +167,7 @@ def onload(prev: Config | None, curr: Config):
 
 @dataclass
 class Forward:
-  nodes: list[MessageSegment]
+  nodes: List[MessageSegment]
 
 
 @driver.on_bot_connect
@@ -174,7 +175,7 @@ async def on_bot_connect() -> None:
   CONFIG()
 
 
-async def format_one(group_id: int, module_config: BaseModuleConfig) -> list[Message]:
+async def format_one(group_id: int, module_config: BaseModuleConfig) -> List[Message]:
   try:
     return await module_config.create_module(group_id).format()
   except Exception:
@@ -183,7 +184,7 @@ async def format_one(group_id: int, module_config: BaseModuleConfig) -> list[Mes
 
 
 async def format_forward(
-  bot_id: int, bot_name: str, group_id: int, modules: list[AnyModuleConfig]
+  bot_id: int, bot_name: str, group_id: int, modules: List[AnyModuleConfig]
 ) -> Forward:
   coros = [format_one(group_id, module) for module in modules]
   messages = await asyncio.gather(*coros)
@@ -193,7 +194,7 @@ async def format_forward(
   ])
 
 
-async def format_all(group_id: int) -> list[Message | Forward]:
+async def format_all(group_id: int) -> List[Union[Message, Forward]]:
   config = CONFIG()
   if group_id not in config.groups:
     modules = config.default_modules
@@ -207,13 +208,13 @@ async def format_all(group_id: int) -> list[Message | Forward]:
   else:
     info = await bot.get_group_member_info(group_id=group_id, user_id=bot_id)
     bot_name = info["card"] or info["nickname"]
-  coros: list[Awaitable[list[Message] | Forward]] = []
+  coros: List[Awaitable[Union[List[Message], Forward]]] = []
   for module in modules:
     if isinstance(module, list):
       coros.append(format_forward(bot_id, bot_name, group_id, module))
     else:
       coros.append(format_one(group_id, module))
-  result: list[Message | Forward] = []
+  result: List[Union[Message, Forward]] = []
   for i in await asyncio.gather(*coros):
     if isinstance(i, Forward):
       result.append(i)
@@ -222,7 +223,7 @@ async def format_all(group_id: int) -> list[Message | Forward]:
   return result
 
 
-def clean_message(message: Message | Forward) -> None:
+def clean_message(message: Union[Message, Forward]) -> None:
   # 清除消息中的 base64，防止日志过长
   if isinstance(message, Forward):
     for node in message.nodes:

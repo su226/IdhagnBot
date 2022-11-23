@@ -1,30 +1,30 @@
 import operator
 import re
-from typing import Any, Callable, Sequence, TypeVar, cast
+from typing import Any, Callable, Dict, List, Sequence, Set, TypeVar, Union, cast
 
 
-def contains(val: Any | set[Any], seq: Sequence[Any]):
+def contains(val: Union[Any, Set[Any]], seq: Sequence[Any]):
   if isinstance(val, set):
     return len(val.intersection(seq)) > 0
   else:
     return val in seq
 
 
-def not_contains(val: Any | set[Any], seq: Sequence[Any]):
+def not_contains(val: Union[Any, Set[Any]], seq: Sequence[Any]):
   if isinstance(val, set):
     return len(val.intersection(seq)) == 0
   else:
     return val not in seq
 
 
-Tree = list["str | Tree"]
+Tree = List[Union[str, "Tree"]]
 
 
 class Condition:
   COMPARISON_RE = re.compile(r"^\s*([A-Za-z]+)\s*(<|<=|==?|>=|>|!=|~=)\s*(-?\d+)\s*$")
   INCLUDE_RE = re.compile(
     r"^\s*([A-Za-z]+)\s*([!\?])\s*\[((?:\s*(?:-?\d+)\s*,)*\s*(?:-?\d+))\s*,?\s*\]\s*$")
-  OPERATORS: dict[str, Callable[[Any, Any], bool]] = {
+  OPERATORS: Dict[str, Callable[[Any, Any], bool]] = {
     "<": operator.lt,
     "<=": operator.le,
     "=": operator.eq,
@@ -41,7 +41,7 @@ class Condition:
 
   @classmethod
   def parse(cls, data: str) -> "Condition":
-    def append(value: str | Tree):
+    def append(value: Union[str, Tree]):
       cur = tree
       for _ in range(level):
         cur = cur[-1]
@@ -78,7 +78,7 @@ class Condition:
       pass
     else:
       return BoolCondition(cls.build(tree[:index]), operator.or_, cls.build(tree[index + 1:]))
-    exp = "".join(cast(list[str], tree))
+    exp = "".join(cast(List[str], tree))
     if include := cls.INCLUDE_RE.match(exp):
       return VarCondition(
         include[1], cls.OPERATORS[include[2]], [int(x) for x in include[3].split(",")])

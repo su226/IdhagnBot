@@ -1,7 +1,6 @@
-import asyncio
 import math
 from io import BytesIO
-from typing import Generator, Literal, cast, overload
+from typing import Generator, List, Literal, Optional, Tuple, Union, cast, overload
 
 import cairo
 from loguru import logger
@@ -17,11 +16,11 @@ __all__ = [
 ]
 
 Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
-Size = tuple[int, int]
-Point = tuple[float, float]
-Plane = tuple[Point, Point, Point, Point]
-PerspectiveData = tuple[float, float, float, float, float, float, float, float]
-_LIBIMAGEQUANT_AVAILABLE: bool | None = None
+Size = Tuple[int, int]
+Point = Tuple[float, float]
+Plane = Tuple[Point, Point, Point, Point]
+PerspectiveData = Tuple[float, float, float, float, float, float, float, float]
+_LIBIMAGEQUANT_AVAILABLE: Optional[bool] = None
 _LIBIMAGEQUANT_WARNED: bool = False
 
 
@@ -67,7 +66,7 @@ def center_pad(im: Image.Image, width: int, height: int) -> Image.Image:
 
 
 def resize_canvas(
-  im: Image.Image, size: tuple[int, int], center: tuple[float, float] = (0.5, 0.5)
+  im: Image.Image, size: Tuple[int, int], center: Tuple[float, float] = (0.5, 0.5)
 ) -> Image.Image:
   x = size[0] - im.width
   y = size[1] - im.height
@@ -99,7 +98,7 @@ def resize_height(im: Image.Image, height: int) -> Image.Image:
   return ImageOps.contain(im, (99999, height), scale_resample())
 
 
-def background(im: Image.Image, bg: tuple[int, int, int] = (255, 255, 255)) -> Image.Image:
+def background(im: Image.Image, bg: Tuple[int, int, int] = (255, 255, 255)) -> Image.Image:
   if im.mode == "P" and "A" in im.palette.mode:
     im = im.convert(im.palette.mode)
   if "A" in im.getbands():
@@ -110,7 +109,7 @@ def background(im: Image.Image, bg: tuple[int, int, int] = (255, 255, 255)) -> I
 
 
 async def get_avatar(
-  uid: int, *, raw: bool = False, bg: tuple[int, int, int] | bool = False
+  uid: int, *, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
 ) -> Image.Image:
   # s 有 100, 160, 640, 1080 分别对应 4 个最大尺寸（可以小）和 0 对应原图（不能不填或者自定义）
   async with misc.http().get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0") as response:
@@ -123,7 +122,7 @@ async def get_avatar(
     if bg is False:
       return raw_avatar.convert("RGBA")
     return background(raw_avatar, (255, 255, 255) if bg is True else bg)
-  return await asyncio.to_thread(process)
+  return await misc.to_thread(process)
 
 
 def frames(im: Image.Image) -> Generator[Image.Image, None, None]:
@@ -155,8 +154,8 @@ def sample_frames(im: Image.Image, frametime: int) -> Generator[Image.Image, Non
 
 
 def paste(
-  dst: Image.Image, src: Image.Image, xy: tuple[int, int] = (0, 0),
-  mask: Image.Image | None = None, anchor: Anchor = "lt"
+  dst: Image.Image, src: Image.Image, xy: Tuple[int, int] = (0, 0),
+  mask: Optional[Image.Image] = None, anchor: Anchor = "lt"
 ) -> None:
   if src.mode == "P" and "A" in src.palette.mode:
     src = src.convert(src.palette.mode)  # RGBA (也可能是LA？)
@@ -232,15 +231,15 @@ def quantize(im: Image.Image) -> Image.Image:
 
 @overload
 def to_segment(
-  im: Image.Image | cairo.ImageSurface, *, fmt: str = ..., **kw
+  im: Union[Image.Image, cairo.ImageSurface], *, fmt: str = ..., **kw
 ) -> MessageSegment: ...
 @overload
 def to_segment(
-  im: list[Image.Image], duration: list[int] | int | Image.Image, *, afmt: str = ..., **kw
+  im: List[Image.Image], duration: Union[List[int], int, Image.Image], *, afmt: str = ..., **kw
 ) -> MessageSegment: ...
 def to_segment(
-  im: Image.Image | list[Image.Image] | cairo.ImageSurface,
-  duration: list[int] | int | Image.Image = 0, *, fmt: str = "png", afmt: str = "gif", **kw
+  im: Union[Image.Image, List[Image.Image], cairo.ImageSurface],
+  duration: Union[List[int], int, Image.Image] = 0, *, fmt: str = "png", afmt: str = "gif", **kw
 ) -> MessageSegment:
   f = BytesIO()
   if isinstance(im, cairo.ImageSurface):
@@ -271,7 +270,7 @@ def to_segment(
 
 
 class RemapTransform:
-  def __init__(self, old_size: Size, new_plane: Plane, old_plane: Plane | None = None) -> None:
+  def __init__(self, old_size: Size, new_plane: Plane, old_plane: Optional[Plane] = None) -> None:
     widths = [point[0] for point in new_plane]
     heights = [point[1] for point in new_plane]
     self.old_size = old_size
@@ -280,7 +279,7 @@ class RemapTransform:
       old_plane = ((0, 0), (old_size[0], 0), (old_size[0], old_size[1]), (0, old_size[1]))
     self.data = self._find_coefficients(old_plane, new_plane)
 
-  def getdata(self) -> tuple[int, tuple[float, ...]]:
+  def getdata(self) -> Tuple[int, Tuple[float, ...]]:
     return Image.Transform.PERSPECTIVE, self.data
 
   @staticmethod

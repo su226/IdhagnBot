@@ -2,7 +2,7 @@ import asyncio
 import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any
+from typing import Any, Dict, List, Optional
 from urllib.parse import quote as urlencode
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -21,7 +21,7 @@ class Config(BaseModel):
 
 class State(BaseModel):
   timestamp: float = 0
-  name_cache: dict[int, str] = Field(default_factory=dict)
+  name_cache: Dict[int, str] = Field(default_factory=dict)
 
 
 CONFIG = configs.SharedConfig("bilibili_check", Config)
@@ -72,7 +72,7 @@ class Medal:
   color_border: int
 
 
-def make_list_item(name: str, uid: int, medal: Medal | None) -> Image.Image:
+def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
   name_im = textutil.render(name, "sans", 32)
   uid_im = textutil.render(str(uid), "sans", 28)
 
@@ -219,13 +219,13 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
   name: str = follow_data["card"]["name"]
   fans: int = follow_data["card"]["fans"]
   following: int = follow_data["card"]["attention"]
-  following_list: list[int] = follow_data["card"]["attentions"]
+  following_list: List[int] = follow_data["card"]["attentions"]
   private = following != 0 and not following_list
   vtb_names = STATE().name_cache
   vtbs = sorted((
     (uid, vtb_names[uid]) for uid in following_list if uid in vtb_names
   ), key=lambda x: x[1])
-  medals: dict[int, Medal] = {}
+  medals: Dict[int, Medal] = {}
   for i in medal_data["data"]["list"]:
     info = i["medal_info"]
     medals[info["target_id"]] = Medal(
@@ -272,4 +272,4 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
 
     return imutil.to_segment(im)
 
-  await bilibili_check.finish(await asyncio.to_thread(make))
+  await bilibili_check.finish(await misc.to_thread(make))

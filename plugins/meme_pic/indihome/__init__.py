@@ -1,14 +1,14 @@
-import asyncio
 import random
 from argparse import Namespace
 from pathlib import Path
+from typing import List, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 DIR = Path(__file__).resolve().parent
@@ -23,12 +23,12 @@ PRICE_FRAMES = 5
 PRICE_DURATION = 250
 
 
-def lerp(box1: tuple[int, ...], box2: tuple[int, ...], r2: float) -> tuple[int, ...]:
+def lerp(box1: Tuple[int, ...], box2: Tuple[int, ...], r2: float) -> Tuple[int, ...]:
   r1 = 1 - r2
   return tuple(int(i * r1 + j * r2) for i, j in zip(box1, box2))
 
 
-def paste(im: Image.Image, im2: Image.Image, box: tuple[int, int, int, int]) -> None:
+def paste(im: Image.Image, im2: Image.Image, box: Tuple[int, int, int, int]) -> None:
   im2 = im2.resize((box[2] - box[0], box[3] - box[1]), imutil.scale_resample())
   im.paste(im2, box, im2)
 
@@ -68,8 +68,8 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     target, _ = target_task.result()
     target = target.resize((360, 360), imutil.scale_resample())
     imutil.circle(target)
-    frames: list[Image.Image] = []
-    durations: list[int] = []
+    frames: List[Image.Image] = []
+    durations: List[int] = []
     for i in range(SLIDE_FRAMES):
       im = Image.new("RGB", (360, 360), (255, 255, 255))
       im.paste(target, lerp((360, 0), (0, 0), i / SLIDE_FRAMES), target)
@@ -96,4 +96,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       durations.append(PRICE_DURATION // PRICE_FRAMES)
     return imutil.to_segment(frames, durations, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

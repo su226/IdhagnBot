@@ -2,7 +2,7 @@ import asyncio
 import time
 from collections import deque
 from datetime import datetime, timedelta
-from typing import AsyncGenerator, cast
+from typing import AsyncGenerator, Deque, List, Optional, Tuple, cast
 
 import nonebot
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_MISSED, JobEvent
@@ -20,11 +20,11 @@ nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 driver = nonebot.get_driver()
-queue: deque[common.User] = deque()
+queue: Deque[common.User] = deque()
 
 
 @common.CONFIG.onload()
-def onload(prev: common.Config | None, curr: common.Config) -> None:
+def onload(prev: Optional[common.Config], curr: common.Config) -> None:
   global queue
   queue = deque()
   for i in curr.users:
@@ -145,7 +145,7 @@ async def try_check(bot: Bot, user: common.User) -> int:
     return 0
 
   try:
-    activities: list[bilibili_activity.Activity] = []
+    activities: List[bilibili_activity.Activity] = []
     async for activity in new_activities(user):
       activities.append(activity)
     activities.reverse()
@@ -160,7 +160,7 @@ async def try_check(bot: Bot, user: common.User) -> int:
     return 0
 
 
-async def try_check_all(bot: Bot, concurrency: int | None = None) -> tuple[int, int]:
+async def try_check_all(bot: Bot, concurrency: Optional[int] = None) -> Tuple[int, int]:
   if concurrency is None:
     concurrency = common.CONFIG().concurrency
   queue_ = queue

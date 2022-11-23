@@ -1,6 +1,5 @@
-import asyncio
 from argparse import Namespace
-from typing import cast, overload
+from typing import Tuple, Union, cast, overload
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ActionFailed
@@ -8,7 +7,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, PyAccess
 
-from util import command, context, imutil, textutil
+from util import command, context, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 GENDERS = {
@@ -26,19 +25,19 @@ def vertical_gradient(
 ) -> Image.Image: ...
 @overload
 def vertical_gradient(
-  mode: str, top: tuple[int], bottom: tuple[int], width: int, height: int
+  mode: str, top: Tuple[int], bottom: Tuple[int], width: int, height: int
 ) -> Image.Image: ...
 def vertical_gradient(
-  mode: str, top: int | tuple[int], bottom: int | tuple[int], width: int, height: int
+  mode: str, top: Union[int, Tuple[int]], bottom: Union[int, Tuple[int]], width: int, height: int
 ) -> Image.Image:
   gradient = Image.new(mode, (1, height))
   px = cast(PyAccess.PyAccess, gradient.load())
   is_tuple = isinstance(top, tuple)
   if is_tuple:
-    delta = tuple(x - y for x, y in zip(cast(tuple[int], bottom), top))
+    delta = tuple(x - y for x, y in zip(cast(Tuple[int], bottom), top))
     for i in range(height):
       ratio = i / (height - 1)
-      px[0, i] = tuple(int(ratio * x + y) for x, y in zip(cast(tuple[int], delta), top))
+      px[0, i] = tuple(int(ratio * x + y) for x, y in zip(cast(Tuple[int], delta), top))
   else:
     delta = cast(int, bottom) - top
     for i in range(height):
@@ -116,4 +115,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

@@ -14,23 +14,28 @@
 ~~详见[我的博客](https://su226.tk/2022/01/12/idhagn-bot/)~~
 已过时，[新文档](https://idhagnbot.su226.tk/)正在施工中
 
-部分功能需安装第三方软件：
-* 沙箱执行Python：bubblewrap（虽然这个也是GPL，但是是subprocess调用的）
-* 沙箱执行JavaScript: bubblewrap、nodejs、npm
-* 配置文件使用PyYAML解析，安装libyaml以使用C语言解析器（否则将使用纯Python解析器）
-
 部分功能需要可选依赖：
 * 离线维基百科：libzim（注意这个是GPL协议）、pyppeteer（默认路径为空字符串，也就是让pyppeteer自动下载，可修改为其他路径）
 * MC服务器状态：mctools
 * IdhagnFetch（仿[neofetch](https://github.com/dylanaraps/neofetch)的状态信息）：psutil
   * 注：显卡信息直接从`/sys/class/drm`读取，因此只支持Linux
 * text_generator的部分功能：jieba
-* petpet_v2的部分功能：opencv
+* meme_pic的部分功能：opencv
+* 词云、排行和统计：wordcloud、jieba、sql
+* B站动态推送的gRPC模式（更快）：grpc
+* auto_recall的SQL模式：sql
 
 你可以使用 `pdm install -G 上述提到的名称` 来安装上述依赖，如：`pdm install -G opencv`
 
+部分功能需安装第三方软件：
+* 沙箱执行Python：bubblewrap（虽然这个也是GPL，但是是subprocess调用的）
+* 沙箱执行JavaScript: bubblewrap、nodejs、npm
+* 配置文件使用PyYAML解析，安装libyaml以使用C语言解析器（否则将使用纯Python解析器）
+* qalc计算器：libqalculate
+
 ## 安装
-本项目使用Linux + Python 3.10开发，未在Windows或MacOS上测试过，且不兼容旧版Python
+本项目使用Linux + Python 3.10开发，未在Windows或MacOS上测试过，理论上也兼容3.8、3.9和3.11，但测试不不如3.10充分。
+（部分可选依赖不兼容3.11：libzim和wordcloud）
 ```shell
 # 以ArchLinux为例，请自行换成你的发行版的包管理器
 sudo pacman -S cairo pango gobject-introspection python-pdm

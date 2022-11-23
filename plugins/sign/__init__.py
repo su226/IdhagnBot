@@ -2,6 +2,7 @@ import asyncio
 import random
 from argparse import Namespace
 from datetime import datetime
+from typing import List, Set, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
 from nonebot.params import ShellCommandArgs
@@ -78,14 +79,14 @@ async def handle_sign(bot: Bot, event: MessageEvent):
   await sign.finish(await formatter(bot, format_data))
 
 
-async def match_all(bot: Bot, event: MessageEvent, patterns: list[str]) -> set[int]:
-  async def do_match(pattern: str) -> tuple[int]:
+async def match_all(bot: Bot, event: MessageEvent, patterns: List[str]) -> Set[int]:
+  async def do_match(pattern: str) -> Tuple[int]:
     if pattern in ("全部", "全体", "all"):
       ctx = context.get_event_context(event)
       return tuple(i["user_id"] for i in await bot.get_group_member_list(group_id=ctx))
     return await user_aliases.match_uid(bot, event, pattern, True)
   coros = [do_match(i) for i in patterns]
-  errors: list[misc.AggregateError] = []
+  errors: List[misc.AggregateError] = []
   users = set()
   for i in await asyncio.gather(*coros, return_exceptions=True):
     if isinstance(i, misc.AggregateError):

@@ -1,6 +1,6 @@
-import asyncio
 import math
 from argparse import Namespace
+from typing import List
 
 import cv2
 import numpy as np
@@ -9,7 +9,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.misc import range_float
 from util.user_aliases import AvatarGetter
 
@@ -65,7 +65,7 @@ async def handle_erode(
     target, _ = target_task.result()
     kernel = get_kernel(args.x, args.y)
 
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for raw in imutil.frames(target):
       frame = ImageOps.contain(raw.convert("RGBA"), (720, 720), imutil.scale_resample())
       frame = np.array(frame)
@@ -75,7 +75,7 @@ async def handle_erode(
 
     return imutil.to_segment(frames, target, afmt=args.format)
 
-  await erode.finish(await asyncio.to_thread(make))
+  await erode.finish(await misc.to_thread(make))
 
 
 dilate = (
@@ -96,7 +96,7 @@ async def handle_dilate(
     target, _ = target_task.result()
     kernel = get_kernel(args.x, args.y)
 
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for raw in imutil.frames(target):
       frame = ImageOps.contain(raw.convert("RGBA"), (720, 720), imutil.scale_resample())
       frame = np.array(frame)
@@ -106,4 +106,4 @@ async def handle_dilate(
 
     return imutil.to_segment(frames, target, afmt=args.format)
 
-  await dilate.finish(await asyncio.to_thread(make))
+  await dilate.finish(await misc.to_thread(make))

@@ -1,5 +1,5 @@
-import asyncio
 from argparse import Namespace
+from typing import List, Tuple
 
 import cv2
 import numpy as np
@@ -8,14 +8,14 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 COEFFICENTS = [0.01, 0.03, 0.05, 0.08, 0.12, 0.17, 0.23, 0.3, 0.4, 0.6]
 BORDERS = [25, 52, 67, 83, 97, 108, 118, 128, 138, 148]
 
 
-DistortCoefficents = tuple[float, float, float, float]
+DistortCoefficents = Tuple[float, float, float, float]
 def distort(im: Image.Image, coefficients: DistortCoefficents) -> Image.Image:
   res = cv2.undistort(
     np.asarray(im),
@@ -52,7 +52,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   def make() -> MessageSegment:
     target, _ = target_task.result()
     target = target.resize((500, 500), imutil.scale_resample())
-    frames: list[Image.Image] = [target]
+    frames: List[Image.Image] = [target]
     for coefficent, border in zip(COEFFICENTS, BORDERS):
       frame = distort(target, (coefficent, 0, 0, 0))
       frame = frame.crop((border, border, 499 - border, 499 - border))
@@ -60,4 +60,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     frames.extend(frames[::-1])
     return imutil.to_segment(frames, 50, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

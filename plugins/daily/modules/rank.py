@@ -1,6 +1,6 @@
 import asyncio
 from datetime import date, timedelta
-from typing import cast
+from typing import List, cast
 
 import nonebot
 from loguru import logger
@@ -18,7 +18,7 @@ class RankModule(Module):
     self.group_id = group_id
     self.limit = 10
 
-  async def format(self) -> list[Message]:
+  async def format(self) -> List[Message]:
     if self.group_id == -1:
       return []  # rank 模块在私聊上下文中不可用
     try:

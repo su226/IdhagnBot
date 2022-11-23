@@ -4,7 +4,9 @@ import re
 import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, Awaitable, Coroutine, Literal, TypeVar, overload
+from typing import (
+  Any, Awaitable, Coroutine, Dict, List, Literal, Optional, Tuple, TypeVar, Union, overload
+)
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent
@@ -18,17 +20,17 @@ from util.misc import AggregateError
 
 
 class Alias(BaseModel):
-  names: list[str]
-  users: tuple[int, ...]
+  names: List[str]
+  users: Tuple[int, ...]
 
 
 class Aliases(BaseModel):
-  contexts: list[int] = Field(default_factory=list)
-  aliases: list[Alias]
+  contexts: List[int] = Field(default_factory=list)
+  aliases: List[Alias]
 
 
 class Config(BaseModel):
-  aliases: list[Aliases] = Field(default_factory=list)
+  aliases: List[Aliases] = Field(default_factory=list)
 
 
 @dataclass
@@ -42,8 +44,8 @@ class MatchPattern:
 
 @dataclass
 class Match:
-  uids: tuple[int, ...]
-  patterns: list[MatchPattern]
+  uids: Tuple[int, ...]
+  patterns: List[MatchPattern]
 
   def __str__(self) -> str:
     if len(self.uids) > 1:
@@ -51,11 +53,11 @@ class Match:
     return str(self.uids[0])
 
 
-AliasesDict = dict[int, Alias]
+AliasesDict = Dict[int, Alias]
 T = TypeVar("T")
 
 CONFIG = configs.SharedConfig("user_aliases", Config)
-CACHE: dict[int, tuple[float, AliasesDict]] = {}
+CACHE: Dict[int, Tuple[float, AliasesDict]] = {}
 IDENTIFIER_RE = re.compile(r"[a-zA-Z0-9\u4e00-\u9fa5]+")
 AMBIGUOUS_LIMIT = 5
 AT_RE = re.compile(r"^\[CQ:at,qq=(\d+)\]$")
@@ -64,7 +66,7 @@ IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
 
 
 @CONFIG.onload()
-def onload(prev: Config | None, curr: Config) -> None:
+def onload(prev: Optional[Config], curr: Config) -> None:
   CACHE.clear()
 
 
@@ -103,13 +105,13 @@ async def get_aliases(bot: Bot, event: Event) -> AliasesDict:
   return aliases
 
 
-async def match(bot: Bot, event: Event, pattern: str) -> tuple[dict[int, Match], dict[int, Match]]:
-  def get(matches: dict[int, Match], id: int, alias: Alias) -> Match:
+async def match(bot: Bot, event: Event, pattern: str) -> Tuple[Dict[int, Match], Dict[int, Match]]:
+  def get(matches: Dict[int, Match], id: int, alias: Alias) -> Match:
     if id not in matches:
       matches[id] = Match(alias.users, [])
     return matches[id]
-  exact: dict[int, Match] = {}
-  inexact: dict[int, Match] = {}
+  exact: Dict[int, Match] = {}
+  inexact: Dict[int, Match] = {}
   for id, alias in (await get_aliases(bot, event)).items():
     for name in alias.names:
       if pattern == name:
@@ -131,10 +133,10 @@ async def match_uid(
 @overload
 async def match_uid(
   bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = ...
-) -> tuple[int]: ...
+) -> Tuple[int]: ...
 async def match_uid(
   bot: Bot, event: Event, raw_pattern: str, multiple: bool = False
-) -> int | tuple[int]:
+) -> Union[int, Tuple[int]]:
   try:
     uid = int(raw_pattern)
     if multiple:
@@ -169,7 +171,7 @@ async def match_uid(
 
 
 async def download_image(
-  url: str, *, crop: bool = True, raw: bool = False, bg: tuple[int, int, int] | bool = False
+  url: str, *, crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
 ) -> Image.Image:
   async with misc.http().get(url) as response:
     data = await response.read()
@@ -183,7 +185,7 @@ async def download_image(
     if bg is False:
       return image.convert("RGBA")
     return imutil.background(image, (255, 255, 255) if bg is True else bg)
-  return await asyncio.to_thread(process)
+  return await misc.to_thread(process)
 
 
 async def get_image_from_link(url: str, **kw) -> Image.Image:
@@ -209,7 +211,7 @@ async def get_avatar(uid: int, *, crop: bool = True, **kw) -> Image.Image:
 
 async def _get_image_and_user(
   bot: Bot, event: MessageEvent, pattern: str, default: int, **kw
-) -> tuple[Image.Image, int | None]:
+) -> Tuple[Image.Image, Optional[int]]:
   if pattern in {"?", "那个", "它"}:
     if not event.reply:
       raise misc.AggregateError("它是什么？你得回复一张图片")
@@ -252,8 +254,8 @@ class Prompter:
     self.message = "这个是什么？请发送一张图片"
     if prompt:
       self.message += f"作为{prompt}"
-    self.prev_future: asyncio.Future[None] | None = None
-    self.next_future: asyncio.Future[None] | None = None
+    self.prev_future: Optional[asyncio.Future[None]] = None
+    self.next_future: Optional[asyncio.Future[None]] = None
 
   async def __call__(self) -> str:
     if self.prev_future:
@@ -276,7 +278,7 @@ class Prompter:
     return url
 
 
-async def _get_from_prompter(task: asyncio.Task[str], **kw) -> tuple[Image.Image, None]:
+async def _get_from_prompter(task: "asyncio.Task[str]", **kw) -> Tuple[Image.Image, None]:
   return await download_image(await task, **kw), None
 
 
@@ -284,14 +286,14 @@ class AvatarGetter:
   def __init__(self, bot: Bot, event: MessageEvent) -> None:
     self.bot = bot
     self.event = event
-    self.tasks: list[asyncio.Task[Any]] = []
-    self.prompter_tasks: list[asyncio.Task[Any]] = []
-    self.last_prompter: Prompter | None = None
+    self.tasks: List[asyncio.Task[Any]] = []
+    self.prompter_tasks: List[asyncio.Task[Any]] = []
+    self.last_prompter: Optional[Prompter] = None
 
   def get(
     self, pattern: str, default: int, prompt: str = "",
-    crop: bool = True, raw: bool = False, bg: tuple[int, int, int] | bool = False
-  ) -> Coroutine[Any, Any, tuple[Image.Image, int | None]]:
+    crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
+  ) -> Coroutine[Any, Any, Tuple[Image.Image, Optional[int]]]:
     if pattern in {"-", "这个"}:
       prompter = Prompter(self.bot, self.event, prompt)
       if self.last_prompter:
@@ -303,22 +305,22 @@ class AvatarGetter:
       return _get_from_prompter(prompter_task, crop=crop, raw=raw, bg=bg)
     return _get_image_and_user(self.bot, self.event, pattern, default, crop=crop, raw=raw, bg=bg)
 
-  def submit(self, coro: Awaitable[T], /) -> asyncio.Task[T]:
+  def submit(self, coro: Awaitable[T], /) -> "asyncio.Task[T]":
     task = asyncio.ensure_future(coro)
     self.tasks.append(task)
     return task
 
   def __call__(
     self, pattern: str, default: int, prompt: str = "",
-    crop: bool = True, raw: bool = False, bg: tuple[int, int, int] | bool = False
-  ) -> asyncio.Task[tuple[Image.Image, int | None]]:
+    crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
+  ) -> "asyncio.Task[Tuple[Image.Image, Optional[int]]]":
     return self.submit(self.get(pattern, default, prompt, crop, raw, bg))
 
   async def __aenter__(self) -> Self:
     return self
 
   async def __aexit__(self, exc_type, exc, tb) -> None:
-    errors: list[str] = []
+    errors: List[str] = []
     for i in asyncio.as_completed(self.tasks):
       try:
         await i

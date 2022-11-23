@@ -1,14 +1,13 @@
-import asyncio
 from argparse import Namespace
 from io import StringIO
-from typing import cast
+from typing import List, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, PyAccess
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 PALETTE = {
@@ -57,7 +56,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     w, h = textutil.layout("A", "monospace", SIZE).get_size()
     aspect_ratio = w / h
     target, _ = target_task.result()
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for raw in imutil.frames(target):
       columns = int(raw.width * SCALE)
       rows = int(raw.height * aspect_ratio * SCALE)
@@ -78,4 +77,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       frames.append(result)
     return imutil.to_segment(frames, target, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

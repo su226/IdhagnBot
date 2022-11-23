@@ -1,7 +1,7 @@
-import asyncio
 import re
 from argparse import Namespace
 from pathlib import Path
+from typing import List, Tuple
 
 import gi
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 gi.require_version("Pango", "1.0")
 from gi.repository import Pango  # type: ignore
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 DIR = Path(__file__).resolve().parent
@@ -27,11 +27,11 @@ TRANSFORM = (
 
 
 def render_vertical_text(content: str, font: str, size: int, **kw) -> Image.Image:
-  lines: list[tuple[int, list[Image.Image]]] = []
+  lines: List[Tuple[int, List[Image.Image]]] = []
   total_width = 0
   total_height = 0
   for line in content.splitlines():
-    parts: list[Image.Image] = []
+    parts: List[Image.Image] = []
     width = 0
     height = 0
 
@@ -108,4 +108,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

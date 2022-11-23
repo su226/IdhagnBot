@@ -1,11 +1,10 @@
-import asyncio
 from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 DIR = Path(__file__).resolve().parent
 
@@ -27,4 +26,4 @@ async def handle_luxun(args: Message = CommandArg()):
     imutil.paste(im, text_im, (240, 350), anchor="mm")
     textutil.paste(im, (320, 400), "——鲁迅", "sans", 30, color=(255, 255, 255))
     return imutil.to_segment(im)
-  await luxun.finish(await asyncio.to_thread(make))
+  await luxun.finish(await misc.to_thread(make))

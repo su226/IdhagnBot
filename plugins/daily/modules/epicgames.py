@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timezone
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from pydantic import BaseModel, Field
@@ -10,8 +11,8 @@ from . import DailyCache, Module
 
 
 class State(BaseModel):
-  prev_games: list[epicgames.Game] = Field(default_factory=list)
-  games: list[epicgames.Game] = Field(default_factory=list)
+  prev_games: List[epicgames.Game] = Field(default_factory=list)
+  games: List[epicgames.Game] = Field(default_factory=list)
 
 
 class EpicGamesCache(DailyCache):
@@ -44,7 +45,7 @@ class EpicGamesModule(Module):
   def __init__(self, force: bool) -> None:
     self.force = force
 
-  async def format(self) -> list[Message]:
+  async def format(self) -> List[Message]:
     await cache.ensure()
     model = State.parse_file(cache.path)
     if not self.force and model.prev_games == model.games:

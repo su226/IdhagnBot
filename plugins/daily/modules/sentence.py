@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Message
 
@@ -31,6 +32,6 @@ sentence_cache = SentenceCache()
 
 
 class SentenceModule(Module):
-  async def format(self) -> list[Message]:
+  async def format(self) -> List[Message]:
     await sentence_cache.ensure()
     return [misc.local("image", sentence_cache.path) + "\n你可以发送 /一句 再次查看"]

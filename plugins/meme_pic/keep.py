@@ -1,12 +1,12 @@
-import asyncio
 from argparse import Namespace
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 parser = ArgumentParser(add_help=False)
@@ -39,7 +39,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     text1 = textutil.render("要我一直", "sans", 60)
     text2 = textutil.render("吗", "sans", 60)
 
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for raw in imutil.frames(target):
       raw = raw.convert("RGBA")
       big = imutil.resize_width(raw, 500)
@@ -58,4 +58,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(frames, target, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

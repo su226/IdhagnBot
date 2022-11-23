@@ -2,7 +2,7 @@ import heapq
 import itertools
 import random
 import re
-from typing import Callable
+from typing import Callable, List
 
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
@@ -31,7 +31,7 @@ USAGE_BASE = '''\
 /骰子 <个数> - 扔出多个六面骰子
 /骰子 d<面数> - 扔出一个多面骰子
 /骰子 <个数>d<面数> - 扔出多个多面骰子'''
-USAGE_FAIL = "骰子数量必须是不超过 {} 的正整数\n骰子 {} 的硬币将会使用二项分布估算"
+USAGE_FAIL = "骰子数量必须是不超过 {} 的正整数\n超过 {} 的骰子将会使用二项分布估算"
 SPECIAL_NAMES = {
   1: "骰(dan)子(zhu)",
   2: "骰(ying)子(bi)"
@@ -39,14 +39,14 @@ SPECIAL_NAMES = {
 DICE_RE = re.compile(r"^(\d+)?(?:d(\d+))?$")
 
 
-def dice_simulation(count: int, faces: int) -> list[int]:
+def dice_simulation(count: int, faces: int) -> List[int]:
   results = [0 for _ in range(faces)]
   for _ in range(count):
     results[random.randrange(faces)] += 1
   return results
 
 
-def dice_binomial(count: int, faces: int) -> list[int]:
+def dice_binomial(count: int, faces: int) -> List[int]:
   results = []
   for used in range(faces):
     current = misc.binomial_sample(count, 1.0 / (faces - used))
@@ -55,7 +55,7 @@ def dice_binomial(count: int, faces: int) -> list[int]:
   return results
 
 
-def format_dice(func: Callable[[int, int], list[int]], count: int, faces: int) -> str:
+def format_dice(func: Callable[[int, int], List[int]], count: int, faces: int) -> str:
   config = CONFIG()
   raw_data = func(count, faces)
   message = f"你抛出了 {count} 个 {faces} 面{SPECIAL_NAMES.get(faces, '骰子')}，"

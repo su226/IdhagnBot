@@ -1,10 +1,9 @@
-import asyncio
 from typing import Callable
 
 from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
 
-from util import imutil
+from util import imutil, misc
 from util.api_common import bilibili_activity
 from util.images.card import Card, CardAuthor, CardText
 
@@ -38,4 +37,4 @@ async def format(activity: ActivityText) -> Message:
       + f"\nhttps://t.bilibili.com/{activity.id}"
     )
 
-  return await asyncio.to_thread(make)
+  return await misc.to_thread(make)

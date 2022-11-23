@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Dict, Optional, Set
 
 import nonebot
 from nonebot.adapters.onebot.v11 import Event, Message, MessageEvent
@@ -14,10 +14,10 @@ from nonebot_plugin_apscheduler import scheduler
 class Record:
   def __init__(self) -> None:
     hook.on_message_sent(self.on_message_sent)
-    self.messages: dict[int, set[int]] = {}
+    self.messages: Dict[int, Set[int]] = {}
 
   async def on_message_sent(
-    self, event: Event | None, is_group: bool, target_id: int, message: Message, message_id: int
+    self, event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int
   ) -> None:
     if isinstance(event, MessageEvent) and event.message_id and message_id:
       recall_time = datetime.fromtimestamp(event.time) + timedelta(seconds=120)

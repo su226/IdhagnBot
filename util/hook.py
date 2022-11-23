@@ -1,6 +1,6 @@
 import asyncio
 from contextvars import ContextVar
-from typing import Any, Awaitable, Callable, cast
+from typing import Any, Awaitable, Callable, Dict, List, Optional, cast
 
 import nonebot
 from loguru import logger
@@ -12,9 +12,9 @@ from . import misc
 
 __all__ = ["on_message_sent", "MessageSentHook"]
 
-send_event: ContextVar[Event | None] = ContextVar("send_event", default=None)
-MessageSentHook = Callable[[Event | None, bool, int, Message, int], Awaitable[None]]
-message_sent_hook: list[MessageSentHook] = []
+send_event: ContextVar[Optional[Event]] = ContextVar("send_event", default=None)
+MessageSentHook = Callable[[Optional[Event], bool, int, Message, int], Awaitable[None]]
+message_sent_hook: List[MessageSentHook] = []
 driver = nonebot.get_driver()
 
 
@@ -30,7 +30,9 @@ def normalize_message(raw: Any) -> Message:
 
 
 @Bot.on_called_api
-async def on_called_api(_, e: Exception | None, api: str, params: dict[str, Any], result: Any):
+async def on_called_api(
+  _, e: Optional[Exception], api: str, params: Dict[str, Any], result: Any
+) -> None:
   if e is not None:
     return
   if api in ("send_private_msg", "send_group_msg", "send_msg"):

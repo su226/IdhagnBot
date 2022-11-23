@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 from util import misc
 
@@ -21,7 +21,7 @@ def get_image(data: Any) -> str:
   return ""
 
 
-async def get_data() -> list[Item]:
+async def get_data() -> List[Item]:
   http = misc.http()
   async with http.get(API) as response:
     data = await response.json()

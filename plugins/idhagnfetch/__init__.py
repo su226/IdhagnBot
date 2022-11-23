@@ -1,8 +1,9 @@
 import asyncio
 import html
 import platform
+import re
 import time
-from typing import Any, Callable, Literal, get_args
+from typing import Any, Callable, Dict, List, Literal, Tuple, get_args
 
 import nonebot
 import psutil
@@ -35,7 +36,7 @@ class Config(BaseModel):
   avatar_size: int = 320
   enable_header: bool = True
   enable_account: bool = True
-  items: list[Items] = Field(default_factory=lambda: list(get_args(Items)))
+  items: List[Items] = Field(default_factory=lambda: list(get_args(Items)))
   background_color: int = 0x212121
   primary_color: int = 0x80d8ff
   secondary_color: int = 0xffffff
@@ -53,11 +54,44 @@ KILO = 1024
 MEGA = 1024 ** 2
 GIGA = 1024 ** 3
 
+
+def _get_distro() -> str:
+  def _parse_os_release(lines):
+    info = {}
+    for line in lines:
+      if match := _os_release_line.match(line):
+        info[match["name"]] = _os_release_unescape.sub(r"\1", match["value"])
+    return info
+
+  _os_release_line = re.compile(
+    r"^(?P<name>[a-zA-Z0-9_]+)=(?P<quote>[\"\']?)(?P<value>.*)(?P=quote)$"
+  )
+  _os_release_unescape = re.compile(r"\\([\\\$\"\'`])")
+  _os_release_candidates = ("/etc/os-release", "/usr/lib/os-release")
+  errno = None
+  for candidate in _os_release_candidates:
+    try:
+      with open(candidate, encoding="utf-8") as f:
+        _os_release = _parse_os_release(f)
+      break
+    except OSError as e:
+      errno = e.errno
+  else:
+    raise OSError(errno, f"Unable to read files {', '.join(_os_release_candidates)}")
+
+  if "PRETTY_NAME" in _os_release:
+    return _os_release["PRETTY_NAME"]
+  return _os_release["NAME"]
+
+
 _uname = platform.uname()
 SYSTEM = f"{_uname.system} {_uname.release}"
 CPU_MODEL = _uname.processor or _uname.machine
 if _uname.system == "Linux":
-  SYSTEM += f" ({platform.freedesktop_os_release()['NAME']})"
+  try:
+    SYSTEM += f" ({_get_distro()})"
+  except (OSError, KeyError):
+    pass
 if _uname.system in ("Linux", "Darwin"):
   with open("/proc/cpuinfo") as f:
     for i in f:
@@ -137,7 +171,7 @@ def human_size(byte: int) -> str:
 
 
 def get_disks():
-  lines: list[tuple[str, str]] = []
+  lines: List[Tuple[str, str]] = []
   for partition in psutil.disk_partitions():
     usage = psutil.disk_usage(partition.mountpoint)
     info_str = f"{human_size(usage.used)} / {human_size(usage.total)} ({usage.percent}%)"
@@ -157,7 +191,7 @@ def get_battery():
   return [("电池", info_str)]
 
 
-ITEMS: dict[Items, Callable[[], list[tuple[str, str]]]] = {
+ITEMS: Dict[Items, Callable[[], List[Tuple[str, str]]]] = {
   "system": lambda: [("系统", SYSTEM)],
   "uptime": lambda: [("系统在线", misc.format_time(time.time() - psutil.boot_time()))],
   "cpu": lambda: [("CPU", CPU_MODEL)],
@@ -234,4 +268,4 @@ async def handle_idhagnfetch(bot: Bot):
 
     return imutil.to_segment(im)
 
-  await idhagnfetch.finish(await asyncio.to_thread(make))
+  await idhagnfetch.finish(await misc.to_thread(make))

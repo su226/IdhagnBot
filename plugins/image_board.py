@@ -1,5 +1,5 @@
 from argparse import Namespace
-from typing import Any, Literal
+from typing import Any, Dict, List, Literal, Optional
 
 import aiohttp
 from aiohttp.http import SERVER_SOFTWARE
@@ -69,19 +69,19 @@ EMPTY_PRESET = {
 
 
 class Command(BaseModel):
-  command: list[str]
+  command: List[str]
   brief: str = ""
-  contexts: list[int] = Field(default_factory=list)
+  contexts: List[int] = Field(default_factory=list)
   permission: Literal["member", "admin", "owner", "super"] = "member"
-  proxy: str | None = None
+  proxy: Optional[str] = None
   user_agent: str = SERVER_SOFTWARE
-  preset: str | None = None
-  origin: str | None = None
-  post_url: str | None = None
-  api_url: str | None = None
-  array_path: str | None = None
-  id_path: str | None = None
-  sample_path: str | None = None
+  preset: Optional[str] = None
+  origin: Optional[str] = None
+  post_url: Optional[str] = None
+  api_url: Optional[str] = None
+  array_path: Optional[str] = None
+  id_path: Optional[str] = None
+  sample_path: Optional[str] = None
 
   def to_site(self) -> Site:
     preset = EMPTY_PRESET if self.preset is None else presets[self.preset].dict()
@@ -93,8 +93,8 @@ class Command(BaseModel):
 class Config(BaseModel):
   default_limit: int = 5
   max_limit: int = 10
-  presets: dict[str, Site] = Field(default_factory=dict)
-  sites: list[Command] = Field(default_factory=list)
+  presets: Dict[str, Site] = Field(default_factory=dict)
+  sites: List[Command] = Field(default_factory=list)
 
 
 CONFIG = configs.SharedConfig("image_board", Config, False)

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Iterable
+from typing import Iterable, List
 
 from pydantic import BaseModel
 
@@ -47,12 +47,12 @@ def getimage(game: dict) -> str:
   return ""
 
 
-async def free_games() -> list[Game]:
+async def free_games() -> List[Game]:
   http = misc.http()
   async with http.get(API) as response:
     data = await response.json()
   games = data["data"]["Catalog"]["searchStore"]["elements"]
-  result: list[Game] = []
+  result: List[Game] = []
   now_date = datetime.now(timezone.utc)
   for game in games:
     for i in promotions(game.get("promotions", {})):

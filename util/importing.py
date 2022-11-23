@@ -2,6 +2,7 @@ import importlib
 import pkgutil
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Dict, List, Set, Tuple
 
 import nonebot
 import yaml
@@ -12,38 +13,39 @@ from . import configs
 
 
 class Config(BaseModel):
-  blacklist: set[str] = Field(default_factory=set)
+  blacklist: Set[str] = Field(default_factory=set)
   invert_blacklist: bool = False
-  extra_plugins: set[str] = Field(default_factory=set)
-  extra_dirs: set[str] = Field(default_factory=lambda: {"user_plugins"})
+  extra_plugins: Set[str] = Field(default_factory=set)
+  extra_dirs: Set[str] = Field(default_factory=lambda: {"user_plugins"})
 
 
 class Metadata(BaseModel):
-  requirements: dict[str, list[str]]
-  groups: dict[str, str]
+  requirements: Dict[str, List[str]]
+  groups: Dict[str, str]
 
 
 @dataclass
 class Missing:
   name: str
-  requires: list[str]
-  groups: list[str]
+  requires: List[str]
+  groups: List[str]
 
 
 CONFIG = configs.SharedConfig("plugins", Config, False)
 ROOT_DIR = Path(__file__).resolve().parents[1]
-MODULES: dict[str, bool] = {}
+MODULES: Dict[str, bool] = {}
 with open(ROOT_DIR / "plugins" / "metadata.yaml") as f:
   METADATA = Metadata.parse_obj(yaml.load(f, configs.SafeLoader))
 
 
-def children(parent: str) -> tuple[list[str], list[Missing]]:
+def children(parent: str) -> Tuple[List[str], List[Missing]]:
+  from . import misc
   config = CONFIG()
   path = ROOT_DIR / parent.replace(".", "/")
-  availables: list[str] = []
-  missings: list[Missing] = []
+  availables: List[str] = []
+  missings: List[Missing] = []
   for child in pkgutil.iter_modules([str(path)]):
-    meta_name = f"{parent}.{child.name}".removeprefix("plugins.")
+    meta_name = misc.removeprefix(f"{parent}.{child.name}", "plugins.")
     if (
       child.name.startswith("_")
       or (meta_name in config.blacklist != config.invert_blacklist)
@@ -53,7 +55,7 @@ def children(parent: str) -> tuple[list[str], list[Missing]]:
     if not requirements:
       availables.append(child.name)
       continue
-    missing: list[str] = []
+    missing: List[str] = []
     for module in requirements:
       if module not in MODULES:
         try:

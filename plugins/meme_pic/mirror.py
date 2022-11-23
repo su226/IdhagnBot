@@ -1,4 +1,3 @@
-import asyncio
 import math
 import random
 from argparse import Namespace
@@ -8,7 +7,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 DIRECTIONS = ["top", "bottom", "left", "right", "t", "b", "l", "r"]
@@ -36,21 +35,20 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
   def make() -> MessageSegment:
     target, _ = target_task.result()
-    match direction:
-      case "top" | "t":
-        flipped = target.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-        y = math.ceil(target.height / 2)
-        target.paste(flipped.crop((0, y, target.width - 1, target.height - 1)), (0, y))
-      case "bottom" | "b":
-        flipped = target.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-        target.paste(flipped.crop((0, 0, target.width - 1, target.height // 2 - 1)))
-      case "left" | "l":
-        flipped = target.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-        x = math.ceil(target.width / 2)
-        target.paste(flipped.crop((x, 0, target.width - 1, target.height - 1)), (x, 0))
-      case "right" | "r":
+    if direction in ("top", "t"):
+      flipped = target.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+      y = math.ceil(target.height / 2)
+      target.paste(flipped.crop((0, y, target.width - 1, target.height - 1)), (0, y))
+    elif direction in ("bottom", "b"):
+      flipped = target.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+      target.paste(flipped.crop((0, 0, target.width - 1, target.height // 2 - 1)))
+    elif direction in ("left", "l"):
+      flipped = target.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+      x = math.ceil(target.width / 2)
+      target.paste(flipped.crop((x, 0, target.width - 1, target.height - 1)), (x, 0))
+    elif direction in ("right", "r"):
         flipped = target.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
         target.paste(flipped.crop((0, 0, target.width // 2 - 1, target.height - 1)))
     return imutil.to_segment(target)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

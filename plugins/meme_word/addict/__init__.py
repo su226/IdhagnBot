@@ -1,11 +1,10 @@
-import asyncio
 from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 DIR = Path(__file__).resolve().parent
 
@@ -30,4 +29,4 @@ async def handle_addict(args: Message = CommandArg()):
     imutil.paste(im, text_im, (543, 684), anchor="mm")
     return imutil.to_segment(im)
 
-  await addict.finish(await asyncio.to_thread(make))
+  await addict.finish(await misc.to_thread(make))

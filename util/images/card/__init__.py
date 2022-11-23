@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import List, Tuple
 
 from PIL import Image, ImageOps
 from typing_extensions import Self
@@ -152,9 +153,9 @@ class InfoCount(Render):
 
 class CardInfo(Render):
   def __init__(self) -> None:
-    self.lines: list[tuple[list[Render], int]] = []
+    self.lines: List[Tuple[List[Render], int]] = []
     self.height = 0
-    self.last_line: list[Render] = []
+    self.last_line: List[Render] = []
     self.last_line_width = 0
     self.last_line_height = 0
 
@@ -195,7 +196,7 @@ class CardInfo(Render):
 
 class Card(Render):
   def __init__(self) -> None:
-    self.items: list[Render] = []
+    self.items: List[Render] = []
     self.height = PADDING * 2
 
   def get_width(self) -> int:

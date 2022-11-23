@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict
+from typing import List, Literal, TypedDict
 
 from typing_extensions import NotRequired
 
@@ -20,6 +20,6 @@ class EventDict(TypedDict):
   grade: NotRequired[Literal[0, 1, 2, 3]]
   effect: NotRequired[EventEffectDict]
   NoRandom: NotRequired[Literal[0, 1]]
-  branch: NotRequired[list[str]]
+  branch: NotRequired[List[str]]
   include: NotRequired[str]
   exclude: NotRequired[str]

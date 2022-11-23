@@ -1,12 +1,12 @@
-import asyncio
 import random
 from pathlib import Path
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageOps
 
-from util import colorutil, command, imutil
+from util import colorutil, command, imutil, misc
 
 DIR = Path(__file__).resolve().parent
 IMAGES = 50
@@ -34,7 +34,7 @@ async def handle_cabbage(args: Message = CommandArg()):
     colors = [colorutil.split_rgb(random.choice(list(colorutil.NAMES)))]
 
   def make() -> MessageSegment:
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for i in range(IMAGES):
       index, ratio = divmod(i / (IMAGES - 1) * (len(colors) - 1), 1)
       index = int(index)
@@ -47,4 +47,4 @@ async def handle_cabbage(args: Message = CommandArg()):
       frames.append(im)
     return imutil.to_segment(frames, DURATION)
 
-  await cabbage.finish(await asyncio.to_thread(make))
+  await cabbage.finish(await misc.to_thread(make))

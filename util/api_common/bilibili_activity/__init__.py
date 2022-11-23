@@ -1,7 +1,7 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Generic, Sequence, TypeVar, overload
+from typing import (
+  TYPE_CHECKING, Dict, Generic, List, Optional, Sequence, Tuple, Type, TypeVar, Union, overload
+)
 
 from util import misc
 
@@ -20,7 +20,7 @@ except ImportError:
 if TYPE_CHECKING:
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicType, Module  # noqa 
 
-Modules = dict["DynModuleType.V", "Module"]
+Modules = Dict["DynModuleType.V", "Module"]
 
 LIST_API = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space" \
   "?host_mid={uid}&offset={offset}"
@@ -36,7 +36,7 @@ GRPC_METADATA = (
 )
 
 
-async def grpc_fetch(uid: int, offset: str = "") -> tuple[Sequence[DynamicItem], str | None]:
+async def grpc_fetch(uid: int, offset: str = "") -> Tuple[Sequence["DynamicItem"], Optional[str]]:
   async with grpc.aio.secure_channel(GRPC_API, grpc.ssl_channel_credentials()) as channel:
     stub = DynamicStub(channel)
     req = DynSpaceReq(host_uid=uid, history_offset=offset)
@@ -45,7 +45,7 @@ async def grpc_fetch(uid: int, offset: str = "") -> tuple[Sequence[DynamicItem],
   return res.list, next_offset
 
 
-async def json_fetch(uid: int, offset: str = "") -> tuple[list[dict], str | None]:
+async def json_fetch(uid: int, offset: str = "") -> Tuple[List[dict], Optional[str]]:
   if offset is None:
     offset = ""
   http = misc.http()
@@ -56,15 +56,11 @@ async def json_fetch(uid: int, offset: str = "") -> tuple[list[dict], str | None
 
 
 @overload
-async def grpc_get(id: str) -> DynamicItem: ...
-
-
+async def grpc_get(id: str) -> "DynamicItem": ...
 @overload
-async def grpc_get(id: list[str]) -> list[DynamicItem]: ...
-
-
-async def grpc_get(id: str | list[str]) -> DynamicItem | list[DynamicItem]:
-  islist = isinstance(id, list)
+async def grpc_get(id: List[str]) -> List["DynamicItem"]: ...
+async def grpc_get(id: Union[str, List[str]]) -> Union["DynamicItem", List["DynamicItem"]]:
+  islist = isinstance(id, List)
   if islist:
     ids = ",".join(id)
   else:
@@ -87,11 +83,11 @@ async def json_get(id: str) -> dict:
 
 class Content:
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> Content:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "Content":
     raise NotImplementedError
 
   @staticmethod
-  def json_parse(item: dict) -> Content:
+  def json_parse(item: dict) -> "Content":
     raise NotImplementedError
 
 
@@ -100,11 +96,11 @@ class ContentText(Content):
   text: str
 
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentText:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentText":
     return ContentText(modules[DynModuleType.module_desc].module_desc.text)
 
   @staticmethod
-  def json_parse(item: dict) -> ContentText:
+  def json_parse(item: dict) -> "ContentText":
     return ContentText(item["modules"]["module_dynamic"]["desc"]["text"])
 
 
@@ -119,10 +115,10 @@ class Image:
 @dataclass
 class ContentImage(Content):
   text: str
-  images: list[Image]
+  images: List[Image]
 
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentImage:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentImage":
     return ContentImage(
       modules[DynModuleType.module_desc].module_desc.text,
       [Image(
@@ -134,7 +130,7 @@ class ContentImage(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> ContentImage:
+  def json_parse(item: dict) -> "ContentImage":
     module = item["modules"]["module_dynamic"]
     return ContentImage(
       module["desc"]["text"],
@@ -153,17 +149,17 @@ class ContentVideo(Content):
   avid: int
   bvid: str
   title: str
-  desc: str | None
+  desc: Optional[str]
   cover: str
-  view: int | None
+  view: Optional[int]
   duration: int
-  width: int | None
-  height: int | None
+  width: Optional[int]
+  height: Optional[int]
   formatted_view: str
   formatted_danmaku: str
 
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentVideo:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentVideo":
     video = modules[DynModuleType.module_dynamic].module_dynamic.dyn_archive
     if DynModuleType.module_desc in modules:
       text = modules[DynModuleType.module_desc].module_desc.text
@@ -180,12 +176,12 @@ class ContentVideo(Content):
       video.duration,
       video.dimension.width,
       video.dimension.height,
-      video.cover_left_text_2.removesuffix("观看"),
-      video.cover_left_text_3.removesuffix("弹幕")
+      misc.removesuffix(video.cover_left_text_2, "观看"),
+      misc.removesuffix(video.cover_left_text_3, "弹幕")
     )
 
   @staticmethod
-  def json_parse(item: dict) -> ContentVideo:
+  def json_parse(item: dict) -> "ContentVideo":
     module = item["modules"]["module_dynamic"]
     video = module["major"]["archive"]
     duration_text: str = video["duration_text"]
@@ -224,11 +220,11 @@ class ContentArticle(Content):
   id: int
   title: str
   desc: str
-  covers: list[str]
+  covers: List[str]
   formatted_view: str
 
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentArticle:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentArticle":
     article = modules[DynModuleType.module_dynamic].module_dynamic.dyn_article
     return ContentArticle(
       int(item.extend.business_id),
@@ -239,7 +235,7 @@ class ContentArticle(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> ContentArticle:
+  def json_parse(item: dict) -> "ContentArticle":
     major = item["modules"]["module_dynamic"]["major"]["article"]
     return ContentArticle(
       major["id"],
@@ -258,12 +254,12 @@ class ContentAudio(Content):
   '''
   id: int
   title: str
-  desc: str | None
+  desc: Optional[str]
   cover: str
   label: str
 
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentAudio:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentAudio":
     audio = modules[DynModuleType.module_dynamic].module_dynamic.dyn_music
     return ContentAudio(
       audio.id,
@@ -274,7 +270,7 @@ class ContentAudio(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> ContentAudio:
+  def json_parse(item: dict) -> "ContentAudio":
     module = item["modules"]["module_dynamic"]
     audio = module["major"]["music"]
     return ContentAudio(
@@ -299,17 +295,17 @@ class ContentPGC(Content):
   epid: int
   season_name: str
   episode_name: str
-  season_cover: str | None
+  season_cover: Optional[str]
   episode_cover: str
-  label: str | None
+  label: Optional[str]
   formatted_view: str
   formatted_danmaku: str
-  duration: int | None
-  width: int | None
-  height: int | None
+  duration: Optional[int]
+  width: Optional[int]
+  height: Optional[int]
 
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentPGC:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentPGC":
     pgc = modules[DynModuleType.module_dynamic].module_dynamic.dyn_pgc
     return ContentPGC(
       pgc.season_id,
@@ -327,7 +323,7 @@ class ContentPGC(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> ContentPGC:
+  def json_parse(item: dict) -> "ContentPGC":
     author = item["modules"]["module_author"]
     pgc = item["modules"]["module_dynamic"]["major"]["pgc"]
     return ContentPGC(
@@ -355,7 +351,7 @@ class ContentForward(Content, Generic[TContent]):
   activity: "Activity[TContent] | None"
 
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentForward:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentForward":
     if DynModuleType.module_dynamic in modules:
       original = Activity.grpc_parse(
         modules[DynModuleType.module_dynamic].module_dynamic.dyn_forward.item
@@ -368,7 +364,7 @@ class ContentForward(Content, Generic[TContent]):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> ContentForward:
+  def json_parse(item: dict) -> "ContentForward":
     if item["orig"]["type"] == "DYNAMIC_TYPE_NONE":
       original = None  # 源动态失效
     else:
@@ -381,15 +377,15 @@ class ContentForward(Content, Generic[TContent]):
 
 class ContentUnknown(Content):
   @staticmethod
-  def grpc_parse(item: DynamicItem, modules: Modules) -> ContentUnknown:
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentUnknown":
     return ContentUnknown()
 
   @staticmethod
-  def json_parse(item: dict) -> ContentUnknown:
+  def json_parse(item: dict) -> "ContentUnknown":
     return ContentUnknown()
 
 
-GRPC_CONTENT_TYPES: dict["DynamicType.V", type[Content]] = {}
+GRPC_CONTENT_TYPES: Dict["DynamicType.V", Type[Content]] = {}
 if GRPC_AVAILABLE:
   GRPC_CONTENT_TYPES = {
     DynamicType.word: ContentText,
@@ -400,7 +396,7 @@ if GRPC_AVAILABLE:
     DynamicType.pgc: ContentPGC,
     DynamicType.forward: ContentForward,
   }
-JSON_CONTENT_TYPES: dict[str, type[Content]] = {
+JSON_CONTENT_TYPES: Dict[str, Type[Content]] = {
   "word": ContentText,
   "draw": ContentImage,
   "av": ContentVideo,
@@ -420,18 +416,18 @@ class Activity(Generic[TContent]):
   top: bool
   type: str
   content: TContent
-  repost: int | None
-  like: int | None
-  reply: int | None
-  time: int | None
+  repost: Optional[int]
+  like: Optional[int]
+  reply: Optional[int]
+  time: Optional[int]
 
   @staticmethod
-  def grpc_parse(item: DynamicItem) -> Activity:
+  def grpc_parse(item: "DynamicItem") -> "Activity":
     modules = {module.module_type: module for module in item.modules}
     if DynModuleType.module_author_forward in modules:
       author_module = modules[DynModuleType.module_author_forward].module_author_forward
       uid = author_module.uid
-      name = author_module.title[0].text.removeprefix("@")
+      name = misc.removeprefix(author_module.title[0].text, "@")
       avatar = author_module.face_url
       top = False
     else:
@@ -460,7 +456,7 @@ class Activity(Generic[TContent]):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> Activity:
+  def json_parse(item: dict) -> "Activity":
     modules = item["modules"]
     author_module = modules["module_author"]
     top = "module_tag" in modules and modules["module_tag"]["text"] == "置顶"

@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 from asyncio.streams import StreamReader, StreamWriter
-from typing import cast
+from typing import Tuple, cast
 
 from loguru import logger
 
@@ -18,7 +18,7 @@ plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
 async def safe_eval(
   code: str, timeout: float, nproc: int, memory: int, output: int
-) -> tuple[bool, int, bytes, bytes]:
+) -> Tuple[bool, int, bytes, bytes]:
   proc = await asyncio.subprocess.create_subprocess_exec(
     "bwrap",
     "--unshare-all",

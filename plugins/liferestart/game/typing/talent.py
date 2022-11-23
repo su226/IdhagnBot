@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict
+from typing import List, Literal, TypedDict, Union
 
 from typing_extensions import NotRequired
 
@@ -15,7 +15,7 @@ class TalentEffectDict(TypedDict, total=False):
 
 
 class GradeReplacementDict(TypedDict):
-  grade: list[int]
+  grade: List[int]
 
 
 class TalentReplacementDict(TypedDict):
@@ -23,13 +23,13 @@ class TalentReplacementDict(TypedDict):
 
 
 class TalentDict(TypedDict):
-  id: int | str
+  id: Union[int, str]
   name: str
   description: str
   grade: Literal[0, 1, 2, 3]
   status: NotRequired[int]
   effect: NotRequired[TalentEffectDict]
   condition: NotRequired[str]
-  exclude: NotRequired[list[int | str]]
-  replacement: NotRequired[GradeReplacementDict | TalentReplacementDict]
+  exclude: NotRequired[List[Union[int, str]]]
+  replacement: NotRequired[Union[GradeReplacementDict, TalentReplacementDict]]
   exclusive: NotRequired[Literal[0, 1]]

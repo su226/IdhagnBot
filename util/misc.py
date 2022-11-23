@@ -1,13 +1,16 @@
 import asyncio
 import base64
+import contextvars
 import itertools
 import math
 import os
 import random
+import sys
 from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import (
-  TYPE_CHECKING, Any, AsyncIterator, Callable, Generator, Iterable, Literal, Sequence, TypeVar
+  TYPE_CHECKING, Any, AsyncIterator, Callable, Dict, Generator, Iterable, List, Literal, Optional,
+  Sequence, Tuple, TypeVar, Union
 )
 
 import aiohttp
@@ -18,6 +21,7 @@ from nonebot.matcher import matchers
 from nonebot.params import Depends
 from nonebot.typing import T_State
 from pydantic import BaseModel, Field
+from typing_extensions import ParamSpec
 
 from .configs import SharedConfig
 
@@ -34,14 +38,15 @@ __all__ = [
 
 
 T = TypeVar("T")
+P = ParamSpec("P")
 Resample = Literal["nearest", "bilinear", "bicubic"]
-ScaleResample = Resample | Literal["box", "hamming", "lanczos"]
-AnyMessage = str | Message | MessageSegment
+ScaleResample = Union[Resample, Literal["box", "hamming", "lanczos"]]
+AnyMessage = Union[str, Message, MessageSegment]
 Quantize = Literal["mediancut", "maxcoverage", "fastoctree"]
 
 
 class AggregateError(Exception, Sequence[str]):
-  def __init__(self, *errors: str | Iterable[str]) -> None:
+  def __init__(self, *errors: Union[str, Iterable[str]]) -> None:
     super().__init__(*itertools.chain.from_iterable(
       [error] if isinstance(error, str) else error
       for error in errors
@@ -64,8 +69,8 @@ class Font(BaseModel):
 
 
 class Config(BaseModel):
-  special_font: dict[str, str] = Field(default_factory=dict)
-  font_substitute: dict[str, str] = Field(default_factory=dict)
+  special_font: Dict[str, str] = Field(default_factory=dict)
+  font_substitute: Dict[str, str] = Field(default_factory=dict)
   chromium: str = ""
   resample: Resample = "bicubic"
   scale_resample: ScaleResample = "bicubic"
@@ -77,7 +82,7 @@ class Config(BaseModel):
 
 CONFIG = SharedConfig("misc", Config)
 ADAPTER_NAME = Adapter.get_name().split(None, 1)[0].lower()
-_http: aiohttp.ClientSession | None = None
+_http: Optional[aiohttp.ClientSession] = None
 _driver = nonebot.get_driver()
 
 
@@ -104,7 +109,7 @@ async def on_shutdown():
     await _http.close()
 
 
-def weighted_choice(choices: list[T | tuple[T, float]]) -> T:
+def weighted_choice(choices: List[Union[T, Tuple[T, float]]]) -> T:
   raw_choices = []
   weights = []
   for i in choices:
@@ -117,9 +122,9 @@ def weighted_choice(choices: list[T | tuple[T, float]]) -> T:
   return random.choices(raw_choices, weights)[0]
 
 
-def format_time(seconds: float | timedelta) -> str:
+def format_time(seconds: Union[float, timedelta]) -> str:
   if isinstance(seconds, timedelta):
-    seconds = seconds.seconds
+    seconds = seconds.total_seconds()
   seconds = round(seconds)
   minutes, seconds = divmod(seconds, 60)
   hours, minutes = divmod(minutes, 60)
@@ -136,7 +141,7 @@ def format_time(seconds: float | timedelta) -> str:
   return " ".join(segments)
 
 
-async def prompt(event: MessageEvent, timeout: float | None = 0) -> Message:
+async def prompt(event: MessageEvent, timeout: Optional[float] = 0) -> Message:
   async def check_prompt(event2: MessageEvent):
     return (
       event.user_id == event2.user_id
@@ -168,7 +173,7 @@ def forward_node(id: int, name: str = "", content: AnyMessage = "") -> MessageSe
   return MessageSegment("node", {"uin": id, "name": name, "content": content})
 
 
-async def send_forward_msg(bot: Bot, event: Event, *nodes: MessageSegment | dict) -> Any:
+async def send_forward_msg(bot: Bot, event: Event, *nodes: Union[MessageSegment, dict]) -> Any:
   if gid := getattr(event, "group_id", None):
     return await bot.call_api("send_group_forward_msg", group_id=gid, messages=nodes)
   elif uid := getattr(event, "user_id", None):
@@ -177,8 +182,8 @@ async def send_forward_msg(bot: Bot, event: Event, *nodes: MessageSegment | dict
   raise ValueError("event 没有 group_id 和 user_id")
 
 
-def chunked(iterable: Iterable[T], n: int) -> Generator[list[T], None, None]:
-  result: list[T] = []
+def chunked(iterable: Iterable[T], n: int) -> Generator[List[T], None, None]:
+  result: List[T] = []
   for i in iterable:
     result.append(i)
     if len(result) == n:
@@ -223,7 +228,7 @@ def is_command(message: Message) -> bool:
   return False
 
 
-def range_int(min: int | None = None, max: int | None = None) -> Callable[[str], int]:
+def range_int(min: Optional[int] = None, max: Optional[int] = None) -> Callable[[str], int]:
   info = ""
   if min is not None and max is not None:
     info = f"必须是 {min} 和 {max} 之间的整数"
@@ -243,7 +248,7 @@ def range_int(min: int | None = None, max: int | None = None) -> Callable[[str],
 
 
 def range_float(
-  min: float | None = None, max: float | None = None, inf: bool = False, nan: bool = False
+  min: Optional[float] = None, max: Optional[float] = None, inf: bool = False, nan: bool = False
 ) -> Callable[[str], float]:
   info = ""
   if min is not None and max is not None:
@@ -363,3 +368,24 @@ def superusers() -> Generator[int, None, None]:
         yield int(i)
       except ValueError:
         pass
+
+
+if sys.version_info >= (3, 9):
+  removeprefix = str.removeprefix
+  removesuffix = str.removesuffix
+  to_thread = asyncio.to_thread
+else:
+  def removeprefix(self: str, prefix: str, /) -> str:
+    if self[:len(prefix)] == prefix:
+      return self[len(prefix):]
+    return self
+
+  def removesuffix(self: str, suffix: str, /) -> str:
+    if self[:len(suffix)] == suffix:
+      return self[len(suffix):]
+    return self
+
+  async def to_thread(func: Callable[P, T], /, *args: P.args, **kwargs: P.kwargs) -> T:
+    loop = asyncio.get_running_loop()
+    ctx = contextvars.copy_context()
+    return await loop.run_in_executor(None, lambda: ctx.run(func, *args, **kwargs))

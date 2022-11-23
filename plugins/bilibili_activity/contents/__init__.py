@@ -20,7 +20,7 @@
 # 4311:    DYNAMIC_TYPE_SUBSCRIPTION_NEW
 # default: DYNAMIC_TYPE_NONE  # noqa
 
-from typing import Any
+from typing import Any, List
 
 from nonebot.adapters.onebot.v11 import Message
 
@@ -29,7 +29,7 @@ from util.api_common import bilibili_activity
 from ..common import Handler
 from . import article, audio, forward, image, text, unknown, video
 
-FORMATTERS: list[Handler[Any]] = [
+FORMATTERS: List[Handler[Any]] = [
   (bilibili_activity.ContentText, text.format),
   (bilibili_activity.ContentImage, image.format),
   (bilibili_activity.ContentVideo, video.format),

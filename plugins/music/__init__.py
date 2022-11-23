@@ -1,5 +1,5 @@
 import math
-from typing import AsyncGenerator, TypedDict, TypeVar, cast
+from typing import AsyncGenerator, List, Type, TypedDict, TypeVar, cast
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.matcher import Matcher
@@ -18,22 +18,22 @@ LIMIT = 10
 class StateDict(TypedDict):
   result: SearchResult[Music]
   page: int
-  choices: list[Music]
+  choices: List[Music]
 
 
 T = TypeVar("T")
-async def pull(gen: AsyncGenerator[T, None], limit: int) -> list[T]:
+async def pull(gen: AsyncGenerator[T, None], limit: int) -> List[T]:
   result = []
   for _ in range(limit):
     try:
-      value = await anext(gen)
+      value = await gen.__anext__()
     except StopAsyncIteration:
       break
     result.append(value)
   return result
 
 
-def append_music_handler(matcher_t: type[Matcher], music_t: type[Music]) -> None:
+def append_music_handler(matcher_t: Type[Matcher], music_t: Type[Music]) -> None:
   async def get_prompt(state: StateDict):
     pages = math.ceil(state["result"].count / LIMIT)
     if pages == 0:

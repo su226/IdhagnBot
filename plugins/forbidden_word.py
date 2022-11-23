@@ -1,5 +1,6 @@
 from argparse import Namespace
 from datetime import datetime, timedelta
+from typing import Dict, Set, Tuple
 
 import nonebot
 from nonebot.adapters.onebot.v11 import GROUP_MEMBER, Bot, Message, MessageEvent, MessageSegment
@@ -25,12 +26,12 @@ class Config(BaseModel):
 
 
 class State(BaseModel):
-  words: set[str] = Field(default_factory=dict)
+  words: Set[str] = Field(default_factory=set)
 
 
 CONFIG = configs.SharedConfig("forbidden_word", Config)
 STATE = configs.GroupState("forbidden_word", State)
-COUNT: dict[tuple[int, int], int] = {}
+COUNT: Dict[Tuple[int, int], int] = {}
 
 manage_parser = ArgumentParser("/屏蔽词", add_help=False)
 subparsers = manage_parser.add_subparsers(required=True)
@@ -80,7 +81,7 @@ async def handle_manage(event: MessageEvent, args: Namespace = ShellCommandArgs(
       f"已删除{removed}个，{len(args.words) - removed}个本就不存在，目前共有{new_len}个屏蔽词")
 
 
-def decr_count(key: tuple[int, int]):
+def decr_count(key: Tuple[int, int]):
   if COUNT[key] == 0:
     del COUNT[key]
 

@@ -31,6 +31,7 @@ dependencies = [
     "Brotli",
     "aiodns",
     "aiohttp==3.8.3",
+    "cchardet; python_version < \"3.10\"",
 ]
 
 [[package]]
@@ -68,8 +69,8 @@ summary = "A small Python module for determining appropriate platform-specific d
 
 [[package]]
 name = "apscheduler"
-version = "3.9.1"
-requires_python = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
+version = "3.9.1.post1"
+requires_python = "!=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 summary = "In-process task scheduler with Cron-like capabilities"
 dependencies = [
     "pytz",
@@ -91,9 +92,20 @@ requires_python = ">=3.5"
 summary = "Classes Without Boilerplate"
 
 [[package]]
+name = "backports.zoneinfo"
+version = "0.2.1"
+requires_python = ">=3.6"
+summary = "Backport of the standard library zoneinfo module"
+
+[[package]]
 name = "brotli"
 version = "1.0.9"
 summary = "Python bindings for the Brotli compression library"
+
+[[package]]
+name = "cchardet"
+version = "2.1.7"
+summary = "cChardet is high speed universal character encoding detector."
 
 [[package]]
 name = "certifi"
@@ -233,8 +245,8 @@ summary = "A fast implementation of the Cassowary constraint solver"
 
 [[package]]
 name = "libzim"
-version = "1.1.0"
-requires_python = ">=3.6"
+version = "2.0.0"
+requires_python = "<3.11,>=3.6"
 summary = "A python-facing API for creating and interacting with ZIM files"
 
 [[package]]
@@ -288,15 +300,6 @@ requires_python = ">=3.7"
 summary = "multidict implementation"
 
 [[package]]
-name = "nodeenv"
-version = "1.7.0"
-requires_python = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*"
-summary = "Node.js virtual environment builder"
-dependencies = [
-    "setuptools",
-]
-
-[[package]]
 name = "nonebot-adapter-onebot"
 version = "2.1.5"
 requires_python = ">=3.8,<4.0"
@@ -345,7 +348,7 @@ dependencies = [
 
 [[package]]
 name = "numpy"
-version = "1.23.4"
+version = "1.23.5"
 requires_python = ">=3.8"
 summary = "NumPy is the fundamental package for array computing with Python."
 
@@ -392,7 +395,7 @@ summary = "Cross-platform lib for process and system monitoring in Python."
 
 [[package]]
 name = "pycairo"
-version = "1.21.0"
+version = "1.22.0"
 requires_python = ">=3.7"
 summary = "Python interface for cairo"
 
@@ -516,15 +519,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "pyright"
-version = "1.1.279"
-requires_python = ">=3.7"
-summary = "Command line wrapper for pyright"
-dependencies = [
-    "nodeenv>=1.6.0",
-]
-
-[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
@@ -550,6 +544,7 @@ version = "0.1.0.post0"
 requires_python = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 summary = "Shims to make deprecation of pytz easier"
 dependencies = [
+    "backports.zoneinfo; python_version >= \"3.6\" and python_version < \"3.9\"",
     "tzdata; python_version >= \"3.6\"",
 ]
 
@@ -561,7 +556,7 @@ summary = "YAML parser and emitter for Python"
 
 [[package]]
 name = "setuptools"
-version = "65.5.1"
+version = "65.6.0"
 requires_python = ">=3.7"
 summary = "Easily download, build, install, upgrade, and uninstall Python packages"
 
@@ -618,6 +613,7 @@ requires_python = ">=3.6"
 summary = "The little ASGI library that shines."
 dependencies = [
     "anyio<5,>=3.4.0",
+    "typing-extensions>=3.10.0; python_version < \"3.10\"",
 ]
 
 [[package]]
@@ -659,6 +655,7 @@ version = "4.2"
 requires_python = ">=3.6"
 summary = "tzinfo object for the local timezone"
 dependencies = [
+    "backports.zoneinfo; python_version < \"3.9\"",
     "pytz-deprecation-shim",
     "tzdata; platform_system == \"Windows\"",
 ]
@@ -751,7 +748,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "4.0"
-content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc3aa392c"
+content_hash = "sha256:9d91352a7424ab9fade8d3745d4a2b9776feeaef7f054b6d96a878168a7cf1ac"
 
 [metadata.files]
 "aiodns 3.0.0" = [
@@ -863,9 +860,9 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3b/00/2344469e2084fb287c2e0b57b72910309874c3245463acd6cf5e3db69324/appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d7/d8/05696357e0311f5b5c316d7b95f46c669dd9c15aaeecbb48c7d0aeb88c40/appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
 ]
-"apscheduler 3.9.1" = [
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3a/7c/f21a6fb73810191d16162f3fce325ff2a62673f63223c390bea48741ea00/APScheduler-3.9.1.tar.gz", hash = "sha256:65e6574b6395498d371d045f2a8a7e4f7d50c6ad21ef7313d15b1c7cf20df1e3"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e4/9f/c3937d4babe62504b874d4bf2c0d85aa69c7f59fa84cf6050f3b9dc5d83e/APScheduler-3.9.1-py2.py3-none-any.whl", hash = "sha256:ddc25a0ddd899de44d7f451f4375fb971887e65af51e41e5dcf681f59b8b2c9a"},
+"apscheduler 3.9.1.post1" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/23/4d/e32c8cd0738942234d7a328ef9272a59c69f3c5db01d46e35003ffef20e4/APScheduler-3.9.1.post1-py2.py3-none-any.whl", hash = "sha256:c8c618241dbb2785ed5a687504b14cb1851d6f7b5a4edf3a51e39cc6a069967a"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/29/40/38699ecfd1c90f2bc26a781131aef85e3e55241812a69dda89d827e1d833/APScheduler-3.9.1.post1.tar.gz", hash = "sha256:b2bea0309569da53a7261bfa0ce19c67ddbfe151bda776a6a907579fdbd3eb2a"},
 ]
 "async-timeout 4.0.2" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/54/6e/9678f7b2993537452710ffb1750c62d2c26df438aa621ad5fa9d1507a43a/async-timeout-4.0.2.tar.gz", hash = "sha256:2163e1640ddb52b7a8c80d0a67a08587e5d245cc9c553a74a847056bc2976b15"},
@@ -875,7 +872,27 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/1a/cb/c4ffeb41e7137b23755a45e1bfec9cbb76ecf51874c6f1d113984ecaa32c/attrs-22.1.0.tar.gz", hash = "sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f2/bc/d817287d1aa01878af07c19505fafd1165cd6a119e9d0821ca1d1c20312d/attrs-22.1.0-py2.py3-none-any.whl", hash = "sha256:86efa402f67bf2df34f51a335487cf46b1ec130d02b8d39fd248abfd30da551c"},
 ]
+"backports.zoneinfo 0.2.1" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/1a/ab/3e941e3fcf1b7d3ab3d0233194d99d6a0ed6b24f8f956fc81e47edc8c079/backports.zoneinfo-0.2.1-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:7b0a64cda4145548fed9efc10322770f929b944ce5cee6c0dfe0c87bf4c0c8c9"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/1c/96/baaca3ad1b06d97138d42a225e4d4d27cd1586b646740f771706cd2d812c/backports.zoneinfo-0.2.1-cp37-cp37m-win32.whl", hash = "sha256:e55b384612d93be96506932a786bbcde5a2db7a9e6a4bb4bffe8b733f5b9036b"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/28/d5/e2f3d6a52870045afd8c37b2681c47fd0b98679cd4851e349bfd7e19cfd7/backports.zoneinfo-0.2.1-cp36-cp36m-win_amd64.whl", hash = "sha256:8439c030a11780786a2002261569bdf362264f605dfa4d65090b64b05c9f79a7"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/33/1c/9357061860f5d3a09e1877aa4cf7c004c55eec40a1036761144ef24d8a1d/backports.zoneinfo-0.2.1-cp36-cp36m-macosx_10_14_x86_64.whl", hash = "sha256:da6013fd84a690242c310d77ddb8441a559e9cb3d3d59ebac9aca1a57b2e18bc"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4a/6d/eca004eeadcbf8bd64cc96feb9e355536147f0577420b44d80c7cac70767/backports.zoneinfo-0.2.1-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:8961c0f32cd0336fb8e8ead11a1f8cd99ec07145ec2931122faaac1c8f7fd987"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4c/7e/ed8af95bed90eeccfb4a4fe6ec424bc7a79e1aa983e54dd1d9062d9fa20b/backports.zoneinfo-0.2.1-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:5c144945a7752ca544b4b78c8c41544cdfaf9786f25fe5ffb10e838e19a27570"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/6c/99/513f2c4dd41522eefc42feb86854f6cf3b1add9c175c14d90c070775e484/backports.zoneinfo-0.2.1-cp37-cp37m-win_amd64.whl", hash = "sha256:a76b38c52400b762e48131494ba26be363491ac4f9a04c1b7e92483d169f6582"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/74/a1/323f86a5ca5a559d452affb879512365a0473529398bfcf2d712a40ae088/backports.zoneinfo-0.2.1-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:f04e857b59d9d1ccc39ce2da1021d196e47234873820cbeaad210724b1ee28ac"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/78/cc/e27fd6493bbce8dbea7e6c1bc861fe3d3bc22c4f7c81f4c3befb8ff5bfaf/backports.zoneinfo-0.2.1-cp38-cp38-win_amd64.whl", hash = "sha256:4a0f800587060bf8880f954dbef70de6c11bbe59c673c3d818921f042f9954a6"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ad/85/475e514c3140937cf435954f78dedea1861aeab7662d11de232bdaa90655/backports.zoneinfo-0.2.1.tar.gz", hash = "sha256:fadbfe37f74051d024037f223b8e001611eac868b5c5b06144ef4d8b799862f2"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c0/34/5fdb0a3a28841d215c255be8fc60b8666257bb6632193c86fd04b63d4a31/backports.zoneinfo-0.2.1-cp38-cp38-win32.whl", hash = "sha256:1b13e654a55cd45672cb54ed12148cd33628f672548f373963b0bff67b217328"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c1/8f/9b1b920a6a95652463143943fa3b8c000cb0b932ab463764a6f2a2416560/backports.zoneinfo-0.2.1-cp38-cp38-manylinux1_i686.whl", hash = "sha256:e81b76cace8eda1fca50e345242ba977f9be6ae3945af8d46326d776b4cf78d1"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d1/04/8f2fed9c0cb9c88442fc8d6372cb0f5738fb05a65b45e2d371fbc8a15087/backports.zoneinfo-0.2.1-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:17746bd546106fa389c51dbea67c8b7c8f0d14b5526a579ca6ccf5ed72c526cf"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d4/79/249bd3c4f794741f04f1e0ff33ad3cca9b2d1f4299b73f78d0d9bc9ec8dc/backports.zoneinfo-0.2.1-cp36-cp36m-win32.whl", hash = "sha256:e8236383a20872c0cdf5a62b554b27538db7fa1bbec52429d8d106effbaeca08"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ef/9a/8de8f379d5b3961a517762cc051b366de3f7d4d3a2250120e7a71e25fab4/backports.zoneinfo-0.2.1-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:89a48c0d158a3cc3f654da4c2de1ceba85263fafb861b98b59040a5086259722"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f9/04/33e910faffe91a5680d68a064162525779259ae5de3b0c0c5bd9c4e900e0/backports.zoneinfo-0.2.1-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:1c5742112073a563c81f786e77514969acb58649bcdf6cdf0b4ed31a348d4546"},
+]
 "brotli 1.0.9" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/00/7f/6d3405fbbd6883bca364e1d2b8ddbd0617bf063f35bed2c912f8fc723cc2/Brotli-1.0.9-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b1375b5d17d6145c798661b67e4ae9d5496920d9265e2f00f1c2c0b5ae91fbde"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/02/f6/743a4364e89c4942edfe28127ba62ae09d720558d624ce10120342b391bc/Brotli-1.0.9-cp311-cp311-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:cab1b5964b39607a66adbba01f1c12df2e55ac36c81ec6ed44f2fca44178bf1a"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0d/d0/99ce3e68b6132900cafd8372a1717bdbe03ed5f858c1f0795a54e6c535bc/Brotli-1.0.9-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:e23281b9a08ec338469268f98f194658abfb13658ee98e2b7f85ee9dd06caa91"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/15/ea/5bd575511b37bbd1c794606a0a621e6feff8e96b7dd007a86a5d218b2d94/Brotli-1.0.9-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:6c772d6c0a79ac0f414a9f8947cc407e119b8598de7621f39cacadae3cf57d12"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/1e/e6/d2af35c3a6dca7dc371cae97ded084a552b247df9c8a501ed6e99167c948/Brotli-1.0.9-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:87fdccbb6bb589095f413b1e05734ba492c962b4a45a13ff3408fa44ffe6479b"},
@@ -886,21 +903,31 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/26/1d/f6ef5ef086bec149517eec9bc6e0c307b1b7aa0ed095b003e3b0b3aab1ef/Brotli-1.0.9-cp36-cp36m-win32.whl", hash = "sha256:61a7ee1f13ab913897dac7da44a73c6d44d48a4adff42a5701e3239791c96e14"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/26/84/fefe2407f323a6a37b84212fc3caba85c537e83f7ecfa85d1c44e02808ff/Brotli-1.0.9-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:a72661af47119a80d82fa583b554095308d6a4c356b2a554fdc2799bc19f2a43"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/27/74/82cb07709fd0161469255a76d013e94449d5315ba1a06bdb77ed3c6d9aa9/Brotli-1.0.9-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:56d027eace784738457437df7331965473f2c0da2c70e1a1f6fdbae5402e0389"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/28/9d/ffbf04a5cea18e8ec25f167e42036836012b8a26c260d099804b038053e6/Brotli-1.0.9-pp37-pypy37_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:73fd30d4ce0ea48010564ccee1a26bfe39323fde05cb34b5863455629db61dc7"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/2a/18/70c32fe9357f3eea18598b23aa9ed29b1711c3001835f7cf99a9818985d0/Brotli-1.0.9.zip", hash = "sha256:4d1b810aa0ed773f81dceda2cc7b403d01057458730e309856356d4ef4188438"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/2e/a7/c2f7bdc3b4ad59b4415bc84fd9c8bc4181d446c9faeccc116dd8b0d0b46a/Brotli-1.0.9-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:db844eb158a87ccab83e868a762ea8024ae27337fc7ddcbfcddd157f841fdfe7"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/31/2b/91c0ecf5f56321d30aa45e00cc4506ee687b6b3da4e9eec4e81a0b7c9989/Brotli-1.0.9-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:68715970f16b6e92c574c30747c95cf8cf62804569647386ff032195dc89a430"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/31/f2/466b10205824dc82fc4f32cd38f263ab40bbd9520946f8fa9f8bb90ebf39/Brotli-1.0.9-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:85f7912459c67eaab2fb854ed2bc1cc25772b300545fe7ed2dc03954da638649"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/35/17/af347488c2b741e226d5c7d8d29b62798572578af7956db2643eb25237d0/Brotli-1.0.9-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:6b2ae9f5f67f89aade1fab0f7fd8f2832501311c363a21579d02defa844d9296"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3a/7f/52adb1a253579749064d705f0b0db40adedc565b72eb22b68f1347db93cb/Brotli-1.0.9-cp27-cp27m-manylinux1_x86_64.whl", hash = "sha256:5913a1177fc36e30fcf6dc868ce23b0453952c78c04c266d3149b3d39e1410d6"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3f/5d/51bc282c0364b4d2895961605a44bf44bc75d0479d15639e3dc3deee2027/Brotli-1.0.9-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:b43775532a5904bc938f9c15b77c613cb6ad6fb30990f3b0afaea82797a402d8"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3f/cf/e720979db49a4529d6651a8d31592ce81a901950583ae98759b5369617fa/Brotli-1.0.9-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:3b78a24b5fd13c03ee2b7b86290ed20efdc95da75a3557cc06811764d5ad1126"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/45/6d/371943e00e09969c8d50c3e076c1335fe1b07a2a8920e639726c9d857427/Brotli-1.0.9-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:9744a863b489c79a73aba014df554b0e7a0fc44ef3f8a0ef2a52919c7d155031"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4f/22/b0f8a9b5de35cdc344869ab370b8bdbff4356fa812f71e14de1dad471ae6/Brotli-1.0.9-cp27-cp27m-manylinux1_i686.whl", hash = "sha256:c2415d9d082152460f2bd4e382a1e85aed233abc92db5a3880da2257dc7daf7b"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/54/ff/2186987dd0cbe55376ed546e77832190c75c6d61b0a662a9602267c705fb/Brotli-1.0.9-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:cb02ed34557afde2d2da68194d12f5719ee96cfb2eacc886352cb73e3808fc5d"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/55/20/79ac7c3cc68e9a56b73c3b24474517e75fe39e0693c426e17b2631589e53/Brotli-1.0.9-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:b83bb06a0192cccf1eb8d0a28672a1b79c74c3a8a5f2619625aeb6f28b3a82bb"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/55/4a/15b10540f902ead7aacf4d7a066b17c81d12f3759856102fbcf7cc0f2cff/Brotli-1.0.9-pp37-pypy37_pp73-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:02177603aaca36e1fd21b091cb742bb3b305a569e2402f1ca38af471777fb019"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/56/aa/27093315722a8c64c9627b2f010cf0802f474e9d8395e127ee8ea72eb73a/Brotli-1.0.9-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:cc0283a406774f465fb45ec7efb66857c09ffefbe49ec20b7882eff6d3c86d3a"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/59/90/3df3020be02c8250b8f372ca13a98472f9cd4f57b3561535935004f52e67/Brotli-1.0.9-pp39-pypy39_pp73-macosx_10_9_x86_64.whl", hash = "sha256:3148362937217b7072cf80a2dcc007f09bb5ecb96dae4617316638194113d5be"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/5b/ca/8f8f30e4ee40f80bca93d87a699be7e5ea6c2a3e104f69db1ab69bf5390b/Brotli-1.0.9-pp39-pypy39_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:3b8b09a16a1950b9ef495a0f8b9d0a87599a9d1f179e2d4ac014b2ec831f87e7"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/5e/a1/01fdd366c3b2da45b166731b338c9f3c3b9bdc38842a36a2b5a4ee5eab00/Brotli-1.0.9-cp37-cp37m-win32.whl", hash = "sha256:f909bbbc433048b499cb9db9e713b5d8d949e8c109a2a548502fb9aa8630f0b1"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/62/39/c1ce8e26bd9c5f514c8c422797de83f0a1b474d766d3f846875394d093b7/Brotli-1.0.9-cp310-cp310-musllinux_1_1_i686.whl", hash = "sha256:3496fc835370da351d37cada4cf744039616a6db7d13c430035e901443a34daa"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/63/29/1b104b5915e61d9f7443889657d93937b7e0b33b331609b82693547934a0/Brotli-1.0.9-cp38-cp38-win_amd64.whl", hash = "sha256:269a5743a393c65db46a7bb982644c67ecba4b8d91b392403ad8a861ba6f495f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/66/0d/9ca2e62b480c4709b3d4e63a8d4ac4766b79559f20cd952b0f283279eae9/Brotli-1.0.9-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:c8e521a0ce7cf690ca84b8cc2272ddaf9d8a50294fd086da67e517439614c755"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/66/66/684696e503fbe7ade3d6a1a73e6863ec43a326491dc0749666abc4960589/Brotli-1.0.9-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:b3523f51818e8f16599613edddb1ff924eeb4b53ab7e7197f85cbc321cdca32f"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/66/aa/7920fae008c4f127f07331964a66b842a5209ce6d52238672dd8aa8cbf36/Brotli-1.0.9-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:268fe94547ba25b58ebc724680609c8ee3e5a843202e9a381f6f9c5e8bdb5c70"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/68/5f/460520bf0c58ce21653e670635c649bd6e6760d2dbfd3b3ad18ceb8085a6/Brotli-1.0.9-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:5b6ef7d9f9c38292df3690fe3e302b5b530999fa90014853dcd0d6902fb59f26"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/6a/22/5effc1cbd672975736c9b5db48f7f771230cbede7be5c9eb2be1e363c25a/Brotli-1.0.9-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:e1abbeef02962596548382e393f56e4c94acd286bd0c5afba756cffc33670e8a"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/6b/11/7d28cd3a5492fed09159e9b37613fdcec7655d93dec664b79d4bb4bb67b8/Brotli-1.0.9-cp310-cp310-win_amd64.whl", hash = "sha256:622a231b08899c864eb87e85f81c75e7b9ce05b001e59bbfbf43d4a71f5f32b2"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/6d/57/9a5b06b8deb7a369339404fd086217c2cdca8dac7b29209a9542507a10fa/Brotli-1.0.9-cp39-cp39-musllinux_1_1_i686.whl", hash = "sha256:e48f4234f2469ed012a98f4b7874e7f7e173c167bed4934912a29e03167cf6b1"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/71/7f/1cb18fc0778924a8c23e532ffae0411d104401131be6fd93e2e5ab803b89/Brotli-1.0.9-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:503fa6af7da9f4b5780bb7e4cbe0c639b010f12be85d02c99452825dd0feef3f"},
@@ -912,6 +939,7 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/7e/54/43a26ea97fa8d40893177ed95b66e67643fafcc969f95326e2e1efa6b4bb/Brotli-1.0.9-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:c83aa123d56f2e060644427a882a36b3c12db93727ad7a7b9efd7d7f3e9cc2c4"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/7f/e6/af68859d7a2f8c47d285e834ef781d4139f5a99dcdfe936fe7740e1b6978/Brotli-1.0.9-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:160c78292e98d21e73a4cc7f76a234390e516afcd982fa17e1422f7c6a9ce9c8"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/81/32/9e45e18bb9847fd5d93a6315920dc91be16c5a27be78a7aefcc095701469/Brotli-1.0.9-cp39-cp39-manylinux1_i686.whl", hash = "sha256:16d528a45c2e1909c2798f27f7bf0a3feec1dc9e50948e738b961618e38b6a7b"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/87/19/e1900b41e12ca58c3263564a0605a7b889d0fbdb203ed7feb83da6ee4686/Brotli-1.0.9-cp311-cp311-win32.whl", hash = "sha256:ba72d37e2a924717990f4d7482e8ac88e2ef43fb95491eb6e0d124d77d2a150d"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/89/53/59a03c7e8921a4cec8e1ae0608d1a2e47ae5a11f1b8f301a2235fa0d9fb6/Brotli-1.0.9-pp37-pypy37_pp73-macosx_10_9_x86_64.whl", hash = "sha256:9749a124280a0ada4187a6cfd1ffd35c350fb3af79c706589d98e088c5044267"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/8d/12/3de67665cef0cfbac10d5996fe1af2d1169daf79bcb57a7b868dee9ec15b/Brotli-1.0.9-cp38-cp38-win32.whl", hash = "sha256:35a3edbe18e876e596553c4007a087f8bcfd538f19bc116917b3c7522fca0429"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/8d/42/906ea84669f941df659baedc4d6b52e7f7d86023771daeca9c5c44b7c577/Brotli-1.0.9-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:29d1d350178e5225397e28ea1b7aca3648fcbab546d20e7475805437bfb0a130"},
@@ -923,21 +951,59 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9f/59/9261fe50c1cfc1d82bf0e973b0ba170245e725a661d88a7c04e015b19544/Brotli-1.0.9-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:e4c4e92c14a57c9bd4cb4be678c25369bf7a092d55fd0866f759e425b9660806"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a2/34/4ff7c20deb22a9db1ef7137f1536473d1a81f11c70bfdb60b73d74d2767c/Brotli-1.0.9-cp35-cp35m-win32.whl", hash = "sha256:defed7ea5f218a9f2336301e6fd379f55c655bea65ba2476346340a0ce6f74a1"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a7/c4/50aba717191c52c6fe15fd5cbf4f95bc8f3f8881913217460ed464193e57/Brotli-1.0.9-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:76ffebb907bec09ff511bb3acc077695e2c32bc2142819491579a695f77ffd4d"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a9/e7/89612a136a8dd94ec5cf430ffa7a6b2280355320d21aa48da40f57d9de1b/Brotli-1.0.9-cp311-cp311-win_amd64.whl", hash = "sha256:3ffaadcaeafe9d30a7e4e1e97ad727e4f5610b9fa2f7551998471e3736738679"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ad/fe/4008cb70e2f46ec5888ebc856cb4ffbc67f5930e5f69e5e8c901a79c615c/Brotli-1.0.9-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:11d3283d89af7033236fa4e73ec2cbe743d4f6a81d41bd234f24bf63dde979df"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b4/18/3fda908d8477be627b1120aeeb48ef3a5cc17cd34e2212f7d14139d8a25e/Brotli-1.0.9-pp38-pypy38_pp73-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:5bf37a08493232fbb0f8229f1824b366c2fc1d02d64e7e918af40acd15f3e337"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b4/d3/7c98f05b7b9103e2f3a112ba42f269c798155b3e5404fb80bb8f823aaebe/Brotli-1.0.9-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:93130612b837103e15ac3f9cbacb4613f9e348b58b3aad53721d92e57f96d46a"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b5/1b/da5ed1a3b8b86b7adc83839ff5d832af9e01e661c976af3453be82a30f94/Brotli-1.0.9-cp310-cp310-manylinux_2_5_i686.manylinux1_i686.manylinux_2_12_i686.manylinux2010_i686.whl", hash = "sha256:19598ecddd8a212aedb1ffa15763dd52a388518c4550e615aed88dc3753c0f0c"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ba/d4/568fb9bb6819188317edd3f7bba157cafa3f1c1a87a2cbf73ff464a0c808/Brotli-1.0.9-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:44bb8ff420c1d19d91d79d8c3574b8954288bdff0273bf788954064d260d7ab0"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/bc/64/3612c23c6863dc91a44a517a680ad47f8921f7f4f5691b2f450a12a193db/Brotli-1.0.9-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:e2d9e1cbc1b25e22000328702b014227737756f4b5bf5c485ac1d8091ada078b"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/bf/db/f7e7c2a8b0357ad947b70067310de9616189424bdc071b083dd904b56658/Brotli-1.0.9-cp39-cp39-win_amd64.whl", hash = "sha256:854c33dad5ba0fbd6ab69185fec8dab89e13cda6b7d191ba111987df74f38761"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/cb/20/ccab7c3f1e4e90609f39f59e4eaa8b829d01a68ac4daa8e15f5c46354e73/Brotli-1.0.9-cp310-cp310-win32.whl", hash = "sha256:26d168aac4aaec9a4394221240e8a5436b5634adc3cd1cdf637f6645cecbf181"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/cd/e8/dedb645aa5a3d696cbf6740a8e516ab4646c243a94eb6a6c0bd285674187/Brotli-1.0.9-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:8ed6a5b3d23ecc00ea02e1ed8e0ff9a08f4fc87a1f58a2530e71c0f48adf882f"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ce/27/63f60ec1eb2c804048d8c0564905837f29ef1661147f61ab6241947f71f4/Brotli-1.0.9-cp36-cp36m-musllinux_1_1_x86_64.whl", hash = "sha256:4688c1e42968ba52e57d8670ad2306fe92e0169c6f3af0089be75bbac0c64a3b"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d0/f4/8787180a6b6bc0674dbd50822d6cdd3015271cdde875ac41315e28917f1d/Brotli-1.0.9-pp38-pypy38_pp73-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:330e3f10cd01da535c70d09c4283ba2df5fb78e915bea0a28becad6e2ac010be"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d8/c1/d69dc32fa52f7e41c6d707e421c21903cd4ddcea385271e7dc921f704a04/Brotli-1.0.9-cp36-cp36m-musllinux_1_1_i686.whl", hash = "sha256:495ba7e49c2db22b046a53b469bbecea802efce200dffb69b93dd47397edc9b6"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e1/f1/7bfd2225e54cc7391a5639d8b481796a38d6518c27db106af9333d60190e/Brotli-1.0.9-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:3c1306004d49b84bd0c4f90457c6f57ad109f5cc6067a9664e12b7b79a9948ad"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e3/d4/e68c4f2a21cab38ba1defbd5bc6ab7e74e2234383f1daf36153dce11ea9d/Brotli-1.0.9-cp36-cp36m-win_amd64.whl", hash = "sha256:1c48472a6ba3b113452355b9af0a60da5c2ae60477f8feda8346f8fd48e3e87c"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e8/7c/80bd5918ba6c766316af550294178886a0a39ac48e7d4f3a2438b77bb388/Brotli-1.0.9-cp38-cp38-manylinux1_i686.whl", hash = "sha256:b663f1e02de5d0573610756398e44c130add0eb9a3fc912a09665332942a2efb"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ed/f2/e17ea7d9a93cbdc4d1b9c08a63b2235bb2580669907caf235d900ae8a0d8/Brotli-1.0.9-pp39-pypy39_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:336b40348269f9b91268378de5ff44dc6fbaa2268194f85177b53463d313842a"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f1/cf/9cebdbbcecf9a9650cc6da672afaac5a731c9c9097a0f67031a9af9ce805/Brotli-1.0.9-cp37-cp37m-win_amd64.whl", hash = "sha256:97f715cf371b16ac88b8c19da00029804e20e25f30d80203417255d239f228b5"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f5/52/e66321599023191416858e947bfcd615de7dbba5d80337afc1ec99281498/Brotli-1.0.9-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:5cb1e18167792d7d21e21365d7650b72d5081ed476123ff7b8cac7f45189c0c7"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f7/fb/97060f469f19d5e68377b3e6871802442e01bee90201dc8ed37f6b9e9322/Brotli-1.0.9-cp27-cp27m-win32.whl", hash = "sha256:afde17ae04d90fbe53afb628f7f2d4ca022797aa093e809de5c3cf276f61bbfa"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/fd/88/1c610fa169cad1309a5a581af043459dc290e82e85fecd9e39a5f9c0e51c/Brotli-1.0.9-cp38-cp38-musllinux_1_1_i686.whl", hash = "sha256:b336c5e9cf03c7be40c47b5fd694c43c9f1358a80ba384a21969e0b4e66a9b17"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/fe/40/ae18cab92a64340f93bd38777b62d239ca07d6ea6a0a1f5f90780a25eb5c/Brotli-1.0.9-cp39-cp39-macosx_10_9_universal2.whl", hash = "sha256:2aad0e0baa04517741c9bb5b07586c642302e5fb3e75319cb62087bd0995ab19"},
+]
+"cchardet 2.1.7" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/03/f2/1585c895df465fe183edbb85a6c98f62b4df70f05a47ce772ba25f89a9ce/cchardet-2.1.7-cp36-cp36m-manylinux1_i686.whl", hash = "sha256:5a25f9577e9bebe1a085eec2d6fdd72b7a9dd680811bba652ea6090fb2ff472f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/04/93/7fad4f4711b0d4eee4e917bbd3cd269fad682d42ccb1e43cc3512aa8af4b/cchardet-2.1.7-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:48ba829badef61441e08805cfa474ccd2774be2ff44b34898f5854168c596d4d"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0c/42/26ef0b6ed6c37ec08b89495b0c999ece88f72aba765603131b31712b6ed3/cchardet-2.1.7-cp36-cp36m-win32.whl", hash = "sha256:eee4f5403dc3a37a1ca9ab87db32b48dc7e190ef84601068f45397144427cc5e"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0c/f1/c45f4ecb68d741596b570f8d585a7a36b9d39cb15fb5b7066751765325a9/cchardet-2.1.7-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:302aa443ae2526755d412c9631136bdcd1374acd08e34f527447f06f3c2ddb98"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/19/09/3ab7094e7c4bc9fd9830c8d1c0c15013b7cd9ba13c04a75e8fea08036f8a/cchardet-2.1.7-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:fdac1e4366d0579fff056d1280b8dc6348be964fda8ebb627c0269e097ab37fa"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/1b/e6/ecd8bb8440ad5c8b7cdb4d0c3fb1e7e653fc9b49c6feca4fce81bbc744a2/cchardet-2.1.7-cp37-cp37m-win_amd64.whl", hash = "sha256:54d0b26fd0cd4099f08fb9c167600f3e83619abefeaa68ad823cc8ac1f7bcc0c"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/21/eb/23024490b86c040248fa9eb92156d115288b8f8d194c0590d5550b96782f/cchardet-2.1.7-cp38-cp38-win_amd64.whl", hash = "sha256:273699c4e5cd75377776501b72a7b291a988c6eec259c29505094553ee505597"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/30/86/56083d1621aba5f5ff7c06b831d88bdacea8a2bbc2198d34c0b26f05ca62/cchardet-2.1.7-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:b59ddc615883835e03c26f81d5fc3671fab2d32035c87f50862de0da7d7db535"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3b/bf/14cea23ee6f5ccfc2238235c7a47f88145490e9c58708dc0ca505ad512c6/cchardet-2.1.7-cp39-cp39-win_amd64.whl", hash = "sha256:24974b3e40fee9e7557bb352be625c39ec6f50bc2053f44a3d1191db70b51675"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/5f/fd/d31308d96a2e3a5aae521a9b0aa12d9e5a282e5b3a15ee083d43137a0e0a/cchardet-2.1.7-cp39-cp39-manylinux1_i686.whl", hash = "sha256:bd7f262f41fd9caf5a5f09207a55861a67af6ad5c66612043ed0f81c58cdf376"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/76/71/ffe383995aba6ab7b67e72bf65837ab3f57990964f346dc923c07692859e/cchardet-2.1.7-cp36-cp36m-manylinux2010_i686.whl", hash = "sha256:228d2533987c450f39acf7548f474dd6814c446e9d6bd228e8f1d9a2d210f10b"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/78/9d/a9bd2cfc2d362a40c64c279c31dc5b92c65d5129c9265b589b90df5090d0/cchardet-2.1.7-cp38-cp38-manylinux1_i686.whl", hash = "sha256:27a9ba87c9f99e0618e1d3081189b1217a7d110e5c5597b0b7b7c3fedd1c340a"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/80/72/a4fba7559978de00cf44081c548c5d294bf00ac7dcda2db405d2baa8c67a/cchardet-2.1.7-cp37-cp37m-manylinux2010_x86_64.whl", hash = "sha256:ec3eb5a9c475208cf52423524dcaf713c394393e18902e861f983c38eeb77f18"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/88/91/b17e4d000037d10f26a0b04a904ebd727f16993857e01f37bc49fef179ab/cchardet-2.1.7-cp38-cp38-win32.whl", hash = "sha256:0b859069bbb9d27c78a2c9eb997e6f4b738db2d7039a03f8792b4058d61d1109"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/90/df/66ed9f7b330133bc412975760a67c2f1beaf19058fd58eba573b30f79790/cchardet-2.1.7-cp36-cp36m-win_amd64.whl", hash = "sha256:f86e0566cb61dc4397297696a4a1b30f6391b50bc52b4f073507a48466b6255a"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9d/38/dcc25b61c506274e1bb5086834da813638ea047d0fdbbf3eafc9e0ea41f2/cchardet-2.1.7-cp39-cp39-win32.whl", hash = "sha256:2309ff8fc652b0fc3c0cff5dbb172530c7abb92fe9ba2417c9c0bcf688463c1c"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a0/e5/a0b9edd8664ea3b0d3270c451ebbf86655ed9fc4c3e4c45b9afae9c2e382/cchardet-2.1.7-cp36-cp36m-manylinux2010_x86_64.whl", hash = "sha256:54341e7e1ba9dc0add4c9d23b48d3a94e2733065c13920e85895f944596f6150"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a1/bc/bbb07486ef8da914f15f7bb1f3e1eaadd3b88a70e4decd64e184364173c5/cchardet-2.1.7-cp38-cp38-manylinux2010_i686.whl", hash = "sha256:45456c59ec349b29628a3c6bfb86d818ec3a6fbb7eb72de4ff3bd4713681c0e3"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a8/5d/090c9f0312b7988a9433246c9cf0b566b1ae1374368cfb8ac897218a4f65/cchardet-2.1.7.tar.gz", hash = "sha256:c428b6336545053c2589f6caf24ea32276c6664cb86db817e03a94c60afa0eaf"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a8/a6/5967f5c4095e6952781863422674d6c23eb40737480d3939be264bf1ae20/cchardet-2.1.7-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:c6f70139aaf47ffb94d89db603af849b82efdf756f187cdd3e566e30976c519f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b4/53/7a295565b7599db90a21a99a7c01c5f931a2d55ecd541209514f3222d37d/cchardet-2.1.7-cp37-cp37m-manylinux2010_i686.whl", hash = "sha256:b154effa12886e9c18555dfc41a110f601f08d69a71809c8d908be4b1ab7314f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b4/c6/41a74560ab45f9cbc602dee51e5e3fad2f487805f7e0e5087999b69745d3/cchardet-2.1.7-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:6b6397d8a32b976a333bdae060febd39ad5479817fabf489e5596a588ad05133"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/bb/5f/a822d40fec63f9e3caa52cbb61db7502dd904c878344035b52f1d3dc714a/cchardet-2.1.7-cp38-cp38-manylinux2010_x86_64.whl", hash = "sha256:f16517f3697569822c6d09671217fdeab61dfebc7acb5068634d6b0728b86c0b"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/be/d3/3f9c005bead891d320ea3e796e5ed76776d2ac0671530188984bb632559b/cchardet-2.1.7-cp39-cp39-manylinux2010_x86_64.whl", hash = "sha256:c96aee9ebd1147400e608a3eff97c44f49811f8904e5a43069d55603ac4d8c97"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c8/e3/11ead63869139948f61b922a1539f4439554358e6b4d304ccf2f1c836004/cchardet-2.1.7-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:90086e5645f8a1801350f4cc6cb5d5bf12d3fa943811bb08667744ec1ecc9ccd"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d5/09/da7c6f30cb053f77d79058994064d76b1b789c25caaa9cb20fce9f300370/cchardet-2.1.7-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:a39526c1c526843965cec589a6f6b7c2ab07e3e56dc09a7f77a2be6a6afa4636"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ea/67/b6ba47a3e34940557c2c6ad5337ecaa68781168401be1c818bcf74f8e3d7/cchardet-2.1.7-cp37-cp37m-win32.whl", hash = "sha256:50ad671e8d6c886496db62c3bd68b8d55060688c655873aa4ce25ca6105409a1"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f1/34/0c90d57d3fcbe7a05ee8810c003edba710ce0ac809d2cc0460b5f15de76d/cchardet-2.1.7-cp37-cp37m-manylinux1_i686.whl", hash = "sha256:70eeae8aaf61192e9b247cf28969faef00578becd2602526ecd8ae7600d25e0e"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f1/45/6ea939fb941b4699561d24462ac5cff7f6ed1f10162299de83a6d9e11287/cchardet-2.1.7-cp39-cp39-manylinux2010_i686.whl", hash = "sha256:80e6faae75ecb9be04a7b258dc4750d459529debb6b8dee024745b7b5a949a34"},
 ]
 "certifi 2022.9.24" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/1d/38/fa96a426e0c0e68aabc68e896584b83ad1eec779265a028e156ce509630e/certifi-2022.9.24-py3-none-any.whl", hash = "sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382"},
@@ -1186,6 +1252,7 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
 ]
 "greenlet 2.0.1" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/00/0b/5a6cbd757eeb53c4adb3a5037b3e0474a548838d699034982984c9409440/greenlet-2.0.1-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:9e112e03d37987d7b90c1e98ba5e1b59e1645226d78d73282f45b326f7bddcb9"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/01/ee/90c95aa12243d93b7b88c4dda580c728ce384a6becb793a57438d01e7ac6/greenlet-2.0.1-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:0459d94f73265744fee4c2d5ec44c6f34aa8a31017e6e9de770f7bcf29710be9"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/02/a0/3977da8e4d21f37e93b803078cb27e026714161977d8997ba9169913b0b1/greenlet-2.0.1-cp27-cp27m-win_amd64.whl", hash = "sha256:3001d00eba6bbf084ae60ec7f4bb8ed375748f53aeaefaf2a37d9f0370558524"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0a/77/837fb1e3218d1fc539268ae7e558d53d9eca5cbbf102abf6f5752380fbeb/greenlet-2.0.1-cp38-cp38-macosx_10_15_x86_64.whl", hash = "sha256:cd4ccc364cf75d1422e66e247e52a93da6a9b73cefa8cad696f3cbbb75af179d"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0c/29/d6dcf7061d3cab9471ae0576066a40aedcbbb9f9741b52a5f35252ec6f17/greenlet-2.0.1-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d5b0ff9878333823226d270417f24f4d06f235cb3e54d1103b71ea537a6a86ce"},
@@ -1214,6 +1281,7 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/72/af/209920ea4a19a74b7638886b180e3144670fd14aec0b3a2a0da90587a67b/greenlet-2.0.1-cp37-cp37m-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:be9e0fb2ada7e5124f5282d6381903183ecc73ea019568d6d63d33f25b2a9000"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/75/ef/db6e0c16df3972f90614bd5ceb969d918a8c53ce4675f75cc641b2ad20ab/greenlet-2.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:b23d2a46d53210b498e5b701a1913697671988f4bf8e10f935433f6e7c332fb6"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/78/96/86b6f5d21aa23fcd28987521ff1d71424e891c79b1a1af8ef991c9082b65/greenlet-2.0.1-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:505138d4fa69462447a562a7c2ef723c6025ba12ac04478bc1ce2fcc279a2db5"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/79/88/843935bbb56e51642fb92a6a91f07a359b95bbf72bb0b21515b62ab212d8/greenlet-2.0.1-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:662e8f7cad915ba75d8017b3e601afc01ef20deeeabf281bd00369de196d7726"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/7d/2e/316dd548499c8c1d0adb516bff06ec093a68024942f113ac6c794da09c7b/greenlet-2.0.1-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:b1992ba9d4780d9af9726bbcef6a1db12d9ab1ccc35e5773685a24b7fb2758eb"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/7d/7e/da3fd28de12c39804a8797a7dff089de0dd9a7d267b5de42fe029a308469/greenlet-2.0.1-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:f6327b6907b4cb72f650a5b7b1be23a2aab395017aa6f1adb13069d66360eb3f"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/80/2c/7080f662dfe235e574826c144a48859e9a1588f1ba2bb65e297cc094f66b/greenlet-2.0.1-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:a20d33124935d27b80e6fdacbd34205732660e0a1d35d8b10b3328179a2b51a1"},
@@ -1221,6 +1289,7 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/88/27/24bb86495d9ef39122229b2ac5c2c338f14334f69305e2ce51855b234c71/greenlet-2.0.1-cp38-cp38-win_amd64.whl", hash = "sha256:d6ee1aa7ab36475035eb48c01efae87d37936a8173fc4d7b10bb02c2d75dd8f6"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/8c/c5/ccdd89c89eb4bdf54f891deaafa57201f1d8fe8960e30b15869199470593/greenlet-2.0.1-cp36-cp36m-win32.whl", hash = "sha256:3d75b8d013086b08e801fbbb896f7d5c9e6ccd44f13a9241d2bf7c0df9eda928"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/8d/34/bcd0848d4f748831058aabf76749f5979bc3c656770be511a11cbd58da4f/greenlet-2.0.1-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:fb412b7db83fe56847df9c47b6fe3f13911b06339c2aa02dcc09dce8bbf582cd"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/90/bf/2f12be708384ab7ba9755819ce31afdd281a0d511407223c34bc9c3c0fad/greenlet-2.0.1-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:d38ffd0e81ba8ef347d2be0772e899c289b59ff150ebbbbe05dc61b1246eb4e0"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/93/45/d8990ab748feec26be644761862e22a138b4f4a287a665ecad0219c9ba71/greenlet-2.0.1-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1bf633a50cc93ed17e494015897361010fc08700d92676c87931d3ea464123ce"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/95/a4/d89fd972a69454f0cfd67192d3fdbf82d9b9a9271c30c76ea4e0e57ad745/greenlet-2.0.1-cp37-cp37m-win_amd64.whl", hash = "sha256:afe07421c969e259e9403c3bb658968702bc3b78ec0b6fde3ae1e73440529c23"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9a/b5/d5bc7914e8a2cee35d54eb2f8a70536c4cd1cbb66b0892ac9cff2777c955/greenlet-2.0.1-cp38-cp38-win32.whl", hash = "sha256:88c8d517e78acdf7df8a2134a3c4b964415b575d2840a2746ddb1cc6175f8608"},
@@ -1422,18 +1491,18 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f6/e8/194a4b4eee0990a648711bfb769a7110d10fd8d8b370a0464cb3d1060381/kiwisolver-1.4.4-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:70e7c2e7b750585569564e2e5ca9845acfaa5da56ac46df68414f29fea97be9f"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f8/f4/724d454e95c7e9be6a05f1da3fb85251b5dbb8c3b7d06bdc61d56b16035a/kiwisolver-1.4.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:36dafec3d6d6088d34e2de6b85f9d8e2324eb734162fba59d2ba9ed7a2043d5b"},
 ]
-"libzim 1.1.0" = [
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/04/7a/bee13d64ef4308fa301883b3272dae70bba14cf9169a377146adef80235a/libzim-1.1.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:a9ef3e066ff8511335a1bcee102e20620b5ff847bc0515f20979bea34a2f0cd1"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/05/88/9aa47365fcc9ba6a7527de30388e8aebe17cd1c030eeaa14b5be8befa73d/libzim-1.1.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:cd6c7ee3a984a9682867529a08be27ae649ca08c731750f508cab72e75820b6f"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/29/43/73256a5826263f908a3094720676989e6e9a55e0caad7b85924227a8a55a/libzim-1.1.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:a563aac41312ffcfb253a6a3111719cfaf34a042f25f8d9259faac2c9cccb2d5"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4f/60/57213607b9d7033a25f53f75ec03ab041de87ef878b4cbc67e3b3bb4d1ac/libzim-1.1.0-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:d707731e0772b5f6f0463534eeaa71e3fc43128e54a43233b073d3239fdae740"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/54/4b/206f3c378fa056e2773d9abc273023bc4535e00a40dda01c6e4e48a6ec41/libzim-1.1.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:e67e137f01558ddf86ceac06fc9487efd1cf8d6396062ddb11b9d9c1ff18ed82"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/55/43/fc2ae2ece51a4fb66f46635be36e95043f66cced3e31cf5fbc8d3296ce7c/libzim-1.1.0-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:321c55a55218ac8ea880e70083f10ba3014ef4435943c73831fe3178c7cf3500"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/87/cb/a3ece5cde8f244064ecd31fb151242cd6ef3826456ce844c14e3e367afe3/libzim-1.1.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:26f68e785ecd721c752389550103b0fc6691b1819b277658a3f736b1e1fc60fc"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9a/4a/8399d70d494cb48f90c942067ccaf8aad133f609e1e7fbb4fa817eaa6f3b/libzim-1.1.0-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:9020c8d9d110a8a00bf2a9fa5b63862d8832c4f19eb6ea7fb5bc4aab253b6462"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9e/97/63fc6500bbd967b39e9e156af49e044c9654231e5a337d9c2e54178fa934/libzim-1.1.0-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:4d1906a5208415915a22824d0893bcb9db66ee3f1f6c8e26ebadf04cafb27a12"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b4/f0/227e4b661f00c43b4ab08d940d81a15ceb964cf0acea927b391bb59c2d18/libzim-1.1.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:9cfe47e6eebcf7226f6a1156b9474b37adb5624ee80b051a8834adf5fdd26509"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/bf/fe/c14bfce31515854bd10efe6017393ccedc9a82f299a10523b9551cc20e45/libzim-1.1.0.tar.gz", hash = "sha256:c07ce098ba2126c42ae565be86dd24cd7f65e442ca17cbb074c319f5cf087d28"},
+"libzim 2.0.0" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/04/85/f5bd2f9a8338dda1be993d4f9b6c2c966465521369c61f5e8b1a651e0007/libzim-2.0.0-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:fb31ecf7da7bdd492f999b3b0fdc73a6bf82c48dca170663d97fee55e933700f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3f/5a/b90a0198cd94fbcb4b894fb1487a63c581dc548e5859bec20ddfe865e436/libzim-2.0.0-cp39-cp39-manylinux1_x86_64.whl", hash = "sha256:64ad727ef4d15dc2ecbdab62b3cc39b50a4df1766a4b67d03fe23860581d90fc"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/41/0e/a5f657a820ca5122ac69cb41c856d52e96cc226ce84b3f621db4038687a4/libzim-2.0.0-cp37-cp37m-manylinux1_x86_64.whl", hash = "sha256:706589087507b1849bc09accaf0400f4d4042cb0e8ebf804bef974f10035bafb"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/78/c1/b25e9efa6869541231ea764b8ed2ae46e3e04e7bef36d6839e17d9ad4088/libzim-2.0.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:ad6ec9c901284465b275b4d7c02e89549fa5b49b98cf1db37e378b78a5bd07be"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/7d/eb/e8c1db605e447ce25b8df37d3d3cf2e81b95dbbbe4a6a23a5007b7396214/libzim-2.0.0-cp36-cp36m-manylinux1_x86_64.whl", hash = "sha256:12877c12ebc79429418434df362d9cf0a4f9a0c4c4ccd85449128db755abf4cd"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/8e/2a/aaceaf7a5488c5772b80c3a4194f5242c60117b18b4294a2e5b562a0a851/libzim-2.0.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:4bba76f25d3fdfb6ccc174b5bf8701090cd212d160e297c99ffc79e69da0e1ea"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a0/9a/5c60b2b12390c713ba05889c49cb50c958188ac48ba4abc2e7f440b6af44/libzim-2.0.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:ce87cd9331e32324c66ac778725fc32782cf3c422d464739617610b26c9f414e"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a4/5f/1644063406a49f17f26d9b4183f7d85fb5ecf1b7a1e257f4ac96e3497bb3/libzim-2.0.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b9d0b867d6fc4ab41aaf2b7a6e347125c66beb24b9e889eaba6caf1c704becb7"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c1/1a/c0ce9d2e05d5e6888e05fa7cb5d660398ef1bd31787189f0536cff324624/libzim-2.0.0-cp310-cp310-manylinux1_x86_64.whl", hash = "sha256:4ec9e2a20ae05c620bb788289f8a3c147587d48f9b795e2d24965c74243fc91e"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d1/b6/892c9614ce053ad87a5c92c5e8a584f62a21704cd0748eb2bd94fff1bd7d/libzim-2.0.0.tar.gz", hash = "sha256:2f8747ca80efa19322021c7a490bdd2a1bad98cbeda79cb1fefdf0b1a5c8ae7e"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/de/66/2987fe8367c3cf4f3b09397feb80629e7ede90c312d7b1931fe047b14602/libzim-2.0.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:d1981b20b853b3f889582bb1ae7f70ce08f73faeb69c2bd0cc2efac7b90a7c5f"},
 ]
 "loguru 0.6.0" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/75/1f/d3818863e4be96bd641c4643c535a98f0fa2a12efa7c8ba35f763fa778ee/loguru-0.6.0.tar.gz", hash = "sha256:066bd06758d0a513e9836fd9c6b5a75bfb3fd36841f4b996bc60b547a309d41c"},
@@ -1605,10 +1674,6 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f6/2c/2f48aa1fd3b89fb632de50c0567f8168e2b75d0b92326ca6ac991aecb0ee/multidict-6.0.2-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:05f6949d6169878a03e607a21e3b862eaf8e356590e8bdae4227eedadacf6e51"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/fa/a7/71c253cdb8a1528802bac7503bf82fe674367e4055b09c28846fdfa4ab90/multidict-6.0.2.tar.gz", hash = "sha256:5ff3bd75f38e4c43f1f470f2df7a4d430b821c4ce22be384e1459cb57d6bb013"},
 ]
-"nodeenv 1.7.0" = [
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/96/a8/d3b5baead78adadacb99e7281b3e842126da825cf53df61688cfc8b8ff91/nodeenv-1.7.0-py2.py3-none-any.whl", hash = "sha256:27083a7b96a25f2f5e1d8cb4b6317ee8aeda3bdd121394e5ac54e498028a042e"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f3/9d/a28ecbd1721cd6c0ea65da6bfb2771d31c5d7e32d916a8f643b062530af3/nodeenv-1.7.0.tar.gz", hash = "sha256:e0e7f7dfb85fc5394c6fe1e8fa98131a2473e04311a45afb6508f7cf1836fa2b"},
-]
 "nonebot-adapter-onebot 2.1.5" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/15/d2/1696ce3237bcd506ec1fcf8966b27c45baf29380cf8d362528590b23b1af/nonebot_adapter_onebot-2.1.5.tar.gz", hash = "sha256:e740422cceebc1f0379da788ccddaa7937f7d88c140e2a5ea9ba0e91ddee867e"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a3/52/6e6152b17aabb17b131e0826378c08e1dc0f11471e556b61e39952002732/nonebot_adapter_onebot-2.1.5-py3-none-any.whl", hash = "sha256:d2a46694c402d5f3c5f6951955a78bbf779e17039d282c612cc1fcff77bc6044"},
@@ -1621,35 +1686,35 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/52/3d/e90e9b97ddd4c317f9dd608a896edae887c0648585007aadff012c8c5f7b/nonebot2-2.0.0rc1-py3-none-any.whl", hash = "sha256:99c70300b9d0755bba6ed50b7399f44f6213e119157bc026b960b3e157a38416"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e7/b7/0c0bd8aabde772bc02e806a80fa0e8a93c0c6a230b7bd6529390ffaa1bc6/nonebot2-2.0.0rc1.tar.gz", hash = "sha256:6e5a0abf24086d05d5c2a56c971a551ece2a343ff29f83b76b398bf717b92e16"},
 ]
-"numpy 1.23.4" = [
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/04/d4/12493d1ed7d6bd5a29016eea021a32011aef266d23a9a4fdefd5ad520eed/numpy-1.23.4-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:ce03305dd694c4873b9429274fd41fc7eb4e0e4dea07e0af97a933b079a5814f"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/07/08/417eabd93635695e69a18a336401b306da504dec032d537dbdc76577a569/numpy-1.23.4-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:95d79ada05005f6f4f337d3bb9de8a7774f259341c70bc88047a1f7b96a4bcb2"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/07/4c/bd58f481de1f0706ea6a46d4fb056e047f488a2876416b04ad085892bce1/numpy-1.23.4-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:c67b833dbccefe97cdd3f52798d430b9d3430396af7cdb2a0c32954c3ef73894"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0c/83/78ae18fffc185d0d57097610d5a97473ef11dbdca95f16739ee96b158087/numpy-1.23.4-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a8365b942f9c1a7d0f0dc974747d99dd0a0cdfc5949a33119caf05cb314682d3"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0f/9e/fc7e8c4f98acb3be0bf32e16a0412bdbbb6a10292ba68061e46158c865b4/numpy-1.23.4-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c237129f0e732885c9a6076a537e974160482eab8f10db6292e92154d4c67d71"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/26/e5/d00b9a9a89597a183257a7a316cce52e30ee705ac1c5a6de92766610ca8e/numpy-1.23.4-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:61be02e3bf810b60ab74e81d6d0d36246dbfb644a462458bb53b595791251911"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/2a/28/94ef96d74927d35d2c53fba76e5636031958c374937d4714bcb9e4fe2506/numpy-1.23.4-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8c053d7557a8f022ec823196d242464b6955a7e7e5015b719e76003f63f82d0f"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/2d/6f/484c508cd324e1b28b78156ed278e0de0153e1e83b4320e01f0697bc2645/numpy-1.23.4-cp311-cp311-win32.whl", hash = "sha256:5e13030f8793e9ee42f9c7d5777465a560eb78fa7e11b1c053427f2ccab90c79"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/34/80/d9b0d68ca6ce1423953d3ac5942f9110b8917c009c562a86d18d7db8fe02/numpy-1.23.4-cp38-cp38-win32.whl", hash = "sha256:dada341ebb79619fe00a291185bba370c9803b1e1d7051610e01ed809ef3a4ba"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/38/0a/3c2524efc072cae26fb1055137f7794434e779b789b5b38671b99536328b/numpy-1.23.4-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:488a66cb667359534bc70028d653ba1cf307bae88eab5929cd707c761ff037db"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3c/d0/d7d0b6af9a434b3ee271b02ada553b1c781294bff012b19318886f86c395/numpy-1.23.4-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:7ab46e4e7ec63c8a5e6dbf5c1b9e1c92ba23a7ebecc86c336cb7bf3bd2fb10e5"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/56/df/2f6016171ebce9875e7de0292a2131bea86e0340607a313a04b332d35c8e/numpy-1.23.4-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a0882323e0ca4245eb0a3d0a74f88ce581cc33aedcfa396e415e5bba7bf05f68"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/58/ef/1e2b870a3fd6d4b4a7f827eae56830dca8eef8a9efc4c3224a193f5b8905/numpy-1.23.4-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:296d17aed51161dbad3c67ed6d164e51fcd18dbcd5dd4f9d0a9c6055dce30810"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/5a/7b/653f2c23240e80a560f3043bfe94f7d3804badf969b89273d8ab141133d9/numpy-1.23.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7a70a7d3ce4c0e9284e92285cba91a4a3f5214d87ee0e95928f3614a256a1488"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/64/8e/9929b64e146d240507edaac2185cd5516f00b133be5b39250d253be25a64/numpy-1.23.4.tar.gz", hash = "sha256:ed2cc92af0efad20198638c69bb0fc2870a58dabfba6eb722c933b48556c686c"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/85/3a/18da9e6aa629311e97ef208e183e1bacd049c87378dfdc9c299c8a6406e1/numpy-1.23.4-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:f76025acc8e2114bb664294a07ede0727aa75d63a06d2fae96bf29a81747e4a7"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/8e/d7/fe76e876a139c5f3f7c7bb2695ec2136bf94d9748433d9028ef0e2f58843/numpy-1.23.4-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:926db372bc4ac1edf81cfb6c59e2a881606b409ddc0d0920b988174b2e2a767f"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/92/49/127e40f3f468a9bbce1fe69e97d0f0db524621960e0adc51a977298eb49c/numpy-1.23.4-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:95de7dc7dc47a312f6feddd3da2500826defdccbc41608d0031276a24181a2c0"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/95/2f/0644216547beb6b6b6ffab234a4eceb5bcba8b4a859676898027f5d57d06/numpy-1.23.4-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:4d52914c88b4930dafb6c48ba5115a96cbab40f45740239d9f4159c4ba779962"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a7/08/e776ca1cc170ead24149dd1f8f4646628c94e70612f5fed74e9543f063fd/numpy-1.23.4-cp310-cp310-win32.whl", hash = "sha256:2341f4ab6dba0834b685cce16dad5f9b6606ea8a00e6da154f5dbded70fdc4dd"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a9/23/646b2bb081b25e8c6e2495fc1ddcea2ad89b5fdff194a9d1e8eb55cc1a6d/numpy-1.23.4-cp38-cp38-win_amd64.whl", hash = "sha256:0fe563fc8ed9dc4474cbf70742673fc4391d70f4363f917599a7fa99f042d5a8"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/af/74/c02ece94ef88bed0a7f266959fd9bb2c97140345bc792f281b7db390eea9/numpy-1.23.4-cp39-cp39-win_amd64.whl", hash = "sha256:f260da502d7441a45695199b4e7fd8ca87db659ba1c78f2bbf31f934fe76ae0e"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b2/f2/fb29a463abacb29fa03dfb548d463f77d5d0be887664a3d570556247767a/numpy-1.23.4-cp310-cp310-win_amd64.whl", hash = "sha256:d331afac87c92373826af83d2b2b435f57b17a5c74e6268b79355b970626e329"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c7/14/e35de6ce343a1226e4f838659f093f124ebaf2682c6f12ce3253a58f46bd/numpy-1.23.4-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:12ac457b63ec8ded85d85c1e17d85efd3c2b0967ca39560b307a35a6703a4735"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c9/ea/9222b4400b8604d4dd097e26a6e33f4a72d3c610902c3c0fe2182b51fea9/numpy-1.23.4-cp39-cp39-win32.whl", hash = "sha256:f2f390aa4da44454db40a1f0201401f9036e8d578a25f01a6e237cea238337ef"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/db/a5/3c06b9f81fcc97f5ae7f6a2cbdcb9af09c7525d24013bc8a588039971f12/numpy-1.23.4-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:a8aae2fb3180940011b4862b2dd3756616841c53db9734b27bb93813cd79fce6"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/eb/a6/a3217b371207622bda002820da4f7e1332a96c8331dd4720c6d4be13a799/numpy-1.23.4-cp311-cp311-win_amd64.whl", hash = "sha256:7607b598217745cc40f751da38ffd03512d33ec06f3523fb0b5f82e09f6f676d"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ec/83/81bcb0adeca52bffe6bf4b7c0a3f3d80a1d541f79f46fc5b12e6e997ddbe/numpy-1.23.4-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:8981d9b5619569899666170c7c9748920f4a5005bf79c72c07d08c8a035757b0"},
+"numpy 1.23.5" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/08/36/6589c7d5fc4fecda63de4453fefff7c58f6de2b1bb7dfbe7fa807bf85c46/numpy-1.23.5-cp39-cp39-win_amd64.whl", hash = "sha256:09b7847f7e83ca37c6e627682f145856de331049013853f344f37b0c9690e3df"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0f/3d/25e99f2191cce5029310c41cf9a34b5107d4475477bbce2f6d2e68c1c93b/numpy-1.23.5-pp38-pypy38_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f9a909a8bae284d46bbfdefbdd4a262ba19d3bc9921b1e76126b1d21c3c34135"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/0f/ae/dad4b8e7c65494cbbd1c063de114efaf9acd0f5f6171f044f0d4b6299787/numpy-1.23.5-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:9c88793f78fca17da0145455f0d7826bcb9f37da4764af27ac945488116efe63"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/19/0d/b8c34e4baf258d77a8592bdce45183e9a12874c167f5966c7dd467b74ea9/numpy-1.23.5-cp311-cp311-win_amd64.whl", hash = "sha256:0cbe9848fad08baf71de1a39e12d1b6310f1d5b2d0ea4de051058e6e1076852d"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/25/7b/3b587a62aa54ad7ecf90eabfc77cf78e96d3df1d0e8c31fc534ad3ca6e17/numpy-1.23.5-pp38-pypy38_pp73-macosx_10_9_x86_64.whl", hash = "sha256:abdde9f795cf292fb9651ed48185503a2ff29be87770c3b8e2a14b0cd7aa16f8"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/2b/1a/9ac00116d3a64b5ea031fdb2ff071062a6e2140553fa0770b5f007b84252/numpy-1.23.5-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5039f55555e1eab31124a5768898c9e22c25a65c1e0037f4d7c495a45778c9f2"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/3f/ce/04d7772671d8d3a14e426d7560047821c4e2d29ee2b5cfa252601412083b/numpy-1.23.5-pp38-pypy38_pp73-win_amd64.whl", hash = "sha256:01dd17cbb340bf0fc23981e52e1d18a9d4050792e8fb8363cecbf066a84b827d"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/42/38/775b43da55fa7473015eddc9a819571517d9a271a9f8134f68fb9be2f212/numpy-1.23.5.tar.gz", hash = "sha256:1b1766d6f397c18153d40015ddfc79ddb715cabadc04d2d228d4e5a8bc4ded1a"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4c/42/6274f92514fbefcb1caa66d56d82ac7ac89f7652c0cef1e159a4b79e09f1/numpy-1.23.5-cp38-cp38-win_amd64.whl", hash = "sha256:ca51fcfcc5f9354c45f400059e88bc09215fb71a48d3768fb80e357f3b457e1e"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4c/b9/038abd6fbd67b05b03cb1af590cfc02b7f1e5a37af7ac6a868f5093c29f5/numpy-1.23.5-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:33161613d2269025873025b33e879825ec7b1d831317e68f4f2f0f84ed14c719"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4d/39/d33202cc56c21123a50c6d5e160d00c18ff685ab864dbd4bf80dd40a7af9/numpy-1.23.5-cp310-cp310-macosx_11_0_arm64.whl", hash = "sha256:e9f4c4e51567b616be64e05d517c79a8a22f3606499941d97bb76f2ca59f982d"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/5d/a1/cdac656aed8bc04dc86296490f8dbef68474c3294cc31af30f2bd0ec06de/numpy-1.23.5-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:bf837dc63ba5c06dc8797c398db1e223a466c7ece27a1f7b5232ba3466aafe3d"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/63/d4/3f0d610a2006434f2b7b2e0c80291368d59b0a03bb3e1911fdb9476232d4/numpy-1.23.5-cp38-cp38-macosx_11_0_arm64.whl", hash = "sha256:0aaee12d8883552fadfc41e96b4c82ee7d794949e2a7c3b3a7201e968c7ecab9"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/67/6b/d7c93d458d16464da9b3f560a20c363a19e242ebbb019bd1e1d797523851/numpy-1.23.5-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:7903ba8ab592b82014713c491f6c5d3a1cde5b4a3bf116404e08f5b52f6daf43"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/6a/03/ae6c3c307f9c5c7516de3df3e764ebb1de33e54e197f0370992138433ef4/numpy-1.23.5-cp310-cp310-win_amd64.whl", hash = "sha256:dbee87b469018961d1ad79b1a5d50c0ae850000b639bcb1b694e9981083243b6"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/6e/7f/94797cfe0263a30805f3074e535adfde02b885ac43d1e4dac85f82213b0b/numpy-1.23.5-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:ce571367b6dfe60af04e04a1834ca2dc5f46004ac1cc756fb95319f64c095a96"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/8c/7a/171d3b4a54de835c8f95181dd2885607c0e04adca55ef99d9de559b4c9ba/numpy-1.23.5-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:8969bfd28e85c81f3f94eb4a66bc2cf1dbdc5c18efc320af34bffc54d6b1e38f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9b/55/a2669debe264b1f22a8133734595128e40b96a8066e17e53e8d160168e41/numpy-1.23.5-cp311-cp311-win32.whl", hash = "sha256:b2a9ab7c279c91974f756c84c365a669a887efa287365a8e2c418f8b3ba73fb0"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9e/9d/ff17c357f7144301da85f8c03d56593cfd2904e9ce89f86c8eefaa96d2d5/numpy-1.23.5-cp39-cp39-macosx_11_0_arm64.whl", hash = "sha256:a7ac231a08bb37f852849bbb387a20a57574a97cfc7b6cabb488a4fc8be176de"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/af/92/8efba008b9bda66456a1844a0e133dc76c08c5fb68c67a674f046211db29/numpy-1.23.5-cp310-cp310-win32.whl", hash = "sha256:522e26bbf6377e4d76403826ed689c295b0b238f46c28a7251ab94716da0b280"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b8/d0/e6a2cb9a3f3e863a43e50949e9ae704be70baf398fd5af59355f65c8740a/numpy-1.23.5-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:56e454c7833e94ec9769fa0f86e6ff8e42ee38ce0ce1fa4cbb747ea7e06d56aa"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b9/0e/10ab011eaebeed29d28ad710d0a3ab2654c06a2800e178e8f2f3a5947ad4/numpy-1.23.5-cp38-cp38-win32.whl", hash = "sha256:06005a2ef6014e9956c09ba07654f9837d9e26696a0470e42beedadb78c11b07"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/bf/d1/1017fe3f5d65c4fe054a793f18f940d913868bb2846a02d3f6244a829a30/numpy-1.23.5-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:92c8c1e89a1f5028a4c6d9e3ccbe311b6ba53694811269b992c0b224269e2398"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c6/4f/63f6f16d3f44a764a3b66c6233e133baf912e198a93e14c39ee991f587d0/numpy-1.23.5-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d208a0f8729f3fb790ed18a003f3a57895b989b40ea4dce4717e9cf4af62c6bb"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d2/55/b9b4bfb9d1d828d7d3192c4059e7b4a7d755ba2e1618089af4be77c152d1/numpy-1.23.5-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:f063b69b090c9d918f9df0a12116029e274daf0181df392839661c4c7ec9018a"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/d5/95/f311e6fdaabe24f909eeb6d5482e3adef27fa8389cb8a84823ae560bf480/numpy-1.23.5-cp39-cp39-win32.whl", hash = "sha256:af1da88f6bc3d2338ebbf0e22fe487821ea4d8e89053e25fa59d1d79786e7481"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e4/f3/679b3a042a127de0d7c84874913c3e23bb84646eb3bc6ecab3f8c872edc9/numpy-1.23.5-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5e05b1c973a9f858c74367553e236f287e749465f773328c8ef31abe18f691e1"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e8/ad/b935c7421657a032fd2a5332eed098f3b9993a155afceb1daa280ff6611f/numpy-1.23.5-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:58f545efd1108e647604a1b5aa809591ccd2540f468a880bedb97247e72db387"},
 ]
 "opencv-python-headless 4.6.0.66" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/21/4f/23cee417897d9114d17a32cf3ec5e78132da90d25e4ae3bb4dcf2aff6cd3/opencv_python_headless-4.6.0.66-cp36-abi3-macosx_10_15_x86_64.whl", hash = "sha256:21e70f8b0c04098cdf466d27184fe6c3820aaef944a22548db95099959c95889"},
@@ -1759,16 +1824,18 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a5/73/35cea01aad1baf901c915dc95ea33a2f271c8ff8cf2f1c73b7f591f1bdf1/psutil-5.9.4-cp36-abi3-macosx_10_9_x86_64.whl", hash = "sha256:54d5b184728298f2ca8567bf83c422b706200bcbbfafdc06718264f9393cfeb7"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ec/be/b8df2071eda861e65a1b2cec35770bb1f4523737e84a10aa41c53e39e9bc/psutil-5.9.4-cp27-cp27mu-manylinux2010_i686.whl", hash = "sha256:6b92c532979bafc2df23ddc785ed116fced1f492ad90a6830cf24f4d1ea27d24"},
 ]
-"pycairo 1.21.0" = [
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/01/2c/b26441fa33a8beb905bb893eb5368b6b2c713a0edd5284356c6f4cffd863/pycairo-1.21.0-cp38-cp38-win32.whl", hash = "sha256:dace6b356c476de27f8e1522428ac21a799c225703f746e2957d441f885dcb6c"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/39/37/6e30254f6583a8ecf6f8a103af48ef5f8c97f56bbe94cf69af6f5f80729c/pycairo-1.21.0-cp310-cp310-win_amd64.whl", hash = "sha256:f63c153a9ea3d21aff85e2caeee4b0c5d566b2368b4ed64826020d12953d76a4"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/48/2d/1c040c138201d4c20e426ed7edbc4baead044e6b1706858d1fe3fdd3fc56/pycairo-1.21.0-cp37-cp37m-win_amd64.whl", hash = "sha256:31e1c4850db03201d33929cbe1905ce1b33202683ebda7bb0d4dba489115066b"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/5d/26/0d193f24c683edf71864a28d87e19f0015c2c639bf9dd0cc2b96c4a8b18e/pycairo-1.21.0-cp37-cp37m-win32.whl", hash = "sha256:70936b19f967fa3cb3cd200c2608911227fa5d09dae21c166f64bc15e714ee41"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/92/a4/506564f574fa74c90b98690e8ecc8dbae1629f31fcfe0be69de45d9e1605/pycairo-1.21.0.tar.gz", hash = "sha256:251907f18a552df938aa3386657ff4b5a4937dde70e11aa042bc297957f4b74b"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9d/a4/783deb9a62eb4417f2660dba97de7e3c8e22f6a9840aea294679b172ba10/pycairo-1.21.0-cp310-cp310-win32.whl", hash = "sha256:44a2ecf34968de07b3b9dfdcdbccbd25aa3cab267200f234f84e81481a73bbf6"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/bc/0a/62f8f61cceeec8b717b96d8773da5b2897ed6017206e1360f1694fac5e62/pycairo-1.21.0-cp38-cp38-win_amd64.whl", hash = "sha256:4357f20a6b1de8f1e8072a74ff68ab4c9a0ae698cd9f5c0f2b2cdd9b28b635f6"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/c5/15/73cdbade21b101e679a344c519e402948dadbc159e03bef6738317e8c2c4/pycairo-1.21.0-cp39-cp39-win_amd64.whl", hash = "sha256:26b72b813c6f9d495f71057eab89c13e70a21c92360e9265abc049e0a931fa39"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f1/4c/e9149c9135ad0644b906f7890fd70502bd01f95b12e4dddfa39784826c0d/pycairo-1.21.0-cp39-cp39-win32.whl", hash = "sha256:6d37375aab9f2bb6136f076c19815d72108383baae89fbc0d6cb8e5092217d02"},
+"pycairo 1.22.0" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/08/d3/e0d5b1b6c26b3b9fd7e69b21674483180a87b55048fbba0488d19685aa96/pycairo-1.22.0-cp37-cp37m-win32.whl", hash = "sha256:9fbe26b3fbe85fde063070e543b4a5f3609569ca8f79680867cecb837d5be29c"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/11/fd/882a1c9ecd6ac3e81ec038c17bcbedc1deece89fac74c039375b4f00a79b/pycairo-1.22.0-cp310-cp310-win32.whl", hash = "sha256:5a62cf1d2c6339028709a600d83c0c24111feedeef3cf977bca333fbb94a79c8"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/2a/7b/86454e22654805e74b2db858087ba963ea1c267f06af544059ba7b6cc8e7/pycairo-1.22.0-cp310-cp310-win_amd64.whl", hash = "sha256:62ce5e8c97eeee70170ba9a74845a0ded4bde9b7f1701d88957cbadf8cb1ccd6"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/46/a9/874dbacd73fd193b5ae4ceb019e037867ec1515ef35fb461939857e8042c/pycairo-1.22.0-cp39-cp39-win32.whl", hash = "sha256:e31a5b70664c425f4d1b71ba8aaf259920de6937a9490132ffabadad2a89764f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/97/42/61a07a474920a7847ffb77d1f5a56bd669157a5d61d06fe28e78df1f09b8/pycairo-1.22.0-cp38-cp38-win_amd64.whl", hash = "sha256:e81189414c11340134bffa6dcb06a378976cb87a6742f39aaefc79cb27612250"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9c/05/7b30157a1f1d0126e3303819845abdf0ef67a93fb0128206a83cc6474741/pycairo-1.22.0-cp37-cp37m-win_amd64.whl", hash = "sha256:00c8a6b92c5075ee3be7ea1d33f676d259f11f92cad7e37077dd193437c8c27c"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/9d/02/e227d33d0eae712c56235f50630221bd7a64460e44dacda3bc664fe250e9/pycairo-1.22.0-cp311-cp311-win32.whl", hash = "sha256:356c9fc665e8522f497b6cbe026ad8decacbb04c93e13fd5d145956433f3d471"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/a9/ad/0847ff86c4259798c0801b37a817a3948e22e88b84c31b76177dfe11cc20/pycairo-1.22.0-cp39-cp39-win_amd64.whl", hash = "sha256:007ae728c56b9a0962d8c5513ae967a4fceff03e022940383c20f4f3d4c48dbe"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/e5/9f/541adc3a06ea28369c4ab52d2cf95597bb2ef626b3cf1c61afa26f735461/pycairo-1.22.0.tar.gz", hash = "sha256:b34517abdf619d4c7f0274f012b398d9b03bab7adc3efd2912bf36be3f911f3f"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/ed/21/088ea95a874fbf1e15106bd953c745580496eb9d39457c0bc5b1d89e3c41/pycairo-1.22.0-cp38-cp38-win32.whl", hash = "sha256:47aed13e950345c8248f77c8a51bff52188bef7afd3d5169584e0eddc21ba341"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f1/6d/6756a36d16eed23675775380dcb653eece5251f6c9fdd8314eddb449f041/pycairo-1.22.0-cp311-cp311-win_amd64.whl", hash = "sha256:b85807ec65a8b7966aca7aa41c39016b72515d6401a874a4b52c314471b31865"},
 ]
 "pycares 4.2.2" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/02/9e/832224344c26b075dab00b234fe53b893a4e652f415747ed214f7ea7dd59/pycares-4.2.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:075d4bdde10590a2d0456eab20028aab997207e45469d30dd01a4a65caa7f8da"},
@@ -1897,10 +1964,6 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/10/46/33c0a9e7d37bf33487074de4399963462093043ad224d1881e41cbd937f3/pyppeteer-1.0.2-py3-none-any.whl", hash = "sha256:11a734d8f02c6b128035aba8faf32748f2016310a6a1cbc6aa5b1e2580742e8f"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/68/d6/10e7dfaa677888f59bb68902729e0b3d4dee540642533f60a4cdb8c1eb63/pyppeteer-1.0.2.tar.gz", hash = "sha256:ddb0d15cb644720160d49abb1ad0d97e87a55581febf1b7531be9e983aad7742"},
 ]
-"pyright 1.1.279" = [
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/80/31/f38dc02bf7e0c1814bdb0de9fb589faa1214da1876838995ad4544fad676/pyright-1.1.279.tar.gz", hash = "sha256:6f3ac7d12e036e0d1a57c1581d03d781e99b42408b8a6f0ef8ae85bcfe58fa57"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f5/dc/5a342de3752952847b39885e71e52a559c773c1563fa877ead8cb9c4a2dd/pyright-1.1.279-py3-none-any.whl", hash = "sha256:5eaa6830c0a701dc72586277be98d35762d2c27e01a9c2fbf01ee4e84e785797"},
-]
 "python-dateutil 2.8.2" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/36/7a/87837f39d0296e723bb9b62bbb257d0355c7f6128853c78955f57342a56d/python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/4c/c4/13b4776ea2d76c115c1d1b84579f3764ee6d57204f6be27119f13a61d0a9/python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
@@ -1959,9 +2022,9 @@ content_hash = "sha256:489e15e9006625c79a2cd40266f79908da06651b3c4ba92193ec567cc
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/f8/54/799b059314b13e1063473f76e908f44106014d18f54b16c83a16edccd5ec/PyYAML-6.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:d4b0ba9512519522b118090257be113b9468d804b19d63c71dbcf4a48fa32358"},
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/fc/48/531ecd926fe0a374346dd811bf1eda59a95583595bb80eadad511f3269b8/PyYAML-6.0-cp311-cp311-win32.whl", hash = "sha256:bfaef573a63ba8923503d27530362590ff4f576c626d86a9fed95822a8255fd7"},
 ]
-"setuptools 65.5.1" = [
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/26/f4/ca5cb6df512f453ad50f78900bf7ec6a5491ee44bb49d0f6f76802dbdd43/setuptools-65.5.1.tar.gz", hash = "sha256:e197a19aa8ec9722928f2206f8de752def0e4c9fc6953527360d1c36d94ddb2f"},
-    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/b6/40/353c051f77ee5618adaf1fd96f4f6bae9714ed0a22c7142c01c24eb77fe4/setuptools-65.5.1-py3-none-any.whl", hash = "sha256:d0b9a8433464d5800cbe05094acf5c6d52a91bfac9b52bcfc4d41382be5d5d31"},
+"setuptools 65.6.0" = [
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/09/b6/33512596fb92ba68f7c45e9bbc5e1bb9b24fbd941f9aece250fb420c2f5c/setuptools-65.6.0.tar.gz", hash = "sha256:d1eebf881c6114e51df1664bc2c9133d022f78d12d5f4f665b9191f084e2862d"},
+    {url = "https://pypi.tuna.tsinghua.edu.cn/packages/1f/97/c03668380f278f1f8b0486d820c142cf224bba1bd78416e1797b52e0e81c/setuptools-65.6.0-py3-none-any.whl", hash = "sha256:6211d2f5eddad8757bd0484923ca7c0a6302ebc4ab32ea5e94357176e0ca0840"},
 ]
 "six 1.16.0" = [
     {url = "https://pypi.tuna.tsinghua.edu.cn/packages/71/39/171f1c67cd00715f190ba0b100d606d440a28c93c7714febeca8b79af85e/six-1.16.0.tar.gz", hash = "sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926"},

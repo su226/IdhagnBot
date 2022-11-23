@@ -3,7 +3,7 @@ import asyncio
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
 
-from util import command
+from util import command, misc
 
 qalc = (
   command.CommandBuilder("qalc", "qalc", "计算")
@@ -36,4 +36,4 @@ async def handle_qalc(arg: Message = CommandArg()):
   result, _ = await proc.communicate(b"y")  # 更新汇率
   if proc.returncode is None:
     proc.terminate()
-  await qalc.finish(result.decode().removesuffix("\n"))
+  await qalc.finish(misc.removesuffix(result.decode(), "\n"))

@@ -1,7 +1,7 @@
 import asyncio
 import time
 from io import BytesIO
-from typing import Awaitable, Callable, Pattern, TypeVar
+from typing import Awaitable, Callable, List, Optional, Pattern, Tuple, TypeVar, Union
 
 from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
@@ -19,12 +19,12 @@ class UserTarget(BaseModel):
   user: int
 
 
-AnyTarget = GroupTarget | UserTarget
+AnyTarget = Union[GroupTarget, UserTarget]
 
 
 class User(BaseModel):
   uid: int
-  targets: list[AnyTarget]
+  targets: List[AnyTarget]
   _name: str = PrivateAttr("未知用户")
   _offset: str = PrivateAttr("-1")
   _time: float = PrivateAttr(default_factory=time.time)
@@ -32,11 +32,11 @@ class User(BaseModel):
 
 class Config(BaseModel):
   grpc_: bool = Field(True, alias="grpc")
-  interval_: int | None = Field(None, alias="interval")
-  concurrency_: int | None = Field(None, alias="concurrency")
-  users: list[User] = Field(default_factory=list)
-  ignore_regexs: list[Pattern] = Field(default_factory=list)
-  ignore_forward_regexs: list[Pattern] = Field(default_factory=list)
+  interval_: Optional[int] = Field(None, alias="interval")
+  concurrency_: Optional[int] = Field(None, alias="concurrency")
+  users: List[User] = Field(default_factory=list)
+  ignore_regexs: List[Pattern] = Field(default_factory=list)
+  ignore_forward_regexs: List[Pattern] = Field(default_factory=list)
 
   @property
   def grpc(self) -> bool:
@@ -59,7 +59,7 @@ CONFIG = configs.SharedConfig("bilibili_activity", Config, "eager")
 IMAGE_GAP = 10
 
 TContent = TypeVar("TContent", bound=bilibili_activity.Content)
-Handler = tuple[TContent, Callable[[bilibili_activity.Activity[TContent]], Awaitable[Message]]]
+Handler = Tuple[TContent, Callable[[bilibili_activity.Activity[TContent]], Awaitable[Message]]]
 
 
 class IgnoredException(Exception):
@@ -79,5 +79,5 @@ async def fetch_image(url: str) -> Image.Image:
     return Image.open(BytesIO(await response.read()))
 
 
-async def fetch_images(*urls: str) -> list[Image.Image]:
+async def fetch_images(*urls: str) -> List[Image.Image]:
   return await asyncio.gather(*(fetch_image(url) for url in urls))

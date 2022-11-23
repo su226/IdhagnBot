@@ -1,13 +1,13 @@
-import asyncio
 from argparse import Namespace
 from pathlib import Path
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageEnhance, ImageFilter
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 DIR = Path(__file__).resolve().parent
@@ -49,7 +49,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     imutil.paste(mask, icon, (big.width // 2, big.height // 2), anchor="mm")
     text1 = textutil.render("不出来", "sans", 60)
 
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for raw in imutil.frames(target):
       small = imutil.resize_width(raw.convert("RGBA"), 100)
       text_h = max(small.height, text1.height)
@@ -64,4 +64,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(frames, target, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

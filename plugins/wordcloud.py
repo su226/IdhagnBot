@@ -4,7 +4,7 @@ import json
 import re
 from datetime import date, datetime, time, timedelta
 from io import BytesIO
-from typing import Any
+from typing import Any, List, Optional, Tuple
 
 import nonebot
 import wordcloud
@@ -19,11 +19,11 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import desc, func, select
 
-from util import command, configs, context, imutil, record
+from util import command, configs, context, imutil, misc, record
 
 
 class Config(BaseModel):
-  font: str | None = None
+  font: Optional[str] = None
   width: int = 400
   height: int = 200
   bg: int = 0xffffff
@@ -69,24 +69,24 @@ EMOJI_RE = re.compile(r"(?:[#*0-9]\uFE0F?\u20E3|[\xA9\xAE\u203C\u2049\u2122\u213
 
 driver = nonebot.get_driver()
 
-def _year(src: str) -> tuple[date, timedelta]:
+def _year(src: str) -> Tuple[date, timedelta]:
   if len(src) == 2:
     year = int(src) + 2000
   else:
     year = int(src)
   return date(year, 1, 1), timedelta(366 if calendar.isleap(year) else 365)
 
-def _month(src: str) -> tuple[date, timedelta]:
+def _month(src: str) -> Tuple[date, timedelta]:
   year = date.today().year
   month = int(src)
   _, days = calendar.monthrange(year, month)
   return date(year, month, 1), timedelta(days)
 
-def _day(src: str) -> tuple[date, timedelta]:
+def _day(src: str) -> Tuple[date, timedelta]:
   today = date.today()
   return date(today.year, today.month, int(src)), timedelta(1)
 
-def _year_month(y_src: str, m_src: str) -> tuple[date, timedelta]:
+def _year_month(y_src: str, m_src: str) -> Tuple[date, timedelta]:
   if len(y_src) == 2:
     year = int(y_src) + 2000
   else:
@@ -95,18 +95,18 @@ def _year_month(y_src: str, m_src: str) -> tuple[date, timedelta]:
   _, days = calendar.monthrange(year, month)
   return date(year, month, 1), timedelta(days)
 
-def _month_day(m_src: str, d_src: str) -> tuple[date, timedelta]:
+def _month_day(m_src: str, d_src: str) -> Tuple[date, timedelta]:
   year = date.today().year
   return date(year, int(m_src), int(d_src)), timedelta(1)
 
-def _year_month_day(y_src: str, m_src: str, d_src: str) -> tuple[date, timedelta]:
+def _year_month_day(y_src: str, m_src: str, d_src: str) -> Tuple[date, timedelta]:
   if len(y_src) == 2:
     year = int(y_src) + 2000
   else:
     year = int(y_src)
   return date(year, int(m_src), int(d_src)), timedelta(1)
 
-def parse_date(src: str) -> tuple[date, timedelta]:
+def parse_date(src: str) -> Tuple[date, timedelta]:
   if (match := CHINESE_Y_RE.match(src)):
     return _year(match[1])
   if (match := CHINESE_M_RE.match(src)):
@@ -163,11 +163,11 @@ def parse_date(src: str) -> tuple[date, timedelta]:
   raise ValueError(f"不是有效的日期: {src}")
 
 
-def format_wordcloud(messages: list[str]) -> MessageSegment:
+def format_wordcloud(messages: List[str]) -> MessageSegment:
   config = CONFIG()
-  texts: list[str] = []
+  texts: List[str] = []
   for i in messages:
-    data: list[dict] = json.loads(i)
+    data: List[dict] = json.loads(i)
     plain = " ".join([x["data"]["text"] for x in data if x["type"] == "text"]).strip()
     is_command = False
     for start in driver.config.command_start:
@@ -238,7 +238,7 @@ async def handle_wordcloud(bot: Bot, event: MessageEvent, arg: Message, is_user:
       .order_by(func.random())
       .limit(config.limit)
     )
-    messages: list[str] = result.scalars().all()
+    messages: List[str] = result.scalars().all()
   end_datetime -= timedelta(seconds=1)  # 显示 23:59:59 而不是 00:00:00，以防误会
   title = f"{start_datetime:%Y-%m-%d %H:%M:%S} 到 {end_datetime:%Y-%m-%d %H:%M:%S} 的词云"
   if is_user:
@@ -246,7 +246,7 @@ async def handle_wordcloud(bot: Bot, event: MessageEvent, arg: Message, is_user:
     title = f"{name} {title}"
   await bot.send(event, title)
   try:
-    seg = await asyncio.to_thread(format_wordcloud, messages)
+    seg = await misc.to_thread(format_wordcloud, messages)
   except Exception:
     logger.opt(exception=True).warning(
       f"生成个人词云失败 群: {group_id} 用户: {user_id} 从: {start_datetime} 到: {end_datetime}"
@@ -365,7 +365,7 @@ async def handle_statistics(
     fig.savefig(f)
     return MessageSegment.image(f)
 
-  await bot.send(event, await asyncio.to_thread(make))
+  await bot.send(event, await misc.to_thread(make))
 
 
 group_statistics = (
@@ -450,7 +450,7 @@ async def handle_leaderboard(
     )
     result = result.all()
     result.reverse()  # matplotlib的y轴是反过来的
-  infos: list[tuple[Image.Image, str]] = await asyncio.gather(*[
+  infos: List[Tuple[Image.Image, str]] = await asyncio.gather(*[
     asyncio.gather(
       imutil.get_avatar(uid, bg=True),
       context.get_card_or_name(bot, event, uid)
@@ -500,4 +500,4 @@ async def handle_leaderboard(
     fig.savefig(f)
     return MessageSegment.image(f)
 
-  await leaderboard.finish(await asyncio.to_thread(make))
+  await leaderboard.finish(await misc.to_thread(make))

@@ -1,12 +1,12 @@
-import asyncio
 from argparse import Namespace
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 FRAMETIME = 100
@@ -46,7 +46,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     base_scale = 5 ** (1 / 20)
 
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for i, raw in zip(range(20), imutil.sample_frames(target, FRAMETIME)):
       raw = raw.convert("RGBA")
       big = imutil.resize_width(raw, 500)
@@ -70,4 +70,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(frames, FRAMETIME, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

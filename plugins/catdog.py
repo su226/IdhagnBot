@@ -1,7 +1,7 @@
 import asyncio
 import os
 import socket
-from typing import Callable
+from typing import Callable, Optional, Tuple
 
 import aiohttp
 from aiohttp import web
@@ -15,7 +15,7 @@ class Config(BaseModel):
   timeout: float = 15
   warn: bool = True
   dog_gif_only: bool = False
-  proxy: str | None = None
+  proxy: Optional[str] = None
 
 
 CONFIG = configs.SharedConfig("catdog", Config)
@@ -135,7 +135,7 @@ dog_gif = (
 )
 @dog_gif.handle()
 async def handle_dog_gif() -> None:
-  async def fetch() -> tuple[str, str, bytes]:
+  async def fetch() -> Tuple[str, str, bytes]:
     nonlocal url
     http = misc.http()
     api = DOG_GIF_API

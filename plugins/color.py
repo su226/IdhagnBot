@@ -1,8 +1,8 @@
-import asyncio
 import random
 import re
 import unicodedata
 from datetime import datetime, timedelta
+from typing import Dict, List
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
@@ -22,8 +22,8 @@ class Config(BaseModel):
 
 class State(BaseModel):
   last_update: datetime = datetime.min
-  brand_to_color: dict[str, int] = Field(default_factory=dict)
-  color_to_brands: dict[int, list[str]] = Field(default_factory=dict)
+  brand_to_color: Dict[str, int] = Field(default_factory=dict)
+  color_to_brands: Dict[int, List[str]] = Field(default_factory=dict)
 
 
 CONFIG = configs.SharedConfig("color", Config)
@@ -142,4 +142,4 @@ hsl({h:.1f}deg, {s * 100:.1f}%, {l * 100:.1f}%)'''
     )
     return imutil.to_segment(im)
 
-  await color_img.finish(await asyncio.to_thread(make))
+  await color_img.finish(await misc.to_thread(make))

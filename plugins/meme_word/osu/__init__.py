@@ -1,12 +1,11 @@
-import asyncio
-from pathlib import Path
 import math
+from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageOps
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 DIR = Path(__file__).resolve().parent
 
@@ -29,4 +28,4 @@ async def handle_osu(args: Message = CommandArg()):
     im = Image.open(DIR / "template.png")
     im.alpha_composite(text_im, (175 - text_im.width // 2, 175 - text_im.height // 2))
     return imutil.to_segment(im)
-  await osu.finish(await asyncio.to_thread(make))
+  await osu.finish(await misc.to_thread(make))

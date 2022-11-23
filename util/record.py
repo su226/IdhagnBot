@@ -5,6 +5,7 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime
+from typing import List, Optional, Tuple
 
 import nonebot
 from nonebot.adapters.onebot.v11 import Event, Message, MessageEvent, MessageSegment
@@ -21,21 +22,21 @@ class SQLModel(BaseSQLModel):
 
 
 class Received(SQLModel, table=True):
-  id: int | None = SQLField(primary_key=True, default=None)
+  id: Optional[int] = SQLField(primary_key=True, default=None)
   message_id: int  # 我是做梦也没想到 go-cqhttp 的消息 ID 居然会重复（）
   time: datetime
   user_id: int
-  group_id: int | None
+  group_id: Optional[int]
   content: str
 
 
 class Sent(SQLModel, table=True):
-  id: int | None = SQLField(primary_key=True, default=None)
+  id: Optional[int] = SQLField(primary_key=True, default=None)
   message_id: int
   time: datetime
   is_group: bool
   target_id: int
-  caused_by: int | None = SQLField(foreign_key="received.message_id")
+  caused_by: Optional[int] = SQLField(foreign_key="received.message_id")
   content: str
 
 
@@ -63,7 +64,7 @@ async def on_startup():
     await connection.run_sync(SQLModel.metadata.create_all)
 
 
-def process_segment(segment: MessageSegment) -> list[CacheEntry]:
+def process_segment(segment: MessageSegment) -> List[CacheEntry]:
   caches = []
   if segment.type in ("image", "record", "video"):
     file = segment.data.get("file", "")
@@ -85,19 +86,19 @@ def process_segment(segment: MessageSegment) -> list[CacheEntry]:
   return caches
 
 
-def process_message(message: Message) -> tuple[list[CacheEntry], list[MessageSegment]]:
-  caches: list[CacheEntry] = []
+def process_message(message: Message) -> Tuple[List[CacheEntry], List[MessageSegment]]:
+  caches: List[CacheEntry] = []
   for segment in message:
     caches.extend(process_segment(segment))
   return caches, list(message)
 
 
-def serialize_message(message: Message) -> tuple[list[CacheEntry], str]:
+def serialize_message(message: Message) -> Tuple[List[CacheEntry], str]:
   caches, segments = process_message(message)
   return caches, json.dumps(segments, ensure_ascii=False, default=pydantic_encoder)
 
 
-async def process_caches(session: AsyncSession, caches: list[CacheEntry]) -> None:
+async def process_caches(session: AsyncSession, caches: List[CacheEntry]) -> None:
   selections = (session.execute(select(Cache).where(Cache.md5 == cache.md5)) for cache in caches)
   for cache, result in zip(caches, await asyncio.gather(*selections)):
     row = result.one_or_none()
@@ -112,7 +113,7 @@ async def process_caches(session: AsyncSession, caches: list[CacheEntry]) -> Non
 
 @hook.on_message_sent
 async def on_message_sent(
-  event: Event | None, is_group: bool, target_id: int, message: Message, message_id: int
+  event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int
 ) -> None:
   if not message_id:
     return

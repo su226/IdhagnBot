@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable
+from typing import Awaitable, Callable, Dict, List, Tuple
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -20,14 +20,14 @@ def simple(url: str) -> FactoryType:
   return func
 
 
-SOURCES: list[tuple[FactoryType, str, list[str]]] = [
+SOURCES: List[Tuple[FactoryType, str, List[str]]] = [
   (simple("https://thiscatdoesnotexist.com/"), "猫", ["cat", "c"]),
   (simple("https://thisartworkdoesnotexist.com/"), "画作", ["artwork", "a"]),
   (simple("https://thishorsedoesnotexist.com/"), "马", ["horse", "h"]),
   (simple("https://thispersondoesnotexist.com/image"), "人", ["person", "p"]),
   (simple("https://thisrentaldoesnotexist.com/img-new/hero.jpg"), "房产", ["rental", "r"]),
 ]
-SOURCES_DICT: dict[str, FactoryType] = {}
+SOURCES_DICT: Dict[str, FactoryType] = {}
 for func, _, ids in SOURCES:
   for id in ids:
     SOURCES_DICT[id] = func

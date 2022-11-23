@@ -3,14 +3,14 @@ import json
 import os
 import sys
 from asyncio.streams import StreamReader, StreamWriter
-from typing import cast
+from typing import Tuple, cast
 
 plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 async def safe_eval(
   code: str, timeout: float, nproc: int, memory: int, output: int
-) -> tuple[bool, int, bytes, bytes]:
+) -> Tuple[bool, int, bytes, bytes]:
   version = f"{sys.version_info.major}.{sys.version_info.minor}"
   proc = await asyncio.subprocess.create_subprocess_exec(
     "bwrap",

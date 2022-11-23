@@ -1,15 +1,14 @@
-import asyncio
 import math
 from argparse import Namespace
-from typing import cast
+from concurrent.futures import Future, ProcessPoolExecutor
+from typing import List, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, PyAccess, ImageOps
-from concurrent.futures import Future, ProcessPoolExecutor
+from PIL import Image, ImageOps, PyAccess
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 FRAMES = 8
@@ -71,13 +70,13 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     amp = scale * target.width / AMPLITUDE
     resample = imutil.scale_resample()
 
-    futures: list[Future[Image.Image]] = []
+    futures: List[Future[Image.Image]] = []
     with ProcessPoolExecutor() as exec:
       for i, raw in zip(range(FRAMES), imutil.sample_frames(target, FRAMETIME)):
         im = raw.convert("RGBA")
         futures.append(exec.submit(wave, im, freq, amp, i, resample))
-    frames: list[Image.Image] = [future.result() for future in futures]
+    frames: List[Image.Image] = [future.result() for future in futures]
 
     return imutil.to_segment(frames, FRAMETIME, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

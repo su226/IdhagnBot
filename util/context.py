@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Set, Union
 
 import nonebot
 from apscheduler.jobstores.memory import MemoryJobStore
@@ -19,17 +20,17 @@ from nonebot_plugin_apscheduler import scheduler
 
 
 class Group(BaseModel):
-  __root__: list[str]
+  __root__: List[str]
   _name: str = PrivateAttr("")
 
 
 class Config(BaseModel):
-  groups: dict[int, Group] = Field(default_factory=dict)
-  private_limit: set[int] = Field(default_factory=set)
+  groups: Dict[int, Group] = Field(default_factory=dict)
+  private_limit: Set[int] = Field(default_factory=set)
   private_limit_whitelist: bool = False
   timeout: int = 600
 
-  _names: dict[str, int] = PrivateAttr(default_factory=dict)
+  _names: Dict[str, int] = PrivateAttr(default_factory=dict)
 
   def __init__(self, **kw) -> None:
     super().__init__(**kw)
@@ -53,8 +54,8 @@ class HasGroupCache:
   def __init__(self, user: int) -> None:
     self.created = datetime.now()
     self.user = user
-    self.results: dict[int, bool] = {}
-    self.tasks: dict[int, asyncio.Future[None]] = {}
+    self.results: Dict[int, bool] = {}
+    self.tasks: Dict[int, asyncio.Future[None]] = {}
 
   def clear(self) -> None:
     self.created = datetime.now()
@@ -68,7 +69,7 @@ class HasGroupCache:
     for group in groups:
       if self.results.get(group, False) is True:
         return True
-    tasks: list[asyncio.Future[None]] = []
+    tasks: List[asyncio.Future[None]] = []
     for group in groups:
       if group not in self.tasks:
         task = self.tasks[group] = asyncio.create_task(self.check_one(bot, group))
@@ -89,9 +90,9 @@ class HasGroupCache:
 
 
 class State(BaseModel):
-  contexts: dict[int, Context] = Field(default_factory=dict)
+  contexts: Dict[int, Context] = Field(default_factory=dict)
 
-  _has_group_cache: dict[int, HasGroupCache] = PrivateAttr(default_factory=dict)
+  _has_group_cache: Dict[int, HasGroupCache] = PrivateAttr(default_factory=dict)
 
   def __init__(self, **kw) -> None:
     super().__init__(**kw)
@@ -111,7 +112,7 @@ driver = nonebot.get_driver()
 
 
 @STATE.onload()
-def state_onload(prev: State | None, curr: State) -> None:
+def state_onload(prev: Optional[State], curr: State) -> None:
   scheduler.remove_all_jobs(JOBSTORE)
   for user, context in curr.contexts.items():
     scheduler.add_job(
@@ -121,7 +122,7 @@ def state_onload(prev: State | None, curr: State) -> None:
 
 
 @CONFIG.onload()
-def config_onload(prev: Config | None, curr: Config) -> None:
+def config_onload(prev: Optional[Config], curr: Config) -> None:
   asyncio.create_task(curr.fetch_names())
 
 
@@ -253,7 +254,7 @@ def build_permission(node: permission.Node, default: permission.Level) -> BotPer
   return BotPermission(checker)
 
 
-async def get_card_or_name(bot: Bot, group_id: Event | int, user_id: int) -> str:
+async def get_card_or_name(bot: Bot, group_id: Union[Event, int], user_id: int) -> str:
   if isinstance(group_id, Event):
     group_id = get_event_context(group_id)
   if group_id != -1:

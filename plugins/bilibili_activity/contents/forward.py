@@ -1,19 +1,18 @@
-import asyncio
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, List, Tuple, Type, Union
 
 from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
 
-from util import imutil
+from util import imutil, misc
 from util.api_common import bilibili_activity
 from util.images.card import Card, CardAuthor, CardCover, CardLine, CardText
 
 from ..common import TContent, check_ignore, fetch_image
 from . import article, audio, image, text, video
 
-Checker = tuple[type[TContent], Callable[[TContent], None]]
-TitleFormatter = tuple[type[TContent], Callable[[TContent], str]]
-AppenderGetter = tuple[type[TContent], Callable[[TContent], Awaitable[Callable[[Card], None]]]]
+Checker = Tuple[Type[TContent], Callable[[TContent], None]]
+TitleFormatter = Tuple[Type[TContent], Callable[[TContent], str]]
+AppenderGetter = Tuple[Type[TContent], Callable[[TContent], Awaitable[Callable[[Card], None]]]]
 ActivityPGC = bilibili_activity.Activity[bilibili_activity.ContentPGC]
 
 
@@ -29,7 +28,7 @@ def pgc_title(activity: ActivityPGC) -> str:
   return " " + activity.content.season_name
 
 
-def checker(activity: text.ActivityText | image.ActivityImage) -> None:
+def checker(activity: Union[text.ActivityText, image.ActivityImage]) -> None:
   check_ignore(True, activity.content.text)
 
 
@@ -60,17 +59,17 @@ def unknown_appender(card: Card) -> None:
 
 
 GENERIC_TITLE = make_title_formatter("动态")
-CHECKERS: list[Checker[Any]] = [
+CHECKERS: List[Checker[Any]] = [
   (bilibili_activity.ContentText, checker),
   (bilibili_activity.ContentImage, checker),
 ]
-TITLE_FORMATTERS: list[TitleFormatter[Any]] = [
+TITLE_FORMATTERS: List[TitleFormatter[Any]] = [
   (bilibili_activity.ContentVideo, make_title_formatter("视频")),
   (bilibili_activity.ContentAudio, make_title_formatter("音频")),
   (bilibili_activity.ContentArticle, make_title_formatter("专栏")),
   (bilibili_activity.ContentPGC, pgc_title),
 ]
-CARD_APPENDERS: list[AppenderGetter[Any]] = [
+CARD_APPENDERS: List[AppenderGetter[Any]] = [
   (bilibili_activity.ContentText, text.get_appender),
   (bilibili_activity.ContentImage, image.get_appender),
   (bilibili_activity.ContentVideo, video.get_appender),
@@ -126,4 +125,4 @@ async def format(
       + f"\nhttps://t.bilibili.com/{activity.id}"
     )
 
-  return await asyncio.to_thread(make)
+  return await misc.to_thread(make)

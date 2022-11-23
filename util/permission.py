@@ -2,7 +2,9 @@ from collections import deque
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Generic, Iterable, Literal, TypeVar, cast
+from typing import (
+  Any, Deque, Dict, Generic, Iterable, List, Literal, Optional, Set, Tuple, TypeVar, cast
+)
 
 from loguru import logger
 from nonebot.adapters.onebot.v11 import Bot
@@ -11,25 +13,25 @@ from pydantic import BaseModel, Field, PrivateAttr
 
 from util import configs, misc
 
-Node = tuple[str, ...]
+Node = Tuple[str, ...]
 
 
 class Entry(BaseModel):
   node_str: str = Field(alias="node")
   value: bool
-  expire: datetime | None = None
-  context: dict[str, str] = Field(default_factory=dict)
-  _node: tuple[str, ...] = PrivateAttr()
+  expire: Optional[datetime] = None
+  context: Dict[str, str] = Field(default_factory=dict)
+  _node: Tuple[str, ...] = PrivateAttr()
 
   def __init__(self, **kw: Any) -> None:
     super().__init__(**kw)
     self._node = tuple(self.node_str.split("."))
 
   @property
-  def node(self) -> tuple[str, ...]:
+  def node(self) -> Tuple[str, ...]:
     return self._node
 
-  def matches(self, time: datetime, context: dict[str, str]) -> bool:
+  def matches(self, time: datetime, context: Dict[str, str]) -> bool:
     if self.expire and self.expire < time:
       return False
     for k, v in self.context.items():
@@ -40,8 +42,8 @@ class Entry(BaseModel):
 
 class Role(BaseModel):
   priority: int = 0
-  parents: list[str] = Field(default_factory=list)
-  entries: list[Entry] = Field(default_factory=list)
+  parents: List[str] = Field(default_factory=list)
+  entries: List[Entry] = Field(default_factory=list)
 
 
 @dataclass
@@ -60,8 +62,8 @@ V = TypeVar("V")
 
 class Trie(Generic[K, V]):
   def __init__(self) -> None:
-    self.data: list[V] = []
-    self.children: dict[K, "Trie[K, V]"] = {}
+    self.data: List[V] = []
+    self.children: Dict[K, "Trie[K, V]"] = {}
     self.parent: "Trie[K, V]" = self
     self.depth = 0
 
@@ -87,15 +89,15 @@ class Trie(Generic[K, V]):
     cur.data.append(value)
 
   def sort(self, recursive: bool = True) -> None:
-    cast(list[Any], self.data).sort()
+    cast(List[Any], self.data).sort()
     if recursive:
       for i in self.children.values():
         i.sort()
 
 
 class User(BaseModel):
-  roles: list[str] = Field(default_factory=list)
-  entries: list[Entry] = Field(default_factory=list)
+  roles: List[str] = Field(default_factory=list)
+  entries: List[Entry] = Field(default_factory=list)
   level: Literal[None, "member", "admin", "owner"] = None
   _tree: Trie[str, Entry] = PrivateAttr()
 
@@ -111,9 +113,9 @@ class Command(BaseModel):
 
 
 class State(BaseModel):
-  roles: dict[str, Role] = Field(default_factory=dict)
-  users: dict[int, User] = Field(default_factory=dict)
-  commands: dict[str, Command] = Field(default_factory=dict)
+  roles: Dict[str, Role] = Field(default_factory=dict)
+  users: Dict[int, User] = Field(default_factory=dict)
+  commands: Dict[str, Command] = Field(default_factory=dict)
   _tree: Trie[str, RoleEntry] = PrivateAttr()
 
   def __init__(self, **kw: Any) -> None:
@@ -126,7 +128,7 @@ class State(BaseModel):
     if "default" not in self.roles:
       self.roles["default"] = Role()
 
-  def get_command_level(self, node: Node) -> str | None:
+  def get_command_level(self, node: Node) -> Optional[str]:
     key = "." if not node else ".".join(node)
     if key in self.commands:
       return self.commands[key].level
@@ -134,7 +136,7 @@ class State(BaseModel):
 
 
 CONFIG = configs.SharedConfig("permission", State)
-LEVELS: dict[str, "Level"] = {}
+LEVELS: Dict[str, "Level"] = {}
 
 
 class Level(Enum):
@@ -173,7 +175,7 @@ class Level(Enum):
     return LEVELS[value]
 
 
-def get_override_level(bot: Bot, user: int, group: int = -1) -> Level | None:
+def get_override_level(bot: Bot, user: int, group: int = -1) -> Optional[Level]:
   if misc.is_superuser(bot, user):
     return Level.SUPER
   config = CONFIG()
@@ -182,7 +184,7 @@ def get_override_level(bot: Bot, user: int, group: int = -1) -> Level | None:
   return None
 
 
-async def get_group_level(bot: Bot, user: int, group: int) -> Level | None:
+async def get_group_level(bot: Bot, user: int, group: int) -> Optional[Level]:
   if group == -1:
     return None
   try:
@@ -194,17 +196,17 @@ async def get_group_level(bot: Bot, user: int, group: int) -> Level | None:
   return None
 
 
-def get_node_level(node: Node, group: int = -1) -> Level | None:
+def get_node_level(node: Node, group: int = -1) -> Optional[Level]:
   config = CONFIG()
   if (level_name := config.get_command_level(node)) is not None:
     return Level.parse(level_name)
   return None
 
 
-def check(node: Node, user: int, group: int, level: Level) -> bool | None:
+def check(node: Node, user: int, group: int, level: Level) -> Optional[bool]:
   config = CONFIG()
-  roles: set[str] = set()
-  queue: deque[str] = deque()
+  roles: Set[str] = set()
+  queue: Deque[str] = deque()
   user_tree = None
   if user in config.users:
     data = config.users[user]
@@ -250,13 +252,13 @@ def check(node: Node, user: int, group: int, level: Level) -> bool | None:
   return None
 
 
-EXPORT_LEVELS: dict[Level, str] = {
+EXPORT_LEVELS: Dict[Level, str] = {
   Level.MEMBER: "群员",
   Level.ADMIN: "群管",
   Level.OWNER: "群主",
   Level.SUPER: "超管",
 }
-EXPORT_NODES: list[tuple[Node, Level]] = []
+EXPORT_NODES: List[Tuple[Node, Level]] = []
 
 
 def register_for_export(node: Node, level: Level):

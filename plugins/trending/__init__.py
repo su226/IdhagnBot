@@ -1,5 +1,6 @@
 import math
 import time
+from typing import Dict, List
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
@@ -18,11 +19,11 @@ class Config(BaseModel):
 
 class Cache(BaseModel):
   time: float = 0
-  items: list[Item] = Field(default_factory=list)
+  items: List[Item] = Field(default_factory=list)
 
 
 class State(BaseModel):
-  cache: dict[str, Cache] = Field(default_factory=dict)
+  cache: Dict[str, Cache] = Field(default_factory=dict)
 
 
 CONFIG = configs.SharedConfig("trending", Config)

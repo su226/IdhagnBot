@@ -1,5 +1,5 @@
 from enum import IntEnum
-from typing import Iterable, TypedDict
+from typing import Dict, Iterable, TypedDict, Union
 
 
 class Rarity(IntEnum):
@@ -13,11 +13,11 @@ class EmptyDict(TypedDict):
   pass
 
 
-Weights = dict[int, float]
-Age = dict[int, Weights]
+Weights = Dict[int, float]
+Age = Dict[int, Weights]
 
 
-def parse_weights(items: Iterable[int | str]) -> Weights:
+def parse_weights(items: Iterable[Union[int, str]]) -> Weights:
   result: Weights = {}
   for item in items:
     if isinstance(item, str):

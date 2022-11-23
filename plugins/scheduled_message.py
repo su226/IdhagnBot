@@ -2,6 +2,7 @@ import random
 import time
 from copy import deepcopy
 from datetime import datetime
+from typing import Dict, List, Optional
 
 import nonebot
 from apscheduler.jobstores.memory import MemoryJobStore
@@ -53,7 +54,7 @@ class Task(BaseModel):
 
 
 class State(BaseModel):
-  tasks: dict[str, Task] = Field(default_factory=dict)
+  tasks: Dict[str, Task] = Field(default_factory=dict)
 
 
 STATE = configs.GroupState("scheduled", State)
@@ -63,10 +64,10 @@ driver = nonebot.get_driver()
 
 
 @STATE.onload()
-def onload(prev: State | None, curr: State, group_id: int) -> None:
+def onload(prev: Optional[State], curr: State, group_id: int) -> None:
   scheduler.remove_all_jobs(JOBSTORE)
   now = datetime.now()
-  expired: list[str] = []
+  expired: List[str] = []
   for id, msg in curr.tasks.items():
     if msg.date <= now:
       logger.warning(f"ID 为 {id} 的定时任务已过期，其内容为：{msg.message}")

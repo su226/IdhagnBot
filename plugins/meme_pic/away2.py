@@ -1,36 +1,35 @@
 import asyncio
 from argparse import Namespace
-from typing import Generator
+from typing import Generator, List, Optional, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 
-def transposes(l: list[Image.Image]) -> Generator[Image.Image, None, None]:
+def transposes(l: List[Image.Image]) -> Generator[Image.Image, None, None]:
   for i in range(8):
     for j in l:
-      match i:
-        case 0:
-          yield j
-        case 1:
-          yield j.transpose(Image.Transpose.ROTATE_90)
-        case 2:
-          yield j.transpose(Image.Transpose.ROTATE_180)
-        case 3:
-          yield j.transpose(Image.Transpose.ROTATE_270)
-        case 4:
-          yield j.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
-        case 5:
-          yield j.transpose(Image.Transpose.TRANSPOSE)
-        case 6:
-          yield j.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-        case 7:
-          yield j.transpose(Image.Transpose.TRANSVERSE)
+      if i == 0:
+        yield j
+      elif i == 1:
+        yield j.transpose(Image.Transpose.ROTATE_90)
+      elif i == 2:
+        yield j.transpose(Image.Transpose.ROTATE_180)
+      elif i == 3:
+        yield j.transpose(Image.Transpose.ROTATE_270)
+      elif i == 4:
+        yield j.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+      elif i == 5:
+        yield j.transpose(Image.Transpose.TRANSPOSE)
+      elif i == 6:
+        yield j.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+      elif i == 7:
+        yield j.transpose(Image.Transpose.TRANSVERSE)
 
 
 DEFAULT_TEXT = "如何提高社交质量：\n远离以下头像的人"
@@ -52,7 +51,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   if len(args.targets) > 8:
     await matcher.finish("最多只能有 8 个目标")
 
-  target_tasks: list[asyncio.Task[tuple[Image.Image, int | None]]] = []
+  target_tasks: List[asyncio.Task[Tuple[Image.Image, Optional[int]]]] = []
   async with AvatarGetter(bot, event) as g:
     for i, pattern in enumerate(args.targets, 1):
       target_tasks.append(g(pattern, event.self_id, f"目标{i}"))
@@ -69,4 +68,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       im.paste(avatar, (x, y), avatar)
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

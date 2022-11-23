@@ -3,7 +3,9 @@
 import os
 import shutil
 from threading import Lock
-from typing import Any, Callable, ClassVar, Generic, Iterable, Literal, TypeVar
+from typing import (
+  Any, Callable, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Tuple, Type, TypeVar
+)
 
 import yaml
 from loguru import logger
@@ -31,19 +33,19 @@ def encode(data: Any) -> Any:
 
 TModel = TypeVar("TModel", bound=BaseModel)
 TParam = TypeVarTuple("TParam")
-LoadHandler = Callable[[TModel | None, TModel, Unpack[TParam]], None]
+LoadHandler = Callable[[Optional[TModel], TModel, Unpack[TParam]], None]
 Reloadable = Literal[False, "eager", "lazy"]
 
 
 class BaseConfig(Generic[TModel, Unpack[TParam]]):
   category: ClassVar = "配置"
-  all: ClassVar[list["BaseConfig"]] = []
+  all: ClassVar[List["BaseConfig"]] = []
 
-  def __init__(self, model: type[TModel], reloadable: Reloadable = "lazy") -> None:
+  def __init__(self, model: Type[TModel], reloadable: Reloadable = "lazy") -> None:
     self.model = model
-    self.cache: dict[tuple[Unpack[TParam]], TModel] = {}
+    self.cache: Dict[Tuple[Unpack[TParam]], TModel] = {}
     self.reloadable: Reloadable = reloadable
-    self.handlers: list[LoadHandler[TModel, Unpack[TParam]]] = []
+    self.handlers: List[LoadHandler[TModel, Unpack[TParam]]] = []
     self.lock = Lock()
     self.all.append(self)
 
@@ -92,7 +94,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
       return handler
     return decorator
 
-  def get_all(self) -> Iterable[tuple[Unpack[TParam]]]:
+  def get_all(self) -> Iterable[Tuple[Unpack[TParam]]]:
     raise NotImplementedError
 
   def load_all(self) -> None:
@@ -112,14 +114,14 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
 class SharedConfig(BaseConfig[TModel]):
   base_dir: ClassVar = "configs"
 
-  def __init__(self, name: str, model: type[TModel], reloadable: Reloadable = "lazy") -> None:
+  def __init__(self, name: str, model: Type[TModel], reloadable: Reloadable = "lazy") -> None:
     super().__init__(model, reloadable)
     self.name = name
 
   def get_file(self) -> str:
     return f"{self.base_dir}/{self.name}.yaml"
 
-  def get_all(self) -> Iterable[tuple[()]]:
+  def get_all(self) -> Iterable[Tuple[()]]:
     yield ()
 
 
@@ -131,7 +133,7 @@ class SharedState(SharedConfig[TModel]):
 class GroupConfig(BaseConfig[TModel, int]):
   base_dir: ClassVar = "configs"
 
-  def __init__(self, name: str, model: type[TModel], reloadable: Reloadable = "lazy") -> None:
+  def __init__(self, name: str, model: Type[TModel], reloadable: Reloadable = "lazy") -> None:
     super().__init__(model, reloadable)
     self.name = name
 
@@ -142,7 +144,7 @@ class GroupConfig(BaseConfig[TModel, int]):
       shutil.copy(default_file, file)
     return file
 
-  def get_all(self) -> Iterable[tuple[int]]:
+  def get_all(self) -> Iterable[Tuple[int]]:
     from . import context
     for i in context.CONFIG().groups:
       yield i,

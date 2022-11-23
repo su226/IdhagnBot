@@ -1,13 +1,13 @@
-import asyncio
 from argparse import Namespace
 from pathlib import Path
+from typing import Dict, List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 DIR = Path(__file__).resolve().parent
@@ -53,9 +53,9 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
   def make() -> MessageSegment:
     target, _ = target_task.result()
-    cache: dict[int, Image.Image] = {}
+    cache: Dict[int, Image.Image] = {}
     target = target.resize((215, 215), imutil.scale_resample())
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for i in range(32):
       template = Image.open(DIR / f"{i}.png")
       if i < len(BOXES):
@@ -69,12 +69,12 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
         im = template
       frames.append(im)
 
-    result_frames: list[Image.Image] = []
-    durations: list[int] = []
+    result_frames: List[Image.Image] = []
+    durations: List[int] = []
     for frame, mul in FRAMES:
       result_frames.append(frames[frame])
       durations.append(mul * DURATION)
 
     return imutil.to_segment(result_frames, durations, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

@@ -1,4 +1,3 @@
-import asyncio
 from argparse import Namespace
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
@@ -6,7 +5,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 parser = ArgumentParser(add_help=False)
@@ -41,4 +40,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     imutil.paste(im, line2_im, (target.width // 2, target.height + 78), anchor="mm")
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

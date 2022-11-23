@@ -1,5 +1,5 @@
 import math
-from typing import Literal, TypeAlias, overload
+from typing import Literal, Tuple, Union, overload
 
 import cairo
 import gi
@@ -12,7 +12,7 @@ gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import GLib, Pango, PangoCairo  # type: ignore
 
-Layout: TypeAlias = Pango.Layout
+Layout = Pango.Layout
 Wrap = Literal[0, 1, 2]
 Ellipsize = Literal[0, 1, 2, 3]
 Align = Literal["l", "m", "r"]
@@ -33,7 +33,7 @@ def special_font(name: str, fallback: str) -> str:
 
 
 def layout(
-  content: str, font: str, size: float, *, box: tuple[int, int] | int | None = None,
+  content: str, font: str, size: float, *, box: Union[Tuple[int, int], int, None] = None,
   wrap: Wrap = WRAP_WORD, ellipsize: Ellipsize = ELLIPSIZE_NONE, markup: bool = False,
   align: Align = "l", spacing: int = 0, lines: int = 0
 ) -> Layout:
@@ -78,19 +78,19 @@ def layout(
 
 @overload
 def render(
-  content: Layout, *, color: RGB | int = ..., stroke: float = ...,
-  stroke_color: RGB | int = ...
+  content: Layout, *, color: Union[RGB, int] = ..., stroke: float = ...,
+  stroke_color: Union[RGB, int] = ...
 ) -> Image.Image: ...
 @overload
 def render(
-  content: str, font: str, size: float, *, color: RGB | int = ..., stroke: float = ...,
-  stroke_color: RGB | int = ..., box: tuple[int, int] | int | None = ..., wrap: Wrap = ...,
-  ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
-  lines: int = ...
+  content: str, font: str, size: float, *, color: Union[RGB, int] = ..., stroke: float = ...,
+  stroke_color: Union[RGB, int] = ..., box: Union[Tuple[int, int], int, None] = ...,
+  wrap: Wrap = ..., ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ...,
+  spacing: int = ..., lines: int = ...
 ) -> Image.Image: ...
 def render(
-  content: str | Layout, *args, color: RGB | int = (0, 0, 0), stroke: float = 0,
-  stroke_color: RGB | int = (255, 255, 255), **kw
+  content: Union[str, Layout], *args, color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
+  stroke_color: Union[RGB, int] = (255, 255, 255), **kw
 ) -> Image.Image:
   if isinstance(content, Pango.Layout):
     l = content
@@ -120,19 +120,19 @@ def render(
 
 @overload
 def paste(
-  im: Image.Image, xy: tuple[int, int], content: Layout, *, anchor: imutil.Anchor = ...,
-  color: RGB | int = ..., stroke: float = ..., stroke_color: RGB | int = ...
+  im: Image.Image, xy: Tuple[int, int], content: Layout, *, anchor: imutil.Anchor = ...,
+  color: Union[RGB, int] = ..., stroke: float = ..., stroke_color: Union[RGB, int] = ...
 ) -> Image.Image: ...
 @overload
 def paste(
-  im: Image.Image, xy: tuple[int, int], content: str, font: str, size: float, *,
-  anchor: imutil.Anchor = ..., color: RGB | int = ..., stroke: float = ...,
-  stroke_color: RGB | int = ..., box: tuple[int, int] | int | None = ..., wrap: Wrap = ...,
-  ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
-  lines: int = ...
+  im: Image.Image, xy: Tuple[int, int], content: str, font: str, size: float, *,
+  anchor: imutil.Anchor = ..., color: Union[RGB, int] = ..., stroke: float = ...,
+  stroke_color: Union[RGB, int] = ..., box: Union[Tuple[int, int], int, None] = ...,
+  wrap: Wrap = ..., ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ...,
+  spacing: int = ..., lines: int = ...
 ) -> Image.Image: ...
 def paste(
-  im: Image.Image, xy: tuple[int, int], *args, anchor: imutil.Anchor = "lt", **kw
+  im: Image.Image, xy: Tuple[int, int], *args, anchor: imutil.Anchor = "lt", **kw
 ) -> Image.Image:
   text = render(*args, **kw)
   imutil.paste(im, text, xy, anchor=anchor)

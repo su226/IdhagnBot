@@ -1,11 +1,10 @@
-import asyncio
 from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 DIR = Path(__file__).resolve().parent
 
@@ -28,4 +27,4 @@ async def handle_goodnews(args: Message = CommandArg()):
     text_im = imutil.contain_down(text_im, 480, 250)
     imutil.paste(im, text_im, (im.width // 2, im.height // 2), anchor="mm")
     return imutil.to_segment(im)
-  await goodnews.finish(await asyncio.to_thread(make))
+  await goodnews.finish(await misc.to_thread(make))

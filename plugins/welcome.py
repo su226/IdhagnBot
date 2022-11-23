@@ -1,3 +1,5 @@
+from typing import Dict, Set
+
 import nonebot
 from nonebot.adapters.onebot.v11 import (
   Bot, GroupDecreaseNoticeEvent, GroupIncreaseNoticeEvent, Message
@@ -8,8 +10,8 @@ from util import configs
 
 
 class Config(BaseModel):
-  welcome: dict[int, str] = Field(default_factory=dict)
-  leave: set[int] = Field(default_factory=set)
+  welcome: Dict[int, str] = Field(default_factory=dict)
+  leave: Set[int] = Field(default_factory=set)
 
 
 CONFIG = configs.SharedConfig("welcome", Config)

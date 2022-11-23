@@ -1,5 +1,5 @@
 import random
-from typing import Literal, cast, get_args
+from typing import Literal, Tuple, cast, get_args
 
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
@@ -38,22 +38,22 @@ def flip() -> FlipResult:
   return cast(FlipResult, result)
 
 
-def flip_multiple(count) -> tuple[int, int, int]:
+def flip_multiple(count) -> Tuple[int, int, int]:
   front = 0
   back = 0
   stand = 0
   for _ in range(count):
-    match flip():
-      case "front":
-        front += 1
-      case "back":
-        back += 1
-      case "stand":
-        stand += 1
+    result = flip()
+    if result == "front":
+      front += 1
+    elif result == "back":
+      back += 1
+    else:
+      stand += 1
   return front, back, stand
 
 
-def flip_binomial(count: int) -> tuple[int, int, int]:
+def flip_binomial(count: int) -> Tuple[int, int, int]:
   config = CONFIG()
   stand = misc.binomial_sample(
     count, config.stand_weight / (config.front_weight + config.back_weight + config.stand_weight)
@@ -66,13 +66,13 @@ def flip_binomial(count: int) -> tuple[int, int, int]:
 
 
 def format_one() -> str:
-  match flip():
-    case "front":
-      return "你抛出了一枚硬币，正面朝上"
-    case "back":
-      return "你抛出了一枚硬币，反面朝上"
-    case "stand":
-      return "你抛出了一枚硬币，立起来了"
+  result = flip()
+  if result == "front":
+    return "你抛出了一枚硬币，正面朝上"
+  elif result == "back":
+    return "你抛出了一枚硬币，反面朝上"
+  else:
+    return "你抛出了一枚硬币，立起来了"
 
 
 coin = (

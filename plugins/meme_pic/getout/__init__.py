@@ -1,4 +1,3 @@
-import asyncio
 import random
 from argparse import Namespace
 from pathlib import Path
@@ -8,7 +7,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.misc import range_int
 from util.user_aliases import AvatarGetter
 
@@ -41,4 +40,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     im.paste(target, (0, 400), target)
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

@@ -1,5 +1,6 @@
 import json
 import os
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Message
 
@@ -33,7 +34,7 @@ cache = EveryFurryCache()
 
 
 class EveryFurryModule(Module):
-  async def format(self) -> list[Message]:
+  async def format(self) -> List[Message]:
     await cache.ensure()
     with open(cache.path) as f:
       data = json.load(f)

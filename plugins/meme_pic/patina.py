@@ -1,6 +1,6 @@
-import asyncio
 from argparse import Namespace
 from io import BytesIO
+from typing import List
 
 import numpy as np
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
@@ -8,7 +8,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageChops, ImageEnhance, ImageFilter, ImageOps
 
-from util import command, context, imutil, textutil
+from util import command, context, imutil, misc, textutil
 from util.misc import range_float, range_int
 from util.user_aliases import AvatarGetter
 
@@ -35,7 +35,7 @@ def apply_yuv_loss(im: Image.Image, purple: bool = False) -> Image.Image:
   return im
 
 
-def apply_watermark(watermarks: list[str], rand: np.random.Generator, im: Image.Image) -> None:
+def apply_watermark(watermarks: List[str], rand: np.random.Generator, im: Image.Image) -> None:
   name = rand.choice(watermarks)
   pos = rand.integers(0, 3)
   short = min(im.width, im.height)
@@ -45,16 +45,15 @@ def apply_watermark(watermarks: list[str], rand: np.random.Generator, im: Image.
   shadow_im = ImageOps.expand(text_im.getchannel("A"), blur)
   shadow_im = ImageEnhance.Brightness(shadow_im).enhance(0.6)
   shadow_im = shadow_im.filter(ImageFilter.BoxBlur(blur))
-  match pos:
-    case 0:  # 中
-      x = (im.width - text_im.width) // 2
-      y = (im.height - text_im.height) // 2
-    case 1:  # 中下
-      x = (im.width - text_im.width) // 2
-      y = im.height - text_im.height - size // 2
-    case _:  # 右下
-      x = im.width - text_im.width - size // 2
-      y = im.height - text_im.height - size // 2
+  if pos == 0:  # 中
+    x = (im.width - text_im.width) // 2
+    y = (im.height - text_im.height) // 2
+  elif pos == 1:  # 中下
+    x = (im.width - text_im.width) // 2
+    y = im.height - text_im.height - size // 2
+  else:  # 右下
+    x = im.width - text_im.width - size // 2
+    y = im.height - text_im.height - size // 2
   offset = int(0.4 * size)
   x += rand.integers(-offset, offset)
   y += rand.integers(-offset, offset)
@@ -128,7 +127,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     blur = args.blur / 100 * size
 
     seed = np.random.SeedSequence()
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for raw in imutil.frames(target):
       rand = np.random.default_rng(seed)
       im = raw.convert("RGB")
@@ -159,4 +158,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(frames, target, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

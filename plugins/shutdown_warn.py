@@ -1,5 +1,6 @@
 import os
 import time
+from typing import Optional
 
 import nonebot
 from loguru import logger
@@ -11,8 +12,8 @@ nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 driver = nonebot.get_driver()
-bot_crash_time: float | None = None
-backend_crash_time: float | None = None
+bot_crash_time: Optional[float] = None
+backend_crash_time: Optional[float] = None
 
 
 @driver.on_startup

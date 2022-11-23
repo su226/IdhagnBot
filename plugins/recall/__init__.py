@@ -1,5 +1,5 @@
 import asyncio
-from typing import cast
+from typing import Union, cast
 
 import nonebot
 from loguru import logger
@@ -49,7 +49,7 @@ async def handle_manual_recall(bot: Bot, event: MessageEvent) -> None:
 
 driver = nonebot.get_driver()
 record = Record()
-AnyRecallNoticeEvent = GroupRecallNoticeEvent | FriendRecallNoticeEvent
+AnyRecallNoticeEvent = Union[GroupRecallNoticeEvent, FriendRecallNoticeEvent]
 
 
 async def rule_auto_recall(event: AnyRecallNoticeEvent, state: T_State) -> bool:

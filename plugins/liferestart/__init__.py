@@ -1,9 +1,8 @@
-import asyncio
 import html
 import itertools
 import random
 from argparse import Namespace
-from typing import Awaitable, Callable, Iterable, cast
+from typing import Awaitable, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -28,7 +27,7 @@ class Config(BaseModel):
 
 
 class State(BaseModel):
-  statistics: dict[int, Statistics] = Field(default_factory=dict)
+  statistics: Dict[int, Statistics] = Field(default_factory=dict)
 
   def get_statistics(self, id: int) -> Statistics:
     if id not in self.statistics:
@@ -40,7 +39,7 @@ CONFIG = configs.SharedConfig("liferestart", Config)
 STATE = configs.SharedState("liferestart", State)
 
 
-def find_character(name: str) -> Character | None:
+def find_character(name: str) -> Optional[Character]:
   for i in CHARACTER.values():
     if i.name == name:
       return i
@@ -50,7 +49,7 @@ def find_character(name: str) -> Character | None:
   return None
 
 
-def random_alloc(game: Game, total: int) -> list[int]:
+def random_alloc(game: Game, total: int) -> List[int]:
   result = [game.config.stat.min] * 4
   for _ in range(total):
     result[random.choice([i for i, v in enumerate(result) if v < game.config.stat.max])] += 1
@@ -65,7 +64,7 @@ RARITY_COLOR = {
 }
 
 
-def make_image(messages: Iterable[tuple[Rarity, str] | str]) -> MessageSegment:
+def make_image(messages: Iterable[Union[Tuple[Rarity, str], str]]) -> MessageSegment:
   lines = []
   for line in messages:
     if isinstance(line, tuple):
@@ -82,7 +81,7 @@ def make_image(messages: Iterable[tuple[Rarity, str] | str]) -> MessageSegment:
   return imutil.to_segment(im)
 
 
-def get_messages(game: Game) -> list[str]:
+def get_messages(game: Game) -> List[str]:
   messages = []
   prev_charm = -1
   prev_intelligence = -1
@@ -176,9 +175,9 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace) -> None
 
   inherited = (
     None if game.statistics.inherited_talent == -1 else TALENT[game.statistics.inherited_talent])
-  talents: list[Talent] = []
+  talents: List[Talent] = []
   for choices in game.random_talents():
-    segments: list[str] = []
+    segments: List[str] = []
     if not seed_shown:
       segments.append(f"种子：{seed}")
       seed_shown = True
@@ -250,7 +249,7 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace) -> None
   segments.append("- 发送 “随” 随机分配")
   segments.append("- 发送 “退” 退出游戏")
   await liferestart.send("\n".join(segments))
-  stats: list[int] = []
+  stats: List[int] = []
   choice = ""
   while True:
     try:
@@ -286,7 +285,7 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace) -> None
   STATE.dump()
 
   for part in misc.chunked(messages, CONFIG().progress_group_by):
-    await liferestart.send(await asyncio.to_thread(
+    await liferestart.send(await misc.to_thread(
       make_image, itertools.chain.from_iterable(part)
     ))
 
@@ -294,7 +293,7 @@ classic = subparsers.add_parser("经典", aliases=["c"], help="游玩经典模�
 classic.add_argument("--seed", "-s", nargs="?", type=int, metavar="种子")
 classic.set_defaults(func=handle_classic)
 
-def get_character_segments(ch: Character) -> list[str]:
+def get_character_segments(ch: Character) -> List[str]:
   segments = [f"---- {ch.name} ----"]
   if isinstance(ch, GeneratedCharacter) and ch.seed != -1:
     segments.append(f"种子：{ch.seed}")
@@ -329,7 +328,7 @@ async def handle_character_list(bot: Bot, event: MessageEvent, args: Namespace) 
     if ch := i.character:
       messages.append(get_character_segments(ch))
   for part in misc.chunked(messages, CONFIG().character_group_by):
-    await liferestart.send(await asyncio.to_thread(
+    await liferestart.send(await misc.to_thread(
       make_image, itertools.chain.from_iterable(part)
     ))
 
@@ -407,7 +406,7 @@ async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace) 
   messages = get_messages(game)
   STATE.dump()
   for part in misc.chunked(messages, config.progress_group_by):
-    await liferestart.send(await asyncio.to_thread(
+    await liferestart.send(await misc.to_thread(
       make_image, itertools.chain.from_iterable(part)
     ))
 
@@ -449,14 +448,14 @@ async def handle_achievements(bot: Bot, event: MessageEvent, args: Namespace) ->
     name = "???" if hidden else achievement.name
     description = "隐藏成就" if hidden else achievement.description
     segments.append((achievement.rarity, f"{symbol} {name} - {description}"))
-  await liferestart.send(await asyncio.to_thread(make_image, segments))
+  await liferestart.send(await misc.to_thread(make_image, segments))
 
 achievements = subparsers.add_parser("成就", help="查看成就和统计")
 achievements.set_defaults(func=handle_achievements)
 
 def leaderboard_factory(
   getter: Callable[[Statistics], int],
-  rarities: Callable[[], list[StatRarityItem]], suffix: str = ""
+  rarities: Callable[[], List[StatRarityItem]], suffix: str = ""
 ) -> Callable[[Bot, MessageEvent, Namespace], Awaitable[None]]:
   async def handler(bot: Bot, event: MessageEvent, args: Namespace) -> None:
     state = STATE()
@@ -465,7 +464,7 @@ def leaderboard_factory(
     segments = []
     ctx = context.get_event_context(event)
     if ctx == -1:
-      members: dict[int, str] = {}
+      members: Dict[int, str] = {}
     else:
       members = {
         i["user_id"]: i["card"] or i["nickname"]
@@ -478,7 +477,7 @@ def leaderboard_factory(
       else:
         name = (await bot.get_stranger_info(user_id=id))["nickname"]
       segments.append((judge.rarity, f"{name} - {v}{suffix}"))
-    await liferestart.send(await asyncio.to_thread(make_image, segments))
+    await liferestart.send(await misc.to_thread(make_image, segments))
   return handler
 
 finished_leaderboard = subparsers.add_parser("重开排行", help="查看重开次数排行")

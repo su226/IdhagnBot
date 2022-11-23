@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import List, Tuple
 
 from ..condition import Condition
 from ..typing.event import EventDict
@@ -21,7 +22,7 @@ class Event:
   spirit: int  # SPR, 快乐
 
   no_random: bool
-  branch: list[tuple[int, Condition]]
+  branch: List[Tuple[int, Condition]]
   include: Condition
   exclude: Condition
 
@@ -45,7 +46,8 @@ class Event:
       no_random=bool(data.get("NoRandom", 0)),
       branch=[
         (int(id), Condition.parse(cond))
-        for cond, id in map(lambda x: x.split(":"), data.get("branch", []))],
+        for cond, id in map(lambda x: x.split(":"), data.get("branch", []))
+      ],
       include=Condition.parse(include) if include else Condition.TRUE,
       exclude=Condition.parse(exclude) if exclude else Condition.FALSE,
     )

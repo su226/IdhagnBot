@@ -1,4 +1,3 @@
-import asyncio
 import random
 import re
 from argparse import Namespace
@@ -48,7 +47,7 @@ async def download_image(url: str, grayscale: bool) -> Image.Image:
       im2 = Image.new("RGB", im.size, (255, 255, 255))
     imutil.paste(im2, im)
     return im2
-  return await asyncio.to_thread(process)
+  return await misc.to_thread(process)
 
 
 parser = ArgumentParser(add_help=False)
@@ -59,7 +58,7 @@ parser.add_argument("--subtitle", "-s", default="", help="副标题")
 parser.add_argument("--position", "-p",
   choices=["左上", "左下", "右上", "右下", "lt", "lb", "rt", "rb"], default="rb", help="副标题方位"
 )
-parser.add_argument("--author", "-a", help="作者（默认为昵称）")
+parser.add_argument("--author", "-a", default="", help="作者（默认为昵称）")
 parser.add_argument("--color", "-c", help=(
   "颜色，0-16为内置颜色，也可是颜色代码，默认为内置颜色中随机"
 ))
@@ -87,7 +86,7 @@ async def handle_orly(bot: Bot, event: MessageEvent, args: Namespace = ShellComm
       c = colorutil.parse(args.color)
       if c is None:
         await orly.finish(f"无效颜色：{args.color}")
-  if args.author is None:
+  if not args.author:
     author = await context.get_card_or_name(bot, event, event.user_id)
   else:
     author = args.author
@@ -134,4 +133,4 @@ async def handle_orly(bot: Bot, event: MessageEvent, args: Namespace = ShellComm
     textutil.paste(im, (56, 1356), "O'RLY?", "sans heavy", 44, anchor="lb")
     return imutil.to_segment(im)
 
-  await orly.finish(await asyncio.to_thread(make))
+  await orly.finish(await misc.to_thread(make))

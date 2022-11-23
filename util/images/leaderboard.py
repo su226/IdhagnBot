@@ -1,4 +1,5 @@
 import html
+from typing import List, Tuple
 
 from PIL import Image, ImageChops, ImageFilter, ImageOps
 
@@ -9,7 +10,7 @@ HEIGHTS = [120, 100, 100, 80]
 MIN_LINES = 6
 
 
-def render(data: list[tuple[Image.Image, str, str]]) -> Image.Image:
+def render(data: List[Tuple[Image.Image, str, str]]) -> Image.Image:
   lines = max(len(data), MIN_LINES)
   if lines < len(HEIGHTS):
     height = sum(HEIGHTS[:lines])

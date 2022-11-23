@@ -2,7 +2,7 @@ import asyncio
 import time
 from collections import defaultdict
 from io import BytesIO
-from typing import cast
+from typing import Dict, List, Optional, Union, cast
 
 import nonebot
 from apscheduler.schedulers.base import JobLookupError
@@ -28,12 +28,12 @@ class UserTarget(BaseModel):
 
 class User(BaseModel):
   uid: int
-  targets: list[GroupTarget | UserTarget]
+  targets: List[Union[GroupTarget, UserTarget]]
 
 
 class Config(BaseModel):
   interval: int = 10
-  users: list[User] = []
+  users: List[User] = []
 
 
 CONFIG = configs.SharedConfig("bilibili_live", Config)
@@ -41,11 +41,11 @@ CONFIG = configs.SharedConfig("bilibili_live", Config)
 API_URL = "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids"
 INFO_API_URL = "https://api.live.bilibili.com/live_user/v1/Master/info"
 driver = nonebot.get_driver()
-streaming: dict[int, bool] = defaultdict(lambda: False)
+streaming: Dict[int, bool] = defaultdict(lambda: False)
 
 
 @CONFIG.onload()
-def onload(prev: Config | None, curr: Config) -> None:
+def onload(prev: Optional[Config], curr: Config) -> None:
   async def prepare() -> None:
     params = []
     for user in curr.users:
@@ -119,7 +119,7 @@ async def get_message(data: dict) -> Message:
     return imutil.to_segment(im)
 
   url = f"https://live.bilibili.com/{data['room_id']}"
-  return f"{data['uname']} 开播了 {category}" + await asyncio.to_thread(make) + url
+  return f"{data['uname']} 开播了 {category}" + await misc.to_thread(make) + url
 
 
 async def check() -> bool:
@@ -130,8 +130,8 @@ async def check() -> bool:
     bot = cast(Bot, nonebot.get_bot())
   except ValueError:
     return False
-  params: list[str] = []
-  targets: dict[int, list[GroupTarget | UserTarget]] = {}
+  params: List[str] = []
+  targets: Dict[int, List[Union[GroupTarget, UserTarget]]] = {}
   for user in CONFIG().users:
     params.append(f"uids[]={user.uid}")
     targets[user.uid] = user.targets

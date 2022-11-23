@@ -2,11 +2,12 @@ import asyncio
 import html
 from calendar import Calendar
 from datetime import date
+from typing import Dict, List
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
 from PIL import Image
 
-from util import context, currency, imutil, textutil
+from util import context, currency, imutil, misc, textutil
 
 from ..config import CONFIG, STATE, FormatData
 
@@ -15,7 +16,7 @@ WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"]
 
 
 async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
-  async def get_user_infos(users: list[int]) -> dict[int, str]:
+  async def get_user_infos(users: List[int]) -> Dict[int, str]:
     coros = [context.get_card_or_name(bot, format_data.gid, user) for user in users]
     return dict(zip(users, await asyncio.gather(*coros)))
 
@@ -97,7 +98,7 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
 
     return imutil.to_segment(im)
 
-  return await asyncio.to_thread(make)
+  return await misc.to_thread(make)
 
 
 async def format(bot: Bot, format_data: FormatData) -> Message:

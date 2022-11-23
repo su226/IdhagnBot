@@ -1,3 +1,5 @@
+from typing import Dict, Set
+
 import nonebot
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
@@ -5,7 +7,7 @@ from nonebot.rule import Rule
 
 from util import command, context, misc, user_aliases
 
-uids: dict[int, set[str]] = {}
+uids: Dict[int, Set[str]] = {}
 
 auto_poke = (
   command.CommandBuilder("auto_poke", "自动戳")

@@ -1,5 +1,6 @@
 import re
 from contextvars import ContextVar
+from typing import Dict, Optional, Tuple
 
 import nonebot
 from nonebot.adapters.onebot.v11 import Event, GroupMessageEvent, Message
@@ -8,13 +9,13 @@ from nonebot.rule import Rule
 from util import hook, misc
 
 suppress = ContextVar("suppress", default=False)
-last_message: dict[int, tuple[Message, int]] = {}
+last_message: Dict[int, Tuple[Message, int]] = {}
 ORIGINAL_EMOTE_RE = re.compile(r"^&#91;[A-Za-z0-9\u4e00-\u9fa5]+&#93;$")
 
 
 @hook.on_message_sent
 async def on_message_sent(
-  event: Event | None, is_group: bool, target_id: int, message: Message, message_id: int
+  event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int
 ) -> None:
   if is_group and target_id in last_message and not suppress.get():
     del last_message[target_id]

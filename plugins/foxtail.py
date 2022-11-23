@@ -2,7 +2,7 @@ import base64
 import re
 import time
 from collections import defaultdict
-from typing import Literal
+from typing import Dict, List, Literal
 from urllib.parse import quote as urlencode
 
 import aiohttp
@@ -186,7 +186,7 @@ keyword = nonebot.on_message(keyword_rule, picture.permission, block=True)
 @keyword.handle()
 async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()):
   config = CONFIG()
-  args = message.extract_plain_text().lstrip().removeprefix(config.keyword)
+  args = misc.removeprefix(message.extract_plain_text().lstrip(), config.keyword)
   await Source.handle(bot, event, args.strip())
 
 
@@ -205,12 +205,12 @@ async def handle_search(message: Message = CommandArg()) -> None:
   http = misc.http()
   async with await http.get(SEARCH_API.format(name)) as response:
     data = await response.json()
-  result: dict[str, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+  result: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
   for i in data["open"]:
     result[i["name"]][i["type"]].append(i["id"])
-  segments: list[str] = []
+  segments: List[str] = []
   for name, pics in result.items():
-    lines: list[str] = []
+    lines: List[str] = []
     lines.append(name)
     for type, ids in pics.items():
       lines.append(TYPE_TO_STR[int(type)] + "：" + "、".join(ids))

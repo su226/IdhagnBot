@@ -4,7 +4,7 @@ import shlex
 from argparse import Namespace
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generator, Sequence, TypeVar
+from typing import Generator, List, Optional, Sequence, Tuple, TypeVar
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.exception import ParserExit
@@ -57,14 +57,14 @@ def split(delim: T, l: Sequence[T]) -> Generator[Sequence[T], None, None]:
     prev_index = index + 1
 
 
-def parse_args(prog: str, msg: Message) -> list[Namespace]:
+def parse_args(prog: str, msg: Message) -> List[Namespace]:
   try:
     all_argv = list(split("--", shlex.split(str(msg))))
   except ValueError as e:
     raise misc.AggregateError(f"解析参数失败：{e}")
 
-  errors: list[str] = []
-  all_args: list[Namespace] = []
+  errors: List[str] = []
+  all_args: List[Namespace] = []
   parser.prog = prog
   setattr(parser, "_message", "")
   for argv in all_argv:
@@ -79,10 +79,10 @@ def parse_args(prog: str, msg: Message) -> list[Namespace]:
 
 
 def parse_message(
-  g: AvatarGetter, bot: Bot, event: MessageEvent, all_args: list[Namespace]
-) -> list[asyncio.Task[ParsedMessage]]:
+  g: AvatarGetter, bot: Bot, event: MessageEvent, all_args: List[Namespace]
+) -> List["asyncio.Task[ParsedMessage]"]:
   async def parse_one(
-    task: asyncio.Task[tuple[Image.Image, int | None]], args: Namespace
+    task: "asyncio.Task[Tuple[Image.Image, Optional[int]]]", args: Namespace
   ) -> ParsedMessage:
     avatar, user = await task
     if args.name is not None:
@@ -100,9 +100,9 @@ def parse_message(
 
 
 def render(
-  messages: list[ParsedMessage], max_height: int = 10000, padding_bottom: int = 20
+  messages: List[ParsedMessage], max_height: int = 10000, padding_bottom: int = 20
 ) -> Image.Image:
-  rendered: list[RenderedMessage] = []
+  rendered: List[RenderedMessage] = []
   width = 0
   height = padding_bottom
   for i in messages:
@@ -171,7 +171,7 @@ async def handle_screenshot(bot: Bot, event: MessageEvent, msg: Message = Comman
     messages = [task.result() for task in message_tasks]
     return imutil.to_segment(render(messages))
 
-  await screenshot.finish(await asyncio.to_thread(make))
+  await screenshot.finish(await misc.to_thread(make))
 
 
 scroll = (
@@ -204,7 +204,7 @@ async def handle_scroll(bot: Bot, event: MessageEvent, msg: Message = CommandArg
     imutil.circle(avatar)
     bottom.paste(avatar, (15, 40), avatar)
 
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     scroll_height = math.ceil(1192 / im.height) * im.height
     for i in range(50):
       frame = Image.new("RGB", (1079, 1192), (234, 237, 244))
@@ -214,4 +214,4 @@ async def handle_scroll(bot: Bot, event: MessageEvent, msg: Message = CommandArg
 
     return imutil.to_segment(frames, 80)
 
-  await scroll.finish(await asyncio.to_thread(make))
+  await scroll.finish(await misc.to_thread(make))

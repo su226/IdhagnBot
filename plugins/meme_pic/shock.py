@@ -1,6 +1,6 @@
-import asyncio
 import random
 from argparse import Namespace
+from typing import List
 
 import cv2
 import numpy as np
@@ -9,7 +9,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 
@@ -49,7 +49,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   def make() -> MessageSegment:
     target, _ = target_task.result()
     target = target.resize((300, 300), imutil.scale_resample())
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for _ in range(30):
       frames.append(
         motion_blur(target, random.randint(-90, 90), random.randint(1, 50))
@@ -57,4 +57,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       )
     return imutil.to_segment(frames, 10, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

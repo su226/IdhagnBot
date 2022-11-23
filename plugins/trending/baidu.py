@@ -1,5 +1,6 @@
 import json
 from html.parser import HTMLParser
+from typing import List, Optional, Tuple
 from urllib.parse import unquote
 
 from util import misc
@@ -16,7 +17,7 @@ class Parser(HTMLParser):
     self.got = False
     self.data = {}
 
-  def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
+  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]):
     for _, value in attrs:
       if value == "hotsearch_data":
         self.got = True
@@ -35,7 +36,7 @@ def extract_data(value: str):
   return parser.data
 
 
-async def get_data() -> list[Item]:
+async def get_data() -> List[Item]:
   http = misc.http()
   async with http.get(URL, headers={"User-Agent": UA}) as response:
     data = extract_data(await response.text())

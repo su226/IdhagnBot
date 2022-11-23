@@ -1,4 +1,5 @@
 import re
+from typing import Optional, Tuple
 
 NAMES = {
   0x000000: "CSS: black",
@@ -832,10 +833,10 @@ HSL_RE = re.compile(
   r"(100(?:\.0+)?|[1-9]\d(?:\.\d+)?)%\s*(?:,|\s)\s*"
   r"(100(?:\.0+)?|[1-9]\d(?:\.\d+)?)%\s*\)$")
 
-RGB = tuple[int, int, int]
+RGB = Tuple[int, int, int]
 
 
-def parse(src: str) -> int | None:
+def parse(src: str) -> Optional[int]:
   if src in VALUES:
     return VALUES[src]
   if match := LONG_HEX_RE.match(src):
@@ -885,7 +886,7 @@ def hsl2rgb(h: float, s: float, l: float) -> int:
   return round(r * 255) << 16 | round(g * 255) << 8 | round(b * 255)
 
 
-def rgb2hsl(r: int, g: int, b: int) -> tuple[float, float, float]:
+def rgb2hsl(r: int, g: int, b: int) -> Tuple[float, float, float]:
   r_ = r / 255
   g_ = g / 255
   b_ = b / 255

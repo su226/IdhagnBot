@@ -1,5 +1,5 @@
 import asyncio
-from typing import Awaitable, cast
+from typing import Awaitable, Dict, List, Set, Tuple, cast
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
@@ -19,10 +19,10 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
     match_to_uid[name] = uid
     uids.add(uid)
 
-  messages: list[tuple[str, str]] = []
-  match_coros: list[Awaitable[None]] = []
-  match_to_uid: dict[str, int] = {}
-  uids: set[int] = {event.self_id}
+  messages: List[Tuple[str, str]] = []
+  match_coros: List[Awaitable[None]] = []
+  match_to_uid: Dict[str, int] = {}
+  uids: Set[int] = {event.self_id}
   for x in str(msg).split("--"):
     message = x.split(None, 1)
     if len(message) != 2:
@@ -42,7 +42,7 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
   async def fetch_name(uid: int) -> None:
     uid_to_name[uid] = await context.get_card_or_name(bot, event, uid)
 
-  uid_to_name: dict[int, str] = {}
+  uid_to_name: Dict[int, str] = {}
   await asyncio.gather(*[fetch_name(uid) for uid in uids])
 
   await misc.send_forward_msg(bot, event, MessageSegment("node", {

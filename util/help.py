@@ -1,6 +1,6 @@
 import html
 import math
-from typing import Callable
+from typing import Callable, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -13,14 +13,14 @@ def NOOP_CONDITION(_): return True
 class CommonData(BaseModel):
   priority: int = 0
   node_str: str = Field(default="", alias="node")
-  has_group: list[int] = Field(default_factory=list)
-  in_group: list[int] = Field(default_factory=list)
-  private: bool | None = None
+  has_group: List[int] = Field(default_factory=list)
+  in_group: List[int] = Field(default_factory=list)
+  private: Optional[bool] = None
   level: permission.Level = permission.Level.MEMBER
   condition: Callable[["ShowData"], bool] = NOOP_CONDITION
 
   @property
-  def node(self) -> permission.Node | None:
+  def node(self) -> Optional[permission.Node]:
     if not self.node_str:
       return None
     elif self.node_str == ".":
@@ -31,7 +31,7 @@ class CommonData(BaseModel):
 class ShowData(BaseModel):
   user_id: int
   current_group: int
-  available_groups: list[int]
+  available_groups: List[int]
   private: bool
   level: permission.Level
 
@@ -45,7 +45,7 @@ class UserString(UserData):
 
 
 class UserCommand(UserData):
-  command: list[str]
+  command: List[str]
   brief: str = ""
   usage: str = ""
 
@@ -57,15 +57,15 @@ class UserCategory(UserData):
 class Config(BaseModel):
   __file__ = "help"
   page_size: int = 10
-  user_helps: list[str | UserString | UserCommand | UserCategory] = Field(default_factory=list)
-  category_brief: dict[str, str] = Field(default_factory=dict)
+  user_helps: List[Union[str, UserString, UserCommand, UserCategory]] = Field(default_factory=list)
+  category_brief: Dict[str, str] = Field(default_factory=dict)
 
 
 CONFIG = configs.SharedConfig("help", Config)
 
 
 @CONFIG.onload()
-def onload(prev: Config | None, curr: Config) -> None:
+def onload(prev: Optional[Config], curr: Config) -> None:
   if prev:
     CommandItem.remove_user_items()
     CategoryItem.ROOT.remove_user_items()
@@ -99,7 +99,7 @@ def check_permission(data: CommonData, show: ShowData) -> bool:
 
 
 class Item:
-  def __init__(self, data: CommonData | None):
+  def __init__(self, data: Optional[CommonData]):
     self.data = CommonData() if data is None else data
 
   def __call__(self) -> str:
@@ -138,7 +138,7 @@ class Item:
 
 
 class StringItem(Item):
-  def __init__(self, string: str, data: CommonData | None = None):
+  def __init__(self, string: str, data: Optional[CommonData] = None):
     super().__init__(data)
     self.string = string
 
@@ -156,7 +156,7 @@ class StringItem(Item):
 
 
 class CommandItem(Item):
-  commands: dict[str, "CommandItem"] = {}
+  commands: Dict[str, "CommandItem"] = {}
   prefixes = {
     permission.Level.MEMBER: "",
     permission.Level.ADMIN: "[群管] ",
@@ -165,8 +165,8 @@ class CommandItem(Item):
   }
 
   def __init__(
-    self, names: list[str] = [], brief: str = "", usage: str | Callable[[], str] = "",
-    data: CommonData | None = None
+    self, names: List[str] = [], brief: str = "", usage: Union[str, Callable[[], str]] = "",
+    data: Optional[CommonData] = None
   ) -> None:
     super().__init__(data)
     self.names = names
@@ -214,7 +214,7 @@ class CommandItem(Item):
 
   @staticmethod
   def remove_user_items() -> None:
-    remove_keys: list[str] = []
+    remove_keys: List[str] = []
     for k, v in CommandItem.commands.items():
       if isinstance(v, UserCommandItem):
         remove_keys.append(k)
@@ -225,12 +225,12 @@ class CommandItem(Item):
 class CategoryItem(Item):
   ROOT: "CategoryItem"
 
-  def __init__(self, name: str, brief: str = "", data: CommonData | None = None):
+  def __init__(self, name: str, brief: str = "", data: Optional[CommonData] = None):
     super().__init__(data)
     self.name = name
     self.brief = brief
-    self.items: list[Item] = []
-    self.subcategories: dict[str, "CategoryItem"] = {}
+    self.items: List[Item] = []
+    self.subcategories: Dict[str, "CategoryItem"] = {}
 
   def __call__(self) -> str:
     brief = f" - {self.brief}" if self.brief else ""
@@ -251,7 +251,7 @@ class CategoryItem(Item):
     return -2
 
   @classmethod
-  def find(cls, path: str | list[str], create: bool = False) -> "CategoryItem":
+  def find(cls, path: Union[str, List[str]], create: bool = False) -> "CategoryItem":
     cur = CategoryItem.ROOT
     if isinstance(path, str):
       path = [x for x in path.split(".") if x]
@@ -287,7 +287,7 @@ class CategoryItem(Item):
 
   def remove_user_items(self) -> None:
     self.items = [item for item in self.items if not isinstance(item, UserItem)]
-    remove_keys: list[str] = []
+    remove_keys: List[str] = []
     for k, v in self.subcategories.items():
       if isinstance(v, UserCategoryItem):
         remove_keys.append(k)

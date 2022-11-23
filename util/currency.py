@@ -1,10 +1,12 @@
+from typing import Dict
+
 from pydantic import BaseModel, Field
 
 from util import configs
 
 
 class State(BaseModel):
-  users: dict[int, int] = Field(default_factory=dict)
+  users: Dict[int, int] = Field(default_factory=dict)
 
 
 STATE = configs.GroupState("currency", State)

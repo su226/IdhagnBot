@@ -4,7 +4,7 @@ import posixpath
 import random
 import re
 from argparse import Namespace
-from typing import Sequence
+from typing import List, Optional, Sequence
 
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
@@ -24,7 +24,7 @@ CONFIG = configs.SharedConfig("fortune", Config)
 RE_033 = re.compile("\033\\[(\\d*;?)*m")
 
 
-def list_fortunes(recursive: bool) -> list[str]:
+def list_fortunes(recursive: bool) -> List[str]:
   config = CONFIG()
   if recursive:
     result = []
@@ -66,7 +66,7 @@ fortune = (
 
 
 class StrFileChoice:
-  def __init__(self, name: str, weight: float, length: int, long: bool | None):
+  def __init__(self, name: str, weight: float, length: int, long: Optional[bool]):
     self.name = name
     self.weight = weight
     with open(os.path.join(CONFIG().fortunes, name + ".dat"), "rb") as f:
@@ -83,7 +83,7 @@ class StrFileChoice:
         self.choice = strfile.read_offset(f, random.randrange(self.count))
 
   @staticmethod
-  def _filter_offsets(offsets: Sequence[int], length: int, long: bool) -> list[int]:
+  def _filter_offsets(offsets: Sequence[int], length: int, long: bool) -> List[int]:
     return [
       offset for i, offset in enumerate(offsets) if
       i + 1 < len(offsets) and (offsets[i + 1] - offset >= length) == long]
@@ -95,7 +95,7 @@ async def handle_fortune(args: Namespace = ShellCommandArgs()) -> None:
   if args.offensive and not config.offensive:
     await fortune.finish("禁止查看可能不雅的文本")
   if args.files:
-    files: list[StrFileChoice] = []
+    files: List[StrFileChoice] = []
     manual_weight = 0
     manual_texts = 0
     manual_files = 0

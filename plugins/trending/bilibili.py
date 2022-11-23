@@ -1,3 +1,5 @@
+from typing import List
+
 from util import misc
 
 from .common import Item
@@ -5,7 +7,7 @@ from .common import Item
 API = "https://api.bilibili.com/x/web-interface/popular?ps=50&pn={}"
 
 
-async def get_data() -> list[Item]:
+async def get_data() -> List[Item]:
   result = []
   http = misc.http()
   pn = 1

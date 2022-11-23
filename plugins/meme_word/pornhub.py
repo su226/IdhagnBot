@@ -1,13 +1,13 @@
-import asyncio
 from dataclasses import dataclass
+from typing import List, Tuple
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageDraw
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
-Color = tuple[int, int, int]
+Color = Tuple[int, int, int]
 
 
 @dataclass
@@ -23,7 +23,7 @@ class Theme:
   fg2: Color
 
 
-def register(node: str, names: list[str], brief: str, theme: Theme):
+def register(node: str, names: List[str], brief: str, theme: Theme):
   async def handler(args: Message = CommandArg()):
     def make() -> MessageSegment:
       content = args.extract_plain_text().split()
@@ -57,7 +57,7 @@ def register(node: str, names: list[str], brief: str, theme: Theme):
         right_im, (theme.margin_outer + lw + theme.margin_text + theme.padding_h, text_y), right_im
       )
       return imutil.to_segment(im)
-    await matcher.finish(await asyncio.to_thread(make))
+    await matcher.finish(await misc.to_thread(make))
   matcher = (
     command.CommandBuilder(node, *names)
     .category("meme_word")

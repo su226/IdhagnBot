@@ -1,6 +1,6 @@
-import asyncio
 from argparse import Namespace
 from pathlib import Path
+from typing import Dict, List
 
 import cairo
 import cv2
@@ -10,7 +10,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageChops, ImageFilter, ImageOps
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.misc import range_int
 from util.user_aliases import AvatarGetter
 
@@ -20,7 +20,7 @@ def kernel_average(size: int) -> np.ndarray:
 
 
 DIR = Path(__file__).resolve().parent
-KERNELS: dict[str, np.ndarray] = {
+KERNELS: Dict[str, np.ndarray] = {
   "thin": kernel_average(5),
   "normal": kernel_average(7),
   "semibold": kernel_average(9),
@@ -121,7 +121,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     pencil = Image.open(DIR / "pencil.jpg").convert("L")
     pencil = ImageOps.fit(pencil, target.size, imutil.scale_resample())
     gradient = make_gradient(target.width, target.height)
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for raw in imutil.frames(target):
       l, a = raw.convert("LA").split()
       frame = Image.new("L", l.size, 255)
@@ -132,4 +132,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       frames.append(frame)
     return imutil.to_segment(frames, target, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

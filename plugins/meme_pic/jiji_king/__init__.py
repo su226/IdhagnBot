@@ -2,14 +2,14 @@ import asyncio
 import itertools
 from argparse import Namespace
 from pathlib import Path
-from typing import Awaitable
+from typing import Awaitable, Optional, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 DIR = Path(__file__).resolve().parent
@@ -42,17 +42,17 @@ matcher = (
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   def get_image(
     g: AvatarGetter, pattern: str, default: int, size: int, prompt: str
-  ) -> asyncio.Task[Image.Image]:
+  ) -> "asyncio.Task[Image.Image]":
     for left, right in BRACKETS:
       if pattern.startswith(left) and pattern.endswith(right):
-        return g.submit(asyncio.to_thread(make_char, pattern[1:-1], size))
+        return g.submit(misc.to_thread(make_char, pattern[1:-1], size))
     return g.submit(get_avatar(g.get(pattern, default, prompt), size))
 
   async def get_avatar(
-    task: Awaitable[tuple[Image.Image, int | None]], size: int
+    task: Awaitable[Tuple[Image.Image, Optional[int]]], size: int
   ) -> Image.Image:
     avatar, _ = await task
-    return await asyncio.to_thread(avatar.resize, (size, size), imutil.scale_resample())
+    return await misc.to_thread(avatar.resize, (size, size), imutil.scale_resample())
 
   def make_char(char: str, size: int) -> Image.Image:
     fg = textutil.render(char, "sans bold", size * 0.67, color=(255, 255, 255))
@@ -96,4 +96,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

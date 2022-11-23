@@ -1,4 +1,3 @@
-import asyncio
 import html
 import math
 import random
@@ -7,7 +6,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 SIZE = 32
 PADDING = SIZE
@@ -48,4 +47,4 @@ async def handle_lolcat(arg: Message = CommandArg()):
     im = Image.new("RGB", (rect.width + PADDING * 2, rect.height + PADDING * 2), (33, 33, 33))
     textutil.paste(im, (PADDING, PADDING), layout)
     return imutil.to_segment(im)
-  await lolcat.finish(await asyncio.to_thread(make))
+  await lolcat.finish(await misc.to_thread(make))

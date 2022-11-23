@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Literal
+from typing import Dict, List, Literal, Optional, Set, Tuple, Union
 
 from pydantic import BaseModel, Field
 
@@ -8,11 +8,11 @@ from util.configs import GroupState, SharedConfig
 
 
 class Config(BaseModel):
-  coin: int | tuple[int, int] = (80, 120)
+  coin: Union[Tuple[int, int], int] = (80, 120)
   combo_each: float = 0.1
   combo_max: float = 1.0
-  first_award: list[int] = Field(default_factory=lambda: [0.5, 0.25, 0.1])
-  first_prefix: list[str] = Field(default_factory=lambda: ["🥇", "🥈", "🥉"])
+  first_award: List[int] = Field(default_factory=lambda: [0.5, 0.25, 0.1])
+  first_prefix: List[str] = Field(default_factory=lambda: ["🥇", "🥈", "🥉"])
   max_rank: int = 10
   formatter: Literal["legacy", "ring"] = "ring"
 
@@ -32,13 +32,13 @@ class Config(BaseModel):
 class UserData(BaseModel):
   combo_days: int = 0
   total_days: int = 0
-  calendar: set[int] = Field(default_factory=set)
+  calendar: Set[int] = Field(default_factory=set)
   time: datetime = datetime.min
 
 
 class GroupData(BaseModel):
-  users: dict[int, UserData] = Field(default_factory=dict)
-  rank: list[int] = Field(default_factory=list)
+  users: Dict[int, UserData] = Field(default_factory=dict)
+  rank: List[int] = Field(default_factory=list)
   time: datetime = datetime.min
 
   def get_user(self, uid: int) -> UserData:
@@ -64,8 +64,8 @@ class FormatData:
   gid: int
   coin: int
   original_coin: int
-  combo_bonus: float | None
-  rank_bonus: float | None
+  combo_bonus: Optional[float]
+  rank_bonus: Optional[float]
 
 
 CONFIG = SharedConfig("sign", Config)

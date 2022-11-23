@@ -2,6 +2,7 @@ import asyncio
 import itertools
 import random
 from argparse import Namespace
+from typing import Dict, List, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.params import ArgPlainText, CommandArg, ShellCommandArgs
@@ -21,11 +22,11 @@ class Goods(BaseModel):
   single: int
   disabled: bool = False
   total_purchased: int = 0
-  single_purchased: dict[int, int] = Field(default_factory=dict)
+  single_purchased: Dict[int, int] = Field(default_factory=dict)
 
 
 class State(BaseModel):
-  goods: dict[int, Goods] = Field(default_factory=dict)
+  goods: Dict[int, Goods] = Field(default_factory=dict)
 
 
 STATE = configs.GroupState("goods", State)
@@ -74,7 +75,7 @@ async def handle_add_goods(
   await add_goods.finish(f"已添加ID为 {goods_id} 的商品")
 
 
-def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
+def find_goods(ctx: int, raw_pattern: str) -> Tuple[int, Goods]:
   state = STATE(ctx)
   try:
     id = int(raw_pattern)
@@ -84,8 +85,8 @@ def find_goods(ctx: int, raw_pattern: str) -> tuple[int, Goods]:
   pattern = user_aliases.to_identifier(raw_pattern)
   if not pattern:
     raise misc.AggregateError(f"有效名字为空：{raw_pattern}")
-  exact: list[tuple[int, Goods]] = []
-  inexact: list[tuple[int, Goods]] = []
+  exact: List[Tuple[int, Goods]] = []
+  inexact: List[Tuple[int, Goods]] = []
   for id, goods in state.goods.items():
     ident = user_aliases.to_identifier(goods.name)
     if pattern == ident:

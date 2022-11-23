@@ -1,11 +1,10 @@
-import asyncio
 from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageFilter, ImageOps
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 DIR = Path(__file__).resolve().parent
 
@@ -22,7 +21,7 @@ nokia = (
 @nokia.handle()
 async def handle_nokia(args: Message = CommandArg()):
   def make() -> MessageSegment:
-    content = args.extract_plain_text().rstrip().removeprefix(".") or nokia.__doc__ or ""
+    content = misc.removeprefix(args.extract_plain_text().rstrip(), ".") or nokia.__doc__ or ""
     font = textutil.special_font("pixel", "sans")
     layout = textutil.layout(content, font, 32, box=320)
     if layout.get_pixel_size().height > 224:
@@ -34,4 +33,4 @@ async def handle_nokia(args: Message = CommandArg()):
     im = Image.open(DIR / "template.png")
     im.paste(layer, (83, 127), layer)
     return imutil.to_segment(im)
-  await nokia.finish(await asyncio.to_thread(make))
+  await nokia.finish(await misc.to_thread(make))

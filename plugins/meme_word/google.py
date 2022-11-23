@@ -1,4 +1,3 @@
-import asyncio
 import html
 import random
 
@@ -6,7 +5,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 
 COLORS = ["4285f4", "ea4335", "fbbc05", "34a853"]
 PADDING = 32
@@ -38,4 +37,4 @@ async def handle_google(args: Message = CommandArg()):
     im = Image.new("RGB", (text_im.width + p, text_im.height + p), (255, 255, 255))
     im.paste(text_im, (PADDING, PADDING), text_im)
     return imutil.to_segment(im)
-  await google.finish(await asyncio.to_thread(make))
+  await google.finish(await misc.to_thread(make))

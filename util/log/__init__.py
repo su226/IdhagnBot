@@ -1,11 +1,10 @@
 import linecache
 import os
 import sys
-import tracemalloc
 import warnings
 from datetime import time, timedelta
 from io import StringIO
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Union
 
 from loguru import logger
 from pydantic import BaseModel, Field
@@ -16,20 +15,23 @@ if TYPE_CHECKING:
   from loguru import Record
 
 
+Level = Literal["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
+
+
 class Target(BaseModel):
-  level: str | int = "INFO"
+  level: Union[Level, int] = "INFO"
   fold_nonebot: bool = True
   format: str = "<g>{time:HH:mm:ss}</g>|<lvl>{level:8}</lvl>| <c>{name}</c> - {message}"
-  colorize: bool | None = None
+  colorize: Optional[bool] = None
   backtrace: bool = True
   diagnose: bool = False
 
 
 class FileTarget(Target):
   file: str
-  rotation: str | int | time | timedelta | None = None
-  retention: str | int | timedelta | None = None
-  compression: str | None = None
+  rotation: Union[str, int, time, timedelta, None] = None
+  retention: Union[str, int, timedelta, None] = None
+  compression: Union[str, None] = None
   encoding: str = "utf8"
   newline: Literal[None, '\r', '\n', '\r\n'] = None
 
@@ -39,13 +41,13 @@ class SpecialTarget(Target):
 
 
 class Config(BaseModel):
-  sinks: list[FileTarget | SpecialTarget] = Field(default_factory=lambda: [SpecialTarget()])
+  sinks: List[Union[FileTarget, SpecialTarget]] = Field(default_factory=lambda: [SpecialTarget()])
   warnings_as_log: bool = True
   stdio_as_log: bool = False
 
 
 class LoggerStream:
-  def __init__(self, name: str, level: str | int):
+  def __init__(self, name: str, level: Union[str, int]):
     self.prefix = name
     self.level = level
     self.buffer = StringIO()
@@ -71,7 +73,7 @@ showwarning_orig = warnings._showwarnmsg_impl  # type: ignore
 
 
 @CONFIG.onload()
-def config_onload(_: Config | None, cur: Config) -> None:
+def config_onload(_: Optional[Config], cur: Config) -> None:
   if cur.warnings_as_log:
     warnings._showwarnmsg_impl = showwarning  # type: ignore
   else:
@@ -127,34 +129,37 @@ def init():
   CONFIG()
 
 
-def colorize_filename(filename: str) -> str:
+def colorize_filename(filename: str) -> Tuple[str, str]:
   if filename.startswith("<"):
-    return filename.replace("<", "\\<")
+    return filename, ""
   dirname, basename = os.path.split(filename)
-  dirname = dirname.replace("<", "\\<")
-  basename = basename.replace("<", "\\<")
-  filename = f"{dirname}{os.path.sep}<b>{basename}</b>"
-  return filename
+  return f"{dirname}{os.path.sep}", basename
 
 
 def showwarning(msg: warnings.WarningMessage) -> None:
   line = msg.line
   if line is None:
     line = linecache.getline(msg.filename, msg.lineno)
-  line = line.strip().replace("<", "\\<")  # loguru转义
-  category = msg.category.__name__.replace("<", "\\<")
-  message = str(msg.message).strip().replace("<", "\\<")
-  log = logger.opt(colors=True, depth=2)
-  log.warning(f"<b><y>{category}</y>: {message}</b>")
-  log.warning(f"  <g>{colorize_filename(msg.filename)}</g>:<y>{msg.lineno}</y>")
+  line = line.strip()
+  category = msg.category.__name__
+  message = str(msg.message).strip()
+  dirname, basename = colorize_filename(msg.filename)
+  log = logger.opt(colors=True, depth=2)  # 不使用 f-string 是防止 loguru 转义问题
+  log.warning("<b><y>{}</y>: {}</b>", category, message)
+  log.warning("  <g>{}<b>{}</b></g>:<y>{}</y>", dirname, basename, msg.lineno)
   if line:
-    log.warning("    " + line)
+    log.warning("    {}", line)
   if msg.source is not None:
+    try:
+      import tracemalloc
+    except ImportError:
+      return
     if not tracemalloc.is_tracing():
       log.warning("启用 tracemalloc 以查看对象分配栈。")
     elif (tb := tracemalloc.get_object_traceback(msg.source)):
       log.warning("<b><y>对象分配于</y>:</b>")
       for frame in tb:
-        log.warning(f"  <g>{colorize_filename(frame.filename)}</g>:<y>{frame.lineno}</y>")
-        line = linecache.getline(frame.filename, frame.lineno).strip().replace("<", "\\<")
-        log.warning("    " + line.strip())
+        dirname, basename = colorize_filename(frame.filename)
+        log.warning("  <g>{}<b>{}</b></g>:<y>{}</y>", dirname, basename, frame.lineno)
+        line = linecache.getline(frame.filename, frame.lineno).strip()
+        log.warning("    {}", line)

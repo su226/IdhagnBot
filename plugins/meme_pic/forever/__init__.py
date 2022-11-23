@@ -2,7 +2,7 @@ import asyncio
 import random
 from argparse import Namespace
 from pathlib import Path
-from typing import Awaitable
+from typing import Awaitable, Dict, List, Optional, Tuple
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -16,7 +16,7 @@ DIR = Path(__file__).resolve().parent
 PREFIX = "我永远喜欢"
 
 
-def name(value: str) -> tuple[int, str]:
+def name(value: str) -> Tuple[int, str]:
   try:
     id, name = value.split(":", 1)
     id = int(id)
@@ -41,8 +41,8 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async def get_one(
-    task: Awaitable[tuple[Image.Image, int | None]], i: int
-  ) -> tuple[Image.Image, str]:
+    task: Awaitable[Tuple[Image.Image, Optional[int]]], i: int
+  ) -> Tuple[Image.Image, str]:
     avatar, user = await task
     if i in default_names:
       return avatar, default_names[i]
@@ -53,9 +53,9 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
   if len(args.targets) > 7:
     await matcher.finish("你个海王，最多只能有7个目标")
-  default_names: dict[int, str] = {i: name for i, name in args.name}
+  default_names: Dict[int, str] = {i: name for i, name in args.name}
   async with AvatarGetter(bot, event) as g:
-    tasks: list[asyncio.Task[tuple[Image.Image, str]]] = [
+    tasks: List[asyncio.Task[Tuple[Image.Image, str]]] = [
       g.submit(get_one(g.get(pattern, event.self_id, f"目标{i}"), i))
       for i, pattern in enumerate(args.targets, 1)
     ]
@@ -100,4 +100,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

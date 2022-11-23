@@ -1,4 +1,3 @@
-import asyncio
 from argparse import Namespace
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
@@ -7,7 +6,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, context, imutil, textutil
+from util import command, context, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 GENDERS = {
@@ -81,4 +80,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

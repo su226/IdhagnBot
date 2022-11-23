@@ -1,4 +1,5 @@
 import json
+from typing import List
 
 from util import misc
 
@@ -7,7 +8,7 @@ from .common import Item
 API = "https://news.cctv.com/2019/07/gaiban/cmsdatainterface/page/news_1.jsonp"
 
 
-async def get_data() -> list[Item]:
+async def get_data() -> List[Item]:
   http = misc.http()
   async with http.get(API) as response:
     data = await response.text()

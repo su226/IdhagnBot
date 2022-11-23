@@ -1,8 +1,8 @@
-from typing import TypedDict
+from typing import List, TypedDict, Union
 
-WeightsList = list[int | str]
+WeightsList = List[Union[int, str]]
 
 
 class Age(TypedDict):
-  age: int | str
+  age: Union[int, str]
   event: WeightsList

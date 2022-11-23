@@ -1,4 +1,3 @@
-import asyncio
 import json
 import re
 import time
@@ -106,4 +105,4 @@ async def handle_bilibili_link(state: T_State) -> None:
     return imutil.to_segment(im)
 
   url = "https://www.bilibili.com/video/" + data_view["bvid"]
-  await bilibili_link.finish(await asyncio.to_thread(make) + url)
+  await bilibili_link.finish(await misc.to_thread(make) + url)

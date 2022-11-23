@@ -3,7 +3,7 @@ import math
 import re
 from html.parser import HTMLParser
 from io import StringIO
-from typing import cast
+from typing import List, Optional, Tuple, cast
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
@@ -34,7 +34,7 @@ class SingleParser(HTMLParser):
     self.level = 0
     self.text = StringIO()
 
-  def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
     if self.level:
       if tag == "br":
         self.text.write("\n")
@@ -56,7 +56,7 @@ class BatchParser(HTMLParser):
   def __init__(self) -> None:
     super().__init__()
     self.begin = False
-    self.lines: list[str] = []
+    self.lines: List[str] = []
 
   def handle_data(self, data: str) -> None:
     data = data.strip()
@@ -76,7 +76,7 @@ INT_RE = re.compile(r"\d+")
 CONFIG = configs.SharedConfig("qimeng", Config)
 
 
-async def query_openapi(uid: int) -> str | None:
+async def query_openapi(uid: int) -> Optional[str]:
   config = CONFIG()
   http = misc.http()
   async with http.get(API.format(config.token.get_secret_value(), uid)) as response:
@@ -87,7 +87,7 @@ async def query_openapi(uid: int) -> str | None:
   return data["note"]
 
 
-async def query_spider(uid: int) -> tuple[int, str]:
+async def query_spider(uid: int) -> Tuple[int, str]:
   http = misc.http()
   data = {"qq": uid}
   async with http.post(URL, data=data) as response:
@@ -104,14 +104,14 @@ async def query_spider(uid: int) -> tuple[int, str]:
   return type, value
 
 
-async def query_spider_batch(uids: list[int]) -> list[tuple[int, int]]:
+async def query_spider_batch(uids: List[int]) -> List[Tuple[int, int]]:
   http = misc.http()
   data = {"qq": "\n".join(str(x) for x in uids)}
   async with http.post(BATCH_URL, data=data) as response:
     parser = BatchParser()
     parser.feed(await response.text())
     parser.close()
-  result: list[tuple[int, int]] = []
+  result: List[Tuple[int, int]] = []
   for line in parser.lines:
     uid = int(cast(re.Match[str], INT_RE.search(line))[0])
     if line.endswith("避雷."):
@@ -189,12 +189,12 @@ async def handle_query_all(bot: Bot, event: Event) -> None:
   chunks = math.ceil(len(members) / CHUNK_SIZE)
   if chunks > 1:
     await query_all.send(f"群员较多，需要分为 {chunks} 批次查询，请稍等。")
-  result: list[tuple[int, int]] = []
+  result: List[Tuple[int, int]] = []
   for chunk in misc.chunked([member["user_id"] for member in members], CHUNK_SIZE):
     if result:
       await asyncio.sleep(1)
     result.extend(await query_spider_batch(chunk))
-  lines: list[str] = []
+  lines: List[str] = []
   for uid, type in result:
     if type == 2:
       lines.append(f"⚠️ {uid} 位于避雷名单中。")

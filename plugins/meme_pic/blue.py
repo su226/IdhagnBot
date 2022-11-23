@@ -1,4 +1,3 @@
-import asyncio
 from argparse import Namespace
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
@@ -6,7 +5,7 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import ImageOps
 
-from util import command, imutil, textutil
+from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter
 
 COLOR = (78, 114, 184)
@@ -45,4 +44,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     )
     return imutil.to_segment(im)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

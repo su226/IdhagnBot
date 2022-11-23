@@ -121,4 +121,4 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
 
     return Message(imutil.to_segment(im))
 
-  return await asyncio.to_thread(make)
+  return await misc.to_thread(make)

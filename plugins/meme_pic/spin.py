@@ -1,13 +1,13 @@
-import asyncio
 import random
 from argparse import Namespace
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.misc import range_int
 from util.user_aliases import AvatarGetter
 
@@ -51,7 +51,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   def make() -> MessageSegment:
     target, _ = target_task.result()
     acw = bool(random.randrange(2)) if args.acw is None else args.acw
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     if not args.original:
       target = target.resize((250, 250), imutil.scale_resample())
     for i in range(0, 360, 10):
@@ -60,4 +60,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       frames.append(frame)
     return imutil.to_segment(frames, args.duration, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

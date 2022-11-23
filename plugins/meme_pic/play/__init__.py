@@ -1,13 +1,13 @@
-import asyncio
 from argparse import Namespace
 from pathlib import Path
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image
 
-from util import command, imutil
+from util import command, imutil, misc
 from util.user_aliases import AvatarGetter
 
 DIR = Path(__file__).resolve().parent
@@ -46,7 +46,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
   def make() -> MessageSegment:
     target, _ = target_task.result()
-    frames: list[Image.Image] = []
+    frames: List[Image.Image] = []
     for i in range(38):
       frames.append(Image.open(DIR / f"{i}.png").convert("RGBA"))
     for i, (x, y, w, h) in enumerate(BOXES):
@@ -54,7 +54,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
       frame.paste(target.resize((w, h), imutil.scale_resample()), (x, y))
       frame.paste(frames[i], mask=frames[i])
       frames[i] = frame
-    result_frames: list[Image.Image] = []
+    result_frames: List[Image.Image] = []
     for i in range(2):
       result_frames.extend(frames[0:12])
     result_frames.extend(frames[0:8])
@@ -62,4 +62,4 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     result_frames.extend(frames[18:38])
     return imutil.to_segment(frames, 60, afmt=args.format)
 
-  await matcher.finish(await asyncio.to_thread(make))
+  await matcher.finish(await misc.to_thread(make))

@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
@@ -38,7 +39,7 @@ class HistoryModule(Module):
       lines.append(f"{i['year']} - {i['title']}")
     return "\n".join(lines)
 
-  async def format(self) -> list[Message]:
+  async def format(self) -> List[Message]:
     text = await self.raw_format()
     text += "\n你可以发送 /历史 再次查看"
     return [Message(MessageSegment.text(text))]

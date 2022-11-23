@@ -118,7 +118,7 @@ keyword = nonebot.on_message(keyword_rule, picture.permission, block=True)
 @keyword.handle()
 async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()):
   config = furbot.CONFIG()
-  args = message.extract_plain_text().lstrip().removeprefix(config.keyword)
+  args = misc.removeprefix(message.extract_plain_text().lstrip(), config.keyword)
   await Source.handle(bot, event, args.strip())
 
 

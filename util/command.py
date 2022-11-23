@@ -1,7 +1,7 @@
 import asyncio
 import shlex
 from collections import deque
-from typing import Any, Callable, Literal
+from typing import Any, Callable, Deque, Dict, List, Literal, Optional, Type, Union
 
 import nonebot
 from apscheduler.job import Job
@@ -31,7 +31,7 @@ class ShellCommandRule:
     self.prog = prog
     self.parser = parser
 
-  async def __call__(self, state: T_State, msg: Message | None = CommandArg()) -> bool:
+  async def __call__(self, state: T_State, msg: Optional[Message] = CommandArg()) -> bool:
     if msg is None:  # 去掉 None 虽然不影响功能，但 DEBUG 日志等级下会刷屏
       return False
     try:
@@ -51,8 +51,8 @@ class ShellCommandRule:
     return True
 
   @staticmethod
-  def split(msg: Message) -> list[str]:
-    args: list[str] = []
+  def split(msg: Message) -> List[str]:
+    args: List[str] = []
     for seg in msg:
       if seg.is_text():
         args.extend(shlex.split(str(seg)))
@@ -61,19 +61,19 @@ class ShellCommandRule:
     return args
 
 
-def add_reject_handler(matcher: type[Matcher]) -> None:
+def add_reject_handler(matcher: Type[Matcher]) -> None:
   async def handler(args: ParserExit = ShellCommandArgs()) -> None:
     await matcher.finish(args.message)
   matcher.handle()(handler)
 
 
 class TokenBucket:
-  def __init__(self, capacity: int, frequency: float | None) -> None:
+  def __init__(self, capacity: int, frequency: Optional[float]) -> None:
     self.capacity = capacity
     self.frequency = 1 / capacity if frequency is None else frequency
     self.tokens = capacity
-    self.queue: deque[asyncio.Future[None]] = deque()
-    self.job: Job | None = None
+    self.queue: Deque[asyncio.Future[None]] = deque()
+    self.job: Optional[Job] = None
 
   async def acquire(self) -> None:
     if not self.job:
@@ -102,7 +102,7 @@ class TokenBucket:
 
 
 def add_throttle_handler(
-  matcher: type[Matcher], name: str, capacity: int, frequency: float | None
+  matcher: Type[Matcher], name: str, capacity: int, frequency: Optional[float]
 ) -> None:
   async def handle_throttle():
     estimated = token.estimate()
@@ -123,7 +123,7 @@ class CommandBuilder:
     self._rule = Rule()
     self._level = permission.Level.MEMBER
     self._auto_reject = False
-    self._state: dict[str, Any] = {}
+    self._state: Dict[str, Any] = {}
 
     self._capacity = 0
     self._frequency = None
@@ -138,7 +138,7 @@ class CommandBuilder:
     self.help_data.level = self._level
     return self
 
-  def rule(self, rule: Rule | T_RuleChecker, *rules: Rule | T_RuleChecker) -> Self:
+  def rule(self, rule: Union[Rule, T_RuleChecker], *rules: Union[Rule, T_RuleChecker]) -> Self:
     self._rule &= rule
     for r in rules:
       self._rule &= r
@@ -158,7 +158,7 @@ class CommandBuilder:
     self._brief = brief
     return self
 
-  def usage(self, usage: str | ArgumentParser | Callable[[], str]) -> Self:
+  def usage(self, usage: Union[str, ArgumentParser, Callable[[], str]]) -> Self:
     if isinstance(usage, ArgumentParser):
       usage.prog = self.names[0]
       self._usage = usage.format_help()
@@ -177,7 +177,7 @@ class CommandBuilder:
       self.usage(parser)
     return self
 
-  def throttle(self, capacity: int, frequency: float | None = None) -> Self:
+  def throttle(self, capacity: int, frequency: Optional[float] = None) -> Self:
     self._capacity = capacity
     self._frequency = frequency
     return self
@@ -194,7 +194,7 @@ class CommandBuilder:
     self._state.update(kw)
     return self
 
-  def build(self) -> type[Matcher]:
+  def build(self) -> Type[Matcher]:
     category = help.CategoryItem.find(self._category, True)
     category.add(help.CommandItem(self.names, self._brief, self._usage, self.help_data))
     _permission = context.build_permission(tuple(self.node.split(".")), self._level)

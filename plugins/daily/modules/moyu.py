@@ -1,3 +1,5 @@
+from typing import List
+
 from nonebot.adapters.onebot.v11 import Message
 
 from util import misc
@@ -25,6 +27,6 @@ moyu_cache = MoyuCache()
 
 
 class MoyuModule(Module):
-  async def format(self) -> list[Message]:
+  async def format(self) -> List[Message]:
     await moyu_cache.ensure()
     return [misc.local("image", moyu_cache.path) + "\n你可以发送 /摸鱼 再次查看"]

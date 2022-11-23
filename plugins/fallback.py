@@ -1,4 +1,5 @@
 import asyncio
+from typing import Set
 
 import nonebot
 from aiohttp.client_exceptions import ClientError
@@ -16,7 +17,7 @@ class ManualException(Exception):
     super().__init__("管理员使用 /raise 手动触发了错误")
 
 
-suppressed: set[int] = set()
+suppressed: Set[int] = set()
 driver = nonebot.get_driver()
 
 

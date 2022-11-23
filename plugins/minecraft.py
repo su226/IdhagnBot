@@ -1,4 +1,4 @@
-from typing import cast
+from typing import List, Tuple, cast
 
 from mctools import PINGClient
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
@@ -10,13 +10,13 @@ from util.configs import SharedConfig
 
 class Config(BaseModel):
   stat_address: str = ""
-  ping_addresses: list[str] = Field(default_factory=list)
+  ping_addresses: List[str] = Field(default_factory=list)
 
 
 CONFIG = SharedConfig("minecraft", Config)
 
 
-def parse_server(raw: str) -> tuple[str, int]:
+def parse_server(raw: str) -> Tuple[str, int]:
   try:
     host, port = raw.rsplit(":", 1)
     return host, int(port)
