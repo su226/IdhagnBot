@@ -3,14 +3,15 @@ import math
 import re
 from html.parser import HTMLParser
 from io import StringIO
-from typing import List, Optional, Tuple, cast
+from typing import List, Optional, Set, Tuple, cast
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
   Bot, Event, GroupIncreaseNoticeEvent, GroupRequestEvent, Message
 )
-from nonebot.params import CommandArg
-from pydantic import BaseModel, SecretStr
+from nonebot.params import ArgStr, CommandArg
+from nonebot.typing import T_State
+from pydantic import BaseModel, Field, SecretStr
 
 from util import command, configs, context, misc
 
@@ -22,6 +23,8 @@ class Config(BaseModel):
   # 对不起绮梦老师了
   token: SecretStr = SecretStr("")
   auto_reject: bool = False
+  # 默认忽略Q群管家
+  ignore: Set[int] = Field(default_factory=lambda: {2854196310})
 
   @property
   def use_spider(self) -> bool:
@@ -184,34 +187,114 @@ query_all = (
 )
 @query_all.handle()
 async def handle_query_all(bot: Bot, event: Event) -> None:
+  config = CONFIG()
   group_id = context.get_event_context(event)
-  members = await bot.get_group_member_list(group_id=group_id)
+  members = {
+    uid: member["card"] or member["nickname"]
+    for member in await bot.get_group_member_list(group_id=group_id)
+    if (uid := member["user_id"]) not in config.ignore
+  }
   chunks = math.ceil(len(members) / CHUNK_SIZE)
   if chunks > 1:
     await query_all.send(f"群员较多，需要分为 {chunks} 批次查询，请稍等。")
   result: List[Tuple[int, int]] = []
-  for chunk in misc.chunked([member["user_id"] for member in members], CHUNK_SIZE):
+  for chunk in misc.chunked(members, CHUNK_SIZE):
     if result:
       await asyncio.sleep(1)
     result.extend(await query_spider_batch(chunk))
   lines: List[str] = []
   for uid, type in result:
     if type == 2:
-      lines.append(f"⚠️ {uid} 位于避雷名单中。")
+      lines.append(f"⚠️ {members[uid]}({uid}) 位于避雷名单中。")
     elif type == 1:
-      lines.append(f"🚨 {uid} 位于云黑名单中。")
+      lines.append(f"🚨 {members[uid]}({uid}) 位于云黑名单中。")
   if not lines:
-    lines.append("✅ 群内无云黑成员。")
+    await query_all.finish("✅ 群内无云黑或避雷成员。")
   await query_all.finish("\n".join(lines))
 
 
-async def check_member_join(_: GroupIncreaseNoticeEvent) -> bool:
-  return bool(CONFIG().token)
+kick_all = (
+  command.CommandBuilder("qimeng.kick_all", "踢群云黑")
+  .brief("批量踢出云黑成员")
+  .usage(f'''\
+/踢群云黑 - 踢出所有云黑成员
+/踢群云黑 避雷 - 踢出所有云黑和避雷成员
+10 秒内只能使用一次
+数据来自 {URL}''')
+  .throttle(1, 10)
+  .in_group()
+  .level("admin")
+  .help_condition(lambda _: CONFIG().use_spider)
+  .rule(lambda: CONFIG().use_spider)
+  .build()
+)
+@kick_all.handle()
+async def handle_kick_all(
+  bot: Bot, event: Event, state: T_State, arg: Message = CommandArg()
+) -> None:
+  config = CONFIG()
+  group_id = context.get_event_context(event)
+  members = {
+    uid: member["card"] or member["nickname"]
+    for member in await bot.get_group_member_list(group_id=group_id)
+    if (uid := member["user_id"]) not in config.ignore
+  }
+  chunks = math.ceil(len(members) / CHUNK_SIZE)
+  if chunks > 1:
+    await kick_all.send(f"群员较多，需要分为 {chunks} 批次查询，请稍等。")
+  result: List[Tuple[int, int]] = []
+  for chunk in misc.chunked(members, CHUNK_SIZE):
+    if result:
+      await asyncio.sleep(1)
+    result.extend(await query_spider_batch(chunk))
+  uids: List[int] = []
+  lines: List[str] = []
+  include_type2 = "避雷" in arg.extract_plain_text()
+  for uid, type in result:
+    if type == 2 and include_type2:
+      lines.append(f"⚠️ {members[uid]}({uid}) 位于避雷名单中。")
+      uids.append(uid)
+    elif type == 1:
+      lines.append(f"🚨 {members[uid]}({uid}) 位于云黑名单中。")
+      uids.append(uid)
+  if not lines:
+    if include_type2:
+      await kick_all.finish("✅ 群内无云黑或避雷成员。")
+    else:
+      await kick_all.finish("✅ 群内无云黑成员，要包括避雷成员，请发送“/踢群云黑 避雷”。")
+  info = await bot.get_group_member_info(group_id=group_id, user_id=event.self_id)
+  if info["role"] == "member":
+    lines.append("IdhagnBot 不是群管理员，不能使用 /踢群云黑")
+    await kick_all.finish("\n".join(lines))
+  state["uids"] = uids
+  lines.append("是否全部踢出？请发送“是”或“否”")
+  await kick_all.send("\n".join(lines))
+
+
+@kick_all.got("confirm")
+async def got_confirm(bot: Bot, event: Event, state: T_State, confirm: str = ArgStr()) -> None:
+  if confirm != "是":
+    await kick_all.finish("操作取消")
+  group_id = context.get_event_context(event)
+  uids: List[int] = state["uids"]
+  done, _ = await asyncio.wait([
+    asyncio.create_task(bot.set_group_kick(group_id=group_id, user_id=uid)) for uid in uids
+  ])
+  success = sum([i.exception() is None for i in done])
+  failed = len(uids) - success
+  msg = f"成功踢出 {success} 个成员"
+  if failed > 0:
+    msg += f"，踢出 {failed} 个成员失败"
+  await kick_all.finish(msg)
+
+
+async def check_member_join(event: GroupIncreaseNoticeEvent) -> bool:
+  config = CONFIG()
+  return bool(config.token) and event.user_id not in config.ignore
 on_member_join = nonebot.on_notice(check_member_join)
 @on_member_join.handle()
 async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
-  config = CONFIG()
-  if config.use_spider:
+  if CONFIG().use_spider:
     type, detail = await query_spider(event.user_id)
     if type == 0:
       return
@@ -227,7 +310,8 @@ async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
 
 
 async def check_group_request(event: GroupRequestEvent) -> bool:
-  return bool(CONFIG().token) and event.sub_type == "add"
+  config = CONFIG()
+  return bool(config.token) and event.sub_type == "add" and event.user_id not in config.ignore
 on_group_request = nonebot.on_notice(check_group_request)
 @on_group_request.handle()
 async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
