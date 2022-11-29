@@ -37,7 +37,8 @@ class Render:
 class CardText(Render):
   def __init__(self, content: str, size: int, lines: int) -> None:
     self.layout = textutil.layout(
-      content, "sans", size, box=CONTENT_WIDTH, ellipsize=textutil.ELLIPSIZE_END, lines=lines)
+      content, "sans", size, box=CONTENT_WIDTH, ellipsize="end", lines=lines
+    )
     self.height = self.layout.get_pixel_size().height
 
   def get_width(self) -> int:
@@ -94,9 +95,7 @@ class CardAuthor(Render):
       self.height = max(self.height, fans_height)
     else:
       self.fans_layout = None
-    self.name_layout = textutil.layout(
-      name, "sans", 32, box=name_max, ellipsize=textutil.ELLIPSIZE_END
-    )
+    self.name_layout = textutil.layout(name, "sans", 32, box=name_max, ellipsize="end")
     name_height = self.name_layout.get_pixel_size().height
     self.height = max(self.height, name_height)
 

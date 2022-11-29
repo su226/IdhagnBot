@@ -56,6 +56,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
 
     with cairo.ImageSurface(cairo.FORMAT_ARGB32, im.width, im.height) as surface:
       cr = cairo.Context(surface)
+      textutil.font_options(cr)
       today = date.today()
       _, days = calendar.monthrange(today.year, today.month)
       angle = math.pi / days * 0.9
@@ -94,7 +95,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
 
     y += textutil.paste(
       im, (center_x, y), name, "sans bold", 28,
-      anchor="mt", box=content_w, ellipsize=textutil.ELLIPSIZE_MIDDLE, color=(255, 255, 255)
+      anchor="mt", box=content_w, ellipsize="middle", color=(255, 255, 255)
     ).height
 
     rank = group_data.rank.index(format_data.uid) + 1

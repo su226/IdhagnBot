@@ -48,9 +48,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     im.paste(target1, (im.width - 257, im.height - 155))
     im.paste(target2, (im.width - 160, im.height - 273))
     im.paste(overlay, (im.width - overlay.width, im.height - overlay.height), overlay)
-    text_im = textutil.render(
-      name, "sans", 20, color=(255, 255, 255), box=230, ellipsize=textutil.ELLIPSIZE_END
-    )
+    text_im = textutil.render(name, "sans", 20, color=(255, 255, 255), box=230, ellipsize="end")
     text_im = ImageOps.pad(text_im, (230, text_im.height), centering=(0, 0))
     text_im = text_im.rotate(9, imutil.resample(), True)
     im.paste(text_im, (im.width - 281, im.height - 345), text_im)

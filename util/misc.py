@@ -30,10 +30,11 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-  "AggregateError", "AnyMessage", "CONFIG", "Config", "Font", "NotCommand", "PromptTimeout",
+  "ADAPTER_NAME", "AggregateError", "AnyMessage", "CONFIG", "CairoAntialias", "CairoHintMetrics",
+  "CairoHintStyle", "CairoSubpixel", "Config", "Font", "NotCommand", "PromptTimeout", "Quantize",
   "Resample", "ScaleResample", "binomial_sample", "browser", "chunked", "command_start",
-  "format_time", "forward_node", "http", "is_command", "local", "prompt", "range_float",
-  "range_int", "send_forward_msg", "weighted_choice"
+  "format_time", "forward_node", "http", "is_command", "is_superuser", "local", "prompt",
+  "range_float", "range_int", "send_forward_msg", "superusers", "weighted_choice"
 ]
 
 
@@ -43,6 +44,10 @@ Resample = Literal["nearest", "bilinear", "bicubic"]
 ScaleResample = Union[Resample, Literal["box", "hamming", "lanczos"]]
 AnyMessage = Union[str, Message, MessageSegment]
 Quantize = Literal["mediancut", "maxcoverage", "fastoctree"]
+CairoAntialias = Literal["default", "none", "fast", "good", "best", "gray", "subpixel"]
+CairoSubpixel = Literal["default", "rgb", "bgr", "vrgb", "vbgr"]
+CairoHintMetrics = Literal["default", False, True]
+CairoHintStyle = Literal["default", "none", "slight", "medium", "full"]
 
 
 class AggregateError(Exception, Sequence[str]):
@@ -74,6 +79,10 @@ class Config(BaseModel):
   chromium: str = ""
   resample: Resample = "bicubic"
   scale_resample: ScaleResample = "bicubic"
+  text_antialias: CairoAntialias = "gray"
+  text_subpixel: CairoSubpixel = "default"
+  text_hint_metrics: CairoHintMetrics = True
+  text_hint_style: CairoHintStyle = "slight"
   libimagequant: bool = False
   quantize: Quantize = "mediancut"
   dither: bool = True

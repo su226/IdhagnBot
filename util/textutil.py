@@ -1,5 +1,5 @@
 import math
-from typing import Literal, Tuple, Union, overload
+from typing import Dict, Literal, Tuple, Union, overload
 
 import cairo
 import gi
@@ -12,18 +12,48 @@ gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import GLib, Pango, PangoCairo  # type: ignore
 
-Layout = Pango.Layout
-Wrap = Literal[0, 1, 2]
-Ellipsize = Literal[0, 1, 2, 3]
+Wrap = Literal["word", "char", "word_char"]
+Ellipsize = Literal[None, "start", "middle", "end"]
 Align = Literal["l", "m", "r"]
-
-WRAP_WORD = 0
-WRAP_CHAR = 1
-WRAP_WORD_CHAR = 2
-ELLIPSIZE_NONE = 0
-ELLIPSIZE_START = 1
-ELLIPSIZE_MIDDLE = 2
-ELLIPSIZE_END = 3
+WRAPS: Dict[Wrap, Pango.WrapMode] = {
+  "word": Pango.WrapMode.WORD,
+  "char": Pango.WrapMode.CHAR,
+  "word_char": Pango.WrapMode.WORD_CHAR,
+}
+ELLIPSIZES: Dict[Ellipsize, Pango.EllipsizeMode] = {
+  None: Pango.EllipsizeMode.NONE,
+  "start": Pango.EllipsizeMode.START,
+  "middle": Pango.EllipsizeMode.MIDDLE,
+  "end": Pango.EllipsizeMode.END,
+}
+ANTIALIASES: Dict[misc.CairoAntialias, cairo.Antialias] = {
+  "default": cairo.Antialias.DEFAULT,
+  "none": cairo.Antialias.NONE,
+  "fast": cairo.Antialias.FAST,
+  "good": cairo.Antialias.GOOD,
+  "best": cairo.Antialias.BEST,
+  "gray": cairo.Antialias.GRAY,
+  "subpixel": cairo.Antialias.SUBPIXEL,
+}
+SUBPIXEL_ORDERS: Dict[misc.CairoSubpixel, cairo.SubpixelOrder] = {
+  "default": cairo.SubpixelOrder.DEFAULT,
+  "rgb": cairo.SubpixelOrder.RGB,
+  "bgr": cairo.SubpixelOrder.BGR,
+  "vrgb": cairo.SubpixelOrder.VRGB,
+  "vbgr": cairo.SubpixelOrder.VBGR,
+}
+HINT_METRICS: Dict[misc.CairoHintMetrics, cairo.HintMetrics] = {
+  "default": cairo.HintMetrics.DEFAULT,
+  False: cairo.HintMetrics.OFF,
+  True: cairo.HintMetrics.ON,
+}
+HINT_STYLES: Dict[misc.CairoHintStyle, cairo.HintStyle] = {
+  "default": cairo.HintStyle.DEFAULT,
+  "none": cairo.HintStyle.NONE,
+  "slight": cairo.HintStyle.SLIGHT,
+  "medium": cairo.HintStyle.MEDIUM,
+  "full": cairo.HintStyle.FULL,
+}
 
 
 def special_font(name: str, fallback: str) -> str:
@@ -32,12 +62,27 @@ def special_font(name: str, fallback: str) -> str:
   return fallback
 
 
+def font_options(context: Union[None, Pango.Context, cairo.Context] = None) -> cairo.FontOptions:
+  config = misc.CONFIG()
+  options = cairo.FontOptions()
+  options.set_antialias(ANTIALIASES[config.text_antialias])
+  options.set_subpixel_order(SUBPIXEL_ORDERS[config.text_subpixel])
+  options.set_hint_metrics(HINT_METRICS[config.text_hint_metrics])
+  options.set_hint_style(HINT_STYLES[config.text_hint_style])
+  if isinstance(context, Pango.Context):
+    PangoCairo.context_set_font_options(context, options)
+  elif isinstance(context, cairo.Context):
+    context.set_font_options(options)
+  return options
+
+
 def layout(
   content: str, font: str, size: float, *, box: Union[Tuple[int, int], int, None] = None,
-  wrap: Wrap = WRAP_WORD, ellipsize: Ellipsize = ELLIPSIZE_NONE, markup: bool = False,
-  align: Align = "l", spacing: int = 0, lines: int = 0
-) -> Layout:
+  wrap: Wrap = "word", ellipsize: Ellipsize = None, markup: bool = False, align: Align = "l",
+  spacing: int = 0, lines: int = 0
+) -> Pango.Layout:
   context = Pango.Context()  # Pango.Context 线程不安全，复用会有奇怪的问题
+  font_options(context)
   context.set_font_map(PangoCairo.FontMap.get_default())
   layout = Pango.Layout(context)
   if value := misc.CONFIG().font_substitute.get(font, None):
@@ -51,8 +96,8 @@ def layout(
       layout.set_height(box[1] * Pango.SCALE)
     else:
       layout.set_width(box * Pango.SCALE)
-  layout.set_ellipsize(ellipsize)
-  layout.set_wrap(wrap)
+  layout.set_ellipsize(ELLIPSIZES[ellipsize])
+  layout.set_wrap(WRAPS[wrap])
   spacing *= Pango.SCALE
   layout.set_spacing(spacing)
   if lines:
@@ -78,7 +123,7 @@ def layout(
 
 @overload
 def render(
-  content: Layout, *, color: Union[RGB, int] = ..., stroke: float = ...,
+  content: Pango.Layout, *, color: Union[RGB, int] = ..., stroke: float = ...,
   stroke_color: Union[RGB, int] = ...
 ) -> Image.Image: ...
 @overload
@@ -89,7 +134,7 @@ def render(
   spacing: int = ..., lines: int = ...
 ) -> Image.Image: ...
 def render(
-  content: Union[str, Layout], *args, color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
+  content: Union[str, Pango.Layout], *args, color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
   stroke_color: Union[RGB, int] = (255, 255, 255), **kw
 ) -> Image.Image:
   if isinstance(content, Pango.Layout):
@@ -120,7 +165,7 @@ def render(
 
 @overload
 def paste(
-  im: Image.Image, xy: Tuple[int, int], content: Layout, *, anchor: imutil.Anchor = ...,
+  im: Image.Image, xy: Tuple[int, int], content: Pango.Layout, *, anchor: imutil.Anchor = ...,
   color: Union[RGB, int] = ..., stroke: float = ..., stroke_color: Union[RGB, int] = ...
 ) -> Image.Image: ...
 @overload

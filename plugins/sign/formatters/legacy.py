@@ -61,9 +61,7 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
     im.paste(avatar, (32, 32), avatar)
 
     # 用户名
-    textutil.paste(
-      im, (152, 32), names[format_data.uid], "sans", 32, box=336, ellipsize=textutil.ELLIPSIZE_END
-    )
+    textutil.paste(im, (152, 32), names[format_data.uid], "sans", 32, box=336, ellipsize="end")
 
     # 群名
     textutil.paste(im, (152, 80), group_name, "sans", 28, color=(143, 143, 143))
