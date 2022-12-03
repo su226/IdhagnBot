@@ -1,10 +1,11 @@
 import html
 import math
 from typing import Callable, Dict, List, Optional, Union
+from nonebot.adapters.onebot.v11 import MessageSegment
 
 from pydantic import BaseModel, Field
 
-from util import configs, context, permission
+from util import configs, context, permission, misc
 
 
 def NOOP_CONDITION(_): return True
@@ -163,6 +164,12 @@ class CommandItem(Item):
     permission.Level.OWNER: "[群主] ",
     permission.Level.SUPER: "[超管] ",
   }
+  prefixes2 = {
+    permission.Level.MEMBER: "",
+    permission.Level.ADMIN: "群管 | ",
+    permission.Level.OWNER: "群主 | ",
+    permission.Level.SUPER: "超管 | ",
+  }
 
   def __init__(
     self, names: List[str] = [], brief: str = "", usage: Union[str, Callable[[], str]] = "",
@@ -199,7 +206,7 @@ class CommandItem(Item):
   def format(self, brief: bool = True) -> str:
     segments = []
     if brief:
-      segments.append(self())
+      segments.append(f"「{self.prefixes2[self.data.level]}{self.names[0]}」{self.brief}")
     if isinstance(self.raw_usage, str):
       raw_usage = self.raw_usage
     else:
@@ -234,7 +241,7 @@ class CategoryItem(Item):
 
   def __call__(self) -> str:
     brief = f" - {self.brief}" if self.brief else ""
-    return f".{self.name}{brief}"
+    return f"📁{self.name}{brief}"
 
   def html(self, details: bool = True) -> str:
     content = "".join(f"<li>{x.html()}</li>" for x in sorted(
@@ -271,19 +278,61 @@ class CategoryItem(Item):
       self.subcategories[item.name] = item
     self.items.append(item)
 
-  def format(self, page_id: int, show_data: ShowData) -> str:
-    vaild_items = ["使用 /帮助 <命令名> 查看详细用法"]
-    vaild_items.extend(x[-1] for x in sorted(
-      (-x.data.priority, x.get_order(), x()) for x in self.items if x.can_show(show_data)
-    ))
+  def format(
+    self, page_id: int, show_data: ShowData, next_args: Optional[List[str]] = None
+  ) -> str:
+    vaild_items = [x[-1] for x in sorted(
+      (-x.data.priority, x.get_order(), x())
+      for x in self.items if x.can_show(show_data)
+    )]
     config = CONFIG()
     pages = math.ceil(len(vaild_items) / config.page_size)
+    if -pages <= page_id < 0:
+      page_id += page_id + 1
     if page_id < 1 or page_id > pages:
       return f"页码范围从 1 到 {pages}"
     start = (page_id - 1) * config.page_size
     end = min(page_id * config.page_size, len(vaild_items))
-    pageid = f"第 {page_id} 页，共 {pages} 页\n"
-    return pageid + "\n".join(vaild_items[start:end])
+    header = f"第 {page_id} 页，共 {pages} 页，发送「/帮助 <命令名>」查看详细用法"
+    if page_id < pages and next_args:
+      header += f"，发送「/帮助 {' '.join(next_args)}」查看下一页"
+    return header + "\n" + "\n".join(vaild_items[start:end])
+
+  def format_forward(
+    self, show_data: ShowData, path: List[str], bot_id: int, bot_name
+  ) -> List[MessageSegment]:
+    vaild_items = [x[-2:] for x in sorted(
+      (-x.data.priority, x.get_order(), x(), x)
+      for x in self.items if x.can_show(show_data)
+    )]
+    config = CONFIG()
+    has_command = False
+    has_category = False
+    nodes: List[MessageSegment] = []
+    for chunk in misc.chunked(vaild_items, config.page_size):
+      lines: List[str] = []
+      for formatted, item in chunk:
+        if isinstance(item, CommandItem):
+          has_command = True
+        elif isinstance(item, CategoryItem):
+          has_category = True
+        lines.append(formatted)
+      nodes.append(misc.forward_node(bot_id, bot_name, "\n".join(lines)))
+    header_lines: List[str] = []
+    if has_command:
+      header_lines.append(
+        "ℹ 斜线「/」开头的是命令，发送「/help <命令名>」查看，"
+        "比如假设有「/某个命令」，就需要发送「/help 某个命令」来查看"
+      )
+    if has_category:
+      path_str = "".join(f" {i}" for i in path)
+      header_lines.append(
+        f"ℹ 文件夹「📁」开头的是分类，发送「/help {path_str}<分类名>」查看，"
+        f"比如假设有「📁某个分类」，就需要发送「/help {path_str}某个分类」来查看"
+      )
+    if header_lines:
+      nodes.insert(0, misc.forward_node(bot_id, bot_name, "\n".join(header_lines)))
+    return nodes
 
   def remove_user_items(self) -> None:
     self.items = [item for item in self.items if not isinstance(item, UserItem)]
