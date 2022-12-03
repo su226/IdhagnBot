@@ -2,18 +2,34 @@ import base64
 import re
 import time
 from collections import defaultdict
+from dataclasses import dataclass, field
 from typing import Dict, List, Literal
 from urllib.parse import quote as urlencode
 
 import aiohttp
 import nonebot
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
+from nonebot.exception import ActionFailed
 from nonebot.params import Arg, ArgPlainText, CommandArg, EventMessage
 from nonebot.typing import T_State
 from pydantic import BaseModel
 
-from util import command, configs, help, misc
+from util import command, configs, context, help, misc
 from util.api_common import furbot
+
+
+@dataclass
+class SearchResult:
+  processing: List[str] = field(default_factory=list)
+  accepted: Dict[str, List[str]] = field(default_factory=lambda: defaultdict(list))
+  rejected: List[str] = field(default_factory=list)
+
+  def __len__(self) -> int:
+    accepted_len = sum(len(x) for x in self.accepted.values())
+    return len(self.processing) + len(self.rejected) + accepted_len
+
+  def __lt__(self, other: "SearchResult") -> bool:
+    return len(self) < len(other)
 
 
 class Config(BaseModel):
@@ -194,27 +210,57 @@ search = (
   command.CommandBuilder("foxtail.search", "兽云祭搜索")
   .category("foxtail")
   .brief("搜索兽图")
-  .usage("/兽云祭搜索 <名字> - 搜索兽图")
+  .usage('''\
+/兽云祭搜索 <名字> - 搜索兽图
+/兽云祭搜索 <名字> 全部 - 包括未过审的ID''')
   .build()
 )
 @search.handle()
-async def handle_search(message: Message = CommandArg()) -> None:
+async def handle_search(bot: Bot, event: Event, message: Message = CommandArg()) -> None:
   name = message.extract_plain_text().rstrip()
+  show_all = name.endswith("全部")
+  name = misc.removesuffix(name, "全部").rstrip()
   if not name:
     await search.finish(search.__doc__)
   http = misc.http()
   async with await http.get(SEARCH_API.format(name)) as response:
     data = await response.json()
-  result: Dict[str, Dict[str, List[str]]] = defaultdict(lambda: defaultdict(list))
+
+  result: Dict[str, SearchResult] = defaultdict(SearchResult)
   for i in data["open"]:
-    result[i["name"]][i["type"]].append(i["id"])
+    if i["examine"] == "0":
+      result[i["name"]].processing.append(i["id"])
+    elif i["examine"] == "1":
+      result[i["name"]].accepted[i["type"]].append(i["id"])
+    else:
+      result[i["name"]].rejected.append(i["id"])
+  sorted_result = sorted(result.items(), key=lambda x: x[1], reverse=True)
+
   segments: List[str] = []
-  for name, pics in result.items():
+  for name, pics in sorted_result:
     lines: List[str] = []
-    lines.append(name)
-    for type, ids in pics.items():
+    lines.append(f"「{name}」")
+    if pics.processing:
+      lines.append("审核中：" + "、".join(pics.processing))
+    for type, ids in pics.accepted.items():
       lines.append(TYPE_TO_STR[int(type)] + "：" + "、".join(ids))
-    segments.append("\n".join(lines))
+    if pics.rejected and show_all:
+      lines.append("未过审：" + "、".join(pics.rejected))
+    if len(lines) > 1:
+      segments.append("\n".join(lines))
+
+  if len(segments) > 5:
+    bot_name = await context.get_card_or_name(bot, event, event.self_id)
+    nodes = [misc.forward_node(event.self_id, bot_name, HEADER)]
+    nodes.extend([misc.forward_node(event.self_id, bot_name, i) for i in segments])
+    try:
+      await misc.send_forward_msg(bot, event, *nodes)
+      await search.finish()
+    except ActionFailed:
+      pass
+    segments = segments[:5] + ["结果太多，这里贴不下……"]
+  elif not segments:
+    segments = ["什么都没搜到……"]
   await search.finish(HEADER + "\n" + "\n----------------\n".join(segments))
 
 
