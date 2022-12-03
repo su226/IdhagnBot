@@ -8,10 +8,17 @@ from nonebot.rule import ArgumentParser
 from util import command, misc
 
 ENGLISH_RE = re.compile(r"^[A-Za-z0-9]+$")
+SPACE_RE = re.compile(r"\s+")
 NBNHHSH_API = "https://lab.magiconch.com/api/nbnhhsh/guess"
 COUPLET_API = "https://ai-backend.binwang.me/v0.2/couplet/"
 ALIPAY_VOICE_API = "https://mm.cqu.cc/share/zhifubaodaozhang/{}.mp3"
 DINGZHEN_API = "https://api.aya1.top/randomdj?r=0"
+HITOKOTO_API = "https://v1.hitokoto.cn/?"
+HITOKOTO_LIKE_API = "https://hitokoto.cn/api/common/v1/like?sentence_uuid="
+HITOKOTO_TYPES = {
+  "a": "动画", "b": "漫画", "c": "游戏", "d": "文学", "e": "原创", "f": "来自网络", "g": "其他",
+  "h": "影视", "i": "诗词", "j": "网易云", "k": "哲学", "l": "抖机灵"
+}
 
 
 nbnhhsh = (
@@ -101,3 +108,34 @@ async def handle_dingzhen() -> None:
   async with http.get(DINGZHEN_API) as response:
     data = await response.json()
   await dingzhen.finish(MessageSegment.image(data["url"]))
+
+
+hitokoto = (
+  command.CommandBuilder("fun_api.hitokoto", "一言", "hitokoto")
+  .brief("ヒトコト")
+  .usage(f'''\
+/一言 - 随机类型一言
+/一言 <类型> - 指定类型一言
+类型是 a-l 之间的字母：{"、".join(x + y for x, y in HITOKOTO_TYPES.items())}
+接口来自https://hitokoto.cn''')
+  .build()
+)
+@hitokoto.handle()
+async def handle_hitokoto(arg: Message = CommandArg()) -> None:
+  types = SPACE_RE.sub("", arg.extract_plain_text()).lower()
+  for i in types:
+    if i not in HITOKOTO_TYPES:
+      await hitokoto.finish(f"{i} 不是有效的类型，类型是 a-l 之间的字母")
+  url = HITOKOTO_API + "&".join(f"c={x}" for x in types)
+  http = misc.http()
+  async with http.get(url) as response:
+    data = await response.json()
+  async with http.get(HITOKOTO_LIKE_API + data["uuid"]) as response:
+    like_data = await response.json()
+    likes = like_data["data"][0]["total"]
+  from_who = data["from_who"] or ""
+  await hitokoto.finish(f'''\
+{data["hitokoto"]}
+——{from_who}「{data["from"]}」
+类型：{HITOKOTO_TYPES[data["type"]]} 点赞：{likes}
+https://hitokoto.cn?id={data["id"]}''')
