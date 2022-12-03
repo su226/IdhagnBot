@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>IdhagnBot 终端渲染页面</title>
+  <link rel="stylesheet" href="xterm.css">
+  <style>
+    body {
+      margin: 0;
+    }
+    #xterm {
+      display: inline-block;
+      vertical-align: top;
+    }
+    .xterm-cursor {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="xterm"></div>
+  <script src="xterm.js"></script>
+  <script>
+    function nextFrame() {
+      return new Promise(resolve => requestAnimationFrame(resolve));
+    }
+    async function render(content, options) {
+      content = JSON.stringify(options) + "\n" + content;
+      const terminal = new Terminal(options);
+      window.terminal = terminal;
+      terminal.open(document.querySelector("#xterm"));
+      terminal.write(content.replaceAll("\n", "\r\n"));
+      await nextFrame();
+      await nextFrame();
+      terminal.selectAll();
+      const lines = terminal.getSelection().split("\n");
+      terminal.clearSelection();
+      width = Math.max(...lines.map(
+        line => terminal._core.unicodeService.getStringCellWidth(line)
+      ));
+      terminal.resize(width, lines.length);
+    }
+  </script>
+</body>
+</html>

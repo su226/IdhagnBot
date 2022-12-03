@@ -9,6 +9,7 @@ requirements:
   text_generator.ero: [jieba]
   wikipedia: [libzim, pyppeteer]
   wordcloud: [wordcloud, jieba, sqlmodel]
+  wttrin: [pyppeteer]
 groups:
   wordcloud: wordcloud
   jieba: jieba
