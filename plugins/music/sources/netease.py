@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass
 from typing import AsyncGenerator
-from urllib.parse import quote
+from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 
@@ -24,7 +24,7 @@ class NeteaseMusic(Music):
   async def search(keyword: str) -> SearchResult["NeteaseMusic"]:
     http = misc.http()
     async with http.get(
-      API.format(keyword=quote(keyword), offset=0, limit=LIMIT)
+      API.format(keyword=encodeuri(keyword), offset=0, limit=LIMIT)
     ) as response:
       data = await response.json(content_type=None)
     count = data["result"]["songCount"]
@@ -46,7 +46,7 @@ class NeteaseMusic(Music):
         if page >= pages:
           break
         async with http.get(
-          API.format(keyword=quote(keyword), offset=page * LIMIT, limit=LIMIT)
+          API.format(keyword=encodeuri(keyword), offset=page * LIMIT, limit=LIMIT)
         ) as response:
           data = await response.json(content_type=None)
 

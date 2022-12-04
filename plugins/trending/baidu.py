@@ -1,7 +1,7 @@
 import json
 from html.parser import HTMLParser
 from typing import List, Optional, Tuple
-from urllib.parse import unquote
+from urllib.parse import unquote as decodeuri
 
 from util import misc
 
@@ -43,7 +43,7 @@ async def get_data() -> List[Item]:
   result = []
   for i in data["hotsearch"]:
     result.append(Item(
-      url=unquote(i["linkurl"]),
+      url=decodeuri(i["linkurl"]),
       title=i["pure_title"],
       image="",
       content="百度热搜|热度" + str(i["heat_score"])

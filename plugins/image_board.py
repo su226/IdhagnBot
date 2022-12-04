@@ -1,5 +1,6 @@
 from argparse import Namespace
 from typing import Any, Dict, List, Literal, Optional
+from urllib.parse import quote as encodeuri
 
 import aiohttp
 from aiohttp.http import SERVER_SOFTWARE
@@ -117,7 +118,7 @@ def register(definition: Command):
     http = misc.http()
     try:
       async with http.get(
-        API_URL.format(tags=" ".join(args.tags), limit=args.limit, page=args.page),
+        API_URL.format(tags=encodeuri(" ".join(args.tags)), limit=args.limit, page=args.page),
         headers=HEADERS, proxy=definition.proxy
       ) as response:
         if response.status != 200:

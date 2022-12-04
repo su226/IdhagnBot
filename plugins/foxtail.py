@@ -4,7 +4,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Dict, List, Literal
-from urllib.parse import quote as urlencode
+from urllib.parse import quote as encodeuri
 
 import aiohttp
 import nonebot
@@ -156,7 +156,7 @@ class Source:
       await bot.send(event, picture_usage() or "")
       return
 
-    url = RANDOM_API.format(urlencode(name), type)
+    url = RANDOM_API.format(encodeuri(name), type)
     async with http.get(url) as response:
       data = await response.json()
       data = data["picture"]
@@ -223,7 +223,7 @@ async def handle_search(bot: Bot, event: Event, message: Message = CommandArg())
   if not name:
     await search.finish(search.__doc__)
   http = misc.http()
-  async with await http.get(SEARCH_API.format(name)) as response:
+  async with await http.get(SEARCH_API.format(encodeuri(name))) as response:
     data = await response.json()
 
   result: Dict[str, SearchResult] = defaultdict(SearchResult)

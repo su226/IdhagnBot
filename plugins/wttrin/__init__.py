@@ -1,6 +1,6 @@
 import pathlib
 from typing import List, TypedDict
-from urllib.parse import quote
+from urllib.parse import quote as encodeuri
 
 import aiohttp
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -66,7 +66,7 @@ async def handle_wttr(arg: Message = CommandArg()):
   if not city:
     await wttr.finish("但是我不知道你要查询哪里的天气诶……")
   async with aiohttp.ClientSession() as session:
-    async with session.get(f"https://wttr.in/{quote(city)}?lang=zh-cn") as response:
+    async with session.get(f"https://wttr.in/{encodeuri(city, '')}?lang=zh-cn") as response:
       content = await response.text()
   async with misc.browser() as browser:
     page = await browser.newPage()

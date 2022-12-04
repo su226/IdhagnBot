@@ -3,7 +3,7 @@ import time
 from dataclasses import dataclass
 from io import BytesIO
 from typing import Any, Dict, List, Optional
-from urllib.parse import quote as urlencode
+from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
@@ -204,7 +204,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
   try:
     uid = int(name)
   except ValueError:
-    async with http.get(SEARCH_API.format(urlencode(name)), headers=headers) as resp:
+    async with http.get(SEARCH_API.format(encodeuri(name)), headers=headers) as resp:
       search_data = await resp.json()
     if "result" not in search_data.get("data", {}):
       await bilibili_check.finish(f"找不到用户：{name}")

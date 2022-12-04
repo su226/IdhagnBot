@@ -1,5 +1,6 @@
 import re
 from argparse import Namespace
+from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg, ShellCommandArgs
@@ -64,7 +65,7 @@ couplet = (
 @couplet.handle()
 async def handle_couplet(args: Namespace = ShellCommandArgs()) -> None:
   http = misc.http()
-  async with http.get(COUPLET_API + args.text) as response:
+  async with http.get(COUPLET_API + encodeuri(args.text, "")) as response:
     data = await response.json()
   result = [
     (result, score) for result, score in zip(data["output"], data["score"]) if score > args.score]
