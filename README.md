@@ -15,7 +15,8 @@
 已过时，[新文档](https://idhagnbot.su226.tk/)正在施工中
 
 部分功能需要可选依赖：
-* 离线维基百科：libzim（注意这个是GPL协议）、pyppeteer（默认路径为空字符串，也就是让pyppeteer自动下载，可修改为其他路径）
+* 离线维基百科：libzim（注意这个是GPL协议）、playwright（默认路径为null，也就是使用playwright附带的浏览器，可修改为其他路径）
+* [wttr.in](https://wttr.in)天气：playwright（因为使用了[xterm.js](https://xtermjs.org)来本地渲染终端）
 * MC服务器状态：mctools
 * IdhagnFetch（仿[neofetch](https://github.com/dylanaraps/neofetch)的状态信息）：psutil
   * 注：显卡信息直接从`/sys/class/drm`读取，因此只支持Linux

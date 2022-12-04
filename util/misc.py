@@ -6,10 +6,9 @@ import math
 import os
 import random
 import sys
-from contextlib import asynccontextmanager
 from datetime import timedelta
 from typing import (
-  TYPE_CHECKING, Any, AsyncIterator, Callable, Dict, Generator, Iterable, List, Literal, Optional,
+  TYPE_CHECKING, Any, Callable, Coroutine, Dict, Generator, Iterable, List, Literal, Optional,
   Sequence, Tuple, TypeVar, Union
 )
 
@@ -26,14 +25,14 @@ from typing_extensions import ParamSpec
 from .configs import SharedConfig
 
 if TYPE_CHECKING:
-  from pyppeteer.browser import Browser
+  from playwright.async_api._generated import Browser, Playwright as AsyncPlaywright
 
 
 __all__ = [
   "ADAPTER_NAME", "AggregateError", "AnyMessage", "CONFIG", "CairoAntialias", "CairoHintMetrics",
   "CairoHintStyle", "CairoSubpixel", "Config", "Font", "NotCommand", "PromptTimeout", "Quantize",
-  "Resample", "ScaleResample", "binomial_sample", "browser", "chunked", "command_start",
-  "format_time", "forward_node", "http", "is_command", "is_superuser", "local", "prompt",
+  "Resample", "ScaleResample", "binomial_sample", "chunked", "command_start", "format_time",
+  "forward_node", "http", "is_command", "is_superuser", "launch_playwright", "local", "prompt",
   "range_float", "range_int", "send_forward_msg", "superusers", "weighted_choice"
 ]
 
@@ -76,7 +75,6 @@ class Font(BaseModel):
 class Config(BaseModel):
   special_font: Dict[str, str] = Field(default_factory=dict)
   font_substitute: Dict[str, str] = Field(default_factory=dict)
-  chromium: str = ""
   resample: Resample = "bicubic"
   scale_resample: ScaleResample = "bicubic"
   text_antialias: CairoAntialias = "gray"
@@ -87,6 +85,8 @@ class Config(BaseModel):
   quantize: Quantize = "mediancut"
   dither: bool = True
   backend_local: bool = True
+  browser: Literal["chromium", "firefox", "webkit"] = "chromium"
+  browser_path: Optional[str] = None
 
 
 CONFIG = SharedConfig("misc", Config)
@@ -95,14 +95,15 @@ _http: Optional[aiohttp.ClientSession] = None
 _driver = nonebot.get_driver()
 
 
-@asynccontextmanager
-async def browser(**options: Any) -> "AsyncIterator[Browser]":
-  import pyppeteer
-  browser = await pyppeteer.launch(options, executablePath=CONFIG().chromium)
-  try:
-    yield browser
-  finally:
-    await browser.close()
+def launch_playwright(p: "AsyncPlaywright", **kw: Any) -> Coroutine[Any, Any, "Browser"]:
+  config = CONFIG()
+  if config.browser == "chromium":
+    browser = p.chromium
+  elif config.browser == "firefox":
+    browser = p.firefox
+  else:
+    browser = p.webkit
+  return browser.launch(executable_path=config.browser_path, **kw)
 
 
 def http() -> aiohttp.ClientSession:

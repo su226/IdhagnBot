@@ -2,7 +2,7 @@ import math
 import re
 import socket
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, Literal
+from typing import Any, AsyncIterator, Literal, Optional
 
 from aiohttp.web import BaseRequest, Response, Server, ServerRunner, TCPSite
 from libzim.reader import Archive  # type: ignore
@@ -10,6 +10,7 @@ from libzim.search import Query, Searcher  # type: ignore
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
+from playwright.async_api import async_playwright
 from pydantic import BaseModel, PrivateAttr
 
 from util import command, configs, misc
@@ -773,7 +774,9 @@ async def autostop(site: TCPSite) -> AsyncIterator[None]:
     await site.stop()
 
 
-async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: int = 100):
+async def screenshot(
+  path: str, format: Literal["png", "jpeg"] = "png", quality: Optional[int] = None
+) -> bytes:
   config = CONFIG()
   server = Server(handler)
   runner = ServerRunner(server)
@@ -782,14 +785,17 @@ async def screenshot(path: str, format: Literal["png", "jpg"] = "png", quality: 
     s.bind(("", 0))
     port = s.getsockname()[1]
   site = TCPSite(runner, "localhost", port)
-  async with autostop(site), misc.browser() as browser:
-    page = await browser.newPage()
-    await page.setViewport({"width": config.width, "height": 0, "deviceScaleFactor": config.scale})
+  async with autostop(site), async_playwright() as p:
+    browser = await misc.launch_playwright(p)
+    page = await browser.new_page(
+      viewport={"width": config.width, "height": 1}, device_scale_factor=config.scale
+    )
     await page.goto(f"http://localhost:{port}/{path}")
     await page.evaluate(COMMON_SCRIPT)
     if config.use_opencc:
       await page.evaluate(OPENCC_SCRIPT)
-    return await page.screenshot(fullPage=True, format=format, quality=quality)
+    return await page.screenshot(full_page=True, type=format, quality=quality)
+
 
 wikipedia = (
   command.CommandBuilder("wikipedia", "维基百科", "维基", "百科", "wikipedia", "wiki", "pedia")
@@ -799,9 +805,7 @@ wikipedia = (
   .usage("/维基百科 <搜索内容>")
   .build()
 )
-
-
-def format_choices(state: T_State):
+def format_choices(state: T_State) -> str:
   config = CONFIG()
   search = state["search"]
   count = state["count"]
@@ -822,7 +826,7 @@ def format_choices(state: T_State):
 
 
 @wikipedia.handle()
-async def handle_wikipedia(state: T_State, msg: Message = CommandArg()):
+async def handle_wikipedia(state: T_State, msg: Message = CommandArg()) -> None:
   query = str(msg).rstrip()
   if not query:
     await wikipedia.finish(wikipedia.__doc__)
@@ -835,9 +839,8 @@ async def handle_wikipedia(state: T_State, msg: Message = CommandArg()):
     await wikipedia.finish("没有结果")
   await wikipedia.send(format_choices(state))
 
-
 @wikipedia.got("choice")
-async def got_choice(state: T_State, choice: str = ArgStr()):
+async def got_choice(state: T_State, choice: str = ArgStr()) -> None:
   choice = choice.strip()
   if choice == "退":
     await wikipedia.finish("已退出")

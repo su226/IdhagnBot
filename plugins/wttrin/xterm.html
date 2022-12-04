@@ -24,8 +24,7 @@
     function nextFrame() {
       return new Promise(resolve => requestAnimationFrame(resolve));
     }
-    async function render(content, options) {
-      content = JSON.stringify(options) + "\n" + content;
+    async function render([content, options]) {
       const terminal = new Terminal(options);
       window.terminal = terminal;
       terminal.open(document.querySelector("#xterm"));

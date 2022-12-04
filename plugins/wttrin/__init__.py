@@ -5,6 +5,7 @@ from urllib.parse import quote as encodeuri
 import aiohttp
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
+from playwright.async_api import async_playwright
 from pydantic import BaseModel, Field
 
 from util import command, configs, misc
@@ -44,6 +45,7 @@ class Xterm(TypedDict, total=False):
 
 class Config(BaseModel):
   xterm: Xterm = Field(default_factory=Xterm)
+  lang: str = "zh-cn"
 
 
 CONFIG = configs.SharedConfig("wttrin", Config)
@@ -65,12 +67,15 @@ async def handle_wttr(arg: Message = CommandArg()):
   city = arg.extract_plain_text().rstrip()
   if not city:
     await wttr.finish("但是我不知道你要查询哪里的天气诶……")
+  config = CONFIG()
   async with aiohttp.ClientSession() as session:
-    async with session.get(f"https://wttr.in/{encodeuri(city, '')}?lang=zh-cn") as response:
+    url = f"https://wttr.in/{encodeuri(city, '')}?lang={config.lang}"
+    async with session.get(url) as response:
       content = await response.text()
-  async with misc.browser() as browser:
-    page = await browser.newPage()
+  async with async_playwright() as p:
+    browser = await misc.launch_playwright(p)
+    page = await browser.new_page(viewport={"width": 1, "height": 1})
     await page.goto(URL)
-    await page.evaluate("render", content.rstrip(), CONFIG().xterm)
-    data = await page.screenshot(fullPage=True)
+    await page.evaluate("render", [content.rstrip(), config.xterm])
+    data = await page.screenshot(full_page=True)
   await wttr.finish(MessageSegment.image(data))
