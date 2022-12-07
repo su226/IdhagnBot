@@ -57,7 +57,7 @@ class State(BaseModel):
   tasks: Dict[str, Task] = Field(default_factory=dict)
 
 
-STATE = configs.GroupState("scheduled", State)
+STATE = configs.GroupState("scheduled", State, "eager")
 JOBSTORE = "scheduled_command"
 scheduler.add_jobstore(MemoryJobStore(), JOBSTORE)
 driver = nonebot.get_driver()
@@ -76,6 +76,14 @@ def onload(prev: Optional[State], curr: State, group_id: int) -> None:
       msg.schedule(group_id, id)
   for id in expired:
     del curr.tasks[id]
+  if expired:
+    STATE.dump(group_id)
+
+
+@driver.on_bot_connect
+async def on_bot_connect() -> None:
+  for i, in STATE.get_all():
+    STATE(i)
 
 
 def ellipsis(content: str, limit: int) -> str:
@@ -147,6 +155,7 @@ async def handle_schedule(event: MessageEvent, msg: Message = CommandArg()):
       await schedule.finish("目标时间比当前时间早")
     id = str(random.randint(1000000000, 9999999999))
     state.tasks[id] = task = Task(user=event.user_id, message=args[1], date=date)
+    STATE.dump(ctx)
     task.schedule(ctx, id)
     name = context.CONFIG().groups[context.get_event_context(event)]._name
     await schedule.finish(f"已设置在 {date} 时在 {name} 中执行的定时任务，ID 为 {id}")
