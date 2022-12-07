@@ -1,15 +1,37 @@
 import asyncio
-from typing import Set
+from datetime import date
+from typing import Dict, Set, Tuple
 
 import nonebot
 from aiohttp.client_exceptions import ClientError
-from nonebot.adapters.onebot.v11 import ActionFailed, Bot, Event, Message, MessageEvent
+from nonebot.adapters.onebot.v11 import (
+  ActionFailed, Bot, Event, GroupRecallNoticeEvent, Message, MessageEvent
+)
 from nonebot.message import event_postprocessor, run_postprocessor, run_preprocessor
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
 from PIL import Image
+from pydantic import BaseModel, Field
 
-from util import command, context, imutil, misc, textutil
+from util import command, configs, context, imutil, misc, textutil
+
+
+class QQBot(BaseModel):
+  total: int = 0
+  today: Tuple[int, date] = (0, date.min)
+  total_by_group: Dict[int, int] = Field(default_factory=dict)
+  today_by_group: Dict[int, Tuple[int, date]] = Field(default_factory=dict)
+
+
+class State(BaseModel):
+  qqbot: QQBot = Field(default_factory=QQBot)
+
+
+class Config(BaseModel):
+  show_invaild_command: misc.EnableSet = misc.EnableSet.true()
+  show_is_bot: misc.EnableSet = misc.EnableSet.true()
+  show_exception: misc.EnableSet = misc.EnableSet.true()
+  send_exception_to_superuser: misc.EnableSet = misc.EnableSet.true()
 
 
 class ManualException(Exception):
@@ -17,12 +39,15 @@ class ManualException(Exception):
     super().__init__("管理员使用 /raise 手动触发了错误")
 
 
+QQBOT_ID = 2854196310
+CONFIG = configs.SharedConfig("fallback", Config)
+STATE = configs.SharedState("fallback", State)
 suppressed: Set[int] = set()
 driver = nonebot.get_driver()
 
 
 @run_preprocessor
-async def pre_run(state: T_State):
+async def pre_run(state: T_State) -> None:
   if state.get("_as_command", True):
     state["_prefix"]["run"] = True
 
@@ -35,7 +60,9 @@ async def try_send(bot: Bot, user: int, message: str) -> None:
 
 
 @run_postprocessor
-async def post_run(bot: Bot, event: MessageEvent, e: Exception):
+async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
+  config = CONFIG()
+
   if isinstance(e, ActionFailed) and e.info.get("msg", None) == "SEND_MSG_API_ERROR":
     reason = "消息发送失败"
     explain = "可能是发送的内容过长、图片过大、含有敏感内容或者机器人帐号被风控。"
@@ -53,7 +80,7 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception):
     explain = "这可能是 IdhagnBot 的设计缺陷，请向开发者寻求帮助。"
 
   group_id = getattr(event, "group_id", None)
-  if group_id not in suppressed:
+  if config.show_exception[group_id] and group_id not in suppressed:
     markup = '''\
   <span weight='heavy' size='200%'>这个要慌，问题很大</span>
   <span color='#ffffff88'>Something really bad happens. Panic!</span>'''
@@ -85,6 +112,14 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception):
     except ActionFailed:
       await bot.send(event, fallback)
 
+  if not config.send_exception_to_superuser[group_id]:
+    return
+
+  user_id = getattr(event, "user_id", None)
+  superusers = list(misc.superusers())
+  if user_id in superusers:
+    return
+
   exc_type = type(e)
   exc_typename = exc_type.__qualname__
   exc_mod = exc_type.__module__
@@ -97,29 +132,28 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception):
   except Exception:
     exc_info = ""
 
-  user_id = getattr(event, "user_id", None)
-  superusers = list(misc.superusers())
-  if user_id not in superusers:
-    message = str(event.message)
-    if len(message) > 50:
-      message = message[:50] + "…"
-    notify = f"机器人出错 - {reason}\n{exc_typename}"
-    if exc_info:
-      notify += f": {exc_info}"
-    notify += f"\n群聊: {group_id}\n用户: {user_id}\n消息: {message}"
-    await asyncio.gather(*(try_send(bot, user, notify) for user in superusers))
+  message = str(event.message)
+  if len(message) > 50:
+    message = message[:50] + "…"
+  notify = f"机器人出错 - {reason}\n{exc_typename}"
+  if exc_info:
+    notify += f": {exc_info}"
+  notify += f"\n群聊: {group_id}\n用户: {user_id}\n消息: {message}"
+  await asyncio.gather(*(try_send(bot, user, notify) for user in superusers))
 
 
 @event_postprocessor
 async def post_event(bot: Bot, event: Event, state: T_State) -> None:
-  if not isinstance(event, MessageEvent):
+  if not isinstance(event, MessageEvent) or event.user_id == QQBOT_ID:
     return
   group_id = getattr(event, "group_id", None)
   if group_id in suppressed or "run" in state["_prefix"]:
     return
+  config = CONFIG()
   if misc.is_command(event.message):
-    await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
-  elif event.is_tome():
+    if config.show_invaild_command[group_id]:
+      await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
+  elif event.is_tome() and config.show_is_bot[group_id]:
     await bot.send(event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）")
 
 
@@ -135,7 +169,7 @@ suppress = (
   .build()
 )
 @suppress.handle()
-async def handle_suppress(bot: Bot, event: MessageEvent, args: Message = CommandArg()):
+async def handle_suppress(bot: Bot, event: MessageEvent, args: Message = CommandArg()) -> None:
   value = str(args).rstrip()
   ctx = context.get_event_context(event)
   if not value:
@@ -149,17 +183,62 @@ async def handle_suppress(bot: Bot, event: MessageEvent, args: Message = Command
     await suppress.finish("已恢复本群错误消息")
   await suppress.finish(suppress.__doc__)
 
-RAISE_USAGE = "/raise confirm - 手动触发一个错误"
+
 raise_ = (
   command.CommandBuilder("fallback.raise", "raise")
   .level("admin")
   .in_group()
   .brief("手动触发一个错误")
-  .build())
-
-
+  .build()
+)
 @raise_.handle()
-async def handle_raise(args: Message = CommandArg()):
+async def handle_raise(args: Message = CommandArg()) -> None:
   if str(args).rstrip() == "confirm":
     raise ManualException
-  await raise_.finish(RAISE_USAGE)
+  await raise_.finish("/raise confirm - 手动触发一个错误")
+
+
+def check_group_recall(event: GroupRecallNoticeEvent):
+  return event.self_id == event.user_id and event.operator_id == QQBOT_ID
+on_group_recall = nonebot.on_notice(check_group_recall)
+@on_group_recall.handle()
+def handle_group_recall(event: GroupRecallNoticeEvent) -> None:
+  state = STATE()
+  today = date.today()
+  count, prev = state.qqbot.today
+  if prev < today:
+    state.qqbot.today = (1, today)
+  else:
+    state.qqbot.today = (count + 1, prev)
+  state.qqbot.total += 1
+  count, prev = state.qqbot.today_by_group.get(event.group_id, (0, date.min))
+  if prev < today:
+    state.qqbot.today_by_group[event.group_id] = (1, today)
+  else:
+    state.qqbot.today_by_group[event.group_id] = (count + 1, prev)
+  total_count = state.qqbot.total_by_group.get(event.group_id, 0)
+  state.qqbot.total_by_group[event.group_id] = total_count + 1
+  STATE.dump()
+
+
+query_recall = (
+  command.CommandBuilder("fallback.query_recall", "今天被Q群管家针对了吗", "今天被q群管家针对了吗")
+  .brief("IdhagnBot今天被Q群管家撤了几次？")
+  .build()
+)
+@query_recall.handle()
+async def handle_query_recall(event: Event) -> None:
+  ctx = context.get_event_context(event)
+  state = STATE()
+  today = date.today()
+  count, prev = state.qqbot.today
+  if prev < today:
+    count = 0
+  msg = f"全部：今天 {count} / 总计 {state.qqbot.total}"
+  if ctx != -1:
+    count, prev = state.qqbot.today_by_group.get(ctx, (0, date.min))
+    if prev < today:
+      count = 0
+    total_count = state.qqbot.total_by_group.get(ctx, 0)
+    msg += f"\n本群：今天 {count} / 总计 {total_count}"
+  await query_recall.finish(msg)
