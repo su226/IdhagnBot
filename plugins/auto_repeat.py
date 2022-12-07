@@ -4,9 +4,8 @@ from typing import Dict, Optional, Tuple
 
 import nonebot
 from nonebot.adapters.onebot.v11 import Event, GroupMessageEvent, Message
-from nonebot.rule import Rule
 
-from util import hook, misc
+from util import context, hook, misc, permission
 
 suppress = ContextVar("suppress", default=False)
 last_message: Dict[int, Tuple[Message, int]] = {}
@@ -52,7 +51,11 @@ async def can_repeat(event: GroupMessageEvent) -> bool:
     last_message[group_id] = (event.message, 1)
     result = False
   return result
-auto_repeat = nonebot.on_message(Rule(can_repeat), priority=2)
+auto_repeat = nonebot.on_message(
+  can_repeat,
+  context.build_permission(("auto_repeat", "can_repeat"), permission.Level.MEMBER),
+  priority=2
+)
 @auto_repeat.handle()
 async def handle_auto_repeat(event: GroupMessageEvent):
   for seg in event.message:

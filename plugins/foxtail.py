@@ -14,7 +14,7 @@ from nonebot.params import Arg, ArgPlainText, CommandArg, EventMessage
 from nonebot.typing import T_State
 from pydantic import BaseModel
 
-from util import command, configs, context, help, misc
+from util import command, configs, context, help, misc, permission
 from util.api_common import furbot
 
 
@@ -99,9 +99,8 @@ UID: {data["picture"]}
 
 
 class Source:
-  @staticmethod
-  def name() -> str:
-    return "兽云祭"
+  name = "兽云祭"
+  node = ("foxtail", "picture", "keyword")
 
   @staticmethod
   def keyword() -> str:
@@ -198,7 +197,11 @@ async def keyword_rule(message: Message = EventMessage()) -> bool:
     return False
   seg = message[0]
   return seg.is_text() and str(seg).lstrip().startswith(config.keyword)
-keyword = nonebot.on_message(keyword_rule, picture.permission, block=True)
+keyword = nonebot.on_message(
+  keyword_rule,
+  context.build_permission(Source.node, permission.Level.MEMBER),
+  block=True
+)
 @keyword.handle()
 async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()):
   config = CONFIG()
@@ -359,4 +362,5 @@ async def handle_info() -> None:
 
 furbot.register_universal_keyword()
 category = help.CategoryItem.find("foxtail")
+category.data.node_str = "foxtail"
 category.brief = "兽云祭"

@@ -3,6 +3,7 @@ from util import help, importing
 importing.load_children(__name__)
 
 category = help.CategoryItem.find("meme_pic", True)
+category.data.node_str = "meme_pic"
 category.brief = "头像梗图生成器"
 category.add(help.StringItem("特别感谢: nonebot-plugin-petpet、lab.magiconch.com"))
 category.add(help.StringItem("标有[动]的可以传入动图"))

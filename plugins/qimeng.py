@@ -22,7 +22,9 @@ class Config(BaseModel):
   # 并且没有批量查询，没法写查询全群
   # 对不起绮梦老师了
   token: SecretStr = SecretStr("")
-  auto_reject: bool = False
+  check_join: misc.EnableSet = misc.EnableSet.false()
+  check_request: misc.EnableSet = misc.EnableSet.false()
+  reject_request: misc.EnableSet = misc.EnableSet.false()
   # 默认忽略Q群管家
   ignore: Set[int] = Field(default_factory=lambda: {2854196310})
 
@@ -290,7 +292,11 @@ async def got_confirm(bot: Bot, event: Event, state: T_State, confirm: str = Arg
 
 async def check_member_join(event: GroupIncreaseNoticeEvent) -> bool:
   config = CONFIG()
-  return bool(config.token) and event.user_id not in config.ignore
+  return (
+    bool(config.token)
+    and event.user_id not in config.ignore
+    and config.check_join[event.group_id]
+  )
 on_member_join = nonebot.on_notice(check_member_join)
 @on_member_join.handle()
 async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
@@ -311,7 +317,12 @@ async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
 
 async def check_group_request(event: GroupRequestEvent) -> bool:
   config = CONFIG()
-  return bool(config.token) and event.sub_type == "add" and event.user_id not in config.ignore
+  return (
+    bool(config.token)
+    and event.sub_type == "add"
+    and event.user_id not in config.ignore
+    and config.check_request[event.group_id]
+  )
 on_group_request = nonebot.on_notice(check_group_request)
 @on_group_request.handle()
 async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
@@ -325,7 +336,7 @@ async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
     if reason is None:
       return
     detail = f"原因：{reason}\n详情请参考 {URL}"
-  if config.auto_reject:
+  if config.reject_request[event.group_id]:
     await bot.set_group_add_request(
       flag=event.flag, sub_type=event.sub_type, approve=False, reason="云黑用户，机器人自动拒绝"
     )

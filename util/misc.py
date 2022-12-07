@@ -9,7 +9,7 @@ import sys
 from datetime import timedelta
 from typing import (
   TYPE_CHECKING, Any, Callable, Coroutine, Dict, Generator, Iterable, List, Literal, Optional,
-  Sequence, Tuple, TypeVar, Union
+  Sequence, Set, Tuple, TypeVar, Union
 )
 
 import aiohttp
@@ -30,10 +30,11 @@ if TYPE_CHECKING:
 
 __all__ = [
   "ADAPTER_NAME", "AggregateError", "AnyMessage", "CONFIG", "CairoAntialias", "CairoHintMetrics",
-  "CairoHintStyle", "CairoSubpixel", "Config", "Font", "NotCommand", "PromptTimeout", "Quantize",
-  "Resample", "ScaleResample", "binomial_sample", "chunked", "command_start", "format_time",
-  "forward_node", "http", "is_command", "is_superuser", "launch_playwright", "local", "prompt",
-  "range_float", "range_int", "send_forward_msg", "superusers", "weighted_choice"
+  "CairoHintStyle", "CairoSubpixel", "Config", "EnableSet", "Font", "NotCommand", "PromptTimeout",
+  "Quantize", "Resample", "ScaleResample", "binomial_sample", "chunked", "command_start",
+  "format_time", "forward_node", "http", "is_command", "is_superuser", "launch_playwright",
+  "local", "prompt", "range_float", "range_int", "send_forward_msg", "superusers",
+  "weighted_choice"
 ]
 
 
@@ -61,6 +62,33 @@ class AggregateError(Exception, Sequence[str]):
 
   def __getitem__(self, index: int) -> str:
     return self.args[index]
+
+
+class IncludeSet(BaseModel):
+  include: Set[int]
+
+
+class ExcludeSet(BaseModel):
+  exclude: Set[int]
+
+
+class EnableSet(BaseModel):
+  __root__: Union[IncludeSet, ExcludeSet, bool]
+
+  def __getitem__(self, group: Optional[int]) -> bool:
+    if isinstance(self.__root__, IncludeSet):
+      return group in self.__root__.include
+    elif isinstance(self.__root__, ExcludeSet):
+      return group not in self.__root__.exclude
+    return self.__root__
+
+  @classmethod
+  def false(cls) -> Any:
+    return Field(default_factory=lambda: EnableSet(__root__=False))
+
+  @classmethod
+  def true(cls) -> Any:
+    return Field(default_factory=lambda: EnableSet(__root__=True))
 
 
 class PromptTimeout(asyncio.TimeoutError):

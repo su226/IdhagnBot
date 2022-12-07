@@ -4,7 +4,7 @@ import nonebot
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
 from nonebot.params import CommandArg, EventMessage
 
-from util import command, help, misc
+from util import command, context, help, misc, permission
 from util.api_common import furbot
 
 HEADER = "======== 绒狸 ========"
@@ -42,9 +42,8 @@ async def fetch_submit_image() -> MessageSegment:
 
 
 class Source:
-  @staticmethod
-  def name() -> str:
-    return "绒狸"
+  name = "绒狸"
+  node = ("furbot", "picture", "keyword")
 
   @staticmethod
   def keyword() -> str:
@@ -114,7 +113,11 @@ async def keyword_rule(message: Message = EventMessage()) -> bool:
     return False
   seg = message[0]
   return seg.is_text() and str(seg).lstrip().startswith(config.keyword)
-keyword = nonebot.on_message(keyword_rule, picture.permission, block=True)
+keyword = nonebot.on_message(
+  keyword_rule,
+  context.build_permission(Source.node, permission.Level.MEMBER),
+  block=True
+)
 @keyword.handle()
 async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()):
   config = furbot.CONFIG()
@@ -205,7 +208,8 @@ async def handle_daily(bot: Bot, event: Event, message: Message = CommandArg()):
 
 furbot.register_universal_keyword()
 
-category = help.CategoryItem.find("furbot", True)
+category = help.CategoryItem.find("furbot")
+category.data.node_str = "furbot"
 category.data.condition = help_condition
 category.brief = "绒狸"
 category.add(help.StringItem("绒狸官方群：893579624"))

@@ -9,7 +9,7 @@ from nonebot.params import EventMessage
 from nonebot.typing import T_State
 from PIL import Image
 
-from util import imutil, misc
+from util import context, imutil, misc, permission
 from util.images.card import Card, CardAuthor, CardCover, CardInfo, CardText, InfoCount, InfoText
 
 VIDEO_RE = re.compile(r"av\d{1,9}|(BV|bv)[A-Za-z0-9]{10}")
@@ -37,7 +37,10 @@ async def check_bilibili_link(state: T_State, msg: Message = EventMessage()) -> 
     state["link"] = match[0]
     return True
   return False
-bilibili_link = nonebot.on_message(check_bilibili_link)
+bilibili_link = nonebot.on_message(
+  check_bilibili_link,
+  context.build_permission(("bilibili_link",), permission.Level.MEMBER),
+)
 @bilibili_link.handle()
 async def handle_bilibili_link(state: T_State) -> None:
   http = misc.http()

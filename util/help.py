@@ -1,5 +1,4 @@
 import html
-import math
 from typing import Callable, Dict, List, Optional, Union
 from nonebot.adapters.onebot.v11 import MessageSegment
 
@@ -258,7 +257,9 @@ class CategoryItem(Item):
     return -2
 
   @classmethod
-  def find(cls, path: Union[str, List[str]], create: bool = False) -> "CategoryItem":
+  def find(
+    cls, path: Union[str, List[str]], create: bool = False, check: Optional[ShowData] = None
+  ) -> "CategoryItem":
     cur = CategoryItem.ROOT
     if isinstance(path, str):
       path = [x for x in path.split(".") if x]
@@ -268,7 +269,11 @@ class CategoryItem(Item):
           raise KeyError(f"子分类 {'.'.join(path[:i])} 不存在")
         sub = cls(name)
         cur.add(sub)
-      cur = cur.subcategories[name]
+        cur = sub
+      else:
+        cur = cur.subcategories[name]
+        if check and not cur.can_show(check):
+          raise ValueError(f"子分类 {'.'.join(path[:i])} 不能显示")
     return cur
 
   def add(self, item: Item):
@@ -279,27 +284,7 @@ class CategoryItem(Item):
     self.items.append(item)
 
   def format(
-    self, page_id: int, show_data: ShowData, next_args: Optional[List[str]] = None
-  ) -> str:
-    vaild_items = [x[-1] for x in sorted(
-      (-x.data.priority, x.get_order(), x())
-      for x in self.items if x.can_show(show_data)
-    )]
-    config = CONFIG()
-    pages = math.ceil(len(vaild_items) / config.page_size)
-    if -pages <= page_id < 0:
-      page_id += page_id + 1
-    if page_id < 1 or page_id > pages:
-      return f"页码范围从 1 到 {pages}"
-    start = (page_id - 1) * config.page_size
-    end = min(page_id * config.page_size, len(vaild_items))
-    header = f"第 {page_id} 页，共 {pages} 页，发送「/帮助 <命令名>」查看详细用法"
-    if page_id < pages and next_args:
-      header += f"，发送「/帮助 {' '.join(next_args)}」查看下一页"
-    return header + "\n" + "\n".join(vaild_items[start:end])
-
-  def format_forward(
-    self, show_data: ShowData, path: List[str], bot_id: int, bot_name
+    self, show_data: ShowData, path: List[str], bot_id: int, bot_name: str
   ) -> List[MessageSegment]:
     vaild_items = [x[-2:] for x in sorted(
       (-x.data.priority, x.get_order(), x(), x)

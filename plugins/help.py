@@ -69,7 +69,7 @@ async def handle_help(bot: Bot, event: MessageEvent, msg: Message = CommandArg()
   )
   if len(args) == 0:
     bot_name = await context.get_card_or_name(bot, event, event.self_id)
-    nodes = help.CategoryItem.ROOT.format_forward(data, [], event.self_id, bot_name)
+    nodes = help.CategoryItem.ROOT.format(data, [], event.self_id, bot_name)
     await misc.send_forward_msg(bot, event, *nodes)
     await help_cmd.finish()
   elif len(args) == 1:
@@ -77,12 +77,11 @@ async def handle_help(bot: Bot, event: MessageEvent, msg: Message = CommandArg()
       await help_cmd.finish(Message(command.format()))
   try:
     path = normalize_path(args)
-    category = help.CategoryItem.find(path)
-    if category.can_show(data):
-      bot_name = await context.get_card_or_name(bot, event, event.self_id)
-      nodes = category.format_forward(data, path, event.self_id, bot_name)
-      await misc.send_forward_msg(bot, event, *nodes)
-      await help_cmd.finish()
-  except KeyError:
+    category = help.CategoryItem.find(path, check=data)
+    bot_name = await context.get_card_or_name(bot, event, event.self_id)
+    nodes = category.format(data, path, event.self_id, bot_name)
+    await misc.send_forward_msg(bot, event, *nodes)
+    await help_cmd.finish()
+  except (KeyError, ValueError):
     pass
   await help_cmd.finish("无此条目或分类、权限不足或在当前上下文不可用")
