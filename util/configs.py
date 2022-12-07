@@ -25,7 +25,7 @@ def encode(data: Any) -> Any:
     return data
   elif isinstance(data, dict):
     return {k: encode(v) for k, v in data.items()}
-  elif isinstance(data, list):
+  elif isinstance(data, (list, tuple, set, frozenset)):
     return [encode(v) for v in data]
   else:
     return encode(pydantic_encoder(data))
