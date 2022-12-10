@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IdhagnBot Markdown 渲染页面</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@primer/css@20.7.1/dist/primer.css">
+  <link rel="stylesheet" href="prism.css">
+  <style>
+    body {
+      padding: 16px;
+    }
+    .markdown-body pre code {
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+  </style>
+</head>
+<body>
+  <div class="markdown-body"></div>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.3/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it@13.0.1/dist/markdown-it.min.js"></script>
+  <script src="markdown-it-katex.js"></script>
+  <script src="prism.js"></script>
+  <script>
+    function render(content) {
+      document.querySelector(".markdown-body").innerHTML = markdownit({
+        highlight: function (code, lang) {
+          if (lang && Prism.languages[lang]) {
+            return Prism.highlight(code, Prism.languages[lang], lang);
+          }
+          return '';
+        }
+      }).use(markdownitKatex).render(content);
+    }
+  </script>
+</body>
+</html>
