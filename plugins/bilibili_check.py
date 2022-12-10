@@ -48,19 +48,16 @@ async def update_vtbs() -> bool:
   now = time.time()
   if state.timestamp > now - config.update_interval:
     return True
-  done, pending = await asyncio.wait(
-    [asyncio.create_task(get_single(api)) for api in VTB_APIS],
-    timeout=config.update_timeout, return_when=asyncio.FIRST_COMPLETED
-  )
-  for task in pending:
-    task.cancel()
-  for task in done:
-    if task.exception() is None:
-      state.name_cache = {x["mid"]: x["uname"] for x in task.result() if x}
-      state.timestamp = now
-      STATE.dump()
-      return True
-  return False
+  try:
+    result = await asyncio.wait_for(misc.first_result(
+      [asyncio.create_task(get_single(api)) for api in VTB_APIS]
+    ), timeout=config.update_timeout)
+  except Exception:
+    return False
+  state.name_cache = {x["mid"]: x["uname"] for x in result if x}
+  state.timestamp = now
+  STATE.dump()
+  return True
 
 
 @dataclass

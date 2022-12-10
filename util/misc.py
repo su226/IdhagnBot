@@ -75,7 +75,9 @@ class ExcludeSet(BaseModel):
 class EnableSet(BaseModel):
   __root__: Union[IncludeSet, ExcludeSet, bool]
 
-  def __getitem__(self, group: Optional[int]) -> bool:
+  def __getitem__(self, group: Union[Optional[int], Event]) -> bool:
+    if isinstance(group, Event):
+      group = getattr(group, "group_id", None)
     if isinstance(self.__root__, IncludeSet):
       return group in self.__root__.include
     elif isinstance(self.__root__, ExcludeSet):
@@ -406,6 +408,24 @@ def superusers() -> Generator[int, None, None]:
         yield int(i)
       except ValueError:
         pass
+
+
+# FIRST_COMPLETED -> Promise.race
+# first_result -> Promise.any
+async def first_result(tasks: Iterable["asyncio.Future[T]"]) -> T:
+  while tasks:
+    done, tasks = await asyncio.wait(tasks)
+    has_result = False
+    result: Any = None
+    for i in done:
+      if i.exception() is None:
+        has_result = True
+        result = i.result()
+    if has_result:
+      for i in tasks:
+        i.cancel()
+      return result
+  raise RuntimeError("全部 Task 都抛出了异常")
 
 
 if sys.version_info >= (3, 9):

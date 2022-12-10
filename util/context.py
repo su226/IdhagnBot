@@ -76,8 +76,11 @@ class HasGroupCache:
       else:
         task = self.tasks[group]
       tasks.append(task)
-    done, _ = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-    return any(i.exception() is None for i in done)
+    try:
+      await misc.first_result(tasks)
+      return True
+    except Exception:
+      return False
 
   async def check_one(self, bot: Bot, group: int) -> None:
     try:
