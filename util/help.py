@@ -286,10 +286,10 @@ class CategoryItem(Item):
   def format(
     self, show_data: ShowData, path: List[str], bot_id: int, bot_name: str
   ) -> List[MessageSegment]:
-    vaild_items = [x[-2:] for x in sorted(
-      (-x.data.priority, x.get_order(), x(), x)
-      for x in self.items if x.can_show(show_data)
-    )]
+    vaild_items = sorted(
+      ((x(), x) for x in self.items if x.can_show(show_data)),
+      key=lambda x: (-x[1].data.priority, x[1].get_order(), x[0])
+    )
     config = CONFIG()
     has_command = False
     has_category = False
