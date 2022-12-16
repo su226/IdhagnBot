@@ -12,8 +12,8 @@ ENGLISH_RE = re.compile(r"^[A-Za-z0-9]+$")
 SPACE_RE = re.compile(r"\s+")
 NBNHHSH_API = "https://lab.magiconch.com/api/nbnhhsh/guess"
 COUPLET_API = "https://ai-backend.binwang.me/v0.2/couplet/"
-ALIPAY_VOICE_API = "https://mm.cqu.cc/share/zhifubaodaozhang/{}.mp3"
-DINGZHEN_API = "https://api.aya1.top/randomdj?r=0"
+ALIPAY_VOICE_API = "https://mm.cqu.cc/share/zhifubaodaozhang/?money={:.2f}"
+# DINGZHEN_API = "https://api.aya1.top/randomdj?r=0" # noqa 接口早已停运
 HITOKOTO_API = "https://v1.hitokoto.cn/?"
 HITOKOTO_LIKE_API = "https://hitokoto.cn/api/common/v1/like?sentence_uuid="
 HITOKOTO_TYPES = {
@@ -75,11 +75,11 @@ async def handle_couplet(args: Namespace = ShellCommandArgs()) -> None:
   await couplet.finish("\n".join(segments))
 
 
-alipay_voice = (
-  command.CommandBuilder("fun_api.alipay_voice", "支付宝到帐", "支付宝", "zfb")
-  .brief("支付宝到帐一亿元")
+alipay_voice = (  # 被中州韵的词库坑了（到账/到帐）
+  command.CommandBuilder("fun_api.alipay_voice", "支付宝到账", "支付宝到帐", "支付宝", "zfb")
+  .brief("支付宝到账一亿元")
   .usage('''\
-/支付宝到帐 <金额>
+/支付宝到账 <金额>
 范围从0.01到999999999999.99，且只能有两位小数
 接口来自https://mm.cqu.cc/share/zhifubaodaozhang/''')
   .build()
@@ -92,23 +92,7 @@ async def handle_alipay_voice(arg: Message = CommandArg()) -> None:
       raise ValueError("超出范围")
   except ValueError:
     await alipay_voice.finish(alipay_voice.__doc__)
-  value = round(value, 2)
-  value_str = str(int(value)) if value % 1 == 0 else str(value)
-  await alipay_voice.finish(MessageSegment.record(ALIPAY_VOICE_API.format(value_str)))
-
-
-dingzhen = (
-  command.CommandBuilder("fun_api.dingzhen", "一眼丁真", "丁真")
-  .brief("鉴定为假")
-  .usage("接口来自https://api.aya1.top/randomdj")
-  .build()
-)
-@dingzhen.handle()
-async def handle_dingzhen() -> None:
-  http = misc.http()
-  async with http.get(DINGZHEN_API) as response:
-    data = await response.json()
-  await dingzhen.finish(MessageSegment.image(data["url"]))
+  await alipay_voice.finish(MessageSegment.record(ALIPAY_VOICE_API.format(value)))
 
 
 hitokoto = (

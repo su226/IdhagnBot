@@ -294,7 +294,7 @@ async def handle_moyu() -> None:
 news = (
   command.CommandBuilder("daily.news", "60秒", "60s")
   .brief("用60秒迅速看世界")
-  .usage("接口来自https://api.qqsuu.cn")
+  .usage("接口来自https://api.vvhan.com")
   .build()
 )
 @news.handle()
