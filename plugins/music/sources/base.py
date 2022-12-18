@@ -17,9 +17,13 @@ class Music:
   album: str
   vip: bool
 
-  def segment(self) -> MessageSegment:
+  async def segment(self) -> MessageSegment:
     raise NotImplementedError
 
   @staticmethod
-  async def search(keyword: str) -> SearchResult["Music"]:
+  async def from_id(id: str) -> MessageSegment:
+    raise ValueError("该来源不支持从ID获取")
+
+  @staticmethod
+  async def search(keyword: str, page_size: int) -> SearchResult["Music"]:
     raise NotImplementedError

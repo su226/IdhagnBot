@@ -9,26 +9,61 @@ from util import misc
 
 from .base import Music, SearchResult
 
-API = "https://music.163.com/api/search/get/web?type=1&offset={offset}&limit={limit}&s={keyword}"
-LIMIT = 10
+SEARCH_API = (
+  "https://music.163.com/api/search/get/web?type=1&offset={offset}&limit={limit}&s={keyword}"
+)
+INFO_API = "http://music.163.com/api/song/detail/?ids=[{id}]"
 
 
 @dataclass
 class NeteaseMusic(Music):
   id: int
 
-  def segment(self) -> MessageSegment:
-    return MessageSegment.music("163", self.id)
+  async def segment(self) -> MessageSegment:
+    http = misc.http()
+    async with http.get(INFO_API.format(id=self.id)) as response:
+      data = await response.json(content_type=None)
+      song = data["songs"][0]
+      audio = "" if song["fee"] == 1 else f"http://music.163.com/song/media/outer/url?id={self.id}"
+    return MessageSegment("music", {
+      "type": "custom",
+      "subtype": "163",
+      "url": f"https://music.163.com/#/song?id={song['id']}",
+      "audio": audio,
+      "title": song["name"],
+      "content": song["artists"][0]["name"],
+      "image": song["album"]["picUrl"]
+    })
 
   @staticmethod
-  async def search(keyword: str) -> SearchResult["NeteaseMusic"]:
+  async def from_id(id: str) -> MessageSegment:
+    id_int = int(id)
     http = misc.http()
+    async with http.get(INFO_API.format(id=id_int)) as response:
+      data = await response.json(content_type=None)
+      if not data["songs"]:
+        raise ValueError("ID不存在")
+      song = data["songs"][0]
+    return MessageSegment("music", {
+      "type": "custom",
+      "subtype": "163",
+      "url": f"https://music.163.com/#/song?id={id}",
+      "audio": "" if song["fee"] == 1 else f"http://music.163.com/song/media/outer/url?id={id}",
+      "title": song["name"],
+      "content": song["artists"][0]["name"],
+      "image": song["album"]["picUrl"]
+    })
+
+  @staticmethod
+  async def search(keyword: str, page_size: int) -> SearchResult["NeteaseMusic"]:
+    http = misc.http()
+    keyword = encodeuri(keyword)
     async with http.get(
-      API.format(keyword=encodeuri(keyword), offset=0, limit=LIMIT)
+      SEARCH_API.format(keyword=keyword, offset=0, limit=page_size)
     ) as response:
       data = await response.json(content_type=None)
     count = data["result"]["songCount"]
-    pages = math.ceil(count / LIMIT)
+    pages = math.ceil(count / page_size)
 
     async def _musics() -> AsyncGenerator[NeteaseMusic, None]:
       nonlocal data
@@ -46,7 +81,7 @@ class NeteaseMusic(Music):
         if page >= pages:
           break
         async with http.get(
-          API.format(keyword=encodeuri(keyword), offset=page * LIMIT, limit=LIMIT)
+          SEARCH_API.format(keyword=keyword, offset=page * page_size, limit=page_size)
         ) as response:
           data = await response.json(content_type=None)
 
