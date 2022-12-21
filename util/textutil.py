@@ -101,10 +101,8 @@ def layout(
   spacing *= Pango.SCALE
   layout.set_spacing(spacing)
   if lines:
-    # 使用Pango.FontMetrics.get_height获取到的行高可能差一像素
-    # 直接获取空Layout的高度即为一倍行高
-    line_height = layout.get_size().height
-    layout.set_height(line_height * lines + spacing * (lines - 1))
+    layout.set_height(-lines)
+    content = content.replace("\n", "\u2028")
   if align == "m":
     layout.set_alignment(Pango.Alignment.CENTER)
   if align == "r":
@@ -141,23 +139,25 @@ def render(
     l = content
   else:
     l = layout(content, *args, **kw)
-  w, h = l.get_pixel_size()  # type: ignore
+  _, rect = l.get_pixel_extents()  # type: ignore
   margin = math.ceil(stroke)
-  w += margin * 2
-  h += margin * 2
+  x = -rect.x + margin
+  y = -rect.y + margin
+  w = rect.width + margin * 2
+  h = rect.height + margin * 2
   with cairo.ImageSurface(cairo.FORMAT_ARGB32, w, h) as surface:
     cr = cairo.Context(surface)
     if stroke:
       if isinstance(stroke_color, int):
         stroke_color = split_rgb(stroke_color)
-      cr.move_to(margin, margin)
+      cr.move_to(x, y)
       PangoCairo.layout_path(cr, l)
       cr.set_line_width(stroke * 2)
       cr.set_source_rgb(stroke_color[0] / 255, stroke_color[1] / 255, stroke_color[2] / 255)
       cr.stroke()
     if isinstance(color, int):
       color = split_rgb(color)
-    cr.move_to(margin, margin)
+    cr.move_to(x, y)
     cr.set_source_rgb(color[0] / 255, color[1] / 255, color[2] / 255)
     PangoCairo.show_layout(cr, l)
     return imutil.from_cairo(surface)

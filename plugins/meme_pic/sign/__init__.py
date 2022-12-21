@@ -108,7 +108,7 @@ group.add_argument(
   help="使用APNG而非GIF格式"
 )
 matcher = (
-  command.CommandBuilder("meme_pic.sign", "举牌")
+  command.CommandBuilder("meme_pic.sign", "唐可可举牌")
   .category("meme_pic")
   .shell(parser)
   .build()

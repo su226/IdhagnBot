@@ -21,7 +21,9 @@ async def handle_luxun(args: Message = CommandArg()):
   def make() -> MessageSegment:
     content = args.extract_plain_text().rstrip() or luxun.__doc__ or ""
     im = Image.open(DIR / "template.jpg")
-    text_im = textutil.render(content, "sans", 38, color=(255, 255, 255), align="m", spacing=5)
+    text_im = textutil.render(
+      content, "sans", 38, box=660, color=(255, 255, 255), align="m", spacing=5
+    )
     text_im = imutil.contain_down(text_im, 440, 100)
     imutil.paste(im, text_im, (240, 350), anchor="mm")
     textutil.paste(im, (320, 400), "——鲁迅", "sans", 30, color=(255, 255, 255))
