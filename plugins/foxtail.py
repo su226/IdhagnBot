@@ -1,4 +1,5 @@
 import base64
+import itertools
 import re
 import time
 from collections import defaultdict
@@ -8,7 +9,7 @@ from urllib.parse import quote as encodeuri
 
 import aiohttp
 import nonebot
-from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent, MessageSegment
 from nonebot.exception import ActionFailed
 from nonebot.params import Arg, ArgPlainText, CommandArg, EventMessage
 from nonebot.typing import T_State
@@ -34,9 +35,15 @@ class SearchResult:
 
 class Config(BaseModel):
   keyword: str = "来只兽"
+  cookies: str = ""
+  show_private: bool = True
+
+  @property
+  def headers(self) -> Dict[str, str]:
+    return {"Cookie": self.cookies}
+
+
 CONFIG = configs.SharedConfig("foxtail", Config)
-
-
 RANDOM_API = "https://cloud.foxtail.cn/api/function/random?name={}&type={}"
 INFO_API = "https://cloud.foxtail.cn/api/function/pullpic?picture={}&model={}"
 DOWNLOAD_API = "https://cloud.foxtail.cn/api/function/pictures?picture={}&model={}"
@@ -67,12 +74,20 @@ USAGE_KEYWORD = "也可以使用关键词“{}”触发"
 
 
 async def send_pic(bot: Bot, event: Event, data: dict) -> None:
-  http = misc.http()
   status = int(data.get("examine", 1))  # 随机接口没有审核参数
   if status == 1:
-    async with http.get(DOWNLOAD_API.format(data["picture"], 0)) as response:
+    config = CONFIG()
+    headers = config.headers if config.show_private else {}
+    http = misc.http()
+    async with http.get(DOWNLOAD_API.format(data["picture"], 0), headers=headers) as response:
       image_data = await response.json()
-      image_segment = MessageSegment.image(image_data["url"])
+      code = image_data["code"]
+      if code == "20600":
+        image_segment = MessageSegment.image(image_data["url"])
+      elif code in {"20602", "20603"}:
+        image_segment = MessageSegment.text("没有查看权限")
+      else:
+        image_segment = MessageSegment.text(image_data["msg"])
   elif status == 2:
     image_segment = MessageSegment.text("图片未过审")
   else:
@@ -112,9 +127,11 @@ class Source:
 
   @staticmethod
   async def handle(bot: Bot, event: Event, args: str) -> None:
+    config = CONFIG()
+    headers = config.headers if config.show_private else {}
     http = misc.http()
     if match := UID_RE.fullmatch(args):
-      async with http.get(INFO_API.format(match[0], 0)) as response:
+      async with http.get(INFO_API.format(match[0], 0), headers=headers) as response:
         data = await response.json()
       if "picture" in data:
         await send_pic(bot, event, data["picture"][0])
@@ -126,7 +143,7 @@ class Source:
     except ValueError:
       pass
     else:
-      async with http.get(INFO_API.format(fid, 1)) as response:
+      async with http.get(INFO_API.format(fid, 1), headers=headers) as response:
         data = await response.json()
       if "picture" in data:
         await send_pic(bot, event, data["picture"][0])
@@ -156,17 +173,17 @@ class Source:
       return
 
     url = RANDOM_API.format(encodeuri(name), type)
-    async with http.get(url) as response:
+    async with http.get(url, headers=headers) as response:
       data = await response.json()
       data = data["picture"]
 
     if "picture" not in data:
       if type:
         await bot.send(
-          event, f"{HEADER}\n这只兽似乎不存在，或者没有指定类型的图片，目前 IdhagnBot 暂不支持投稿。"
+          event, f"{HEADER}\n这只兽似乎不存在，或者没有指定类型的图片。"
         )
       else:
-        await bot.send(event, f"{HEADER}\n这只兽似乎不存在，目前 IdhagnBot 暂不支持投稿。")
+        await bot.send(event, f"{HEADER}\n这只兽似乎不存在。")
       return
 
     await send_pic(bot, event, data)
@@ -225,12 +242,14 @@ async def handle_search(bot: Bot, event: Event, message: Message = CommandArg())
   name = misc.removesuffix(name, "全部").rstrip()
   if not name:
     await search.finish(search.__doc__)
+  config = CONFIG()
+  headers = config.headers if config.show_private else {}
   http = misc.http()
-  async with await http.get(SEARCH_API.format(encodeuri(name))) as response:
+  async with await http.get(SEARCH_API.format(encodeuri(name)), headers=headers) as response:
     data = await response.json()
 
   result: Dict[str, SearchResult] = defaultdict(SearchResult)
-  for i in data["open"]:
+  for i in itertools.chain(data["open"], data["private"], data["given"]):
     if i["examine"] == "0":
       result[i["name"]].processing.append(i["id"])
     elif i["examine"] == "1":
@@ -275,7 +294,9 @@ class SubmitData(BaseModel):
 
 
 submit = (
-  command.CommandBuilder("foxtail.submit", "兽云祭投稿")
+  command.CommandBuilder("foxtail.submit", "兽云祭投稿", "兽云祭上传")
+  .rule(lambda: bool(CONFIG().cookies))
+  .help_condition(lambda _: bool(CONFIG().cookies))
   .category("foxtail")
   .brief("投稿兽图")
   .usage(f'''\
@@ -314,7 +335,7 @@ async def got_image(state: T_State, image: Message = Arg()) -> None:
 ''' + image)
 
 @submit.got("confirm")
-async def got_confirm(state: T_State, confirm: str = ArgPlainText()) -> None:
+async def got_confirm(event: MessageEvent, state: T_State, confirm: str = ArgPlainText()) -> None:
   if confirm != "是":
     await submit.finish("投稿取消")
   data: SubmitData = state["data"]
@@ -322,16 +343,19 @@ async def got_confirm(state: T_State, confirm: str = ArgPlainText()) -> None:
   http = misc.http()
   async with http.get(image) as response:
     image_data = await response.read()
+  note = f"[IdhagnBot]投稿用户: {event.user_id}\n" + data.note
   form = aiohttp.FormData({
     "name": data.name,
-    "type": data.type,
+    "type": str(data.type),
     "suggest": data.desc,
-    "rem": data.note,
+    "rem": note,
   })
   form.add_field("file", image_data)
-  async with http.post("https://cloud.foxtail.cn/api/function/upload", data=form) as response:
+  async with http.post(
+    "https://cloud.foxtail.cn/api/function/upload", data=form, headers=CONFIG().headers
+  ) as response:
     result = await response.json()
-  if result["code"] != 200:
+  if result["code"] != "20000":
     await submit.finish(HEADER + "\n提交失败: " + result["msg"])
   await submit.finish(HEADER + f'''
 提交成功，图片正在审核中。
@@ -340,7 +364,7 @@ UID: {result["picture"]}''')
 
 
 info = (
-  command.CommandBuilder("foxtail.info", "兽云祭信息")
+  command.CommandBuilder("foxtail.info", "兽云祭信息", "兽云祭状态")
   .category("foxtail")
   .brief("兽云祭服务器信息")
   .build()
@@ -355,7 +379,7 @@ async def handle_info() -> None:
 主页访问次数：{data['page']['count']}
 图片查看次数：{data['total']['count']}
 图片总数：{data['atlas']['count']}
-公开图片数：{data['page']['count']}
+公开图片数：{data['power']['count']}
 待审核图片数: {data['examine']['count']}
 运行时长: {data['time']['count']}天''')
 
