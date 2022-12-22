@@ -16,7 +16,6 @@ from util import command, configs, context, misc
 from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
 from .modules.epicgames import EpicGamesModule
-from .modules.everyfurry import EveryFurryModule
 from .modules.furbot import FurbotModule
 from .modules.history import HistoryModule
 from .modules.moyu import MoyuModule, moyu_cache
@@ -97,13 +96,6 @@ class FurbotModuleConfig(BaseModuleConfig):
     return FurbotModule()
 
 
-class EveryFurryModuleConfig(BaseModuleConfig):
-  type: Literal["everyfurry"]
-
-  def create_module(self, group_id: int) -> Module:
-    return EveryFurryModule()
-
-
 class EpicGamesModuleConfig(BaseModuleConfig):
   type: Literal["epicgames"]
   force: bool = False
@@ -121,7 +113,6 @@ AnyModuleConfig = Union[
   SentenceModuleConfig,
   RankModuleConfig,
   FurbotModuleConfig,
-  EveryFurryModuleConfig,
   EpicGamesModuleConfig
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
@@ -325,16 +316,3 @@ history = (
 @history.handle()
 async def handle_history() -> None:
   await history.finish(await HistoryModule().raw_format())
-
-
-everyfurry = (
-  command.CommandBuilder("daily.everyfurry", "今日兽兽")
-  .usage("接口来自https://hifurry.cn")
-  .build()
-)
-@everyfurry.handle()
-async def handle_everyfurry() -> None:
-  messages = await EveryFurryModule().format()
-  if not messages:
-    await everyfurry.finish("似乎没有今日兽兽")
-  await everyfurry.finish(messages[0])

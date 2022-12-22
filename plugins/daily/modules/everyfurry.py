@@ -8,6 +8,7 @@ from util import misc
 
 from . import DailyCache, Module
 
+# 早已停更，仅作纪念
 EVERYFURRY_API = "https://bot.hifurry.cn/everyfurry?date=today"
 
 
