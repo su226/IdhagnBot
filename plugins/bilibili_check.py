@@ -184,7 +184,7 @@ def make_header(
 bilibili_check = (
   command.CommandBuilder("bilibili_check", "查成分")
   .brief("卧槽，□批！")
-  .usage("/查成分 <用户名或ID>")
+  .usage("/查成分 <B站用户名或ID>")
   .rule(lambda: bool(CONFIG().cookie))
   .help_condition(lambda _: bool(CONFIG().cookie))
   .build()
@@ -193,7 +193,7 @@ bilibili_check = (
 async def handle_bilibili_check(arg: Message = CommandArg()):
   name = arg.extract_plain_text().rstrip()
   if not name:
-    await bilibili_check.finish("/查成分 <用户名或ID>")
+    await bilibili_check.finish(bilibili_check.__doc__)
   if not await update_vtbs():
     await bilibili_check.finish("更新VTB数据失败")
   headers = {"Cookie": CONFIG().cookie.get_secret_value()}
@@ -204,11 +204,13 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
     async with http.get(SEARCH_API.format(encodeuri(name)), headers=headers) as resp:
       search_data = await resp.json()
     if "result" not in search_data.get("data", {}):
-      await bilibili_check.finish(f"找不到用户：{name}")
+      await bilibili_check.finish(f"找不到B站用户：{name}")
     uid = search_data["data"]["result"][0]["mid"]
 
   async with http.get(FOLLOW_API.format(uid)) as resp:
     follow_data = await resp.json(content_type=None)
+  if follow_data["code"] == -626:
+    await bilibili_check.finish(f"UID 为 {uid} 的B站用户不存在")
   async with http.get(MEDAL_API.format(uid), headers=headers) as resp:
     medal_data = await resp.json()
   async with http.get(follow_data["card"]["face"]) as resp:
