@@ -76,10 +76,12 @@ def format_dice(func: Callable[[int, int], List[int]], count: int, faces: int) -
   return message
 
 
+def dice_usage() -> str:
+  return USAGE_BASE + "\n" + CONFIG().fail_str
 dice = (
   command.CommandBuilder("dice", "骰子", "色子", "dice")
   .brief("先过个sancheck")
-  .usage(lambda: USAGE_BASE + "\n" + CONFIG().fail_str)
+  .usage(dice_usage)
   .build()
 )
 @dice.handle()
@@ -87,7 +89,7 @@ async def handle_dice(args: Message = CommandArg()):
   config = CONFIG()
   match = DICE_RE.match(str(args).rstrip())
   if match is None:
-    await dice.finish(dice.__doc__)
+    await dice.finish(dice_usage())
   count = 1 if match[1] is None else int(match[1])
   if count < 1:
     await dice.finish("个数必须为正整数")
