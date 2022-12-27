@@ -28,6 +28,7 @@ sql = ["sqlmodel>=0.0.8", "aiosqlite>=0.17.0"]
 wordcloud = ["wordcloud>=1.8.2.2"] # 词云也需要 sql 和 jieba
 grpc = ["protobuf>=4.21.6", "grpcio>=1.49.1"]
 playwright = ["playwright>=1.27.1"]
+cryptography = ["cryptography>=38.0.4"]
 
 [project.urls]
 Homepage = "https://idhagnbot.su226.tk"

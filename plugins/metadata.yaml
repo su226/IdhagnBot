@@ -1,6 +1,7 @@
 requirements:
   chatgpt: [playwright]
   idhagnfetch: [psutil]
+  jikipedia: [cryptography]
   minecraft: [mctools]
   meme_pic.erode: [cv2]
   meme_pic.fisheye: [cv2]
@@ -21,3 +22,4 @@ groups:
   psutil: psutil
   numpy: opencv
   cv2: opencv
+  cryptography: cryptography
