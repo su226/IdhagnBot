@@ -8,6 +8,7 @@ requirements:
   meme_pic.louvre: [cv2]
   meme_pic.patina: [numpy]
   meme_pic.shock: [cv2]
+  reborn: [playwright]
   text_generator.ero: [jieba]
   wikipedia: [libzim, playwright]
   wordcloud: [wordcloud, jieba, sqlmodel]

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IdhagnBot 地图渲染页面</title>
+  <style>
+  body {
+    margin: 0;
+  }
+  #chart {
+    width: 100vw;
+    height: 100vh;
+  }
+  </style>
+</head>
+<body>
+  <div id="chart"></div>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+  <!-- ECharts 5 不再提供地图数据，此处使用 ECharts 4 的地图数据 -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  <script>
+  function render([position, name]) {
+    echarts.init(document.getElementById("chart")).setOption({
+      backgroundColor: "#e8e8e8",
+      geo: {
+        map: "world",
+        silent: true,
+        center: position,
+        zoom: 2.5,
+        itemStyle: {
+          areaColor: "#cfcfcf",
+          borderColor: "#111111",
+        }
+      },
+      visualMap: {
+        min: 0,
+        max: 1,
+        inRange: {
+          color: ["#cfcfcf", "#2a333d"]
+        },
+        show: false
+      },
+      series: {
+        type: "map",
+        geoIndex: 0,
+        data: [{ name: name, value: 1 }]
+      }
+    });
+  }
+  </script>
+</body>
+</html>
