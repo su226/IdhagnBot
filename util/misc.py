@@ -77,7 +77,9 @@ class EnableSet(BaseModel):
 
   def __getitem__(self, group: Union[Optional[int], Event]) -> bool:
     if isinstance(group, Event):
-      group = getattr(group, "group_id", None)
+      group = getattr(group, "group_id", -1)
+    elif group is None:
+      group = -1
     if isinstance(self.__root__, IncludeSet):
       return group in self.__root__.include
     elif isinstance(self.__root__, ExcludeSet):

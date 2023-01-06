@@ -25,6 +25,7 @@ class QQBot(BaseModel):
 
 class State(BaseModel):
   qqbot: QQBot = Field(default_factory=QQBot)
+  show_is_bot_disabled: Set[int] = Field(default_factory=set)
 
 
 class Config(BaseModel):
@@ -134,7 +135,7 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
 
   message = str(event.message)
   if len(message) > 50:
-    message = message[:50] + "…"
+    message = f"{message[:50]}……（{len(message)}字符）"
   notify = f"机器人出错 - {reason}\n{exc_typename}"
   if exc_info:
     notify += f": {exc_info}"
@@ -143,18 +144,40 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
 
 
 @event_postprocessor
-async def post_event(bot: Bot, event: Event, state: T_State) -> None:
+async def post_event(bot: Bot, event: Event, bot_state: T_State) -> None:
   if not isinstance(event, MessageEvent) or event.user_id == QQBOT_ID:
     return
-  group_id = getattr(event, "group_id", None)
-  if group_id in suppressed or "run" in state["_prefix"]:
+  group_id = getattr(event, "group_id", -1)
+  if group_id in suppressed or "run" in bot_state["_prefix"]:
     return
   config = CONFIG()
-  if misc.is_command(event.message):
-    if config.show_invaild_command[group_id]:
-      await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
-  elif event.is_tome() and config.show_is_bot[group_id]:
-    await bot.send(event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）")
+  if misc.is_command(event.message) and config.show_invaild_command[group_id]:
+    await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
+    return
+  state = STATE()
+  if (
+    event.is_tome() and config.show_is_bot[group_id]
+    and event.user_id not in state.show_is_bot_disabled
+  ):
+    await bot.send(
+      event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）\n发送 /禁用提示 为你禁用本提示"
+    )
+
+
+# 使用 nonebot.on_command 是为了不显示在帮助里
+async def check_disable_show_is_bot(event: Event) -> bool:
+  return CONFIG().show_is_bot[event]
+disable_show_is_bot = nonebot.on_command("禁用提示", check_disable_show_is_bot)
+@disable_show_is_bot.handle()
+async def handle_disable_show_is_bot(event: MessageEvent) -> None:
+  state = STATE()
+  if event.user_id in state.show_is_bot_disabled:
+    state.show_is_bot_disabled.remove(event.user_id)
+    STATE.dump()
+    await disable_show_is_bot.finish("你已恢复“本帐号为机器人”的提示。")
+  state.show_is_bot_disabled.add(event.user_id)
+  STATE.dump()
+  await disable_show_is_bot.finish("你已禁用“本帐号为机器人”的提示，再次发送 /禁用提示 可恢复。")
 
 
 suppress = (
