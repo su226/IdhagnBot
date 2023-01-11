@@ -11,16 +11,12 @@ from pydantic import BaseModel, Field
 
 from util import configs
 
-if TYPE_CHECKING:
-  from loguru import Record
-
 
 Level = Literal["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
 
 
 class Target(BaseModel):
   level: Union[Level, int] = "INFO"
-  fold_nonebot: bool = True
   format: str = "<g>{time:HH:mm:ss}</g>|<lvl>{level:8}</lvl>| <c>{name}</c> - {message}"
   colorize: Optional[bool] = None
   backtrace: bool = True
@@ -87,14 +83,6 @@ def config_onload(_: Optional[Config], cur: Config) -> None:
 
   logger.remove()
   for sink in cur.sinks:
-    def filter(
-      record: "Record",
-      level=logger.level(sink.level.upper()).no if isinstance(sink.level, str) else sink.level
-    ) -> bool:
-      if sink.fold_nonebot and (record["name"] or "").startswith("nonebot."):
-        record["name"] = "nonebot"
-      return record["level"].no >= level
-
     if isinstance(sink, SpecialTarget):
       if sink.type == "stdout":
         real_sink = sys.__stdout__
@@ -116,7 +104,7 @@ def config_onload(_: Optional[Config], cur: Config) -> None:
 
     logger.add(
       real_sink,
-      filter=filter,
+      level=sink.level,
       format=sink.format,
       colorize=sink.colorize,
       diagnose=sink.diagnose,
