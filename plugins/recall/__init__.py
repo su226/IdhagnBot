@@ -1,11 +1,9 @@
 import asyncio
-from typing import Union, cast
+from typing import cast
 
 import nonebot
 from loguru import logger
-from nonebot.adapters.onebot.v11 import (
-  Bot, FriendRecallNoticeEvent, GroupRecallNoticeEvent, Message, MessageEvent
-)
+from nonebot.adapters.onebot.v11 import Bot, GroupRecallNoticeEvent, Message, MessageEvent
 from nonebot.adapters.onebot.v11.event import Reply
 from nonebot.exception import ActionFailed
 from nonebot.params import EventMessage
@@ -43,7 +41,7 @@ async def handle_manual_recall(bot: Bot, event: MessageEvent) -> None:
   try:
     await bot.delete_msg(message_id=cast(Reply, event.reply).message_id)
   except ActionFailed:
-    await manual_recall.finish("撤回失败，可能已超过两分钟、已经被撤回，或者不支持这种消息")
+    await manual_recall.send("撤回失败，可能已超过两分钟、已经被撤回，或者不支持这种消息")
   try:
     await bot.delete_msg(message_id=event.message_id)
   except ActionFailed:
@@ -52,19 +50,18 @@ async def handle_manual_recall(bot: Bot, event: MessageEvent) -> None:
 
 driver = nonebot.get_driver()
 record = Record()
-AnyRecallNoticeEvent = Union[GroupRecallNoticeEvent, FriendRecallNoticeEvent]
 
 
-async def rule_auto_recall(event: AnyRecallNoticeEvent, state: T_State) -> bool:
-  return await record.has(event.message_id, state)
+async def rule_auto_recall(event: GroupRecallNoticeEvent, state: T_State) -> bool:
+  return await record.has(event, state)
 on_auto_recall = nonebot.on(
   "notice",
   rule_auto_recall,
   context.build_permission(("recall", "auto_recall"), permission.Level.MEMBER)
 )
 @on_auto_recall.handle()
-async def handle_auto_recall(bot: Bot, event: AnyRecallNoticeEvent, state: T_State) -> None:
+async def handle_auto_recall(bot: Bot, event: GroupRecallNoticeEvent, state: T_State) -> None:
   coros = []
-  async for message in record.get(event.message_id, state):
+  async for message in record.get(event, state):
     coros.append(try_delete_msg(bot, message))
   await asyncio.gather(*coros)
