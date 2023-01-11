@@ -51,11 +51,15 @@ async def get_pgc_appender(activity: ActivityPGC) -> Callable[[Card], None]:
 
 
 def deleted_appender(card: Card) -> None:
-  card.add(CardText("源动态已失效", 32, 2))
+  block = Card()
+  block.add(CardText("源动态已失效", 32, 2))
+  card.add(block)
 
 
 def unknown_appender(card: Card) -> None:
-  card.add(CardText("IdhagnBot 暂不支持解析此类动态", 32, 2))
+  block = Card()
+  block.add(CardText("IdhagnBot 暂不支持解析此类动态", 32, 2))
+  card.add(block)
 
 
 GENERIC_TITLE = make_title_formatter("动态")
@@ -112,9 +116,11 @@ async def format(
       appender = unknown_appender
 
   def make() -> Message:
-    card = Card()
-    card.add(CardAuthor(avatar, activity.name))
-    card.add(CardText(activity.content.text, 32, 3))
+    card = Card(0)
+    block = Card()
+    block.add(CardAuthor(avatar, activity.name))
+    block.add(CardText(activity.content.text, 32, 3))
+    card.add(block)
     card.add(CardLine())
     appender(card)
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))

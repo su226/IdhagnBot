@@ -102,7 +102,7 @@ def layout(
   layout.set_spacing(spacing)
   if lines:
     layout.set_height(-lines)
-    content = content.replace("\n", "\u2028")
+    content = content.replace("\r", "").replace("\n", "\u2028")
   if align == "m":
     layout.set_alignment(Pango.Alignment.CENTER)
   if align == "r":

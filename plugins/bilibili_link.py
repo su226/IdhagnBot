@@ -74,15 +74,20 @@ async def handle_bilibili_link(state: T_State) -> None:
   async with http.get(data_view["pic"]) as response:
     cover_data = await response.read()
 
-  # 3. 构建卡片
   def make() -> MessageSegment:
+    # 3. 构建卡片
+    card = Card(0)
+
+    block = Card()
+    block.add(CardText(data_view["title"], 40, 2))
     avatar = Image.open(BytesIO(avatar_data))
+    block.add(CardAuthor(avatar, data_card["name"], data_card["fans"]))
+    card.add(block)
+
     cover = Image.open(BytesIO(cover_data))
-    card = Card()
-    card.add(CardText(data_view["title"], 40, 2))
-    card.add(CardAuthor(avatar, data_card["name"], data_card["fans"]))
     card.add(CardCover(cover))
 
+    block = Card()
     infos = CardInfo()
     date = time.strftime("%Y-%m-%d", time.localtime(data_view["pubdate"]))
     infos.add(InfoText(date))
@@ -96,11 +101,11 @@ async def handle_bilibili_link(state: T_State) -> None:
     infos.add(InfoCount("collect", data_stat["favorite"]))
     infos.add(InfoCount("share", data_stat["share"]))
     infos.finish_last_line()
-    card.add(infos)
-
+    block.add(infos)
     desc = data_view["desc"]
     if desc and desc != "-":
-      card.add(CardText(desc, 32, 3))
+      block.add(CardText(desc, 32, 3))
+    card.add(block)
 
     # 4. 渲染卡片并发送
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))

@@ -29,10 +29,14 @@ async def get_appender(activity: ActivityArticle) -> Callable[[Card], None]:
       cover = Image.new("RGB", (640, size), (255, 255, 255))
       for i, v in enumerate(covers):
         cover.paste(v, (i * (size + IMAGE_GAP), 0))
-    card.add(CardAuthor(avatar, activity.name))
-    card.add(CardText(activity.content.title, 40, 2))
+    block = Card()
+    block.add(CardAuthor(avatar, activity.name))
+    block.add(CardText(activity.content.title, 40, 2))
+    card.add(block)
     card.add(CardCover(cover, False))
-    card.add(CardText(activity.content.desc, 32, 3))
+    block = Card()
+    block.add(CardText(activity.content.desc, 32, 3))
+    card.add(block)
 
   return appender
 
@@ -41,7 +45,7 @@ async def format(activity: ActivityArticle) -> Message:
   appender = await get_appender(activity)
 
   def make() -> Message:
-    card = Card()
+    card = Card(0)
     appender(card)
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)

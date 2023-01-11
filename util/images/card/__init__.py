@@ -59,10 +59,10 @@ class CardLine(Render):
     return WIDTH
 
   def get_height(self) -> int:
-    return PADDING * 2 + 2
+    return 2
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
-    dst.paste((143, 143, 143), (x, y + PADDING, x + WIDTH, y + PADDING + 2))
+    dst.paste((143, 143, 143), (x, y, x + WIDTH, y + 2))
 
 
 class CardCover(Render):
@@ -76,10 +76,10 @@ class CardCover(Render):
     return WIDTH
 
   def get_height(self) -> int:
-    return self.im.height + PADDING * 2
+    return self.im.height
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
-    dst.paste(self.im, (x, y + PADDING))
+    dst.paste(self.im, (x, y))
 
 
 class CardAuthor(Render):
@@ -194,9 +194,10 @@ class CardInfo(Render):
 
 
 class Card(Render):
-  def __init__(self) -> None:
+  def __init__(self, padding: int = PADDING) -> None:
     self.items: List[Render] = []
-    self.height = PADDING * 2
+    self.padding = padding
+    self.height = padding * 2
 
   def get_width(self) -> int:
     return WIDTH
@@ -210,7 +211,7 @@ class Card(Render):
     return self
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
-    y += PADDING
+    y += self.padding
     for item in self.items:
       item.render(dst, x, y)
       y += item.get_height()

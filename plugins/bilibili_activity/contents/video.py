@@ -19,13 +19,17 @@ async def get_appender(activity: ActivityVideo) -> Callable[[Card], None]:
   )
 
   def appender(card: Card) -> None:
-    card.add(CardAuthor(avatar, activity.name))
+    block = Card()
+    block.add(CardAuthor(avatar, activity.name))
     if activity.content.text:
-      card.add(CardText(activity.content.text, 32, 3))
-    card.add(CardText(activity.content.title, 40, 2))
+      block.add(CardText(activity.content.text, 32, 3))
+    block.add(CardText(activity.content.title, 40, 2))
+    card.add(block)
     card.add(CardCover(cover))
     if activity.content.desc and activity.content.desc != "-":
-      card.add(CardText(activity.content.desc, 32, 3))
+      block = Card()
+      block.add(CardText(activity.content.desc, 32, 3))
+      card.add(block)
 
   return appender
 
@@ -34,7 +38,7 @@ async def format(activity: ActivityVideo) -> Message:
   appender = await get_appender(activity)
 
   def make() -> Message:
-    card = Card()
+    card = Card(0)
     appender(card)
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)

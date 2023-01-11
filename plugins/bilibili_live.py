@@ -2,16 +2,18 @@ import asyncio
 import time
 from collections import defaultdict
 from io import BytesIO
-from typing import Dict, List, Optional, Union, cast
+from typing import Awaitable, Dict, List, Optional, Union, cast
 
 import nonebot
 from apscheduler.schedulers.base import JobLookupError
 from loguru import logger
-from nonebot.adapters.onebot.v11 import Bot, Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
+from nonebot.exception import ActionFailed
+from nonebot.params import CommandArg
 from PIL import Image
 from pydantic import BaseModel
 
-from util import command, configs, imutil, misc
+from util import command, configs, imutil, misc, context
 from util.images.card import Card, CardAuthor, CardCover, CardText
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -21,14 +23,21 @@ from nonebot_plugin_apscheduler import scheduler
 class GroupTarget(BaseModel):
   group: int
 
+  async def send(self, bot: Bot, message: Message) -> None:
+    await bot.send_group_msg(group_id=self.group, message=message)
+
 
 class UserTarget(BaseModel):
   user: int
 
+  async def send(self, bot: Bot, message: Message) -> None:
+    await bot.send_private_msg(user_id=self.user, message=message)
 
+
+Target = Union[GroupTarget, UserTarget]
 class User(BaseModel):
   uid: int
-  targets: List[Union[GroupTarget, UserTarget]]
+  targets: List[Target]
 
 
 class Config(BaseModel):
@@ -87,6 +96,35 @@ async def handle_check_live():
     await check_live.finish("没有可以推送的内容")
 
 
+force_push = (
+  command.CommandBuilder("bilibili_live.force_push", "推送直播")
+  .level("admin")
+  .brief("强制推送B站直播")
+  .usage("/推送直播 <UID>")
+  .build()
+)
+@force_push.handle()
+async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg()) -> None:
+  try:
+    uid = int(arg.extract_plain_text())
+  except ValueError:
+    await force_push.finish(force_push.__doc__)
+  http = misc.http()
+  async with http.get(API_URL + f"?uids[]={uid}") as response:
+    data = await response.json()
+  if not data["data"]:
+    await force_push.finish("无法获取这个用户的直播间")
+  message = await get_message(data["data"][str(uid)])
+  ctx = context.get_event_context(event)
+  real_ctx = getattr(event, "group_id", -1)
+  if ctx != real_ctx:
+    await bot.send_group_msg(group_id=ctx, message=message)
+    name = context.CONFIG().groups[ctx]._name
+    await force_push.finish(f"已推送到 {name}")
+  else:
+    await force_push.finish(Message(message))
+
+
 @driver.on_startup
 async def on_startup() -> None:
   CONFIG()
@@ -100,19 +138,30 @@ async def get_message(data: dict) -> Message:
     desc: str = info["data"]["room_news"]["content"]
   async with http.get(data["face"]) as response:
     avatar_data = await response.read()
-  async with http.get(data["cover_from_user"]) as response:
-    cover_data = await response.read()
+  if (cover_url := data["cover_from_user"]):
+    async with http.get(cover_url) as response:
+      cover_data = await response.read()
+  else:
+    cover_data = None
   category = f"{data['area_v2_parent_name']} - {data['area_v2_name']}"
 
   def make() -> MessageSegment:
+    card = Card(0)
+    block = Card()
+    block.add(CardText(data["title"], 40, 2))
+    block.add(CardText(category, 32, 1))
     avatar = Image.open(BytesIO(avatar_data))
-    cover = Image.open(BytesIO(cover_data))
-    card = Card()
-    card.add(CardText(data["title"], 40, 2))
-    card.add(CardText(category, 32, 1))
-    card.add(CardAuthor(avatar, data["uname"], fans))
+    block.add(CardAuthor(avatar, data["uname"], fans))
+    card.add(block)
+    if cover_data:
+      cover = Image.open(BytesIO(cover_data))
+    else:
+      cover = avatar
     card.add(CardCover(cover))
-    card.add(CardText(desc, 32, 3))
+    if desc:
+      block = Card()
+      block.add(CardText(desc, 32, 3))
+      card.add(block)
 
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)
@@ -120,6 +169,27 @@ async def get_message(data: dict) -> Message:
 
   url = f"https://live.bilibili.com/{data['room_id']}"
   return f"{data['uname']} 开播了 {category}" + await misc.to_thread(make) + url
+
+
+async def push_all(bot: Bot, data: dict, targets: List[Target]) -> None:
+  logger.info(f"推送 {data['uname']} 的直播间")
+  try:
+    message = await get_message(data)
+  except Exception:
+    logger.exception(f"获取 {data['uname']} 的直播间的推送消息失败")
+    return
+
+  async def send_with_except(target: Target, message: Message) -> None:
+    try:
+      await target.send(bot, message)
+    except ActionFailed:
+      logger.exception(f"推送 {data['uname']} 的直播间到目标 {target} 失败")
+
+  coros: List[Awaitable[None]] = []
+  for target in targets:
+    coros.append(send_with_except(target, message))
+
+  await asyncio.gather(*coros)
 
 
 async def check() -> bool:
@@ -144,21 +214,15 @@ async def check() -> bool:
   fetch_t = time.perf_counter() - fetch_t
 
   send_t = time.perf_counter()
-  result = False
+  coros: List[Awaitable[None]] = []
   for uid, detail in data["data"].items():
     current = bool(detail["live_status"])
     status = "已开播" if current else "未开播"
     logger.debug(f"B站直播: {detail['uname']} -> {status}")
     if not streaming[uid] and current:
-      logger.info(f"推送 {detail['uname']} 的直播间")
-      message = await get_message(detail)
-      for target in targets[int(uid)]:
-        if isinstance(target, GroupTarget):
-          await bot.send_group_msg(group_id=target.group, message=message)
-        else:
-          await bot.send_private_msg(user_id=target.user, message=message)
-      result = True
+      coros.append(push_all(bot, detail, targets[int(uid)]))
     streaming[uid] = current
+  await asyncio.gather(*coros)
   send_t = time.perf_counter() - send_t
 
   total_t = time.perf_counter() - total_t
@@ -167,4 +231,4 @@ async def check() -> bool:
       f"检查直播时间过长，请检查网络: \n"
       f"准备 {prepare_t:.3f}s\n获取 {fetch_t:.3f}s\n发送 {send_t:.3f}s"
     )
-  return result
+  return bool(coros)

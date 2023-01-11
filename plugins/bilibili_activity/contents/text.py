@@ -16,8 +16,10 @@ async def get_appender(activity: ActivityText) -> Callable[[Card], None]:
   avatar = await fetch_image(activity.avatar)
 
   def appender(card: Card) -> None:
-    card.add(CardAuthor(avatar, activity.name))
-    card.add(CardText(activity.content.text, 32, 6))
+    block = Card()
+    block.add(CardAuthor(avatar, activity.name))
+    block.add(CardText(activity.content.text, 32, 6))
+    card.add(block)
 
   return appender
 
@@ -27,7 +29,7 @@ async def format(activity: ActivityText) -> Message:
   appender = await get_appender(activity)
 
   def make() -> Message:
-    card = Card()
+    card = Card(0)
     appender(card)
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)
