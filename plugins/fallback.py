@@ -1,6 +1,6 @@
 import asyncio
 from datetime import date
-from typing import Dict, Set, Tuple
+from typing import Any, Dict, Set, Tuple
 
 import nonebot
 from aiohttp.client_exceptions import ClientError
@@ -11,7 +11,8 @@ from nonebot.message import event_postprocessor, run_postprocessor, run_preproce
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
 from PIL import Image
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
+from pygtrie import Trie
 
 from util import command, configs, context, imutil, misc, textutil
 
@@ -30,9 +31,24 @@ class State(BaseModel):
 
 class Config(BaseModel):
   show_invaild_command: misc.EnableSet = misc.EnableSet.true()
+  invaild_command_ignore: Dict[int, Set[str]] = Field(default_factory=dict)
   show_is_bot: misc.EnableSet = misc.EnableSet.true()
   show_exception: misc.EnableSet = misc.EnableSet.true()
   send_exception_to_superuser: misc.EnableSet = misc.EnableSet.true()
+  _invaild_command_ignore: Dict[int, Trie] = PrivateAttr()
+
+  def __init__(self, **data: Any) -> None:
+    super().__init__(**data)
+    self._invaild_command_ignore = {}
+    for group_id, prefixes in self.invaild_command_ignore.items():
+      self._invaild_command_ignore[group_id] = Trie((x, None) for x in prefixes)
+
+  def has_ignored_prefix(self, group_id: int, message: Message) -> bool:
+    return (
+      message[0].is_text()
+      and group_id in self.invaild_command_ignore
+      and bool(self._invaild_command_ignore[group_id].shortest_prefix(str(message[0])))
+    )
 
 
 class ManualException(Exception):
@@ -151,7 +167,11 @@ async def post_event(bot: Bot, event: Event, bot_state: T_State) -> None:
   if group_id in suppressed or "run" in bot_state["_prefix"]:
     return
   config = CONFIG()
-  if misc.is_command(event.message) and config.show_invaild_command[group_id]:
+  if (
+    misc.is_command(event.message)
+    and config.show_invaild_command[group_id]
+    and not config.has_ignored_prefix(group_id, event.message)
+  ):
     await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
     return
   state = STATE()
