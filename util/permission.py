@@ -203,7 +203,9 @@ def get_node_level(node: Node, group: int = -1) -> Optional[Level]:
   return None
 
 
-def check(node: Node, user: int, group: int, level: Level) -> Optional[bool]:
+def check(
+  node: Node, user: int, group: int, level: Level, prefix: Optional[str] = None
+) -> Optional[bool]:
   config = CONFIG()
   roles: Set[str] = set()
   queue: Deque[str] = deque()
@@ -224,6 +226,7 @@ def check(node: Node, user: int, group: int, level: Level) -> Optional[bool]:
     "group": str(group),
     "level": level.key,
     "admin": str(level >= Level.ADMIN).lower(),
+    "prefix": prefix,
   }
   now = datetime.now()
   if user_tree:

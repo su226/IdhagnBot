@@ -1,16 +1,20 @@
 import asyncio
+from contextlib import AsyncExitStack
+from contextvars import ContextVar
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Union
+from typing import Dict, List, Optional, Set, Type, Union
 
 import nonebot
+import nonebot.message
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.base import JobLookupError
 from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
 from nonebot.exception import ActionFailed, IgnoredException
+from nonebot.matcher import Matcher
 from nonebot.message import event_preprocessor
 from nonebot.permission import Permission as BotPermission
 from nonebot.rule import Rule
-from nonebot.typing import T_State
+from nonebot.typing import T_DependencyCache, T_State
 from pydantic import BaseModel, Field, PrivateAttr
 
 from . import configs, misc, permission
@@ -242,13 +246,34 @@ async def get_event_level(bot: Bot, event: Event) -> permission.Level:
   return await permission.get_group_level(bot, user_id, group_id) or permission.Level.MEMBER
 
 
+# XXX: 对 Nonebot 2 进行 Monkey Patch 以在 Permission 中拿到 State
+_check_matcher_orig = nonebot.message._check_matcher
+_current_state: ContextVar[T_State] = ContextVar("_current_state")
+async def _check_matcher(
+  priority: int,
+  Matcher: Type[Matcher],
+  bot: "Bot",
+  event: "Event",
+  state: T_State,
+  stack: Optional[AsyncExitStack] = None,
+  dependency_cache: Optional[T_DependencyCache] = None,
+) -> None:
+  token = _current_state.set(state)
+  try:
+    await _check_matcher_orig(priority, Matcher, bot, event, state, stack, dependency_cache)
+  finally:
+    _current_state.reset(token)
+nonebot.message._check_matcher = _check_matcher
+
+
 def build_permission(node: permission.Node, default: permission.Level) -> BotPermission:
   async def checker(bot: Bot, event: Event) -> bool:
     if (user_id := getattr(event, "user_id", None)) is None:
       return False
     event_level = await get_event_level(bot, event)
+    prefix = _current_state.get()["_prefix"]["command_start"]
     if (result := permission.check(
-      node, user_id, get_event_context(event), event_level
+      node, user_id, get_event_context(event), event_level, prefix
     )) is not None:
       return result
     command_level = permission.get_node_level(node) or default
