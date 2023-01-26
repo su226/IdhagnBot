@@ -11,7 +11,8 @@ from util import command, misc
 ENGLISH_RE = re.compile(r"^[A-Za-z0-9]+$")
 SPACE_RE = re.compile(r"\s+")
 NBNHHSH_API = "https://lab.magiconch.com/api/nbnhhsh/guess"
-COUPLET_API = "https://ai-backend.binwang.me/v0.2/couplet/"
+# COUPLET_API = "https://ai-backend.binwang.me/v0.2/couplet/" # noqa 此为原地址，新地址如下
+COUPLET_API = "https://seq2seq-couplet-model.rssbrain.com/v0.2/couplet/"
 ALIPAY_VOICE_API = "https://mm.cqu.cc/share/zhifubaodaozhang/?money={:.2f}"
 # DINGZHEN_API = "https://api.aya1.top/randomdj?r=0" # noqa 接口早已停运
 HITOKOTO_API = "https://v1.hitokoto.cn/?"
