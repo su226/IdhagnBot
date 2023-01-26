@@ -60,7 +60,7 @@ CONFIG = configs.SharedConfig("user_aliases", Config)
 CACHE: Dict[int, Tuple[float, AliasesDict]] = {}
 IDENTIFIER_RE = re.compile(r"[a-zA-Z0-9\u4e00-\u9fa5]+")
 AMBIGUOUS_LIMIT = 5
-AT_RE = re.compile(r"^\[CQ:at,qq=(\d+)\]$")
+AT_RE = re.compile(r"^\[CQ:at,qq=(\d+|all)\]$")
 LINK_RE = re.compile(r"^https?://.+$")
 IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
 
@@ -159,7 +159,11 @@ async def match_uid(
       segments.append(f"等 {count} 个成员或别名")
     raise AggregateError("\n".join(segments))
   elif len(matches) == 0:
-    raise AggregateError(f"找不到 {pattern}")
+    if pattern == raw_pattern:
+      display_pattern = pattern
+    else:
+      display_pattern = f"{raw_pattern}（{pattern}）"
+    raise AggregateError(f"找不到 {display_pattern}")
   if not multiple and len(matches[0].uids) > 1:
     comment = " "
     if len(matches[0].patterns) > 1:
@@ -227,6 +231,8 @@ async def _get_image_and_user(
   if not pattern:
     uid = default
   elif match := AT_RE.match(pattern):
+    if match[1] == "all":
+      raise misc.AggregateError("不支持@全体成员，恭喜你浪费了一次")
     uid = int(match[1])
   elif IMAGE_RE.match(pattern):
     return await get_image_from_link(Message(pattern)[0].data["url"], **kw), None
