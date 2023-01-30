@@ -9,8 +9,8 @@ from util import misc
 
 from .base import Music, SearchResult
 
-SEARCH_API = "https://ovooa.com/API/QQ_Music/?msg={keyword}&n={i}"
-ID_API = "https://ovooa.com/API/QQ_Music/?id={id}"
+SEARCH_API = "https://ovooa.com/API/QQ_Music/?msg={keyword}&n={i}&br=2"
+ID_API = "https://ovooa.com/API/QQ_Music/?mid={id}"
 ID_RE = re.compile(r"[0-9A-Za-z]{14}")
 
 
@@ -26,7 +26,7 @@ class QQOvooaMusic(Music):
     return MessageSegment("music", {
       "type": "custom",
       "subtype": "qq",
-      "url": f"https://y.qq.com/n/ryqq/songDetail/{data['data']['Mid']}",
+      "url": f"https://y.qq.com/n/ryqq/songDetail/{data['data']['mid']}",
       "audio": data["data"]["music"],
       "title": self.name,
       "content": self.artists,
@@ -43,7 +43,7 @@ class QQOvooaMusic(Music):
     return MessageSegment("music", {
       "type": "custom",
       "subtype": "qq",
-      "url": f"https://y.qq.com/n/ryqq/songDetail/{data['data']['Mid']}",
+      "url": f"https://y.qq.com/n/ryqq/songDetail/{data['data']['mid']}",
       "audio": data["data"]["music"],
       "title": data["data"]["song"],
       "content": data["data"]["singer"],
@@ -62,7 +62,7 @@ class QQOvooaMusic(Music):
       for i, song in enumerate(data["data"], 1):
         yield QQOvooaMusic(
           song["song"],
-          song["singers"],
+          "/".join(song["singers"]),
           "",
           False,
           keyword,
