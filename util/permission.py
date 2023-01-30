@@ -3,13 +3,14 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import (
-  Any, Deque, Dict, Generic, Iterable, List, Literal, Optional, Set, Tuple, TypeVar, cast
+  Any, Deque, Dict, Iterable, List, Literal, Optional, Set, Tuple, TypeVar, Union, cast
 )
 
 from loguru import logger
 from nonebot.adapters.onebot.v11 import Bot
 from nonebot.exception import ActionFailed
 from pydantic import BaseModel, Field, PrivateAttr
+from pygtrie import StringTrie
 
 from util import configs, misc
 
@@ -25,7 +26,7 @@ class Entry(BaseModel):
 
   def __init__(self, **kw: Any) -> None:
     super().__init__(**kw)
-    self._node = tuple(self.node_str.split("."))
+    self._node = tuple(filter(None, self.node_str.split(".")))
 
   @property
   def node(self) -> Tuple[str, ...]:
@@ -60,52 +61,27 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
-class Trie(Generic[K, V]):
-  def __init__(self) -> None:
-    self.data: List[V] = []
-    self.children: Dict[K, "Trie[K, V]"] = {}
-    self.parent: "Trie[K, V]" = self
-    self.depth = 0
+class NodeTrie(StringTrie):
+  def __init__(self, *args, **kw):
+    super().__init__(separator=".", *args, **kw)
 
-  def get_most(self, key: Iterable[K]) -> "Trie[K, V]":
-    cur = self
-    for i in key:
-      if i not in cur.children:
-        break
-      cur = cur.children[i]
-    return cur
-
-  def __setitem__(self, key: Iterable[K], value: V) -> None:
-    cur = self
-    for i in key:
-      if i not in cur.children:
-        child = Trie()
-        child.parent = cur
-        child.depth = cur.depth + 1
-        cur.children[i] = child
-        cur = child
-      else:
-        cur = cur.children[i]
-    cur.data.append(value)
-
-  def sort(self, recursive: bool = True) -> None:
-    cast(List[Any], self.data).sort()
-    if recursive:
-      for i in self.children.values():
-        i.sort()
+  def _path_from_key(self, key: Union[str, Node]) -> Iterable[str]:
+    if isinstance(key, str):
+      return key.split(self._separator)
+    return key
 
 
 class User(BaseModel):
   roles: List[str] = Field(default_factory=list)
   entries: List[Entry] = Field(default_factory=list)
   level: Literal[None, "member", "admin", "owner"] = None
-  _tree: Trie[str, Entry] = PrivateAttr()
+  _tree: NodeTrie = PrivateAttr()
 
   def __init__(self, **kw: Any) -> None:
     super().__init__(**kw)
-    self._tree = Trie()
+    self._tree = NodeTrie()
     for entry in self.entries:
-      self._tree[entry.node] = entry
+      cast(List[Entry], self._tree.setdefault(entry.node, [])).append(entry)
 
 
 class Command(BaseModel):
@@ -116,15 +92,17 @@ class State(BaseModel):
   roles: Dict[str, Role] = Field(default_factory=dict)
   users: Dict[int, User] = Field(default_factory=dict)
   commands: Dict[str, Command] = Field(default_factory=dict)
-  _tree: Trie[str, RoleEntry] = PrivateAttr()
+  _tree: NodeTrie = PrivateAttr()
 
   def __init__(self, **kw: Any) -> None:
     super().__init__(**kw)
-    self._tree = Trie()
+    self._tree = NodeTrie()
     for name, role in self.roles.items():
       for entry in role.entries:
-        self._tree[entry.node] = RoleEntry(name, role, entry)
-    self._tree.sort()
+        entries = cast(List[RoleEntry], self._tree.setdefault(entry.node, []))
+        entries.append(RoleEntry(name, role, entry))
+    for entries in self._tree.itervalues():
+      cast(List[RoleEntry], entries).sort()
     if "default" not in self.roles:
       self.roles["default"] = Role()
 
@@ -203,17 +181,26 @@ def get_node_level(node: Node, group: int = -1) -> Optional[Level]:
   return None
 
 
+def walk_most(trie: NodeTrie, key: Node) -> Iterable[NodeTrie._Step]:
+  try:
+    yield from trie.walk_towards(key)
+  except KeyError:
+    pass
+
+
 def check(
   node: Node, user: int, group: int, level: Level, prefix: Optional[str] = None
 ) -> Optional[bool]:
   config = CONFIG()
   roles: Set[str] = set()
   queue: Deque[str] = deque()
-  user_tree = None
+  EMPTY = []
   if user in config.users:
     data = config.users[user]
     queue.extend(data.roles)
-    user_tree = data._tree.get_most(node)
+    user_steps = [cast(List[Entry], x.get(EMPTY)) for x in walk_most(data._tree, node)]
+  else:
+    user_steps = []
   while queue:
     i = queue.popleft()
     if i in roles:
@@ -221,7 +208,12 @@ def check(
     roles.add(i)
     queue.extend(config.roles[i].parents)
   roles.add("default")
-  role_tree = config._tree.get_most(node)
+  role_steps = [cast(List[RoleEntry], x.get(EMPTY)) for x in walk_most(config._tree, node)]
+  len_diff = len(user_steps) - len(role_steps)
+  if len_diff < 0:
+    user_steps += [EMPTY] * -len_diff
+  else:
+    role_steps += [EMPTY] * len_diff
   context = {
     "group": str(group),
     "level": level.key,
@@ -229,29 +221,15 @@ def check(
     "prefix": prefix,
   }
   now = datetime.now()
-  if user_tree:
-    while user_tree.depth > role_tree.depth:
-      for entry in user_tree.data:
+  for user_step, role_step in zip(reversed(user_steps), reversed(role_steps)):
+    if user_step:
+      for entry in user_step:
         if entry.matches(now, context):
           return entry.value
-      user_tree = user_tree.parent
-    while role_tree.depth > user_tree.depth:
-      for entry in role_tree.data:
+    if role_step:
+      for entry in role_step:
         if entry.role_name in roles and entry.entry.matches(now, context):
           return entry.entry.value
-      role_tree = role_tree.parent
-  while True:
-    if user_tree:
-      for entry in user_tree.data:
-        if entry.matches(now, context):
-          return entry.value
-      user_tree = user_tree.parent
-    for entry in role_tree.data:
-      if entry.role_name in roles and entry.entry.matches(now, context):
-        return entry.entry.value
-    role_tree = role_tree.parent
-    if role_tree.depth == 0:
-      break
   return None
 
 
