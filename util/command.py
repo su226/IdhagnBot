@@ -10,7 +10,7 @@ from nonebot.consts import SHELL_ARGS, SHELL_ARGV
 from nonebot.exception import ParserExit
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg, ShellCommandArgs
-from nonebot.rule import ArgumentParser, Rule
+from nonebot.rule import ArgumentParser, Rule, parser_message
 from nonebot.typing import T_RuleChecker, T_State
 from typing_extensions import Self
 
@@ -42,12 +42,13 @@ class ShellCommandRule:
       state[SHELL_ARGS] = ParserExit(127, "解析命令行参数失败：" + str(e))
       return True
     self.parser.prog = self.prog
-    setattr(self.parser, "_message", "")
+    token = parser_message.set("")
     try:
       args = self.parser.parse_args(argv)
       state[SHELL_ARGS] = args
     except ParserExit as e:
       state[SHELL_ARGS] = e
+    parser_message.reset(token)
     return True
 
   @staticmethod

@@ -250,7 +250,6 @@ async def get_event_level(bot: Bot, event: Event) -> permission.Level:
 _check_matcher_orig = nonebot.message._check_matcher
 _current_state: ContextVar[T_State] = ContextVar("_current_state")
 async def _check_matcher(
-  priority: int,
   Matcher: Type[Matcher],
   bot: "Bot",
   event: "Event",
@@ -260,7 +259,7 @@ async def _check_matcher(
 ) -> None:
   token = _current_state.set(state)
   try:
-    await _check_matcher_orig(priority, Matcher, bot, event, state, stack, dependency_cache)
+    await _check_matcher_orig(Matcher, bot, event, state, stack, dependency_cache)
   finally:
     _current_state.reset(token)
 nonebot.message._check_matcher = _check_matcher
