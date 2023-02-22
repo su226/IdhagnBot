@@ -3,7 +3,7 @@ import html
 import platform
 import re
 import time
-from typing import Any, Awaitable, Callable, Dict, List, Literal, Tuple, TypeVar
+from typing import Any, Awaitable, Callable, Dict, List, Literal, Set, Tuple, TypeVar
 
 import nonebot
 import psutil
@@ -245,7 +245,11 @@ async def get_swap():
 
 async def get_disks():
   lines: List[Tuple[str, str]] = []
+  shown: Set[str] = set()
   for partition in psutil.disk_partitions():
+    if partition.device.startswith("/dev/loop") or partition.device in shown:
+      continue  # 忽略回环设备和 mount --bind
+    shown.add(partition.device)
     usage = psutil.disk_usage(partition.mountpoint)
     info_str = f"{human_util(usage.used, usage.total)} ({round(usage.percent)}%)"
     lines.append((partition.mountpoint, info_str))
@@ -278,11 +282,13 @@ async def get_diskio():
 
 
 async def get_network():
-  counter = psutil.net_io_counters()
+  before = psutil.net_io_counters(True)
   await asyncio.sleep(1)
-  counter1 = psutil.net_io_counters()
-  recv = counter1.bytes_recv - counter.bytes_recv
-  sent = counter1.bytes_sent - counter.bytes_sent
+  after = psutil.net_io_counters(True)
+  after.pop("lo", None)
+  counters = [(counter, before[name]) for name, counter in after.items()]
+  recv = sum(x.bytes_recv - y.bytes_recv for x, y in counters)
+  sent = sum(x.bytes_sent - y.bytes_sent for x, y in counters)
   return [("网络", f"↓ {human_size(recv)}/s ↑ {human_size(sent)}/s")]
 
 
@@ -352,7 +358,9 @@ def render_bars(min_width: int, items: List[Tuple[str, str, float]]) -> Image.Im
 
 
 idhagnfetch = (
-  command.CommandBuilder("idhagnfetch", "idhagnfetch", "状态", "state", "运行时间", "uptime")
+  command.CommandBuilder(
+    "idhagnfetch", "idhagnfetch", "状态", "status", "state", "运行时间", "uptime"
+  )
   .brief("显示机器人的状态")
   .usage('''\
 服务器在线在重启系统（含崩溃自动重启）时归零
@@ -362,9 +370,12 @@ idhagnfetch = (
 @idhagnfetch.handle()
 async def handle_idhagnfetch(bot: Bot):
   config = CONFIG()
-  login, avatar, items, bar_items = await asyncio.gather(
+  login, avatar = await asyncio.gather(
     bot.get_login_info(),
     imutil.get_avatar(int(bot.self_id)),
+  )
+  # 分开获取，防止干扰网络信息
+  items, bar_items = await asyncio.gather(
     asyncio.gather(*(ITEMS[name]() for name in config.items)),
     asyncio.gather(*(BAR_ITEMS[name]() for name in config.bar_items)),
   )
