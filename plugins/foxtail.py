@@ -4,11 +4,13 @@ import re
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
+from http.cookies import SimpleCookie
 from typing import Dict, List, Literal
 from urllib.parse import quote as encodeuri
 
 import aiohttp
 import nonebot
+from loguru import logger
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent, MessageSegment
 from nonebot.exception import ActionFailed
 from nonebot.params import Arg, ArgPlainText, CommandArg, EventMessage
@@ -35,8 +37,18 @@ class SearchResult:
 
 class Config(BaseModel):
   keyword: str = "来只兽"
-  cookies: str = ""
   show_private: bool = True
+  user: str = ""
+  password: str = ""
+  token: str = ""
+
+  @property
+  def can_login(self) -> bool:
+    return bool(self.user and self.password and self.token)
+
+
+class State(BaseModel):
+  cookies: str = ""
 
   @property
   def headers(self) -> Dict[str, str]:
@@ -44,6 +56,7 @@ class Config(BaseModel):
 
 
 CONFIG = configs.SharedConfig("foxtail", Config)
+STATE = configs.SharedState("foxtail", State)
 RANDOM_API = "https://cloud.foxtail.cn/api/function/random?name={}&type={}"
 INFO_API = "https://cloud.foxtail.cn/api/function/pullpic?picture={}&model={}"
 DOWNLOAD_API = "https://cloud.foxtail.cn/api/function/pictures?picture={}&model={}"
@@ -73,21 +86,48 @@ USAGE_BASE = f'''\
 USAGE_KEYWORD = "也可以使用关键词“{}”触发"
 
 
-async def send_pic(bot: Bot, event: Event, data: dict) -> None:
+async def ensure_login() -> SimpleCookie[str]:
+  config = CONFIG()
+  if not config.can_login:
+    return SimpleCookie()
+  state = STATE()
+  http = misc.http()
+  if state.cookies:
+    cookies = SimpleCookie(state.cookies)
+    async with http.get("https://cloud.foxtail.cn/api/account/state", cookies=cookies) as response:
+      res = await response.json()
+    if res["code"] == "11100":
+      return cookies
+  logger.info("兽云祭帐号登录过期，重新登录中")
+  async with http.post("https://cloud.foxtail.cn/api/account/login", data={
+    "account": config.user,
+    "password": config.password,
+    "model": 1,
+    "token": config.token,
+  }) as response:
+    res = await response.json()
+  if res["code"] == "10000":
+    state.cookies = response.cookies.output([], "", ";")[1:]  # 移除开头的空格
+  else:
+    logger.error(f"兽云祭帐号登录失败: {res}")
+    state.cookies = ""
+  STATE.dump()
+  return response.cookies
+
+
+async def send_pic(bot: Bot, event: Event, data: dict, cookies: SimpleCookie[str]) -> None:
   status = int(data.get("examine", 1))  # 随机接口没有审核参数
   if status == 1:
-    config = CONFIG()
-    headers = config.headers if config.show_private else {}
     http = misc.http()
-    async with http.get(DOWNLOAD_API.format(data["picture"], 0), headers=headers) as response:
+    async with http.get(DOWNLOAD_API.format(data["picture"], 0), cookies=cookies) as response:
       image_data = await response.json()
-      code = image_data["code"]
-      if code == "20600":
-        image_segment = MessageSegment.image(image_data["url"])
-      elif code in {"20602", "20603"}:
-        image_segment = MessageSegment.text("没有查看权限")
-      else:
-        image_segment = MessageSegment.text(image_data["msg"])
+    code = image_data["code"]
+    if code == "20600":
+      image_segment = MessageSegment.image(image_data["url"])
+    elif code in {"20602", "20603"}:
+      image_segment = MessageSegment.text("没有查看权限")
+    else:
+      image_segment = MessageSegment.text(image_data["msg"])
   elif status == 2:
     image_segment = MessageSegment.text("图片未过审")
   else:
@@ -128,13 +168,13 @@ class Source:
   @staticmethod
   async def handle(bot: Bot, event: Event, args: str) -> None:
     config = CONFIG()
-    headers = config.headers if config.show_private else {}
+    cookies = await ensure_login() if config.show_private else SimpleCookie()
     http = misc.http()
     if match := UID_RE.fullmatch(args):
-      async with http.get(INFO_API.format(match[0], 0), headers=headers) as response:
+      async with http.get(INFO_API.format(match[0], 0), cookies=cookies) as response:
         data = await response.json()
       if "picture" in data:
-        await send_pic(bot, event, data["picture"][0])
+        await send_pic(bot, event, data["picture"][0], cookies)
       else:
         await bot.send(event, f"{HEADER}\n{data['msg']}")
       return
@@ -143,10 +183,10 @@ class Source:
     except ValueError:
       pass
     else:
-      async with http.get(INFO_API.format(fid, 1), headers=headers) as response:
+      async with http.get(INFO_API.format(fid, 1), cookies=cookies) as response:
         data = await response.json()
       if "picture" in data:
-        await send_pic(bot, event, data["picture"][0])
+        await send_pic(bot, event, data["picture"][0], cookies)
       else:
         await bot.send(event, f"{HEADER}\n{data['msg']}")
       return
@@ -173,7 +213,7 @@ class Source:
       return
 
     url = RANDOM_API.format(encodeuri(name), type)
-    async with http.get(url, headers=headers) as response:
+    async with http.get(url, cookies=cookies) as response:
       data = await response.json()
       data = data["picture"]
 
@@ -186,7 +226,7 @@ class Source:
         await bot.send(event, f"{HEADER}\n这只兽似乎不存在。")
       return
 
-    await send_pic(bot, event, data)
+    await send_pic(bot, event, data, cookies)
 furbot.universal_sources["foxtail"] = Source
 
 
@@ -243,9 +283,9 @@ async def handle_search(bot: Bot, event: Event, message: Message = CommandArg())
   if not name:
     await search.finish(search.__doc__)
   config = CONFIG()
-  headers = config.headers if config.show_private else {}
+  cookies = await ensure_login() if config.show_private else {}
   http = misc.http()
-  async with await http.get(SEARCH_API.format(encodeuri(name)), headers=headers) as response:
+  async with await http.get(SEARCH_API.format(encodeuri(name)), cookies=cookies) as response:
     data = await response.json()
 
   result: Dict[str, SearchResult] = defaultdict(SearchResult)
@@ -295,8 +335,8 @@ class SubmitData(BaseModel):
 
 submit = (
   command.CommandBuilder("foxtail.submit", "兽云祭投稿", "兽云祭上传")
-  .rule(lambda: bool(CONFIG().cookies))
-  .help_condition(lambda _: bool(CONFIG().cookies))
+  .rule(lambda: bool(CONFIG().can_login))
+  .help_condition(lambda _: bool(CONFIG().can_login))
   .category("foxtail")
   .brief("投稿兽图")
   .usage(f'''\
@@ -352,7 +392,7 @@ async def got_confirm(event: MessageEvent, state: T_State, confirm: str = ArgPla
   })
   form.add_field("file", image_data)
   async with http.post(
-    "https://cloud.foxtail.cn/api/function/upload", data=form, headers=CONFIG().headers
+    "https://cloud.foxtail.cn/api/function/upload", data=form, headers=await ensure_login()
   ) as response:
     result = await response.json()
   if result["code"] != "20000":
@@ -388,3 +428,4 @@ furbot.register_universal_keyword()
 category = help.CategoryItem.find("foxtail")
 category.data.node_str = "foxtail"
 category.brief = "兽云祭"
+del category
