@@ -99,7 +99,7 @@ async def query_spider(uid: int) -> Tuple[int, str]:
     parser = SingleParser()
     parser.feed(await response.text())
     parser.close()
-  value = parser.text.getvalue()
+  value = parser.text.getvalue().rstrip()
   if "避雷起始时间" in value:
     type = 2
   elif "上黑等级" in value:
@@ -133,7 +133,7 @@ query = (
   .brief("查询趣绮梦Furry云黑")
   .usage(f'''\
 /查云黑 <QQ号> [<QQ号>...]
-可以批量查询多个
+可以批量查询多个，最多 {CHUNK_SIZE} 个
 数据来自 {URL}''')
   .throttle(5, 1)
   .help_condition(lambda _: bool(CONFIG().token))
@@ -142,15 +142,28 @@ query = (
 )
 @query.handle()
 async def handle_query(args: Message = CommandArg()) -> None:
-  try:
-    uids = [int(x) for x in args.extract_plain_text().split()]
-  except ValueError:
-    uids = []
+  uids = []
+  for seg in args:
+    if seg.type == "text":
+      for i in seg.data["text"].split():
+        try:
+          uids.append(int(i))
+        except ValueError:
+          await query.finish(f"{i} 不是QQ号")
+    elif seg.type == "at":
+      qq = seg.data["qq"]
+      if qq == "all":
+        await query.finish("请使用 /查群云黑 批量查询全体成员")
+      uids.append(int(qq))
+    else:
+      await query.finish("只能传入QQ号或者@")
   if not uids:
     await query.finish(query.__doc__)
   config = CONFIG()
   if config.use_spider:
-    if len(uids) > 1:
+    if len(uids) > CHUNK_SIZE:
+      await query.finish(f"查询数量过多，最多 {CHUNK_SIZE} 个")
+    elif len(uids) > 1:
       result = await query_spider_batch(uids)
       lines = []
       for uid, type in result:
