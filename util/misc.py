@@ -141,7 +141,7 @@ def launch_playwright(p: "AsyncPlaywright", **kw: Any) -> Coroutine[Any, Any, "B
 def http() -> aiohttp.ClientSession:
   global _http
   if _http is None:
-    _http = aiohttp.ClientSession()
+    _http = aiohttp.ClientSession(cookie_jar=aiohttp.DummyCookieJar())
   return _http
 
 
