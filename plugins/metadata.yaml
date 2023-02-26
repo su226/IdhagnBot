@@ -1,4 +1,5 @@
 requirements:
+  charts: [sqlmodel]
   chatgpt: [playwright]
   idhagnfetch: [psutil]
   jikipedia: [cryptography]

@@ -1,10 +1,10 @@
 import html
 from typing import Callable, Dict, List, Optional, Union
-from nonebot.adapters.onebot.v11 import MessageSegment
 
+from nonebot.adapters.onebot.v11 import MessageSegment
 from pydantic import BaseModel, Field
 
-from util import configs, context, permission, misc
+from util import configs, context, misc, permission
 
 
 def NOOP_CONDITION(_): return True
@@ -206,15 +206,17 @@ class CommandItem(Item):
     segments = []
     if brief:
       segments.append(f"「{self.prefixes2[self.data.level]}{self.names[0]}」{self.brief}")
-    if isinstance(self.raw_usage, str):
-      raw_usage = self.raw_usage
-    else:
-      raw_usage = self.raw_usage()
+      segments.append("══════════")
+    raw_usage = self.raw_usage
+    if isinstance(raw_usage, Callable):
+      raw_usage = raw_usage()
+    raw_usage = raw_usage.replace("__cmd__", self.names[0])
     if len(raw_usage) == 0:
       segments.append("没有用法说明")
     else:
       segments.append(raw_usage)
     if len(self.names) > 1:
+      segments.append("══════════")
       segments.append("该命令有以下别名：" + "、".join(self.names[1:]))
     return "\n".join(segments)
 

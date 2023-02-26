@@ -912,16 +912,18 @@ def rgb2hsl(r: int, g: int, b: int) -> Tuple[float, float, float]:
 
 
 def split_rgb(v: int) -> RGB:
-  return (v >> 16, (v >> 8) & 0xff, v & 0xff)
+  return (v >> 16 & 0xff, v >> 8 & 0xff, v & 0xff)
 
 
 def luminance(r: int, g: int, b: int) -> float:
   return 0.3 * (r / 255) + 0.59 * (g / 255) + 0.11 * (b / 255)
 
 
-def blend(color1: RGB, color2: RGB, r: float) -> RGB:
+def blend(fg: RGB, bg: RGB, r: float, gamma: float = 2) -> RGB:
+  igamma = 1 / gamma
   r2 = 1 - r
   return (
-    int(color1[0] * r + color2[0] * r2),
-    int(color1[1] * r + color2[1] * r2),
-    int(color1[2] * r + color2[2] * r2))
+    int(((fg[0] / 255) ** gamma * r + (bg[0] / 255) ** gamma * r2) ** igamma * 255),
+    int(((fg[1] / 255) ** gamma * r + (bg[1] / 255) ** gamma * r2) ** igamma * 255),
+    int(((fg[2] / 255) ** gamma * r + (bg[2] / 255) ** gamma * r2) ** igamma * 255)
+  )

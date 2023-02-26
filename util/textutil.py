@@ -165,19 +165,19 @@ def render(
 
 @overload
 def paste(
-  im: Image.Image, xy: Tuple[int, int], content: Pango.Layout, *, anchor: imutil.Anchor = ...,
+  im: Image.Image, xy: Tuple[float, float], content: Pango.Layout, *, anchor: imutil.Anchor = ...,
   color: Union[RGB, int] = ..., stroke: float = ..., stroke_color: Union[RGB, int] = ...
 ) -> Image.Image: ...
 @overload
 def paste(
-  im: Image.Image, xy: Tuple[int, int], content: str, font: str, size: float, *,
+  im: Image.Image, xy: Tuple[float, float], content: str, font: str, size: float, *,
   anchor: imutil.Anchor = ..., color: Union[RGB, int] = ..., stroke: float = ...,
   stroke_color: Union[RGB, int] = ..., box: Union[Tuple[int, int], int, None] = ...,
   wrap: Wrap = ..., ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ...,
   spacing: int = ..., lines: int = ...
 ) -> Image.Image: ...
 def paste(
-  im: Image.Image, xy: Tuple[int, int], *args, anchor: imutil.Anchor = "lt", **kw
+  im: Image.Image, xy: Tuple[float, float], *args, anchor: imutil.Anchor = "lt", **kw
 ) -> Image.Image:
   text = render(*args, **kw)
   imutil.paste(im, text, xy, anchor=anchor)

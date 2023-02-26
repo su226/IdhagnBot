@@ -1,14 +1,14 @@
 import asyncio
 import shlex
 from collections import deque
-from typing import Any, Callable, Deque, Dict, List, Literal, Optional, Type, Union
+from typing import Any, Callable, Deque, Dict, List, Literal, NoReturn, Optional, Type, Union, cast
 
 import nonebot
 from apscheduler.job import Job
 from nonebot.adapters.onebot.v11 import Message
-from nonebot.consts import SHELL_ARGS, SHELL_ARGV
+from nonebot.consts import PREFIX_KEY, RAW_CMD_KEY, SHELL_ARGS, SHELL_ARGV
 from nonebot.exception import ParserExit
-from nonebot.matcher import Matcher
+from nonebot.matcher import Matcher, current_matcher
 from nonebot.params import CommandArg, ShellCommandArgs
 from nonebot.rule import ArgumentParser, Rule, parser_message
 from nonebot.typing import T_RuleChecker, T_State
@@ -19,16 +19,17 @@ from nonebot_plugin_apscheduler import scheduler
 
 from . import context, help, permission
 
+IDHAGNBOT_KEY = "_idhagnbot"
+USAGE_KEY = "usage"
 driver = nonebot.get_driver()
 
 
 class ShellCommandRule:
   # 修改自 nonebot.rule.ShellCommandRule
   # 特殊处理不是纯文本的消息段，以及 shlex 抛出 ValueError 的情况
-  __slots__ = "prog", "parser"
+  __slots__ = "parser"
 
-  def __init__(self, prog: str, parser: ArgumentParser):
-    self.prog = prog
+  def __init__(self, parser: ArgumentParser):
     self.parser = parser
 
   async def __call__(self, state: T_State, msg: Optional[Message] = CommandArg()) -> bool:
@@ -39,9 +40,8 @@ class ShellCommandRule:
       state[SHELL_ARGV] = argv
     except ValueError as e:
       state[SHELL_ARGV] = []
-      state[SHELL_ARGS] = ParserExit(127, "解析命令行参数失败：" + str(e))
+      state[SHELL_ARGS] = ParserExit(2, "解析命令行参数失败：" + str(e))
       return True
-    self.parser.prog = self.prog
     token = parser_message.set("")
     try:
       args = self.parser.parse_args(argv)
@@ -63,8 +63,11 @@ class ShellCommandRule:
 
 
 def add_reject_handler(matcher: Type[Matcher]) -> None:
-  async def handler(args: ParserExit = ShellCommandArgs()) -> None:
-    await matcher.finish(args.message)
+  async def handler(state: T_State, args: ParserExit = ShellCommandArgs()) -> None:
+    message = None
+    if args.message:
+      message = args.message.rstrip().replace("__cmd__", state[PREFIX_KEY][RAW_CMD_KEY])
+    await matcher.finish(message)
   matcher.handle()(handler)
 
 
@@ -103,18 +106,27 @@ class TokenBucket:
 
 
 def add_throttle_handler(
-  matcher: Type[Matcher], name: str, capacity: int, frequency: Optional[float]
+  matcher: Type[Matcher], capacity: int, frequency: Optional[float]
 ) -> None:
-  async def handle_throttle():
+  async def handle_throttle(state: T_State):
     estimated = token.estimate()
+    command = state[PREFIX_KEY][RAW_CMD_KEY]
     if estimated >= 60:
-      await matcher.finish(f"当前使用 /{name} 的人数过多，请稍后再试。")
+      await matcher.finish(f"当前使用 {command} 的人数过多，请稍后再试。")
     if estimated >= 10:
-      await matcher.send(f"当前使用 /{name} 的人数较多，请等待大约 {int(estimated)} 秒。")
+      await matcher.send(f"当前使用 {command} 的人数较多，请等待大约 {int(estimated)} 秒。")
     await token.acquire()
 
   token = TokenBucket(capacity, frequency)
   matcher.handle()(handle_throttle)
+
+
+async def finish_with_usage() -> NoReturn:
+  matcher = current_matcher.get()
+  usage = cast(Union[str, Callable[[], str]], matcher.state[IDHAGNBOT_KEY][USAGE_KEY])
+  if isinstance(usage, Callable):
+    usage = usage()
+  await matcher.finish(usage.replace("__cmd__", matcher.state[PREFIX_KEY][RAW_CMD_KEY]))
 
 
 class CommandBuilder:
@@ -161,8 +173,8 @@ class CommandBuilder:
 
   def usage(self, usage: Union[str, ArgumentParser, Callable[[], str]]) -> Self:
     if isinstance(usage, ArgumentParser):
-      usage.prog = self.names[0]
-      self._usage = usage.format_help()
+      usage.prog = "__cmd__"
+      self._usage = usage.format_help().rstrip()
     else:
       self._usage = usage
     return self
@@ -172,7 +184,7 @@ class CommandBuilder:
     return self
 
   def shell(self, parser: ArgumentParser, auto_reject: bool = True) -> Self:
-    self.rule(ShellCommandRule(self.names[0], parser))
+    self.rule(ShellCommandRule(parser))
     self._auto_reject = auto_reject
     if not self._usage:
       self.usage(parser)
@@ -199,13 +211,19 @@ class CommandBuilder:
     category = help.CategoryItem.find(self._category, True)
     category.add(help.CommandItem(self.names, self._brief, self._usage, self.help_data))
     _permission = context.build_permission(tuple(self.node.split(".")), self._level)
+    self._state.update({
+      IDHAGNBOT_KEY: {
+        USAGE_KEY: self._usage
+      }
+    })
     matcher = nonebot.on_command(
       self.names[0], self._rule, set(self.names[1:]), permission=_permission, state=self._state,
       _depth=1  # type: ignore
     )
-    matcher.__doc__ = self._usage
+    if isinstance(self._usage, str):  # 已弃用，使用 finish_with_usage
+      matcher.__doc__ = self._usage.replace("__cmd__", self.names[0])
     if self._capacity:
-      add_throttle_handler(matcher, self.names[0], self._capacity, self._frequency)
+      add_throttle_handler(matcher, self._capacity, self._frequency)
     if self._auto_reject:
       add_reject_handler(matcher)
     return matcher

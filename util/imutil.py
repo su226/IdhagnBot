@@ -20,6 +20,7 @@ Size = Tuple[int, int]
 Point = Tuple[float, float]
 Plane = Tuple[Point, Point, Point, Point]
 PerspectiveData = Tuple[float, float, float, float, float, float, float, float]
+PasteColor = Tuple[Tuple[int, int, int], Tuple[int, int]]
 _LIBIMAGEQUANT_AVAILABLE: Optional[bool] = None
 _LIBIMAGEQUANT_WARNED: bool = False
 
@@ -109,10 +110,17 @@ def background(im: Image.Image, bg: Tuple[int, int, int] = (255, 255, 255)) -> I
 
 
 async def get_avatar(
-  uid: int, *, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
+  uid: Optional[int] = None, gid: Optional[int] = None, *,
+  raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
 ) -> Image.Image:
   # s 有 100, 160, 640, 1080 分别对应 4 个最大尺寸（可以小）和 0 对应原图（不能不填或者自定义）
-  async with misc.http().get(f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0") as response:
+  if uid is not None and gid is None:
+    url = f"https://q1.qlogo.cn/g?b=qq&nk={uid}&s=0"
+  elif gid is not None and uid is None:
+    url = f"https://p.qlogo.cn/gh/{gid}/{gid}/0/"
+  else:
+    raise TypeError("uid 和 gid 只能指定一个")
+  async with misc.http().get(url) as response:
     data = await response.read()
 
   def process() -> Image.Image:
@@ -154,29 +162,36 @@ def sample_frames(im: Image.Image, frametime: int) -> Generator[Image.Image, Non
 
 
 def paste(
-  dst: Image.Image, src: Image.Image, xy: Tuple[int, int] = (0, 0),
+  dst: Image.Image, src: Union[Image.Image, PasteColor], xy: Tuple[float, float] = (0, 0),
   mask: Optional[Image.Image] = None, anchor: Anchor = "lt"
 ) -> None:
-  if src.mode == "P" and "A" in src.palette.mode:
-    src = src.convert(src.palette.mode)  # RGBA (也可能是LA？)
-  if "A" in src.getbands():
-    if mask:
-      paste_mask = ImageChops.multiply(mask, src.getchannel("A"))
-    else:
-      paste_mask = src.getchannel("A")
+  if isinstance(src, Image.Image):
+    if src.mode == "P" and "A" in src.palette.mode:
+      src = src.convert(src.palette.mode)  # RGBA (也可能是LA？)
+    if "A" in src.getbands():
+      if mask:
+        mask = ImageChops.multiply(mask, src.getchannel("A"))
+      else:
+        mask = src.getchannel("A")
+    paste_src = src
+    width, height = src.size
   else:
-    paste_mask = mask
-  x, y = xy
+    paste_src, (width, height) = src
+  x1, y1 = xy
   xa, ya = anchor
   if xa == "m":
-    x -= src.width // 2
+    x1 -= width / 2
   elif xa == "r":
-    x -= src.width
+    x1 -= width
   if ya == "m":
-    y -= src.height // 2
+    y1 -= height / 2
   elif ya == "b":
-    y -= src.height
-  dst.paste(src, (x, y), paste_mask)
+    y1 -= height
+  x1 = round(x1)
+  y1 = round(y1)
+  x2 = x1 + width
+  y2 = y1 + height
+  dst.paste(paste_src, (x1, y1, x2, y2), mask)
 
 
 def _check_libimagequant() -> bool:
