@@ -13,7 +13,7 @@ from nonebot.params import CommandArg
 from PIL import Image
 from pydantic import BaseModel
 
-from util import command, configs, imutil, misc, context
+from util import command, configs, context, imutil, misc
 from util.images.card import Card, CardAuthor, CardCover, CardText
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -63,7 +63,7 @@ def onload(prev: Optional[Config], curr: Config) -> None:
     async with http.get(API_URL + "?" + "&".join(params)) as response:
       data = await response.json()
     for uid, detail in data["data"].items():
-      streaming[uid] = current = bool(detail["live_status"])
+      streaming[uid] = current = detail["live_status"] == 1  # 0下播 1直播 2轮播
       status = "已开播" if current else "未开播"
       logger.debug(f"B站直播: {detail['uname']} -> {status}")
     scheduler.add_job(check, "interval", id="bilibili_live", replace_existing=True, seconds=10)
@@ -216,7 +216,7 @@ async def check() -> bool:
   send_t = time.perf_counter()
   coros: List[Awaitable[None]] = []
   for uid, detail in data["data"].items():
-    current = bool(detail["live_status"])
+    current = detail["live_status"] == 1
     status = "已开播" if current else "未开播"
     logger.debug(f"B站直播: {detail['uname']} -> {status}")
     if not streaming[uid] and current:

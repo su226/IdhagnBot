@@ -6,20 +6,23 @@ from nonebot.adapters.onebot.v11 import Message
 from PIL import Image, ImageOps
 
 from util import imutil, misc
-from util.api_common import bilibili_activity
-from util.images.card import Card, CardAuthor, CardCover, CardText
+from util.api_common.bilibili_activity import ActivityImage
+from util.api_common.bilibili_activity.card import CardRichText, fetch_emotions
+from util.images.card import Card, CardAuthor, CardCover
 
+from .. import extras
 from ..common import IMAGE_GAP, check_ignore, fetch_image, fetch_images
 
-ActivityImage = bilibili_activity.Activity[bilibili_activity.ContentImage]
 
-
-async def get_appender(activity: ActivityImage) -> Callable[[Card], None]:
+async def get_appender(activity: ActivityImage[object]) -> Callable[[Card], None]:
   image_infos = (
     activity.content.images[:9] if len(activity.content.images) > 9 else activity.content.images
   )
-  avatar, images = await asyncio.gather(
-    fetch_image(activity.avatar), fetch_images(*[image.src for image in image_infos])
+  avatar, images, emotions, append_extra = await asyncio.gather(
+    fetch_image(activity.avatar),
+    fetch_images(*[image.src for image in image_infos]),
+    fetch_emotions(activity.content.richtext),
+    extras.format(activity.extra),
   )
 
   def appender(card: Card) -> None:
@@ -42,14 +45,15 @@ async def get_appender(activity: ActivityImage) -> Callable[[Card], None]:
         cover.paste(v, (x, y))
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
-    block.add(CardText(activity.content.text, 32, 3))
+    block.add(CardRichText(activity.content.richtext, emotions, 32, 3, activity.topic))
     card.add(block)
     card.add(CardCover(cover, False))
+    append_extra(card, True)
 
   return appender
 
 
-async def format(activity: ActivityImage) -> Message:
+async def format(activity: ActivityImage[object]) -> Message:
   check_ignore(False, activity.content.text)
   appender = await get_appender(activity)
 

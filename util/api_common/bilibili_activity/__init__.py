@@ -1,7 +1,9 @@
 from dataclasses import dataclass
 from typing import (
-  TYPE_CHECKING, Dict, Generic, List, Optional, Sequence, Tuple, Type, TypeVar, Union, overload
+  TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Optional, Protocol, Sequence, Tuple, Type,
+  TypeVar, Union, overload
 )
+from urllib.parse import urlparse
 
 from util import misc
 
@@ -9,8 +11,9 @@ try:
   import grpc
 
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
-    DynamicItem, DynamicType, DynDetailsReply, DynDetailsReq, DynModuleType, DynSpaceReq,
-    DynSpaceRsp
+    AdditionalType, Description, DescType, DynamicItem, DynamicType, DynDetailReply, DynDetailReq,
+    DynDetailsReply, DynDetailsReq, DynModuleType, DynSpaceReq, DynSpaceRsp, ModuleAdditional,
+    VideoSubType
   )
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
   GRPC_AVAILABLE = True
@@ -18,9 +21,13 @@ except ImportError:
   GRPC_AVAILABLE = False
 
 if TYPE_CHECKING:
-  from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import DynamicType, Module  # noqa 
+  from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (  # noqa
+    AdditionalType, DynamicType, Module
+  )
 
 Modules = Dict["DynModuleType.V", "Module"]
+TContent = TypeVar("TContent", covariant=True)
+TExtra = TypeVar("TExtra", covariant=True)
 
 LIST_API = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space" \
   "?host_mid={uid}&offset={offset}"
@@ -32,7 +39,10 @@ DETAIL_API_OLD = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dyn
   "?dynamic_id={id}"
 GRPC_API = "grpc.biliapi.net"
 GRPC_METADATA = (
-  ("x-bili-device-bin", b""),
+  ('x-bili-device-bin', b'\x10\x80\xe7\x8f\x03\x1a%XY5ADF45C6BF3BD3FAE8126774BD8E4E7DFC5"\x07android*\x07android2\x05phone:\x04bili'),  # noqa
+  ('x-bili-local-bin', b''),
+  ('x-bili-metadata-bin', b'\x12\x07android\x1a\x05phone \x80\xe7\x8f\x03*\x04bili2%XY5ADF45C6BF3BD3FAE8126774BD8E4E7DFC5:\x07android'),  # noqa
+  ('x-bili-network-bin', b'\x08\x01'),
 )
 
 
@@ -45,9 +55,7 @@ async def grpc_fetch(uid: int, offset: str = "") -> Tuple[Sequence["DynamicItem"
   return res.list, next_offset
 
 
-async def json_fetch(uid: int, offset: str = "") -> Tuple[List[dict], Optional[str]]:
-  if offset is None:
-    offset = ""
+async def json_fetch(uid: int, offset: str = "") -> Tuple[List[Dict[Any, Any]], Optional[str]]:
   http = misc.http()
   async with http.get(LIST_API.format(uid=uid, offset=offset)) as response:
     data = await response.json()
@@ -60,48 +68,89 @@ async def grpc_get(id: str) -> "DynamicItem": ...
 @overload
 async def grpc_get(id: List[str]) -> List["DynamicItem"]: ...
 async def grpc_get(id: Union[str, List[str]]) -> Union["DynamicItem", List["DynamicItem"]]:
-  islist = isinstance(id, List)
-  if islist:
-    ids = ",".join(id)
-  else:
-    ids = id
   async with grpc.aio.secure_channel(GRPC_API, grpc.ssl_channel_credentials()) as channel:
     stub = DynamicStub(channel)
-    req = DynDetailsReq(dynamic_ids=ids)
-    res: DynDetailsReply = await stub.DynDetails(req, metadata=GRPC_METADATA)
-  if islist:
-    return list(res.list)
-  return res.list[0]
+    if isinstance(id, list):
+      req = DynDetailsReq(dynamic_ids=",".join(id))
+      res: DynDetailsReply = await stub.DynDetails(req, metadata=GRPC_METADATA)
+      return list(res.list)
+    req2 = DynDetailReq(dynamic_id=id)
+    res2: DynDetailReply = await stub.DynDetail(req2, metadata=GRPC_METADATA)
+    return res2.item
 
 
-async def json_get(id: str) -> dict:
+async def json_get(id: str) -> Dict[Any, Any]:
   http = misc.http()
-  async with http.get(DETAIL_API.format(id=id)) as response:
+  headers = {
+    "Referer": f"https://t.bilibili.com/{id}"
+  }
+  async with http.get(DETAIL_API.format(id=id), headers=headers) as response:
     data = await response.json()
   return data["data"]["item"]
 
 
-class Content:
+@dataclass
+class RichTextEmotion:
+  url: str
+
+
+@dataclass
+class RichTextLink:
+  text: str
+
+
+RichTextNode = Union[str, RichTextEmotion, RichTextLink]
+RichText = List[RichTextNode]
+
+
+def grpc_parse_richtext(desc: Iterable["Description"]) -> RichText:
+  nodes: RichText = []
+  for node in desc:
+    if node.type == DescType.desc_type_text:
+      nodes.append(node.text)
+    elif node.type == DescType.desc_type_emoji:
+      nodes.append(RichTextEmotion(node.uri))
+    else:
+      nodes.append(RichTextLink(node.text))
+  return nodes
+
+
+def json_parse_richtext(text: List[Dict[Any, Any]]) -> RichText:
+  nodes: RichText = []
+  for node in text:
+    if node["type"] == "RICH_TEXT_NODE_TYPE_TEXT":
+      nodes.append(node["text"])
+    elif node["type"] == "RICH_TEXT_NODE_TYPE_EMOJI":
+      nodes.append(RichTextEmotion(node["emoji"]["icon_url"]))
+    else:
+      nodes.append(RichTextLink(node["text"]))
+  return nodes
+
+
+class ContentParser(Protocol[TContent]):
   @staticmethod
-  def grpc_parse(item: "DynamicItem", modules: Modules) -> "Content":
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> TContent:
     raise NotImplementedError
 
   @staticmethod
-  def json_parse(item: dict) -> "Content":
+  def json_parse(item: Dict[Any, Any]) -> TContent:
     raise NotImplementedError
 
 
 @dataclass
-class ContentText(Content):
+class ContentText(ContentParser["ContentText"]):
   text: str
+  richtext: RichText
 
   @staticmethod
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentText":
-    return ContentText(modules[DynModuleType.module_desc].module_desc.text)
+    desc = modules[DynModuleType.module_desc].module_desc
+    return ContentText(desc.text, grpc_parse_richtext(desc.desc))
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentText":
-    return ContentText(item["modules"]["module_dynamic"]["desc"]["text"])
+  def json_parse(item: Dict[Any, Any]) -> "ContentText":
+    desc = item["modules"]["module_dynamic"]["desc"]
+    return ContentText(desc["text"], json_parse_richtext(desc["rich_text_nodes"]))
 
 
 @dataclass
@@ -113,14 +162,17 @@ class Image:
 
 
 @dataclass
-class ContentImage(Content):
+class ContentImage(ContentParser["ContentImage"]):
   text: str
+  richtext: RichText
   images: List[Image]
 
   @staticmethod
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentImage":
+    desc = modules[DynModuleType.module_desc].module_desc
     return ContentImage(
-      modules[DynModuleType.module_desc].module_desc.text,
+      desc.text,
+      grpc_parse_richtext(desc.desc),
       [Image(
         image.src,
         image.width,
@@ -130,10 +182,12 @@ class ContentImage(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentImage":
+  def json_parse(item: Dict[Any, Any]) -> "ContentImage":
     module = item["modules"]["module_dynamic"]
+    desc = module["desc"]
     return ContentImage(
-      module["desc"]["text"],
+      desc["text"],
+      json_parse_richtext(desc["rich_text_nodes"]),
       [Image(
         image["src"],
         image["width"],
@@ -144,8 +198,9 @@ class ContentImage(Content):
 
 
 @dataclass
-class ContentVideo(Content):
+class ContentVideo(ContentParser["ContentVideo"]):
   text: str
+  richtext: RichText  # 动态视频有富文本
   avid: int
   bvid: str
   title: str
@@ -162,11 +217,15 @@ class ContentVideo(Content):
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentVideo":
     video = modules[DynModuleType.module_dynamic].module_dynamic.dyn_archive
     if DynModuleType.module_desc in modules:
-      text = modules[DynModuleType.module_desc].module_desc.text
+      desc_module = modules[DynModuleType.module_desc].module_desc
+      text = desc_module.text
+      richtext = grpc_parse_richtext(desc_module.desc)
     else:
       text = ""
+      richtext = []
     return ContentVideo(
       text,
+      richtext,
       video.avid,
       video.bvid,
       video.title,
@@ -181,7 +240,7 @@ class ContentVideo(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentVideo":
+  def json_parse(item: Dict[Any, Any]) -> "ContentVideo":
     module = item["modules"]["module_dynamic"]
     video = module["major"]["archive"]
     duration_text: str = video["duration_text"]
@@ -195,8 +254,16 @@ class ContentVideo(Content):
       duration = int(h) * 3600 + int(m) * 60 + int(s)
     except ValueError:
       duration = -1
+    desc = module["desc"]
+    if desc:
+      text = desc["text"]
+      richtext = json_parse_richtext(desc["rich_text_nodes"])
+    else:
+      text = ""
+      richtext = []
     return ContentVideo(
-      module["desc"]["text"] if module["desc"] is not None else "",
+      text,
+      richtext,
       video["aid"],
       video["bvid"],
       video["title"],
@@ -212,10 +279,10 @@ class ContentVideo(Content):
 
 
 @dataclass
-class ContentArticle(Content):
+class ContentArticle(ContentParser["ContentArticle"]):
   '''
   专栏
-  https://www.bilibili.com/audio/au<ID>
+  https://www.bilibili.com/read/cv<ID>
   '''
   id: int
   title: str
@@ -235,7 +302,7 @@ class ContentArticle(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentArticle":
+  def json_parse(item: Dict[Any, Any]) -> "ContentArticle":
     major = item["modules"]["module_dynamic"]["major"]["article"]
     return ContentArticle(
       major["id"],
@@ -247,7 +314,7 @@ class ContentArticle(Content):
 
 
 @dataclass
-class ContentAudio(Content):
+class ContentAudio(ContentParser["ContentAudio"]):
   '''
   音频
   https://www.bilibili.com/audio/au<ID>
@@ -270,7 +337,7 @@ class ContentAudio(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentAudio":
+  def json_parse(item: Dict[Any, Any]) -> "ContentAudio":
     module = item["modules"]["module_dynamic"]
     audio = module["major"]["music"]
     return ContentAudio(
@@ -283,13 +350,14 @@ class ContentAudio(Content):
 
 
 @dataclass
-class ContentPGC(Content):
+class ContentPGC(ContentParser["ContentPGC"]):
   '''
   番剧、电视剧、电影、纪录片等PGC（Professional Generated Content，专业生产内容，与之相对的是
   User Generated Content，用户生产内容，就是UP主上传的视频、专栏等）
   https://www.bilibili.com/bangumi/media/md<SSID> # 介绍页
   https://www.bilibili.com/bangumi/play/ss<SSID> # 播放第一集
   https://www.bilibili.com/bangumi/play/ep<EPID> # 播放指定集
+  这种动态只会出现在转发里
   '''
   ssid: int
   epid: int
@@ -307,6 +375,14 @@ class ContentPGC(Content):
   @staticmethod
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentPGC":
     pgc = modules[DynModuleType.module_dynamic].module_dynamic.dyn_pgc
+    subtypes = {
+      VideoSubType.VideoSubTypeBangumi: "番剧",
+      VideoSubType.VideoSubTypeMovie: "电影",
+      VideoSubType.VideoSubTypeDocumentary: "纪录片",
+      VideoSubType.VideoSubTypeDomestic: "国创",
+      VideoSubType.VideoSubTypeTeleplay: "电视剧",
+    }
+
     return ContentPGC(
       pgc.season_id,
       pgc.epid,
@@ -314,7 +390,7 @@ class ContentPGC(Content):
       pgc.title,
       None,
       pgc.cover,
-      None,
+      subtypes.get(pgc.sub_type),
       pgc.cover_left_text_2,
       pgc.cover_left_text_3,
       pgc.duration,
@@ -323,7 +399,7 @@ class ContentPGC(Content):
     )
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentPGC":
+  def json_parse(item: Dict[Any, Any]) -> "ContentPGC":
     author = item["modules"]["module_author"]
     pgc = item["modules"]["module_dynamic"]["major"]["pgc"]
     return ContentPGC(
@@ -342,13 +418,145 @@ class ContentPGC(Content):
     )
 
 
-TContent = TypeVar("TContent", bound=Content)
+@dataclass
+class ContentCommon(ContentParser["ContentCommon"]):
+  '''通用方卡（用于番剧评分、大会员活动等）和通用竖卡（暂时不明）'''
+  text: str
+  richtext: RichText
+  cover: str
+  title: str
+  desc: str
+  badge: str
+  vertical: bool
+
+  @staticmethod
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentCommon":
+    desc = modules[DynModuleType.module_desc].module_desc
+    common = modules[DynModuleType.module_dynamic].module_dynamic.dyn_common
+    return ContentCommon(
+      desc.text,
+      grpc_parse_richtext(desc.desc),
+      common.cover,
+      common.title,
+      common.desc,
+      common.badge[0].text if common.badge else "",
+      item.item_type == DynamicType.common_vertical,
+    )
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ContentCommon":
+    module = item["modules"]["module_dynamic"]
+    common = module["major"]["common"]
+    desc = module["desc"]
+    return ContentCommon(
+      desc["text"],
+      json_parse_richtext(desc["rich_text_nodes"]),
+      common["cover"],
+      common["title"],
+      common["desc"],
+      common["badge"]["text"],
+      item["type"] == "DYNAMIC_TYPE_COMMON_VERTICAL",
+    )
 
 
 @dataclass
-class ContentForward(Content, Generic[TContent]):
+class ContentLive(ContentParser["ContentLive"]):
+  '''
+  直播
+  这种动态只会出现在转发里
+  '''
+  id: int
+  title: str
+  category: str
+  cover: str
+  streaming: bool
+
+  @staticmethod
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentLive":
+    live = modules[DynModuleType.module_dynamic].module_dynamic.dyn_common_live
+    return ContentLive(
+      live.id,
+      live.title,
+      live.cover_label,
+      live.cover,
+      live.badge.text != "直播结束",
+    )
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ContentLive":
+    live = item["modules"]["module_dynamic"]["major"]["live"]
+    return ContentLive(
+      live["id"],
+      live["title"],
+      live["desc_first"],
+      live["cover"],
+      bool(live["live_state"]),
+    )
+
+
+@dataclass
+class ContentCourse(ContentParser["ContentCourse"]):
+  '''
+  课程
+  这种动态只会出现在转发里
+  '''
+  id: int
+  title: str
+  desc: str
+  stat: str
+  cover: str
+
+  @staticmethod
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentCourse":
+    course = modules[DynModuleType.module_dynamic].module_dynamic.dyn_cour_season
+    return ContentCourse(
+      int(item.extend.business_id),
+      course.title,
+      course.desc,
+      course.text_1,
+      course.cover,
+    )
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ContentCourse":
+    course = item["modules"]["module_dynamic"]["major"]["courses"]
+    return ContentCourse(
+      course["id"],
+      course["title"],
+      course["sub_title"],
+      course["desc"],
+      course["cover"],
+    )
+
+
+@dataclass
+class ContentPlaylist(ContentParser["ContentPlaylist"]):
+  '''
+  合集（播放列表）
+  这种动态只会出现在转发里
+  '''
+  id: int
+  title: str
+  stat: str
+  cover: str
+
+  @staticmethod
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentPlaylist":
+    medialist = modules[DynModuleType.module_dynamic].module_dynamic.dyn_medialist
+    return ContentPlaylist(
+      medialist.id,
+      medialist.title,
+      medialist.sub_title,
+      medialist.cover,
+    )
+  # JSON API 获取不到转发合集，所以只有 grpc_parse
+
+
+@dataclass
+class ContentForward(ContentParser["ContentForward"]):
   text: str
-  activity: "Activity[TContent] | None"
+  richtext: RichText
+  activity: Optional["Activity[object, object]"]
 
   @staticmethod
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentForward":
@@ -358,34 +566,38 @@ class ContentForward(Content, Generic[TContent]):
       )
     else:
       original = None  # 源动态失效
+    desc = modules[DynModuleType.module_desc].module_desc
     return ContentForward(
-      modules[DynModuleType.module_desc].module_desc.text,
+      desc.text,
+      grpc_parse_richtext(desc.desc),
       original,
     )
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentForward":
+  def json_parse(item: Dict[Any, Any]) -> "ContentForward":
     if item["orig"]["type"] == "DYNAMIC_TYPE_NONE":
       original = None  # 源动态失效
     else:
       original = Activity.json_parse(item["orig"])
+    desc = item["modules"]["module_dynamic"]["desc"]
     return ContentForward(
-      item["modules"]["module_dynamic"]["desc"]["text"],
+      desc["text"],
+      json_parse_richtext(desc["rich_text_nodes"]),
       original,
     )
 
 
-class ContentUnknown(Content):
+class ContentUnknown(ContentParser["ContentUnknown"]):
   @staticmethod
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentUnknown":
     return ContentUnknown()
 
   @staticmethod
-  def json_parse(item: dict) -> "ContentUnknown":
+  def json_parse(item: Dict[Any, Any]) -> "ContentUnknown":
     return ContentUnknown()
 
 
-GRPC_CONTENT_TYPES: Dict["DynamicType.V", Type[Content]] = {}
+GRPC_CONTENT_TYPES: Dict["DynamicType.V", Type[ContentParser[object]]] = {}
 if GRPC_AVAILABLE:
   GRPC_CONTENT_TYPES = {
     DynamicType.word: ContentText,
@@ -394,21 +606,159 @@ if GRPC_AVAILABLE:
     DynamicType.article: ContentArticle,
     DynamicType.music: ContentAudio,
     DynamicType.pgc: ContentPGC,
+    DynamicType.common_square: ContentCommon,
+    DynamicType.common_vertical: ContentCommon,
+    DynamicType.courses_season: ContentCourse,
+    DynamicType.live: ContentLive,
+    DynamicType.medialist: ContentPlaylist,
     DynamicType.forward: ContentForward,
   }
-JSON_CONTENT_TYPES: Dict[str, Type[Content]] = {
-  "word": ContentText,
-  "draw": ContentImage,
-  "av": ContentVideo,
-  "article": ContentArticle,
-  "music": ContentAudio,
-  "pgc": ContentPGC,
-  "forward": ContentForward,
+JSON_CONTENT_TYPES: Dict[str, Type[ContentParser[object]]] = {
+  "WORD": ContentText,
+  "DRAW": ContentImage,
+  "AV": ContentVideo,
+  "ARTICLE": ContentArticle,
+  "MUSIC": ContentAudio,
+  "PGC": ContentPGC,
+  "COMMON_SQUARE": ContentCommon,
+  "COMMON_VERTICAL": ContentCommon,
+  "COURSES_SEASON": ContentCourse,
+  "LIVE": ContentLive,
+  # JSON API获取不到转发合集
+  "FORWARD": ContentForward,
+}
+
+
+class ExtraParser(Protocol[TExtra]):
+  @staticmethod
+  def grpc_parse(item: "ModuleAdditional") -> TExtra:
+    raise NotImplementedError
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> TExtra:
+    raise NotImplementedError
+
+
+@dataclass
+class ExtraVote(ExtraParser["ExtraVote"]):
+  id: int
+  uid: int
+  title: str
+  count: int
+  end: int
+
+  @staticmethod
+  def grpc_parse(item: "ModuleAdditional") -> "ExtraVote":
+    return ExtraVote(
+      item.vote2.vote_id,
+      0,
+      item.vote2.title,
+      item.vote2.total,
+      item.vote2.deadline,
+    )
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ExtraVote":
+    return ExtraVote(
+      item["vote"]["vote_id"],
+      item["vote"]["uid"],
+      item["vote"]["desc"],
+      item["vote"]["join_num"] or 0,  # 0人时是null
+      item["vote"]["end_time"],
+    )
+
+
+@dataclass
+class ExtraVideo(ExtraParser["ExtraVideo"]):
+  id: int
+  title: str
+  desc: str
+  duration: str
+  cover: str
+
+  @staticmethod
+  def grpc_parse(item: "ModuleAdditional") -> "ExtraVideo":
+    uri = urlparse(item.ugc.uri)
+    return ExtraVideo(
+      int(uri.path[1:]),
+      item.ugc.title,
+      item.ugc.desc_text_2,
+      item.ugc.duration,
+      item.ugc.cover,
+    )
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ExtraVideo":
+    return ExtraVideo(
+      int(item["ugc"]["id_str"]),
+      item["ugc"]["title"],
+      item["ugc"]["desc_second"],
+      item["ugc"]["duration"],
+      item["ugc"]["cover"],
+    )
+
+
+@dataclass
+class ExtraReserve(ExtraParser["ExtraReserve"]):
+  id: int
+  uid: int
+  title: str
+  desc: str
+  count: int
+
+  @staticmethod
+  def grpc_parse(item: "ModuleAdditional") -> "ExtraReserve":
+    return ExtraReserve(
+      item.rid,
+      item.up.up_mid,
+      item.up.title,
+      item.up.desc_text_1.text,
+      item.up.reserve_total,
+    )
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ExtraReserve":
+    return ExtraReserve(
+      item["reserve"]["rid"],
+      item["reserve"]["up_mid"],
+      item["reserve"]["title"],
+      item["reserve"]["desc1"]["text"],
+      item["reserve"]["reserve_total"],
+    )
+
+
+class ExtraUnknown(ExtraParser["ExtraUnknown"]):
+  @staticmethod
+  def grpc_parse(item: "ModuleAdditional") -> "ExtraUnknown":
+    return ExtraUnknown()
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ExtraUnknown":
+    return ExtraUnknown()
+
+
+GRPC_EXTRA_TYPES: Dict["AdditionalType.V", Type[ExtraParser[object]]] = {}
+if GRPC_AVAILABLE:
+  GRPC_EXTRA_TYPES = {
+    AdditionalType.additional_type_vote: ExtraVote,
+    AdditionalType.additional_type_ugc: ExtraVideo,
+    AdditionalType.additional_type_up_reservation: ExtraReserve,
+  }
+JSON_EXTRA_TYPES: Dict[str, Type[ExtraParser[object]]] = {
+  "VOTE": ExtraVote,
+  "UGC": ExtraVideo,
+  "RESERVE": ExtraReserve,
 }
 
 
 @dataclass
-class Activity(Generic[TContent]):
+class Topic:
+  id: int
+  name: str
+
+
+@dataclass
+class Activity(Generic[TContent, TExtra]):
   uid: int
   name: str
   avatar: str
@@ -420,9 +770,11 @@ class Activity(Generic[TContent]):
   like: Optional[int]
   reply: Optional[int]
   time: Optional[int]
+  extra: Optional[TExtra]
+  topic: Optional[Topic]
 
   @staticmethod
-  def grpc_parse(item: "DynamicItem") -> "Activity":
+  def grpc_parse(item: "DynamicItem") -> "Activity[object, object]":
     modules = {module.module_type: module for module in item.modules}
     if DynModuleType.module_author_forward in modules:
       author_module = modules[DynModuleType.module_author_forward].module_author_forward
@@ -436,11 +788,23 @@ class Activity(Generic[TContent]):
       name = author_module.author.name
       avatar = author_module.author.face
       top = author_module.is_top
-    if DynModuleType.module_stat_forward in modules:
+    if DynModuleType.module_bottom in modules:
+      # buttom的u是B站拼错了，不是我（甩锅）
+      stat_module = modules[DynModuleType.module_bottom].module_buttom.module_stat
+    elif DynModuleType.module_stat_forward in modules:
       stat_module = modules[DynModuleType.module_stat_forward].module_stat_forward
     else:
       stat_module = modules[DynModuleType.module_stat].module_stat
     content_cls = GRPC_CONTENT_TYPES.get(item.card_type, ContentUnknown)
+    extra = None
+    if DynModuleType.module_additional in modules:
+      additional_module = modules[DynModuleType.module_additional].module_additional
+      extra_cls = GRPC_EXTRA_TYPES.get(additional_module.type, ExtraUnknown)
+      extra = extra_cls.grpc_parse(additional_module)
+    topic = None
+    if DynModuleType.module_topic in modules:
+      topic_module = modules[DynModuleType.module_topic].module_topic
+      topic = Topic(topic_module.id, topic_module.name)
     return Activity(
       uid,
       name,
@@ -453,10 +817,12 @@ class Activity(Generic[TContent]):
       stat_module.repost,
       stat_module.reply,
       None,
+      extra,
+      topic,
     )
 
   @staticmethod
-  def json_parse(item: dict) -> "Activity":
+  def json_parse(item: Dict[Any, Any]) -> "Activity[object, object]":
     modules = item["modules"]
     author_module = modules["module_author"]
     top = "module_tag" in modules and modules["module_tag"]["text"] == "置顶"
@@ -469,8 +835,17 @@ class Activity(Generic[TContent]):
       repost = None
       like = None
       reply = None
-    type = item["type"].removeprefix("DYNAMIC_TYPE_").lower()
+    type = item["type"].removeprefix("DYNAMIC_TYPE_")
     content_cls = JSON_CONTENT_TYPES.get(type, ContentUnknown)
+    dynamic_module = modules["module_dynamic"]
+    extra = None
+    if (additional := dynamic_module["additional"]) is not None:
+      type = additional["type"].removeprefix("ADDITIONAL_TYPE_")
+      extra_cls = JSON_EXTRA_TYPES.get(type, ExtraUnknown)
+      extra = extra_cls.json_parse(additional)
+    topic = None
+    if (raw_topic := dynamic_module["topic"]) is not None:
+      topic = Topic(raw_topic["id"], raw_topic["name"])
     return Activity(
       author_module["mid"],
       author_module["name"],
@@ -483,4 +858,18 @@ class Activity(Generic[TContent]):
       repost,
       reply,
       author_module["pub_ts"],
+      extra,
+      topic,
     )
+
+ActivityText = Activity[ContentText, TExtra]
+ActivityImage = Activity[ContentImage, TExtra]
+ActivityArticle = Activity[ContentArticle, TExtra]
+ActivityVideo = Activity[ContentVideo, TExtra]
+ActivityAudio = Activity[ContentAudio, TExtra]
+ActivityPGC = Activity[ContentPGC, TExtra]
+ActivityCommonSquare = Activity[ContentCommon, TExtra]
+ActivityForward = Activity[ContentForward, TExtra]
+ActivityLive = Activity[ContentLive, TExtra]
+ActivityCourse = Activity[ContentCourse, TExtra]
+ActivityPlaylist = Activity[ContentPlaylist, TExtra]

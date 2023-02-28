@@ -2,20 +2,21 @@ import asyncio
 from typing import Callable
 
 from nonebot.adapters.onebot.v11 import Message
-from PIL import Image
+from PIL import Image, ImageOps
 
-from util import imutil, misc
-from util.api_common.bilibili_activity import ActivityText
+from util import imutil, misc, textutil
+from util.api_common.bilibili_activity import ActivityCommonSquare
 from util.api_common.bilibili_activity.card import CardRichText, fetch_emotions
-from util.images.card import Card, CardAuthor
+from util.images.card import Card, CardAuthor, CardMargin, CardTab
 
 from .. import extras
 from ..common import check_ignore, fetch_image
 
 
-async def get_appender(activity: ActivityText[object]) -> Callable[[Card], None]:
-  avatar, emotions, append_extra = await asyncio.gather(
+async def get_appender(activity: ActivityCommonSquare[object]) -> Callable[[Card], None]:
+  avatar, cover, emotions, append_extra = await asyncio.gather(
     fetch_image(activity.avatar),
+    fetch_image(activity.content.cover),
     fetch_emotions(activity.content.richtext),
     extras.format(activity.extra),
   )
@@ -23,15 +24,22 @@ async def get_appender(activity: ActivityText[object]) -> Callable[[Card], None]
   def appender(card: Card) -> None:
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
-    lines = 3 if activity.extra else 6
-    block.add(CardRichText(activity.content.richtext, emotions, 32, lines, activity.topic))
+    block.add(CardRichText(activity.content.richtext, emotions, 32, 6, activity.topic))
+    block.add(CardMargin())
+    content = (
+      f"{textutil.escape(activity.content.title)}\n"
+      f"<span color='#888888'>{textutil.escape(activity.content.desc)}</span>"
+    )
+    nonlocal cover
+    cover = ImageOps.fit(cover, (100, 100), imutil.scale_resample())
+    block.add(CardTab(content, activity.content.badge, cover))
     append_extra(block, False)
     card.add(block)
 
   return appender
 
 
-async def format(activity: ActivityText[object]) -> Message:
+async def format(activity: ActivityCommonSquare[object]) -> Message:
   check_ignore(False, activity.content.text)
   appender = await get_appender(activity)
 

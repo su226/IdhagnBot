@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from PIL import Image, ImageOps
 from typing_extensions import Self
@@ -13,7 +13,8 @@ CONTENT_WIDTH = WIDTH - PADDING * 2
 AVATAR_MARGIN = 8
 INFO_MARGIN = 16
 INFO_ICON_MARGIN = 4
-ICON_SIZE = 48
+INFO_ICON_SIZE = 48
+DIM_COLOR = (224, 224, 224)
 
 
 def normalize_10k(count: int) -> str:
@@ -62,7 +63,7 @@ class CardLine(Render):
     return 2
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
-    dst.paste((143, 143, 143), (x, y, x + WIDTH, y + 2))
+    dst.paste(DIM_COLOR, (x, y, x + WIDTH, y + 2))
 
 
 class CardCover(Render):
@@ -134,8 +135,8 @@ class InfoCount(Render):
     self.icon = icon
     self.layout = textutil.layout(normalize_10k(count), "sans", 32)
     text_width, text_height = self.layout.get_pixel_size()
-    self.width = ICON_SIZE + INFO_ICON_MARGIN + text_width
-    self.height = max(ICON_SIZE, text_height)
+    self.width = INFO_ICON_SIZE + INFO_ICON_MARGIN + text_width
+    self.height = max(INFO_ICON_SIZE, text_height)
 
   def get_width(self) -> int:
     return self.width
@@ -147,7 +148,7 @@ class InfoCount(Render):
     icon_im = Image.open(PLUGIN_DIR / (self.icon + ".png"))
     dst.paste(icon_im, (x, y), icon_im)
     textutil.paste(
-      dst, (x + ICON_SIZE + INFO_ICON_MARGIN, y + self.height // 2), self.layout, anchor="lm")
+      dst, (x + INFO_ICON_SIZE + INFO_ICON_MARGIN, y + self.height // 2), self.layout, anchor="lm")
 
 
 class CardInfo(Render):
@@ -191,6 +192,58 @@ class CardInfo(Render):
         item.render(dst, x1, y + (height - item.get_height()) // 2)
         x1 += item.get_width() + INFO_MARGIN
       y += height
+
+
+class CardMargin(Render):
+  def __init__(self, margin: int = PADDING) -> None:
+    self.margin = margin
+
+  def get_width(self) -> int:
+    return WIDTH
+
+  def get_height(self) -> int:
+    return self.margin
+
+  def render(self, dst: Image.Image, x: int, y: int) -> None:
+    pass
+
+
+class CardTab(Render):
+  def __init__(self, content: str, title: str = "", icon: Optional[Image.Image] = None) -> None:
+    self.icon = icon
+    box = CONTENT_WIDTH - 8
+    if icon:
+      box -= icon.width + PADDING
+    self.title_im = textutil.render(title, "sans", 32, box=box) if title else None
+    self.content_im = textutil.render(content, "sans", 32, box=box, markup=True)
+
+  def get_width(self) -> int:
+    return WIDTH
+
+  def get_height(self) -> int:
+    title_h = self.title_im.height if self.title_im else 0
+    content_h = self.content_im.height
+    if self.icon:
+      content_h = max(content_h, self.icon.height)
+    return title_h + content_h + 16
+
+  def render(self, dst: Image.Image, x: int, y: int) -> None:
+    x += PADDING
+    if self.title_im:
+      dst.paste(DIM_COLOR, (x, y, x + self.title_im.width + 16, y + self.title_im.height))
+      dst.paste(self.title_im, (x + 8, y), self.title_im)
+      y += self.title_im.height
+    content_h = self.content_im.height
+    if self.icon:
+      content_h = max(content_h, self.icon.height)
+    dst.paste(DIM_COLOR, (x, y, WIDTH - PADDING, y + content_h + 16))
+    x += 8
+    y_ = y + 8 + content_h / 2
+    if self.icon:
+      imutil.paste(dst, self.icon, (x, y_), anchor="lm")
+      x += self.icon.width + PADDING
+    imutil.paste(
+      dst, self.content_im, (x, y_), anchor="lm")
 
 
 class Card(Render):

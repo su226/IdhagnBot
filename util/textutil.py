@@ -1,13 +1,15 @@
 import math
-from typing import Dict, Literal, Tuple, Union, overload
+from typing import Dict, Literal, Optional, Tuple, Union, overload
 
 import cairo
 import gi
 from PIL import Image
+from typing_extensions import Self
 
 from util import imutil, misc
 from util.colorutil import RGB, split_rgb
 
+gi.require_version("GLib", "2.0")
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import GLib, Pango, PangoCairo  # type: ignore
@@ -15,6 +17,7 @@ from gi.repository import GLib, Pango, PangoCairo  # type: ignore
 Wrap = Literal["word", "char", "word_char"]
 Ellipsize = Literal[None, "start", "middle", "end"]
 Align = Literal["l", "m", "r"]
+ImageAlign = Literal["top", "middle", "baseline", "bottom"]
 WRAPS: Dict[Wrap, Pango.WrapMode] = {
   "word": Pango.WrapMode.WORD,
   "char": Pango.WrapMode.CHAR,
@@ -25,6 +28,11 @@ ELLIPSIZES: Dict[Ellipsize, Pango.EllipsizeMode] = {
   "start": Pango.EllipsizeMode.START,
   "middle": Pango.EllipsizeMode.MIDDLE,
   "end": Pango.EllipsizeMode.END,
+}
+ALIGNS: Dict[Align, Pango.Alignment] = {
+  "l": Pango.Alignment.LEFT,
+  "m": Pango.Alignment.CENTER,
+  "r": Pango.Alignment.RIGHT,
 }
 ANTIALIASES: Dict[misc.CairoAntialias, cairo.Antialias] = {
   "default": cairo.Antialias.DEFAULT,
@@ -56,6 +64,134 @@ HINT_STYLES: Dict[misc.CairoHintStyle, cairo.HintStyle] = {
 }
 
 
+class RichText:
+  _IMAGE_REPLACEMENT = "￼".encode()
+
+  def __init__(self) -> None:
+    self._context = Pango.Context()
+    self._context.set_font_map(PangoCairo.FontMap.get_default())
+    font_options(self._context)
+    PangoCairo.context_set_shape_renderer(self._context, self._render_images)
+    self._utf8 = bytearray()
+    self._attrs = Pango.AttrList()
+    self._images: Dict[int, cairo.ImageSurface] = {}
+    self._layout = Pango.Layout(self._context)
+    self._frozen = False
+
+  def _render_images(self, cr: cairo.Context, attr: Pango.AttrShape, do_path: bool) -> None:
+    if do_path:
+      return
+    x, y = cr.get_current_point()
+    y += attr.ink_rect.y / Pango.SCALE
+    surface = self._images[attr.data]
+    cr.set_source_surface(surface, x, y)
+    cr.rectangle(x, y, surface.get_width(), surface.get_height())
+    cr.fill()
+
+  def append(self, text: str) -> Self:
+    text = text.replace("\r", "").replace("\n", "\u2028")
+    self._utf8.extend(text.encode())
+    return self
+
+  def append_markup(self, markup: str) -> Self:
+    markup = markup.replace("\r", "").replace("\n", "\u2028")
+    _, attrs, text, _ = Pango.parse_markup(markup, -1, "\0")
+    utf8 = text.encode()
+    self._attrs.splice(attrs, len(self._utf8), len(utf8))
+    self._utf8.extend(utf8)
+    return self
+
+  def append_image(self, im: Image.Image, align: ImageAlign = "middle") -> Self:
+    image_id = id(im)
+    if image_id not in self._images:
+      self._images[image_id] = imutil.to_cairo(im)
+    metrics = self._context.get_metrics(self._layout.get_font_description())
+    rect = Pango.Rectangle()
+    if align == "top":
+      rect.y = -metrics.get_ascent()
+    elif align == "middle":
+      rect.y = (metrics.get_descent() - metrics.get_ascent() - im.height * Pango.SCALE) // 2
+    elif align == "bottom":
+      rect.y = -im.height * Pango.SCALE + metrics.get_descent()
+    else:
+      rect.y = -im.height * Pango.SCALE
+    rect.width = im.width * Pango.SCALE
+    rect.height = im.height * Pango.SCALE
+    attr = Pango.AttrShape.new_with_data(rect, rect, image_id)
+    attr.start_index = len(self._utf8)
+    attr.end_index = len(self._utf8) + len(self._IMAGE_REPLACEMENT)
+    self._utf8.extend(self._IMAGE_REPLACEMENT)
+    self._attrs.insert(attr)
+    return self
+
+  def set_font(self, font: str, size: float) -> Self:
+    if value := misc.CONFIG().font_substitute.get(font, None):
+      font = value
+    desc = Pango.FontDescription.from_string(font)
+    desc.set_absolute_size(Pango.SCALE * size)
+    self._layout.set_font_description(desc)
+    return self
+
+  def set_width(self, width: int) -> Self:
+    self._layout.set_width(width * Pango.SCALE)
+    return self
+
+  def set_height(self, height: int) -> Self:
+    if height > 0:
+      height *= Pango.SCALE
+    self._layout.set_height(height)
+    return self
+
+  def set_wrap(self, wrap: Wrap) -> Self:
+    self._layout.set_wrap(WRAPS[wrap])
+    return self
+
+  def set_ellipsize(self, ellipsize: Ellipsize) -> Self:
+    self._layout.set_ellipsize(ELLIPSIZES[ellipsize])
+    return self
+
+  def set_spacing(self, spacing: float) -> Self:
+    if spacing < 0:
+      self._layout.set_line_spacing(spacing)
+      self._layout.set_spacing(0)
+    else:
+      self._layout.set_line_spacing(0)
+      self._layout.set_spacing(spacing * Pango.SCALE)
+    return self
+
+  def set_align(self, align: Align) -> Self:
+    self._layout.set_alignment(ALIGNS[align])
+    return self
+
+  def size(self) -> Tuple[int, int]:
+    _, rect = self._layout.get_pixel_extents()
+    return rect
+
+  def unwrap(self) -> Pango.Layout:
+    self._layout.set_text(self._utf8.decode())
+    self._layout.set_attributes(self._attrs)
+    return self._layout
+
+  def render(
+    self, color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
+    stroke_color: Union[RGB, int] = (255, 255, 255)
+  ) -> Image.Image:
+    return render(self.unwrap(), color=color, stroke=stroke, stroke_color=stroke_color)
+
+  def paste(
+    self, im: Image.Image, xy: Tuple[float, float], anchor: imutil.Anchor = "lt",
+    color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
+    stroke_color: Union[RGB, int] = (255, 255, 255)
+  ) -> Image.Image:
+    src = render(self.unwrap(), color=color, stroke=stroke, stroke_color=stroke_color)
+    imutil.paste(im, src, xy, anchor=anchor)
+    return src
+
+
+def escape(text: str) -> str:
+  return GLib.markup_escape_text(text, -1)
+
+
 def special_font(name: str, fallback: str) -> str:
   if value := misc.CONFIG().special_font.get(name, None):
     return value
@@ -77,46 +213,27 @@ def font_options(context: Union[None, Pango.Context, cairo.Context] = None) -> c
 
 
 def layout(
-  content: str, font: str, size: float, *, box: Union[Tuple[int, int], int, None] = None,
-  wrap: Wrap = "word", ellipsize: Ellipsize = None, markup: bool = False, align: Align = "l",
-  spacing: int = 0, lines: int = 0
+  content: str, font: str, size: float, *, box: Optional[int] = None, wrap: Wrap = "word",
+  ellipsize: Ellipsize = None, markup: bool = False, align: Align = "l", spacing: int = 0,
+  lines: int = 0
 ) -> Pango.Layout:
-  context = Pango.Context()  # Pango.Context 线程不安全，复用会有奇怪的问题
-  font_options(context)
-  context.set_font_map(PangoCairo.FontMap.get_default())
-  layout = Pango.Layout(context)
-  if value := misc.CONFIG().font_substitute.get(font, None):
-    font = value
-  desc = Pango.FontDescription.from_string(font)
-  desc.set_absolute_size(Pango.SCALE * size)
-  layout.set_font_description(desc)
-  if box is not None:
-    if isinstance(box, tuple):
-      layout.set_width(box[0] * Pango.SCALE)
-      layout.set_height(box[1] * Pango.SCALE)
-    else:
-      layout.set_width(box * Pango.SCALE)
-  layout.set_ellipsize(ELLIPSIZES[ellipsize])
-  layout.set_wrap(WRAPS[wrap])
-  spacing *= Pango.SCALE
-  layout.set_spacing(spacing)
+  render = (
+    RichText().set_font(font, size).set_wrap(wrap).set_ellipsize(ellipsize)
+    .set_align(align)
+    .set_spacing(spacing)
+  )
+  if box:
+    render.set_width(box)
   if lines:
-    layout.set_height(-lines)
-    content = content.replace("\r", "").replace("\n", "\u2028")
-  if align == "m":
-    layout.set_alignment(Pango.Alignment.CENTER)
-  if align == "r":
-    layout.set_alignment(Pango.Alignment.RIGHT)
+    render.set_height(-lines)
   if markup:
     try:
-      Pango.parse_markup(content, -1, "\0")
-    except GLib.Error as e:
-      layout.set_text(f"解析失败: {e.message}", -1)
-    else:
-      layout.set_markup(content, -1)
+      render.append_markup(content)
+    except GLib.Error:
+      render.append(content)
   else:
-    layout.set_text(content, -1)
-  return layout
+    render.append(content)
+  return render.unwrap()
 
 
 @overload
@@ -127,9 +244,9 @@ def render(
 @overload
 def render(
   content: str, font: str, size: float, *, color: Union[RGB, int] = ..., stroke: float = ...,
-  stroke_color: Union[RGB, int] = ..., box: Union[Tuple[int, int], int, None] = ...,
-  wrap: Wrap = ..., ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ...,
-  spacing: int = ..., lines: int = ...
+  stroke_color: Union[RGB, int] = ..., box: Optional[int] = ..., wrap: Wrap = ...,
+  ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
+  lines: int = ...
 ) -> Image.Image: ...
 def render(
   content: Union[str, Pango.Layout], *args, color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
@@ -172,9 +289,9 @@ def paste(
 def paste(
   im: Image.Image, xy: Tuple[float, float], content: str, font: str, size: float, *,
   anchor: imutil.Anchor = ..., color: Union[RGB, int] = ..., stroke: float = ...,
-  stroke_color: Union[RGB, int] = ..., box: Union[Tuple[int, int], int, None] = ...,
-  wrap: Wrap = ..., ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ...,
-  spacing: int = ..., lines: int = ...
+  stroke_color: Union[RGB, int] = ..., box: Optional[int] = ..., wrap: Wrap = ...,
+  ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
+  lines: int = ...
 ) -> Image.Image: ...
 def paste(
   im: Image.Image, xy: Tuple[float, float], *args, anchor: imutil.Anchor = "lt", **kw

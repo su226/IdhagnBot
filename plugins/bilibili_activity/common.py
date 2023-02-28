@@ -1,14 +1,13 @@
 import asyncio
 import time
 from io import BytesIO
-from typing import Awaitable, Callable, List, Optional, Pattern, Tuple, TypeVar, Union
+from typing import List, Optional, Pattern, Union
 
-from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
 from pydantic import BaseModel, Field, PrivateAttr
 
 from util import configs, misc
-from util.api_common import bilibili_activity
+from util.api_common.bilibili_activity import GRPC_AVAILABLE
 
 
 class GroupTarget(BaseModel):
@@ -40,7 +39,7 @@ class Config(BaseModel):
 
   @property
   def grpc(self) -> bool:
-    return self.grpc_ and bilibili_activity.GRPC_AVAILABLE
+    return self.grpc_ and GRPC_AVAILABLE
 
   @property
   def interval(self) -> int:
@@ -57,9 +56,6 @@ class Config(BaseModel):
 
 CONFIG = configs.SharedConfig("bilibili_activity", Config, "eager")
 IMAGE_GAP = 10
-
-TContent = TypeVar("TContent", bound=bilibili_activity.Content)
-Handler = Tuple[TContent, Callable[[bilibili_activity.Activity[TContent]], Awaitable[Message]]]
 
 
 class IgnoredException(Exception):

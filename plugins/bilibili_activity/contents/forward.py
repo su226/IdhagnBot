@@ -1,51 +1,143 @@
-from typing import Any, Awaitable, Callable, List, Tuple, Type, Union
+import asyncio
+from typing import Any, Awaitable, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
 from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
 
 from util import imutil, misc
-from util.api_common import bilibili_activity
+from util.api_common.bilibili_activity import (
+  Activity, ActivityCourse, ActivityForward, ActivityLive, ActivityPGC, ActivityPlaylist,
+  ContentArticle, ContentAudio, ContentCommon, ContentCourse, ContentImage, ContentLive,
+  ContentPGC, ContentPlaylist, ContentText, ContentVideo
+)
+from util.api_common.bilibili_activity.card import CardRichText, CardTopic, fetch_emotions
 from util.images.card import Card, CardAuthor, CardCover, CardLine, CardText
 
-from ..common import TContent, check_ignore, fetch_image
-from . import article, audio, image, text, video
+from .. import extras
+from ..common import check_ignore, fetch_image
+from . import article, audio, common, image, text, video
 
+TContent = TypeVar("TContent")
 Checker = Tuple[Type[TContent], Callable[[TContent], None]]
 TitleFormatter = Tuple[Type[TContent], Callable[[TContent], str]]
 AppenderGetter = Tuple[Type[TContent], Callable[[TContent], Awaitable[Callable[[Card], None]]]]
-ActivityPGC = bilibili_activity.Activity[bilibili_activity.ContentPGC]
 
 
-def make_title_formatter(label: str) -> Callable[[bilibili_activity.Activity[Any]], str]:
-  def title_formatter(activity: bilibili_activity.Activity[Any]) -> str:
+def make_title_formatter(label: str) -> Callable[[Activity[object, object]], str]:
+  def title_formatter(activity: Activity[object, object]) -> str:
     return f" {activity.name} 的{label}"
   return title_formatter
 
 
-def pgc_title(activity: ActivityPGC) -> str:
+def pgc_title(activity: ActivityPGC[object]) -> str:
   if activity.content.label:
-    return activity.content.label
-  return " " + activity.content.season_name
+    prefix = activity.content.label
+  else:
+    prefix = ""
+  return prefix + " " + activity.content.season_name
 
 
 def checker(activity: Union[text.ActivityText, image.ActivityImage]) -> None:
   check_ignore(True, activity.content.text)
 
 
-async def get_pgc_appender(activity: ActivityPGC) -> Callable[[Card], None]:
-  if activity.content.season_cover:
-    season_cover = await fetch_image(activity.content.season_cover)
-  else:
-    season_cover = None
-  episode_cover = await fetch_image(activity.content.episode_cover)
+async def get_pgc_appender(activity: ActivityPGC[object]) -> Callable[[Card], None]:
+  async def fetch_season_cover() -> Optional[Image.Image]:
+    if activity.avatar:
+      return await fetch_image(activity.avatar)
+    if activity.content.season_cover:
+      return await fetch_image(activity.content.season_cover)
+    return None
+
+  season_cover, episode_cover, append_extra = await asyncio.gather(
+    fetch_season_cover(),
+    fetch_image(activity.content.episode_cover),
+    extras.format(activity.extra),
+  )
 
   def appender(card: Card) -> None:
+    block = Card()
     if season_cover:
-      card.add(CardAuthor(season_cover, activity.content.season_name))
+      block.add(CardAuthor(season_cover, activity.content.season_name))
     else:
-      card.add(CardText(activity.content.season_name, 32, 1))
-    card.add(CardText(activity.content.episode_name, 40, 2))
+      block.add(CardText(activity.content.season_name, 32, 1))
+    block.add(CardTopic(activity.topic))
+    block.add(CardText(activity.content.episode_name, 40, 2))
+    card.add(block)
     card.add(CardCover(episode_cover))
+    append_extra(card, True)
+
+  return appender
+
+
+async def get_live_appender(activity: ActivityLive[object]) -> Callable[[Card], None]:
+  avatar, cover, append_extra = await asyncio.gather(
+    fetch_image(activity.avatar),
+    fetch_image(activity.content.cover),
+    extras.format(activity.extra),
+  )
+
+  def appender(card: Card) -> None:
+    block = Card()
+    block.add(CardAuthor(avatar, activity.name))
+    block.add(CardTopic(activity.topic))
+    block.add(CardText(activity.content.title, 40, 2))
+    streaming = "直播中" if activity.content.streaming else "已下播"
+    block.add(CardText(f"{activity.content.category} {streaming}", 32, 0))
+    card.add(block)
+    card.add(CardCover(cover))
+    append_extra(card, True)
+
+  return appender
+
+
+async def get_course_appender(activity: ActivityCourse[object]) -> Callable[[Card], None]:
+  async def fetch_avatar() -> Optional[Image.Image]:
+    if activity.avatar:
+      return await fetch_image(activity.avatar)
+    return None
+
+  avatar, cover, append_extra = await asyncio.gather(
+    fetch_avatar(),
+    fetch_image(activity.content.cover),
+    extras.format(activity.extra),
+  )
+
+  def appender(card: Card) -> None:
+    block = Card()
+    if avatar:
+      block.add(CardAuthor(avatar, activity.name))
+    else:
+      block.add(CardText("@" + activity.name, 32, 1))
+    block.add(CardTopic(activity.topic))
+    block.add(CardText(activity.content.title, 40, 2))
+    block.add(CardText(activity.content.stat, 32, 0))
+    card.add(block)
+    card.add(CardCover(cover))
+    block = Card()
+    block.add(CardText(activity.content.desc, 32, 3))
+    append_extra(block, False)
+    card.add(block)
+
+  return appender
+
+
+async def get_playlist_appender(activity: ActivityPlaylist[object]) -> Callable[[Card], None]:
+  avatar, cover, append_extra = await asyncio.gather(
+    fetch_image(activity.avatar),
+    fetch_image(activity.content.cover),
+    extras.format(activity.extra),
+  )
+
+  def appender(card: Card) -> None:
+    block = Card()
+    block.add(CardAuthor(avatar, activity.name))
+    block.add(CardTopic(activity.topic))
+    block.add(CardText(activity.content.title, 40, 2))
+    block.add(CardText(activity.content.stat, 32, 0))
+    card.add(block)
+    card.add(CardCover(cover))
+    append_extra(card, True)
 
   return appender
 
@@ -56,36 +148,49 @@ def deleted_appender(card: Card) -> None:
   card.add(block)
 
 
+async def get_deleted_appender(_) -> Callable[[Card], None]:
+  return deleted_appender
+
+
 def unknown_appender(card: Card) -> None:
   block = Card()
   block.add(CardText("IdhagnBot 暂不支持解析此类动态", 32, 2))
   card.add(block)
 
 
+async def get_unknown_appender(_) -> Callable[[Card], None]:
+  return unknown_appender
+
+
 GENERIC_TITLE = make_title_formatter("动态")
 CHECKERS: List[Checker[Any]] = [
-  (bilibili_activity.ContentText, checker),
-  (bilibili_activity.ContentImage, checker),
+  (ContentText, checker),
+  (ContentImage, checker),
 ]
 TITLE_FORMATTERS: List[TitleFormatter[Any]] = [
-  (bilibili_activity.ContentVideo, make_title_formatter("视频")),
-  (bilibili_activity.ContentAudio, make_title_formatter("音频")),
-  (bilibili_activity.ContentArticle, make_title_formatter("专栏")),
-  (bilibili_activity.ContentPGC, pgc_title),
+  (ContentVideo, make_title_formatter("视频")),
+  (ContentAudio, make_title_formatter("音频")),
+  (ContentArticle, make_title_formatter("专栏")),
+  (ContentPGC, pgc_title),
+  (ContentLive, make_title_formatter("直播")),
+  (ContentCourse, make_title_formatter("课程")),
+  (ContentPlaylist, make_title_formatter("合集")),
 ]
 CARD_APPENDERS: List[AppenderGetter[Any]] = [
-  (bilibili_activity.ContentText, text.get_appender),
-  (bilibili_activity.ContentImage, image.get_appender),
-  (bilibili_activity.ContentVideo, video.get_appender),
-  (bilibili_activity.ContentAudio, audio.get_appender),
-  (bilibili_activity.ContentArticle, article.get_appender),
-  (bilibili_activity.ContentPGC, get_pgc_appender),
+  (ContentText, text.get_appender),
+  (ContentImage, image.get_appender),
+  (ContentVideo, video.get_appender),
+  (ContentAudio, audio.get_appender),
+  (ContentArticle, article.get_appender),
+  (ContentCommon, common.get_appender),
+  (ContentPGC, get_pgc_appender),
+  (ContentLive, get_live_appender),
+  (ContentCourse, get_course_appender),
+  (ContentPlaylist, get_playlist_appender),
 ]
 
 
-async def format(
-  activity: bilibili_activity.Activity[bilibili_activity.ContentForward]
-) -> Message:
+async def format(activity: ActivityForward[object]) -> Message:
   check_ignore(False, activity.content.text)
 
   if activity.content.activity is None:
@@ -103,23 +208,29 @@ async def format(
     else:
       title_label = GENERIC_TITLE(activity.content.activity)
 
-  avatar = await fetch_image(activity.avatar)
-
   if activity.content.activity is None:
-    appender = deleted_appender
+    appender_getter = get_deleted_appender
   else:
     for type, getter in CARD_APPENDERS:
       if isinstance(activity.content.activity.content, type):
-        appender = await getter(activity.content.activity)
+        appender_getter = getter
         break
     else:
-      appender = unknown_appender
+      appender_getter = get_unknown_appender
+
+  avatar, appender, emotions, append_extras = await asyncio.gather(
+    fetch_image(activity.avatar),
+    appender_getter(activity.content.activity),
+    fetch_emotions(activity.content.richtext),
+    extras.format(activity.extra),
+  )
 
   def make() -> Message:
     card = Card(0)
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
-    block.add(CardText(activity.content.text, 32, 3))
+    block.add(CardRichText(activity.content.richtext, emotions, 32, 3, activity.topic))
+    append_extras(block, False)
     card.add(block)
     card.add(CardLine())
     appender(card)

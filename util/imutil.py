@@ -57,6 +57,13 @@ def from_cairo(surface: cairo.ImageSurface) -> Image.Image:
   return Image.merge("RGBA", (r, g, b, a))  # BGRa -> BGRA -> RGBA
 
 
+def to_cairo(im: Image.Image) -> cairo.ImageSurface:
+  im = im.convert("RGBA").convert("RGBa")  # 不能由 RGB 直接转换为 RGBa
+  r, g, b, a = im.split()
+  data = memoryview(bytearray(Image.merge("RGBa", (b, g, r, a)).tobytes()))
+  return cairo.ImageSurface.create_for_data(data, cairo.FORMAT_ARGB32, im.width, im.height)
+
+
 def center_pad(im: Image.Image, width: int, height: int) -> Image.Image:
   if im.width > width or im.height > height:
     padded_im = ImageOps.pad(im, (width, height), scale_resample())

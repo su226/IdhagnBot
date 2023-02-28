@@ -2,7 +2,7 @@ import asyncio
 import time
 from collections import deque
 from datetime import datetime, timedelta
-from typing import AsyncGenerator, Deque, List, Optional, Tuple, cast
+from typing import Any, AsyncGenerator, Deque, List, Optional, Tuple, cast
 
 import nonebot
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_MISSED, JobEvent
@@ -192,13 +192,18 @@ async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg())
   if len(args) == 0:
     await force_push.finish(force_push.__doc__)
   config = common.CONFIG()
+  src: Any
   try:
     if config.grpc:
-      activity = bilibili_activity.Activity.grpc_parse(await bilibili_activity.grpc_get(args))
+      src = await bilibili_activity.grpc_get(args)
     else:
-      activity = bilibili_activity.Activity.json_parse(await bilibili_activity.json_get(args))
+      src = await bilibili_activity.json_get(args)
   except Exception:
     await force_push.finish("无法获取这条动态")
+  if config.grpc:
+    activity = bilibili_activity.Activity.grpc_parse(src)
+  else:
+    activity = bilibili_activity.Activity.json_parse(src)
   message = await contents.format(activity)
   ctx = context.get_event_context(event)
   real_ctx = getattr(event, "group_id", -1)
