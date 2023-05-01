@@ -1,16 +1,19 @@
 import asyncio
 import shlex
 from collections import deque
-from typing import Any, Callable, Deque, Dict, List, Literal, NoReturn, Optional, Type, Union, cast
+from typing import (
+  Any, Callable, Deque, Dict, List, Literal, NoReturn, Optional, Tuple, Type, Union, cast
+)
 
 import nonebot
 from apscheduler.job import Job
+from nonebot.adapters import Bot, Event
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.consts import PREFIX_KEY, RAW_CMD_KEY, SHELL_ARGS, SHELL_ARGV
 from nonebot.exception import ParserExit
 from nonebot.matcher import Matcher, current_matcher
 from nonebot.params import CommandArg, ShellCommandArgs
-from nonebot.rule import ArgumentParser, Rule, parser_message
+from nonebot.rule import TRIE_VALUE, ArgumentParser, CommandRule, Rule, TrieRule, parser_message
 from nonebot.typing import T_RuleChecker, T_State
 from typing_extensions import Self
 
@@ -129,6 +132,23 @@ async def finish_with_usage() -> NoReturn:
   await matcher.finish(usage.replace("__cmd__", matcher.state[PREFIX_KEY][RAW_CMD_KEY]))
 
 
+class SerialRule:
+  def __init__(self, *rules: Union[Rule, T_RuleChecker]) -> None:
+    self.rules = [rule if isinstance(rule, Rule) else Rule(rule) for rule in rules]
+
+  async def __call__(self, bot: Bot, event: Event, state: T_State) -> bool:
+    for rule in self.rules:
+      if not await rule(
+        bot,
+        event,
+        state,
+        context._current_stack.get(),
+        context._current_dependency_cache.get(),
+      ):
+        return False
+    return True
+
+
 class CommandBuilder:
   def __init__(self, node: str, name: str, *names: str) -> None:
     self.node = node
@@ -210,14 +230,21 @@ class CommandBuilder:
   def build(self) -> Type[Matcher]:
     category = help.CategoryItem.find(self._category, True)
     category.add(help.CommandItem(self.names, self._brief, self._usage, self.help_data))
-    _permission = context.build_permission(tuple(self.node.split(".")), self._level)
+    permission = context.build_permission(tuple(self.node.split(".")), self._level)
     self._state.update({
       IDHAGNBOT_KEY: {
         USAGE_KEY: self._usage
       }
     })
-    matcher = nonebot.on_command(
-      self.names[0], self._rule, set(self.names[1:]), permission=_permission, state=self._state,
+    command_start = nonebot.get_driver().config.command_start
+    commands: List[Tuple[str, ...]] = []
+    for command in self.names:
+      command = (command,)
+      commands.append(command)
+      for start in command_start:
+        TrieRule.add_prefix(f"{start}{command[0]}", TRIE_VALUE(start, command))
+    matcher = nonebot.on_message(
+      SerialRule(CommandRule(commands), self._rule), permission, state=self._state, block=False,
       _depth=1  # type: ignore
     )
     if isinstance(self._usage, str):  # 已弃用，使用 finish_with_usage

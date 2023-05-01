@@ -68,8 +68,10 @@ URL = (pathlib.Path(__file__).resolve().parent / "index.html").as_uri()
 
 
 def check_at_bot(event: MessageEvent) -> bool:
-  config = CONFIG()
-  return event.is_tome() and bool(config.can_login) and config.at_bot[event] and not event.reply
+  if event.is_tome():
+    config = CONFIG()
+    return bool(config.can_login) and config.at_bot[event] and not event.reply
+  return False
 at_bot = nonebot.on_message(
   check_at_bot,
   context.build_permission(("chatgpt", "chat", "at_bot"), permission.Level.MEMBER)

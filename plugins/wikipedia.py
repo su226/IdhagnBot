@@ -2,7 +2,7 @@ import math
 import re
 import socket
 from contextlib import asynccontextmanager
-from typing import Any, AsyncIterator, Literal, Optional
+from typing import AsyncIterator, Literal, Optional
 
 from aiohttp.web import BaseRequest, Response, Server, ServerRunner, TCPSite
 from libzim.reader import Archive  # type: ignore
@@ -22,12 +22,13 @@ class Config(BaseModel):
   width: int = 800
   scale: float = 1
   use_opencc: bool = True
-  _archive: Archive = PrivateAttr()
+  _archive: Optional[Archive] = PrivateAttr()
 
-  def __init__(self, **kw: Any) -> None:
-    super().__init__(**kw)
-    if self.zim:
+  @property
+  def archive(self) -> Archive:
+    if not self._archive:
       self._archive = Archive(self.zim)
+    return self._archive
 
 
 CONFIG = configs.SharedConfig("wikipedia", Config)
@@ -755,7 +756,7 @@ async def handler(request: BaseRequest):
     return ""
   config = CONFIG()
   try:
-    entry = config._archive.get_entry_by_path(request.path[1:])
+    entry = config.archive.get_entry_by_path(request.path[1:])
   except KeyError:
     return Response(status=404, text="Not Found")
   item = entry.get_item()
@@ -831,7 +832,7 @@ async def handle_wikipedia(state: T_State, msg: Message = CommandArg()) -> None:
   if not query:
     await wikipedia.finish(wikipedia.__doc__)
   config = CONFIG()
-  state["search"] = search = Searcher(config._archive).search(Query().set_query(query))
+  state["search"] = search = Searcher(config.archive).search(Query().set_query(query))
   state["count"] = count = search.getEstimatedMatches()
   state["page"] = 0
   state["end"] = False

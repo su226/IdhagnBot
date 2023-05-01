@@ -249,6 +249,10 @@ async def get_event_level(bot: Bot, event: Event) -> permission.Level:
 # XXX: 对 Nonebot 2 进行 Monkey Patch 以在 Permission 中拿到 State
 _check_matcher_orig = nonebot.message._check_matcher
 _current_state: ContextVar[T_State] = ContextVar("_current_state")
+_current_stack: ContextVar[Optional[AsyncExitStack]] = ContextVar("_current_stack", default=None)
+_current_dependency_cache: ContextVar[Optional[T_DependencyCache]] = (
+  ContextVar("_current_dependency_cache", default=None)
+)
 async def _check_matcher(
   Matcher: Type[Matcher],
   bot: "Bot",
@@ -258,10 +262,14 @@ async def _check_matcher(
   dependency_cache: Optional[T_DependencyCache] = None,
 ) -> None:
   token = _current_state.set(state)
+  token2 = _current_stack.set(stack)
+  token3 = _current_dependency_cache.set(dependency_cache)
   try:
     await _check_matcher_orig(Matcher, bot, event, state, stack, dependency_cache)
   finally:
     _current_state.reset(token)
+    _current_stack.reset(token2)
+    _current_dependency_cache.reset(token3)
 nonebot.message._check_matcher = _check_matcher
 
 
