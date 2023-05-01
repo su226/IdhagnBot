@@ -4,6 +4,7 @@ from typing import Dict, Optional, Tuple
 
 import nonebot
 from nonebot.adapters.onebot.v11 import Event, GroupMessageEvent, Message
+from nonebot.exception import ActionFailed
 
 from util import context, hook, misc, permission
 
@@ -65,5 +66,7 @@ async def handle_auto_repeat(event: GroupMessageEvent):
   token = suppress.set(True)
   try:
     await auto_repeat.finish(event.message)
+  except ActionFailed:
+    pass
   finally:
     suppress.reset(token)
