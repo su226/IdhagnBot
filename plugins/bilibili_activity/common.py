@@ -3,7 +3,7 @@ import time
 from io import BytesIO
 from typing import List, Optional, Pattern, Union
 
-from PIL import Image
+from PIL import Image, ImageOps
 from pydantic import BaseModel, Field, PrivateAttr
 
 from util import configs, misc
@@ -72,7 +72,7 @@ def check_ignore(forward: bool, content: str):
 
 async def fetch_image(url: str) -> Image.Image:
   async with misc.http().get(url) as response:
-    return Image.open(BytesIO(await response.read()))
+    return ImageOps.exif_transpose(Image.open(BytesIO(await response.read())))
 
 
 async def fetch_images(*urls: str) -> List[Image.Image]:
