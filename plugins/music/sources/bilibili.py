@@ -13,6 +13,8 @@ SEARCH_API = (
   "?keyword={keyword}&page={page}&pagesize={page_size}"
 )
 INFO_API = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid={id}"
+URL_API = "https://www.bilibili.com/audio/music-service-c/web/url?sid={id}"
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0"
 
 
 @dataclass
@@ -21,14 +23,23 @@ class BilibiliMusic(Music):
   picture_url: str
 
   async def segment(self) -> MessageSegment:
+    http = misc.http()
+    async with http.get(URL_API.format(id=self.id)) as response:
+      urldata = await response.json()
+      urls = urldata["data"]["cdns"]
+    referer = f"https://www.bilibili.com/audio/au{self.id}"
     return MessageSegment("music", {
       "type": "custom",
       "subtype": "bilibili",
-      "url": f"https://www.bilibili.com/audio/au{self.id}",
-      "audio": "",
+      "url": referer,
+      "audio": urls[0] if urls else "",
       "title": self.name,
       "content": self.artists,
-      "image": self.picture_url
+      "image": self.picture_url,
+      "headers": {
+        "Referer": referer,
+        "User-Agent": USER_AGENT,
+      },
     })
 
   @staticmethod
@@ -42,14 +53,22 @@ class BilibiliMusic(Music):
       data = await response.json()
     if data["data"] is None:
       raise ValueError("ID不存在")
+    async with http.get(URL_API.format(id=id_int)) as response:
+      urldata = await response.json()
+      urls = urldata["data"]["cdns"]
+    referer = f"https://www.bilibili.com/audio/au{id_int}"
     return MessageSegment("music", {
       "type": "custom",
       "subtype": "bilibili",
-      "url": f"https://www.bilibili.com/audio/au{id_int}",
-      "audio": "",
+      "url": referer,
+      "audio": urls[0] if urls else "",
       "title": data["data"]["title"],
       "content": data['data']['author'],
-      "image": data["data"]["cover"]
+      "image": data["data"]["cover"],
+      "headers": {
+        "Referer": referer,
+        "User-Agent": USER_AGENT,
+      },
     })
 
   @staticmethod

@@ -1,7 +1,7 @@
 import math
 import re
 from dataclasses import dataclass
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional, Tuple
 from urllib.parse import quote as encodeuri, urlparse, urlunparse
 
 from nonebot.adapters.onebot.v11 import MessageSegment
@@ -35,22 +35,35 @@ class MiguMusic(Music):
   picture_url: str
 
   @staticmethod
-  def _get_best_url(data) -> str:
-    best_format = (data["newRateFormats"] or data["rateFormats"])[-1]
-    url = best_format["androidUrl"] if "androidUrl" in best_format else best_format["url"]
+  def _fix_url(url: str) -> str:
     # 原本是ftp，替换为https
     return urlunparse(urlparse(url)._replace(scheme="https", netloc="freetyst.nf.migu.cn"))
+
+  @staticmethod
+  def _get_best_url(data) -> Tuple[Optional[str], str]:
+    formats = data["newRateFormats"] or data["rateFormats"]
+    if formats[-1]["formatType"] == "SQ":
+      lossless_format = formats[-1]
+      lossy_format = formats[-2]
+    else:
+      lossless_format = None
+      lossy_format = formats[-1]
+    lossless_url = MiguMusic._fix_url(lossless_format["androidUrl"]) if lossless_format else None
+    lossy_url = MiguMusic._fix_url(lossy_format["url"])
+    return lossless_url, lossy_url
 
   async def segment(self) -> MessageSegment:
     http = misc.http()
     async with http.get(INFO_API.format(id=self.id)) as response:
       data = await response.json()
       song = data["resource"][0]
+    lossless_url, lossy_url = self._get_best_url(song)
     return MessageSegment("music", {
       "type": "custom",
       "subtype": "migu",
       "url": f"https://music.migu.cn/v3/music/song/{self.id}",
-      "audio": self._get_best_url(song),
+      "audio": lossy_url,
+      "lossless": lossless_url,
       "title": song["songName"],
       "content": song["singer"],
       "image": song["albumImgs"][0]["img"],
@@ -66,11 +79,13 @@ class MiguMusic(Music):
       if not data["resource"]:
         raise ValueError("ID不存在")
       song = data["resource"][0]
+    lossless_url, lossy_url = MiguMusic._get_best_url(song)
     return MessageSegment("music", {
       "type": "custom",
       "subtype": "migu",
       "url": f"https://music.migu.cn/v3/music/song/{id}",
-      "audio": MiguMusic._get_best_url(song),
+      "audio": lossy_url,
+      "lossless": lossless_url,
       "title": song["songName"],
       "content": song["singer"],
       "image": song["albumImgs"][0]["img"],
@@ -96,10 +111,10 @@ class MiguMusic(Music):
           yield MiguMusic(
             song["name"],
             "/".join(x["name"] for x in song["singers"]),
-            song["album"]["name"],
+            album["name"] if (album := song["album"]) else "",
             False,  # INFO_API 可以读到 VIP 歌曲的直链（包括 FLAC）
             song["copyrightId"],
-            "https://" + song["largePic"],
+            "https://" + cover if (cover := song["largePic"]) else "",
           )
         page += 1
         if page > pages:
