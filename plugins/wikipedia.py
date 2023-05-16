@@ -22,7 +22,7 @@ class Config(BaseModel):
   width: int = 800
   scale: float = 1
   use_opencc: bool = True
-  _archive: Optional[Archive] = PrivateAttr()
+  _archive: Optional[Archive] = PrivateAttr(None)
 
   @property
   def archive(self) -> Archive:
