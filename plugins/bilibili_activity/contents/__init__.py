@@ -29,11 +29,17 @@ from typing import Any, Awaitable, Callable, List, Tuple, Type, TypeVar
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 from util.api_common.bilibili_activity import (
-  Activity, ContentArticle, ContentAudio, ContentCommon, ContentForward, ContentImage, ContentText,
-  ContentVideo
+  Activity, ContentArticle, ContentAudio, ContentCommon, ContentForward, ContentImage, ContentLive,
+  ContentText, ContentVideo
 )
 
+from ..common import IgnoredException
 from . import article, audio, common, forward, image, text, video
+
+
+async def ignore(activity: Activity[object, object]) -> Message:
+  raise IgnoredException
+
 
 TContent = TypeVar("TContent")
 Formatter = Tuple[Type[TContent], Callable[[Activity[TContent, object]], Awaitable[Message]]]
@@ -45,6 +51,7 @@ FORMATTERS: List[Formatter[Any]] = [
   (ContentAudio, audio.format),
   (ContentCommon, common.format),
   (ContentForward, forward.format),
+  (ContentLive, ignore),
 ]
 
 
