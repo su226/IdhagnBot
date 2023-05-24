@@ -3,6 +3,7 @@ from typing import (
   TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Optional, Protocol, Sequence, Tuple, Type,
   TypeVar, Union, overload
 )
+import json
 from urllib.parse import urlparse
 
 from util import misc
@@ -462,7 +463,7 @@ class ContentCommon(ContentParser["ContentCommon"]):
 @dataclass
 class ContentLive(ContentParser["ContentLive"]):
   '''
-  直播
+  直播间
   这种动态只会出现在转发里
   '''
   id: int
@@ -491,6 +492,62 @@ class ContentLive(ContentParser["ContentLive"]):
       live["desc_first"],
       live["cover"],
       bool(live["live_state"]),
+    )
+
+
+@dataclass
+class ContentLiveRcmd(ContentParser["ContentLiveRcmd"]):
+  '''
+  直播推荐/直播场次
+  这种动态可能出现在转发里，也可能出现在动态里
+  下播之后对应动态也会消失
+  '''
+  live_id: int
+  room_id: int
+  uid: int
+  title: str
+  cover: str
+  category: str
+  category_id: int
+  parent_category: str
+  parent_category_id: int
+  start_time: int
+  watching: int
+
+  @staticmethod
+  def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentLiveRcmd":
+    live = json.loads(modules[DynModuleType.module_dynamic].module_dynamic.dyn_live_rcmd.content)
+    live = live["live_play_info"]
+    return ContentLiveRcmd(
+      int(live["live_id"]),
+      live["room_id"],
+      live["uid"],
+      live["title"],
+      live["cover"],
+      live["area_name"],
+      live["area_id"],
+      live["parent_area_name"],
+      live["parent_area_id"],
+      live["live_start_time"],
+      live["watched_show"]["num"],
+    )
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ContentLiveRcmd":
+    live = json.loads(item["modules"]["module_dynamic"]["major"]["live_rcmd"]["content"])
+    live = live["live_play_info"]
+    return ContentLiveRcmd(
+      int(live["live_id"]),
+      live["room_id"],
+      live["uid"],
+      live["title"],
+      live["cover"],
+      live["area_name"],
+      live["area_id"],
+      live["parent_area_name"],
+      live["parent_area_id"],
+      live["live_start_time"],
+      live["watched_show"]["num"],
     )
 
 
@@ -557,6 +614,7 @@ class ContentForward(ContentParser["ContentForward"]):
   text: str
   richtext: RichText
   activity: Optional["Activity[object, object]"]
+  error_text: str
 
   @staticmethod
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentForward":
@@ -564,26 +622,32 @@ class ContentForward(ContentParser["ContentForward"]):
       original = Activity.grpc_parse(
         modules[DynModuleType.module_dynamic].module_dynamic.dyn_forward.item
       )
+      error_text = ""
     else:
       original = None  # 源动态失效
+      error_text = modules[DynModuleType.module_item_null].module_item_null.text
     desc = modules[DynModuleType.module_desc].module_desc
     return ContentForward(
       desc.text,
       grpc_parse_richtext(desc.desc),
       original,
+      error_text,
     )
 
   @staticmethod
   def json_parse(item: Dict[Any, Any]) -> "ContentForward":
     if item["orig"]["type"] == "DYNAMIC_TYPE_NONE":
       original = None  # 源动态失效
+      error_text = item["orig"]["major"]["none"]["tips"]
     else:
       original = Activity.json_parse(item["orig"])
+      error_text = ""
     desc = item["modules"]["module_dynamic"]["desc"]
     return ContentForward(
       desc["text"],
       json_parse_richtext(desc["rich_text_nodes"]),
       original,
+      error_text,
     )
 
 
@@ -610,6 +674,7 @@ if GRPC_AVAILABLE:
     DynamicType.common_vertical: ContentCommon,
     DynamicType.courses_season: ContentCourse,
     DynamicType.live: ContentLive,
+    DynamicType.live_rcmd: ContentLiveRcmd,
     DynamicType.medialist: ContentPlaylist,
     DynamicType.forward: ContentForward,
   }
@@ -624,6 +689,7 @@ JSON_CONTENT_TYPES: Dict[str, Type[ContentParser[object]]] = {
   "COMMON_VERTICAL": ContentCommon,
   "COURSES_SEASON": ContentCourse,
   "LIVE": ContentLive,
+  "LIVE_RCMD": ContentLiveRcmd,
   # JSON API获取不到转发合集
   "FORWARD": ContentForward,
 }
@@ -811,7 +877,7 @@ class Activity(Generic[TContent, TExtra]):
       avatar,
       item.extend.dyn_id_str,
       top,
-      DynamicType.Name(item.card_type),
+      DynamicType.Name(item.card_type).upper(),
       content_cls.grpc_parse(item, modules),
       stat_module.like,
       stat_module.repost,
@@ -871,5 +937,6 @@ ActivityPGC = Activity[ContentPGC, TExtra]
 ActivityCommonSquare = Activity[ContentCommon, TExtra]
 ActivityForward = Activity[ContentForward, TExtra]
 ActivityLive = Activity[ContentLive, TExtra]
+ActivityLiveRcmd = Activity[ContentLiveRcmd, TExtra]
 ActivityCourse = Activity[ContentCourse, TExtra]
 ActivityPlaylist = Activity[ContentPlaylist, TExtra]

@@ -39,7 +39,7 @@ async def get_appender(activity: ActivityAudio[object]) -> Callable[[Card], None
   return appender
 
 
-async def format(activity: ActivityAudio[object]) -> Message:
+async def format(activity: ActivityAudio[object], can_ignore: bool) -> Message:
   appender = await get_appender(activity)
 
   def make() -> Message:

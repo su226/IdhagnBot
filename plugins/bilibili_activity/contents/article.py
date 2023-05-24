@@ -45,7 +45,7 @@ async def get_appender(activity: ActivityArticle[object]) -> Callable[[Card], No
   return appender
 
 
-async def format(activity: ActivityArticle[object]) -> Message:
+async def format(activity: ActivityArticle[object], can_ignore: bool) -> Message:
   appender = await get_appender(activity)
 
   def make() -> Message:

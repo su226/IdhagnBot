@@ -29,20 +29,20 @@ from typing import Any, Awaitable, Callable, List, Tuple, Type, TypeVar
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 from util.api_common.bilibili_activity import (
-  Activity, ContentArticle, ContentAudio, ContentCommon, ContentForward, ContentImage, ContentLive,
-  ContentText, ContentVideo
+  Activity, ContentArticle, ContentAudio, ContentCommon, ContentForward, ContentImage,
+  ContentLiveRcmd, ContentText, ContentVideo
 )
 
 from ..common import IgnoredException
 from . import article, audio, common, forward, image, text, video
 
 
-async def ignore(activity: Activity[object, object]) -> Message:
+async def ignore(activity: Activity[object, object], can_ignore: bool) -> Message:
   raise IgnoredException
 
 
 TContent = TypeVar("TContent")
-Formatter = Tuple[Type[TContent], Callable[[Activity[TContent, object]], Awaitable[Message]]]
+Formatter = Tuple[Type[TContent], Callable[[Activity[TContent, object], bool], Awaitable[Message]]]
 FORMATTERS: List[Formatter[Any]] = [
   (ContentText, text.format),
   (ContentImage, image.format),
@@ -51,20 +51,20 @@ FORMATTERS: List[Formatter[Any]] = [
   (ContentAudio, audio.format),
   (ContentCommon, common.format),
   (ContentForward, forward.format),
-  (ContentLive, ignore),
+  (ContentLiveRcmd, ignore),
 ]
 
 
 async def format_unknown(activity: Activity[object, object]) -> Message:
   return Message(MessageSegment.text(
     f"{activity.name} 发布了动态\n"
-    "IdhagnBot 暂不支持解析此类动态\n"
+    f"IdhagnBot 暂不支持解析此类动态（{activity.type}）\n"
     f"https://t.bilibili.com/{activity.id}"
   ))
 
 
-async def format(activity: Activity[object, object]) -> Message:
+async def format(activity: Activity[object, object], can_ignore: bool = True) -> Message:
   for type, formatter in FORMATTERS:
     if isinstance(activity.content, type):
-      return await formatter(activity)
+      return await formatter(activity, can_ignore)
   return await format_unknown(activity)

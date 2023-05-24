@@ -43,7 +43,7 @@ async def get_appender(activity: ActivityVideo[object]) -> Callable[[Card], None
   return appender
 
 
-async def format(activity: ActivityVideo[object]) -> Message:
+async def format(activity: ActivityVideo[object], can_ignore: bool) -> Message:
   appender = await get_appender(activity)
 
   def make() -> Message:

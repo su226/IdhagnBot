@@ -3,12 +3,13 @@ from typing import Any, Awaitable, Callable, List, Optional, Tuple, Type, TypeVa
 
 from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
+import time
 
 from util import imutil, misc
 from util.api_common.bilibili_activity import (
-  Activity, ActivityCourse, ActivityForward, ActivityLive, ActivityPGC, ActivityPlaylist,
-  ContentArticle, ContentAudio, ContentCommon, ContentCourse, ContentImage, ContentLive,
-  ContentPGC, ContentPlaylist, ContentText, ContentVideo
+  Activity, ActivityCourse, ActivityForward, ActivityLive, ActivityLiveRcmd, ActivityPGC,
+  ActivityPlaylist, ContentArticle, ContentAudio, ContentCommon, ContentCourse, ContentImage,
+  ContentLive, ContentLiveRcmd, ContentPGC, ContentPlaylist, ContentText, ContentVideo
 )
 from util.api_common.bilibili_activity.card import CardRichText, CardTopic, fetch_emotions
 from util.images.card import Card, CardAuthor, CardCover, CardLine, CardText
@@ -91,6 +92,31 @@ async def get_live_appender(activity: ActivityLive[object]) -> Callable[[Card], 
   return appender
 
 
+async def get_live_rcmd_appender(activity: ActivityLiveRcmd[object]) -> Callable[[Card], None]:
+  avatar, cover, append_extra = await asyncio.gather(
+    fetch_image(activity.avatar),
+    fetch_image(activity.content.cover),
+    extras.format(activity.extra),
+  )
+
+  def appender(card: Card) -> None:
+    block = Card()
+    block.add(CardAuthor(avatar, activity.name))
+    block.add(CardTopic(activity.topic))
+    block.add(CardText(activity.content.title, 40, 2))
+    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(activity.content.start_time))
+    block.add(CardText((
+      f"{activity.content.parent_category}/{activity.content.category} "
+      f"{activity.content.watching} 人看过\n"
+      f"{start_time} 开播"
+    ), 32, 0))
+    card.add(block)
+    card.add(CardCover(cover))
+    append_extra(card, True)
+
+  return appender
+
+
 async def get_course_appender(activity: ActivityCourse[object]) -> Callable[[Card], None]:
   async def fetch_avatar() -> Optional[Image.Image]:
     if activity.avatar:
@@ -142,24 +168,23 @@ async def get_playlist_appender(activity: ActivityPlaylist[object]) -> Callable[
   return appender
 
 
-def deleted_appender(card: Card) -> None:
-  block = Card()
-  block.add(CardText("源动态已失效", 32, 2))
-  card.add(block)
+async def get_deleted_appender(reason: str) -> Callable[[Card], None]:
+  def appender(card: Card) -> None:
+    block = Card()
+    message = "源动态已失效"
+    if reason:
+      message += f"（{reason}）"
+    block.add(CardText(message, 32, 0))
+    card.add(block)
+  return appender
 
 
-async def get_deleted_appender(_) -> Callable[[Card], None]:
-  return deleted_appender
-
-
-def unknown_appender(card: Card) -> None:
-  block = Card()
-  block.add(CardText("IdhagnBot 暂不支持解析此类动态", 32, 2))
-  card.add(block)
-
-
-async def get_unknown_appender(_) -> Callable[[Card], None]:
-  return unknown_appender
+async def get_unknown_appender(activity: Activity[object, object]) -> Callable[[Card], None]:
+  def appender(card: Card) -> None:
+    block = Card()
+    block.add(CardText(f"IdhagnBot 暂不支持解析此类动态（{activity.type}）", 32, 0))
+    card.add(block)
+  return appender
 
 
 GENERIC_TITLE = make_title_formatter("动态")
@@ -173,6 +198,7 @@ TITLE_FORMATTERS: List[TitleFormatter[Any]] = [
   (ContentArticle, make_title_formatter("专栏")),
   (ContentPGC, pgc_title),
   (ContentLive, make_title_formatter("直播")),
+  (ContentLiveRcmd, make_title_formatter("直播")),
   (ContentCourse, make_title_formatter("课程")),
   (ContentPlaylist, make_title_formatter("合集")),
 ]
@@ -185,21 +211,24 @@ CARD_APPENDERS: List[AppenderGetter[Any]] = [
   (ContentCommon, common.get_appender),
   (ContentPGC, get_pgc_appender),
   (ContentLive, get_live_appender),
+  (ContentLiveRcmd, get_live_rcmd_appender),
   (ContentCourse, get_course_appender),
   (ContentPlaylist, get_playlist_appender),
 ]
 
 
-async def format(activity: ActivityForward[object]) -> Message:
-  check_ignore(False, activity.content.text)
+async def format(activity: ActivityForward[object], can_ignore: bool) -> Message:
+  if can_ignore:
+    check_ignore(False, activity.content.text)
 
   if activity.content.activity is None:
     title_label = "失效动态"
   else:
-    for type, checker in CHECKERS:
-      if isinstance(activity.content.activity.content, type):
-        checker(activity.content.activity)
-        break
+    if can_ignore:
+      for type, checker in CHECKERS:
+        if isinstance(activity.content.activity.content, type):
+          checker(activity.content.activity)
+          break
 
     for type, formatter in TITLE_FORMATTERS:
       if isinstance(activity.content.activity.content, type):
@@ -209,18 +238,18 @@ async def format(activity: ActivityForward[object]) -> Message:
       title_label = GENERIC_TITLE(activity.content.activity)
 
   if activity.content.activity is None:
-    appender_getter = get_deleted_appender
+    appender_coro = get_deleted_appender(activity.content.error_text)
   else:
     for type, getter in CARD_APPENDERS:
       if isinstance(activity.content.activity.content, type):
-        appender_getter = getter
+        appender_coro = getter(activity.content.activity)
         break
     else:
-      appender_getter = get_unknown_appender
+      appender_coro = get_unknown_appender(activity.content.activity)
 
   avatar, appender, emotions, append_extras = await asyncio.gather(
     fetch_image(activity.avatar),
-    appender_getter(activity.content.activity),
+    appender_coro,
     fetch_emotions(activity.content.richtext),
     extras.format(activity.extra),
   )

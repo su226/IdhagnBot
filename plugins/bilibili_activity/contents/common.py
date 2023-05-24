@@ -39,8 +39,9 @@ async def get_appender(activity: ActivityCommonSquare[object]) -> Callable[[Card
   return appender
 
 
-async def format(activity: ActivityCommonSquare[object]) -> Message:
-  check_ignore(False, activity.content.text)
+async def format(activity: ActivityCommonSquare[object], can_ignore: bool) -> Message:
+  if can_ignore:
+    check_ignore(False, activity.content.text)
   appender = await get_appender(activity)
 
   def make() -> Message:

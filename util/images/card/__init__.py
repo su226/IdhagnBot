@@ -38,7 +38,7 @@ class Render:
 class CardText(Render):
   def __init__(self, content: str, size: int, lines: int) -> None:
     self.layout = textutil.layout(
-      content, "sans", size, box=CONTENT_WIDTH, ellipsize="end", lines=lines
+      content, "sans", size, box=CONTENT_WIDTH, ellipsize="end" if lines else None, lines=lines
     )
     self.height = self.layout.get_pixel_size().height
 

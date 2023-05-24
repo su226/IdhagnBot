@@ -114,7 +114,7 @@ async def try_check(bot: Bot, user: common.User) -> int:
     try:
       message = await contents.format(activity)
     except common.IgnoredException:
-      logger.info(f"{user._name}({user.uid}) 的动态 {activity.id} 含有忽略的关键字")
+      logger.info(f"已忽略 {user._name}({user.uid}) 的动态 {activity.id}")
       return
     except Exception:
       logger.exception(
@@ -204,7 +204,7 @@ async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg())
     activity = bilibili_activity.Activity.grpc_parse(src)
   else:
     activity = bilibili_activity.Activity.json_parse(src)
-  message = await contents.format(activity)
+  message = await contents.format(activity, False)
   ctx = context.get_event_context(event)
   real_ctx = getattr(event, "group_id", -1)
   if ctx != real_ctx:
