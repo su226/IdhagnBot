@@ -209,20 +209,24 @@ class CardMargin(Render):
 
 
 class CardTab(Render):
-  def __init__(self, content: str, title: str = "", icon: Optional[Image.Image] = None) -> None:
+  def __init__(
+    self, content: str = "", title: str = "", icon: Optional[Image.Image] = None
+  ) -> None:
     self.icon = icon
     box = CONTENT_WIDTH - 8
+    self.title_im = textutil.render(title, "sans", 32, box=box) if title else None
     if icon:
       box -= icon.width + PADDING
-    self.title_im = textutil.render(title, "sans", 32, box=box) if title else None
-    self.content_im = textutil.render(content, "sans", 32, box=box, markup=True)
+    self.content_im = (
+      textutil.render(content, "sans", 32, box=box, markup=True) if content else None
+    )
 
   def get_width(self) -> int:
     return WIDTH
 
   def get_height(self) -> int:
     title_h = self.title_im.height if self.title_im else 0
-    content_h = self.content_im.height
+    content_h = self.content_im.height if self.content_im else 0
     if self.icon:
       content_h = max(content_h, self.icon.height)
     return title_h + content_h + 16
@@ -233,7 +237,7 @@ class CardTab(Render):
       dst.paste(DIM_COLOR, (x, y, x + self.title_im.width + 16, y + self.title_im.height))
       dst.paste(self.title_im, (x + 8, y), self.title_im)
       y += self.title_im.height
-    content_h = self.content_im.height
+    content_h = self.content_im.height if self.content_im else 0
     if self.icon:
       content_h = max(content_h, self.icon.height)
     dst.paste(DIM_COLOR, (x, y, WIDTH - PADDING, y + content_h + 16))
@@ -242,8 +246,8 @@ class CardTab(Render):
     if self.icon:
       imutil.paste(dst, self.icon, (x, y_), anchor="lm")
       x += self.icon.width + PADDING
-    imutil.paste(
-      dst, self.content_im, (x, y_), anchor="lm")
+    if self.content_im:
+      imutil.paste(dst, self.content_im, (x, y_), anchor="lm")
 
 
 class Card(Render):

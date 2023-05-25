@@ -104,7 +104,7 @@ async def get_live_rcmd_appender(activity: ActivityLiveRcmd[object]) -> Callable
     block.add(CardAuthor(avatar, activity.name))
     block.add(CardTopic(activity.topic))
     block.add(CardText(activity.content.title, 40, 2))
-    start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(activity.content.start_time))
+    start_time = time.strftime("%m-%d %H:%M", time.localtime(activity.content.start_time))
     block.add(CardText((
       f"{activity.content.parent_category}/{activity.content.category} "
       f"{activity.content.watching} 人看过\n"

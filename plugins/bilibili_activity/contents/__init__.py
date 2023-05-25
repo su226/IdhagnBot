@@ -37,8 +37,18 @@ from ..common import IgnoredException
 from . import article, audio, common, forward, image, text, video
 
 
+async def format_unknown(activity: Activity[object, object]) -> Message:
+  return Message(MessageSegment.text(
+    f"{activity.name} 发布了动态\n"
+    f"IdhagnBot 暂不支持解析此类动态（{activity.type}）\n"
+    f"https://t.bilibili.com/{activity.id}"
+  ))
+
+
 async def ignore(activity: Activity[object, object], can_ignore: bool) -> Message:
-  raise IgnoredException
+  if can_ignore:
+    raise IgnoredException
+  return await format_unknown(activity)
 
 
 TContent = TypeVar("TContent")
@@ -53,14 +63,6 @@ FORMATTERS: List[Formatter[Any]] = [
   (ContentForward, forward.format),
   (ContentLiveRcmd, ignore),
 ]
-
-
-async def format_unknown(activity: Activity[object, object]) -> Message:
-  return Message(MessageSegment.text(
-    f"{activity.name} 发布了动态\n"
-    f"IdhagnBot 暂不支持解析此类动态（{activity.type}）\n"
-    f"https://t.bilibili.com/{activity.id}"
-  ))
 
 
 async def format(activity: Activity[object, object], can_ignore: bool = True) -> Message:

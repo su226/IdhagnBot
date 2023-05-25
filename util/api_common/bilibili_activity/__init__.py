@@ -661,23 +661,21 @@ class ContentUnknown(ContentParser["ContentUnknown"]):
     return ContentUnknown()
 
 
-GRPC_CONTENT_TYPES: Dict["DynamicType.V", Type[ContentParser[object]]] = {}
-if GRPC_AVAILABLE:
-  GRPC_CONTENT_TYPES = {
-    DynamicType.word: ContentText,
-    DynamicType.draw: ContentImage,
-    DynamicType.av: ContentVideo,
-    DynamicType.article: ContentArticle,
-    DynamicType.music: ContentAudio,
-    DynamicType.pgc: ContentPGC,
-    DynamicType.common_square: ContentCommon,
-    DynamicType.common_vertical: ContentCommon,
-    DynamicType.courses_season: ContentCourse,
-    DynamicType.live: ContentLive,
-    DynamicType.live_rcmd: ContentLiveRcmd,
-    DynamicType.medialist: ContentPlaylist,
-    DynamicType.forward: ContentForward,
-  }
+GRPC_CONTENT_TYPES: Dict["DynamicType.V", Type[ContentParser[object]]] = {
+  DynamicType.word: ContentText,
+  DynamicType.draw: ContentImage,
+  DynamicType.av: ContentVideo,
+  DynamicType.article: ContentArticle,
+  DynamicType.music: ContentAudio,
+  DynamicType.pgc: ContentPGC,
+  DynamicType.common_square: ContentCommon,
+  DynamicType.common_vertical: ContentCommon,
+  DynamicType.courses_season: ContentCourse,
+  DynamicType.live: ContentLive,
+  DynamicType.live_rcmd: ContentLiveRcmd,
+  DynamicType.medialist: ContentPlaylist,
+  DynamicType.forward: ContentForward,
+} if GRPC_AVAILABLE else {}
 JSON_CONTENT_TYPES: Dict[str, Type[ContentParser[object]]] = {
   "WORD": ContentText,
   "DRAW": ContentImage,
@@ -771,6 +769,8 @@ class ExtraReserve(ExtraParser["ExtraReserve"]):
   title: str
   desc: str
   count: int
+  link_text: str
+  link_url: str
 
   @staticmethod
   def grpc_parse(item: "ModuleAdditional") -> "ExtraReserve":
@@ -780,6 +780,8 @@ class ExtraReserve(ExtraParser["ExtraReserve"]):
       item.up.title,
       item.up.desc_text_1.text,
       item.up.reserve_total,
+      item.up.desc_text3.text,
+      item.up.desc_text3.jump_url,
     )
 
   @staticmethod
@@ -790,7 +792,39 @@ class ExtraReserve(ExtraParser["ExtraReserve"]):
       item["reserve"]["title"],
       item["reserve"]["desc1"]["text"],
       item["reserve"]["reserve_total"],
+      item["reserve"]["desc3"]["text"],
+      item["reserve"]["desc3"]["jump_url"],
     )
+
+
+@dataclass
+class Goods:
+  id: int
+  name: str
+  price: str
+  url: str
+  image: str
+
+
+@dataclass
+class ExtraGoods(ExtraParser["ExtraGoods"]):
+  title: str
+  goods: List[Goods]
+
+  @staticmethod
+  def grpc_parse(item: "ModuleAdditional") -> "ExtraGoods":
+    goods = [
+      Goods(i.item_id, i.title, i.price, i.jump_url, i.cover) for i in item.goods.goods_items
+    ]
+    return ExtraGoods(item.goods.rcmd_desc, goods)
+
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ExtraGoods":
+    goods: List[Goods] = [
+      Goods(int(i["id"]), i["name"], i["price"], i["url"], i["cover"])
+      for i in item["goods"]["items"]
+    ]
+    return ExtraGoods(item["goods"]["head_text"], goods)
 
 
 class ExtraUnknown(ExtraParser["ExtraUnknown"]):
@@ -803,18 +837,31 @@ class ExtraUnknown(ExtraParser["ExtraUnknown"]):
     return ExtraUnknown()
 
 
-GRPC_EXTRA_TYPES: Dict["AdditionalType.V", Type[ExtraParser[object]]] = {}
-if GRPC_AVAILABLE:
-  GRPC_EXTRA_TYPES = {
-    AdditionalType.additional_type_vote: ExtraVote,
-    AdditionalType.additional_type_ugc: ExtraVideo,
-    AdditionalType.additional_type_up_reservation: ExtraReserve,
-  }
+GRPC_EXTRA_TYPES: Dict["AdditionalType.V", Type[ExtraParser[object]]] = {
+  AdditionalType.additional_type_vote: ExtraVote,
+  AdditionalType.additional_type_ugc: ExtraVideo,
+  AdditionalType.additional_type_up_reservation: ExtraReserve,
+  AdditionalType.additional_type_goods: ExtraGoods,
+} if GRPC_AVAILABLE else {}
 JSON_EXTRA_TYPES: Dict[str, Type[ExtraParser[object]]] = {
   "VOTE": ExtraVote,
   "UGC": ExtraVideo,
   "RESERVE": ExtraReserve,
+  "GOODS": ExtraGoods,
 }
+
+
+@dataclass
+class Stat:
+  repost: int
+  like: int
+  reply: int
+
+
+@dataclass
+class Extra(Generic[TExtra]):
+  type: str
+  value: TExtra
 
 
 @dataclass
@@ -832,11 +879,9 @@ class Activity(Generic[TContent, TExtra]):
   top: bool
   type: str
   content: TContent
-  repost: Optional[int]
-  like: Optional[int]
-  reply: Optional[int]
+  stat: Optional[Stat]
   time: Optional[int]
-  extra: Optional[TExtra]
+  extra: Optional[Extra[TExtra]]
   topic: Optional[Topic]
 
   @staticmethod
@@ -865,8 +910,10 @@ class Activity(Generic[TContent, TExtra]):
     extra = None
     if DynModuleType.module_additional in modules:
       additional_module = modules[DynModuleType.module_additional].module_additional
-      extra_cls = GRPC_EXTRA_TYPES.get(additional_module.type, ExtraUnknown)
-      extra = extra_cls.grpc_parse(additional_module)
+      extra = Extra(
+        misc.removeprefix(AdditionalType.Name(additional_module.type).upper(), "ADDITIONAL_TYPE_"),
+        GRPC_EXTRA_TYPES.get(additional_module.type, ExtraUnknown).grpc_parse(additional_module)
+      )
     topic = None
     if DynModuleType.module_topic in modules:
       topic_module = modules[DynModuleType.module_topic].module_topic
@@ -877,11 +924,9 @@ class Activity(Generic[TContent, TExtra]):
       avatar,
       item.extend.dyn_id_str,
       top,
-      DynamicType.Name(item.card_type).upper(),
+      misc.removeprefix(DynamicType.Name(item.card_type).upper(), "DYN_"),
       content_cls.grpc_parse(item, modules),
-      stat_module.like,
-      stat_module.repost,
-      stat_module.reply,
+      Stat(stat_module.like, stat_module.repost, stat_module.reply),
       None,
       extra,
       topic,
@@ -892,23 +937,22 @@ class Activity(Generic[TContent, TExtra]):
     modules = item["modules"]
     author_module = modules["module_author"]
     top = "module_tag" in modules and modules["module_tag"]["text"] == "置顶"
+    stat = None
     if "module_stat" in modules:
       stat_module = modules["module_stat"]
-      repost = stat_module["forward"]["count"]
-      like = stat_module["like"]["count"]
-      reply = stat_module["comment"]["count"]
-    else:
-      repost = None
-      like = None
-      reply = None
+      stat = Stat(
+        stat_module["forward"]["count"],
+        stat_module["like"]["count"],
+        stat_module["comment"]["count"],
+      )
     type = item["type"].removeprefix("DYNAMIC_TYPE_")
     content_cls = JSON_CONTENT_TYPES.get(type, ContentUnknown)
     dynamic_module = modules["module_dynamic"]
     extra = None
     if (additional := dynamic_module["additional"]) is not None:
-      type = additional["type"].removeprefix("ADDITIONAL_TYPE_")
-      extra_cls = JSON_EXTRA_TYPES.get(type, ExtraUnknown)
-      extra = extra_cls.json_parse(additional)
+      extra_type = additional["type"].removeprefix("ADDITIONAL_TYPE_")
+      extra_cls = JSON_EXTRA_TYPES.get(extra_type, ExtraUnknown)
+      extra = Extra(extra_type, extra_cls.json_parse(additional))
     topic = None
     if (raw_topic := dynamic_module["topic"]) is not None:
       topic = Topic(raw_topic["id"], raw_topic["name"])
@@ -920,9 +964,7 @@ class Activity(Generic[TContent, TExtra]):
       top,
       type,
       content_cls.json_parse(item),
-      like,
-      repost,
-      reply,
+      stat,
       author_module["pub_ts"],
       extra,
       topic,

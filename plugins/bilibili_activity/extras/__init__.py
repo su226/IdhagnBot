@@ -7,12 +7,14 @@
 # ADDITIONAL_TYPE_UGC     # 视频
 # ADDITIONAL_TYPE_RESERVE # 直播预约
 
-from typing import Any, Awaitable, Callable, List, Tuple, Type, TypeVar
+from typing import Any, Awaitable, Callable, List, Optional, Tuple, Type, TypeVar
 
-from util.api_common.bilibili_activity import ExtraReserve, ExtraVideo, ExtraVote
+from util.api_common.bilibili_activity import (
+  Extra, ExtraGoods, ExtraReserve, ExtraVideo, ExtraVote
+)
 from util.images.card import Card, CardMargin, CardTab
 
-from . import reserve, video, vote
+from . import goods, reserve, video, vote
 
 TExtra = TypeVar("TExtra")
 Formatter = Tuple[Type[TExtra], Callable[[TExtra], Awaitable[Callable[[Card], None]]]]
@@ -20,6 +22,7 @@ FORMATTERS: List[Formatter[Any]] = [
   (ExtraVote, vote.format),
   (ExtraVideo, video.format),
   (ExtraReserve, reserve.format),
+  (ExtraGoods, goods.format),
 ]
 
 
@@ -27,19 +30,21 @@ def format_noop(card: Card, block: bool = False) -> None:
   pass
 
 
-def format_unknown(card: Card) -> None:
-  card.add(CardTab("IdhagnBot 暂不支持解析此内容", "额外内容"))
+def get_unknown_appender(type: str) -> Callable[[Card], None]:
+  def appender(card: Card) -> None:
+    card.add(CardTab(f"IdhagnBot 暂不支持解析此内容（{type}）", "额外内容"))
+  return appender
 
 
-async def format(extra: object) -> Callable[[Card, bool], None]:
+async def format(extra: Optional[Extra[object]]) -> Callable[[Card, bool], None]:
   if extra is None:
     return format_noop
   for type, get_appender in FORMATTERS:
-    if isinstance(extra, type):
-      appender = await get_appender(extra)
+    if isinstance(extra.value, type):
+      appender = await get_appender(extra.value)
       break
   else:
-    appender = format_unknown
+    appender = get_unknown_appender(extra.type)
 
   def do_format(card: Card, block: bool = False) -> None:
     if block:
