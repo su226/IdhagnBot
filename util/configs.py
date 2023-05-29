@@ -2,9 +2,11 @@
 # 现在只有上帝明白了
 import os
 import shutil
+from dataclasses import dataclass
 from threading import Lock
 from typing import (
-  Any, Callable, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Tuple, Type, TypeVar
+  Any, Callable, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Tuple, Type, TypeVar,
+  cast
 )
 
 import yaml
@@ -37,13 +39,19 @@ LoadHandler = Callable[[Optional[TModel], TModel, Unpack[TParam]], None]
 Reloadable = Literal[False, "eager", "lazy"]
 
 
+@dataclass
+class CacheItem(Generic[TModel]):
+  item: TModel
+  need_reload: bool = False
+
+
 class BaseConfig(Generic[TModel, Unpack[TParam]]):
   category: ClassVar = "配置"
   all: ClassVar[List["BaseConfig"]] = []
 
   def __init__(self, model: Type[TModel], reloadable: Reloadable = "lazy") -> None:
     self.model = model
-    self.cache: Dict[Tuple[Unpack[TParam]], TModel] = {}
+    self.cache: Dict[Tuple[Unpack[TParam]], CacheItem[TModel]] = {}
     self.reloadable: Reloadable = reloadable
     self.handlers: List[LoadHandler[TModel, Unpack[TParam]]] = []
     self.lock = Lock()
@@ -53,32 +61,32 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     raise NotImplementedError
 
   def __call__(self, *args: Unpack[TParam]) -> TModel:
-    if args not in self.cache:
+    if args not in self.cache or self.cache[args].need_reload:
       with self.lock:  # Nonebot 的 run_sync 不在主线程
-        if args not in self.cache:
+        if args not in self.cache or not self.cache[args].need_reload:
           self.load(*args)
-    return self.cache[args]
+    return self.cache[args].item
 
   def load(self, *args: Unpack[TParam]) -> None:
-    if args in self.cache:
-      old_config = self.cache[args]
-    else:
-      old_config = None
+    if args not in self.cache:
+      self.cache[args] = CacheItem(cast(Any, None))
+    cache_item = self.cache[args]
+    old_config = cache_item.item
     file = self.get_file(*args)
     if os.path.exists(file):
       logger.info(f"加载{self.category}文件: {file}")
       with open(file) as f:
-        self.cache[args] = self.model.parse_obj(yaml.load(f, SafeLoader))
+        cache_item.item = self.model.parse_obj(yaml.load(f, SafeLoader))
     else:
       logger.info(f"{self.category}文件不存在: {file}")
-      self.cache[args] = self.model()
+      cache_item.item = self.model()
     for handler in self.handlers:
-      handler(old_config, self.cache[args], *args)
+      handler(old_config, cache_item.item, *args)
 
   def dump(self, *args: Unpack[TParam]) -> None:
     if args not in self.cache:
       return
-    data = encode(self.cache[args].dict())
+    data = encode(self.cache[args].item.dict())
     file = self.get_file(*args)
     os.makedirs(os.path.dirname(file), exist_ok=True)
     with open(file, "w") as f:
@@ -106,7 +114,8 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
       for key in self.cache:
         self.load(*key)
     elif self.reloadable == "lazy":
-      self.cache.clear()
+      for v in self.cache.values():
+        v.need_reload = True
     else:
       raise ValueError(f"{self} 不可重载")
 
