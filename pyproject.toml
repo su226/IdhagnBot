@@ -28,7 +28,6 @@ sql = ["sqlmodel>=0.0.8", "aiosqlite>=0.17.0"]
 wordcloud = ["wordcloud>=1.9.1.1"] # 词云也需要 sql 和 jieba
 grpc = ["protobuf>=4.21.6", "grpcio>=1.49.1"]
 playwright = ["playwright>=1.27.1"]
-cryptography = ["cryptography>=38.0.4"]
 
 [project.urls]
 Homepage = "https://idhagnbot.su226.tk"
@@ -47,6 +46,11 @@ lint = [
   "pylama[eradicate,toml]>=8.4.1",
   "isort>=5.10.1",
 ]
+dev = [
+  "grpc-stubs>=1.53.0.2",
+  "mypy-protobuf>=3.4.0",
+  "grpcio-tools>=1.54.2",
+]
 
 [tool.pdm.scripts]
 start = "python bot.py"
@@ -60,7 +64,7 @@ indent = "  "
 [tool.pyright]
 typeCheckingMode = "basic"
 strict = ["plugins/liferestart/game"]
-ignore = ["util/api_common/*/protos"]
+ignore = ["util/api_common/*/protos", "archived"]
 pythonVersion = "3.8"
 
 [tool.pylama]

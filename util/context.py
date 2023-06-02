@@ -260,12 +260,12 @@ async def _check_matcher(
   state: T_State,
   stack: Optional[AsyncExitStack] = None,
   dependency_cache: Optional[T_DependencyCache] = None,
-) -> None:
+) -> bool:
   token = _current_state.set(state)
   token2 = _current_stack.set(stack)
   token3 = _current_dependency_cache.set(dependency_cache)
   try:
-    await _check_matcher_orig(Matcher, bot, event, state, stack, dependency_cache)
+    return await _check_matcher_orig(Matcher, bot, event, state, stack, dependency_cache)
   finally:
     _current_state.reset(token)
     _current_stack.reset(token2)
