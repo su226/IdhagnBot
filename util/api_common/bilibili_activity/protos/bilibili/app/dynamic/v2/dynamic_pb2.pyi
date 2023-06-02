@@ -4,1618 +4,1683 @@ isort:skip_file
 """
 import bilibili.app.archive.middleware.v1.preload_pb2
 import builtins
+import collections.abc
 import google.protobuf.any_pb2
 import google.protobuf.descriptor
 import google.protobuf.internal.containers
 import google.protobuf.internal.enum_type_wrapper
 import google.protobuf.message
+import sys
 import typing
-import typing_extensions
 
-DESCRIPTOR: google.protobuf.descriptor.FileDescriptor = ...
+if sys.version_info >= (3, 10):
+    import typing as typing_extensions
+else:
+    import typing_extensions
 
-#
-class AddButtonBgStyle(_AddButtonBgStyle, metaclass=_AddButtonBgStyleEnumTypeWrapper):
-    pass
+DESCRIPTOR: google.protobuf.descriptor.FileDescriptor
+
 class _AddButtonBgStyle:
-    V = typing.NewType('V', builtins.int)
-class _AddButtonBgStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AddButtonBgStyle.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 默认填充
-    fill = AddButtonBgStyle.V(0)
-    # 描边
-    stroke = AddButtonBgStyle.V(1)
-    # 置灰
-    gray = AddButtonBgStyle.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 默认填充
-fill = AddButtonBgStyle.V(0)
-# 描边
-stroke = AddButtonBgStyle.V(1)
-# 置灰
-gray = AddButtonBgStyle.V(2)
+class _AddButtonBgStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AddButtonBgStyle.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    fill: _AddButtonBgStyle.ValueType  # 0
+    """默认填充"""
+    stroke: _AddButtonBgStyle.ValueType  # 1
+    """描边"""
+    gray: _AddButtonBgStyle.ValueType  # 2
+    """置灰"""
+
+class AddButtonBgStyle(_AddButtonBgStyle, metaclass=_AddButtonBgStyleEnumTypeWrapper):
+    """"""
+
+fill: AddButtonBgStyle.ValueType  # 0
+"""默认填充"""
+stroke: AddButtonBgStyle.ValueType  # 1
+"""描边"""
+gray: AddButtonBgStyle.ValueType  # 2
+"""置灰"""
 global___AddButtonBgStyle = AddButtonBgStyle
 
-
-# 按钮类型
-class AddButtonType(_AddButtonType, metaclass=_AddButtonTypeEnumTypeWrapper):
-    pass
 class _AddButtonType:
-    V = typing.NewType('V', builtins.int)
-class _AddButtonTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AddButtonType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    bt_none = AddButtonType.V(0)
-    # 跳转
-    bt_jump = AddButtonType.V(1)
-    # 按钮
-    bt_button = AddButtonType.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-bt_none = AddButtonType.V(0)
-# 跳转
-bt_jump = AddButtonType.V(1)
-# 按钮
-bt_button = AddButtonType.V(2)
+class _AddButtonTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AddButtonType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    bt_none: _AddButtonType.ValueType  # 0
+    """占位"""
+    bt_jump: _AddButtonType.ValueType  # 1
+    """跳转"""
+    bt_button: _AddButtonType.ValueType  # 2
+    """按钮"""
+
+class AddButtonType(_AddButtonType, metaclass=_AddButtonTypeEnumTypeWrapper):
+    """按钮类型"""
+
+bt_none: AddButtonType.ValueType  # 0
+"""占位"""
+bt_jump: AddButtonType.ValueType  # 1
+"""跳转"""
+bt_button: AddButtonType.ValueType  # 2
+"""按钮"""
 global___AddButtonType = AddButtonType
 
-
-# 投票状态
-class AdditionVoteState(_AdditionVoteState, metaclass=_AdditionVoteStateEnumTypeWrapper):
-    pass
 class _AdditionVoteState:
-    V = typing.NewType('V', builtins.int)
-class _AdditionVoteStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionVoteState.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    addition_vote_state_none = AdditionVoteState.V(0)
-    #
-    addition_vote_state_open = AdditionVoteState.V(1)
-    #
-    addition_vote_state_close = AdditionVoteState.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-addition_vote_state_none = AdditionVoteState.V(0)
-#
-addition_vote_state_open = AdditionVoteState.V(1)
-#
-addition_vote_state_close = AdditionVoteState.V(2)
+class _AdditionVoteStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionVoteState.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    addition_vote_state_none: _AdditionVoteState.ValueType  # 0
+    """"""
+    addition_vote_state_open: _AdditionVoteState.ValueType  # 1
+    """"""
+    addition_vote_state_close: _AdditionVoteState.ValueType  # 2
+    """"""
+
+class AdditionVoteState(_AdditionVoteState, metaclass=_AdditionVoteStateEnumTypeWrapper):
+    """投票状态"""
+
+addition_vote_state_none: AdditionVoteState.ValueType  # 0
+""""""
+addition_vote_state_open: AdditionVoteState.ValueType  # 1
+""""""
+addition_vote_state_close: AdditionVoteState.ValueType  # 2
+""""""
 global___AdditionVoteState = AdditionVoteState
 
-
-# 投票类型
-class AdditionVoteType(_AdditionVoteType, metaclass=_AdditionVoteTypeEnumTypeWrapper):
-    pass
 class _AdditionVoteType:
-    V = typing.NewType('V', builtins.int)
-class _AdditionVoteTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionVoteType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    addition_vote_type_none = AdditionVoteType.V(0)
-    #
-    addition_vote_type_word = AdditionVoteType.V(1)
-    #
-    addition_vote_type_pic = AdditionVoteType.V(2)
-    #
-    addition_vote_type_default = AdditionVoteType.V(3)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-addition_vote_type_none = AdditionVoteType.V(0)
-#
-addition_vote_type_word = AdditionVoteType.V(1)
-#
-addition_vote_type_pic = AdditionVoteType.V(2)
-#
-addition_vote_type_default = AdditionVoteType.V(3)
+class _AdditionVoteTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionVoteType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    addition_vote_type_none: _AdditionVoteType.ValueType  # 0
+    """"""
+    addition_vote_type_word: _AdditionVoteType.ValueType  # 1
+    """"""
+    addition_vote_type_pic: _AdditionVoteType.ValueType  # 2
+    """"""
+    addition_vote_type_default: _AdditionVoteType.ValueType  # 3
+    """"""
+
+class AdditionVoteType(_AdditionVoteType, metaclass=_AdditionVoteTypeEnumTypeWrapper):
+    """投票类型"""
+
+addition_vote_type_none: AdditionVoteType.ValueType  # 0
+""""""
+addition_vote_type_word: AdditionVoteType.ValueType  # 1
+""""""
+addition_vote_type_pic: AdditionVoteType.ValueType  # 2
+""""""
+addition_vote_type_default: AdditionVoteType.ValueType  # 3
+""""""
 global___AdditionVoteType = AdditionVoteType
 
-
-# 附加卡按钮点击类型
-class AdditionalButtonClickType(_AdditionalButtonClickType, metaclass=_AdditionalButtonClickTypeEnumTypeWrapper):
-    pass
 class _AdditionalButtonClickType:
-    V = typing.NewType('V', builtins.int)
-class _AdditionalButtonClickTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalButtonClickType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 通用按钮
-    click_none = AdditionalButtonClickType.V(0)
-    # 预约卡按钮
-    click_up = AdditionalButtonClickType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 通用按钮
-click_none = AdditionalButtonClickType.V(0)
-# 预约卡按钮
-click_up = AdditionalButtonClickType.V(1)
+class _AdditionalButtonClickTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalButtonClickType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    click_none: _AdditionalButtonClickType.ValueType  # 0
+    """通用按钮"""
+    click_up: _AdditionalButtonClickType.ValueType  # 1
+    """预约卡按钮"""
+
+class AdditionalButtonClickType(_AdditionalButtonClickType, metaclass=_AdditionalButtonClickTypeEnumTypeWrapper):
+    """附加卡按钮点击类型"""
+
+click_none: AdditionalButtonClickType.ValueType  # 0
+"""通用按钮"""
+click_up: AdditionalButtonClickType.ValueType  # 1
+"""预约卡按钮"""
 global___AdditionalButtonClickType = AdditionalButtonClickType
 
-
-# 附加卡按钮状态
-class AdditionalButtonStatus(_AdditionalButtonStatus, metaclass=_AdditionalButtonStatusEnumTypeWrapper):
-    pass
 class _AdditionalButtonStatus:
-    V = typing.NewType('V', builtins.int)
-class _AdditionalButtonStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalButtonStatus.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    none = AdditionalButtonStatus.V(0)
-    #
-    uncheck = AdditionalButtonStatus.V(1)
-    #
-    check = AdditionalButtonStatus.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-none = AdditionalButtonStatus.V(0)
-#
-uncheck = AdditionalButtonStatus.V(1)
-#
-check = AdditionalButtonStatus.V(2)
+class _AdditionalButtonStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalButtonStatus.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    none: _AdditionalButtonStatus.ValueType  # 0
+    """"""
+    uncheck: _AdditionalButtonStatus.ValueType  # 1
+    """"""
+    check: _AdditionalButtonStatus.ValueType  # 2
+    """"""
+
+class AdditionalButtonStatus(_AdditionalButtonStatus, metaclass=_AdditionalButtonStatusEnumTypeWrapper):
+    """附加卡按钮状态"""
+
+none: AdditionalButtonStatus.ValueType  # 0
+""""""
+uncheck: AdditionalButtonStatus.ValueType  # 1
+""""""
+check: AdditionalButtonStatus.ValueType  # 2
+""""""
 global___AdditionalButtonStatus = AdditionalButtonStatus
 
-
-#
-class AdditionalShareShowType(_AdditionalShareShowType, metaclass=_AdditionalShareShowTypeEnumTypeWrapper):
-    pass
 class _AdditionalShareShowType:
-    V = typing.NewType('V', builtins.int)
-class _AdditionalShareShowTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalShareShowType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    st_none = AdditionalShareShowType.V(0)
-    #
-    st_show = AdditionalShareShowType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-st_none = AdditionalShareShowType.V(0)
-#
-st_show = AdditionalShareShowType.V(1)
+class _AdditionalShareShowTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalShareShowType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    st_none: _AdditionalShareShowType.ValueType  # 0
+    """"""
+    st_show: _AdditionalShareShowType.ValueType  # 1
+    """"""
+
+class AdditionalShareShowType(_AdditionalShareShowType, metaclass=_AdditionalShareShowTypeEnumTypeWrapper):
+    """"""
+
+st_none: AdditionalShareShowType.ValueType  # 0
+""""""
+st_show: AdditionalShareShowType.ValueType  # 1
+""""""
 global___AdditionalShareShowType = AdditionalShareShowType
 
-
-# 枚举-动态附加卡
-class AdditionalType(_AdditionalType, metaclass=_AdditionalTypeEnumTypeWrapper):
-    pass
 class _AdditionalType:
-    V = typing.NewType('V', builtins.int)
-class _AdditionalTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    additional_none = AdditionalType.V(0)
-    # 附加卡-追番
-    additional_type_pgc = AdditionalType.V(1)
-    # 附加卡-商品
-    additional_type_goods = AdditionalType.V(2)
-    # 附加卡投票
-    additional_type_vote = AdditionalType.V(3)
-    # 附加通用卡
-    additional_type_common = AdditionalType.V(4)
-    # 附加电竞卡
-    additional_type_esport = AdditionalType.V(5)
-    # 附加UP主推荐卡
-    additional_type_up_rcmd = AdditionalType.V(6)
-    # 附加卡-ugc
-    additional_type_ugc = AdditionalType.V(7)
-    # UP主预约卡
-    additional_type_up_reservation = AdditionalType.V(8)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-additional_none = AdditionalType.V(0)
-# 附加卡-追番
-additional_type_pgc = AdditionalType.V(1)
-# 附加卡-商品
-additional_type_goods = AdditionalType.V(2)
-# 附加卡投票
-additional_type_vote = AdditionalType.V(3)
-# 附加通用卡
-additional_type_common = AdditionalType.V(4)
-# 附加电竞卡
-additional_type_esport = AdditionalType.V(5)
-# 附加UP主推荐卡
-additional_type_up_rcmd = AdditionalType.V(6)
-# 附加卡-ugc
-additional_type_ugc = AdditionalType.V(7)
-# UP主预约卡
-additional_type_up_reservation = AdditionalType.V(8)
+class _AdditionalTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_AdditionalType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    additional_none: _AdditionalType.ValueType  # 0
+    """占位"""
+    additional_type_pgc: _AdditionalType.ValueType  # 1
+    """附加卡-追番"""
+    additional_type_goods: _AdditionalType.ValueType  # 2
+    """附加卡-商品"""
+    additional_type_vote: _AdditionalType.ValueType  # 3
+    """附加卡投票"""
+    additional_type_common: _AdditionalType.ValueType  # 4
+    """附加通用卡"""
+    additional_type_esport: _AdditionalType.ValueType  # 5
+    """附加电竞卡"""
+    additional_type_up_rcmd: _AdditionalType.ValueType  # 6
+    """附加UP主推荐卡"""
+    additional_type_ugc: _AdditionalType.ValueType  # 7
+    """附加卡-ugc"""
+    additional_type_up_reservation: _AdditionalType.ValueType  # 8
+    """UP主预约卡"""
+
+class AdditionalType(_AdditionalType, metaclass=_AdditionalTypeEnumTypeWrapper):
+    """枚举-动态附加卡"""
+
+additional_none: AdditionalType.ValueType  # 0
+"""占位"""
+additional_type_pgc: AdditionalType.ValueType  # 1
+"""附加卡-追番"""
+additional_type_goods: AdditionalType.ValueType  # 2
+"""附加卡-商品"""
+additional_type_vote: AdditionalType.ValueType  # 3
+"""附加卡投票"""
+additional_type_common: AdditionalType.ValueType  # 4
+"""附加通用卡"""
+additional_type_esport: AdditionalType.ValueType  # 5
+"""附加电竞卡"""
+additional_type_up_rcmd: AdditionalType.ValueType  # 6
+"""附加UP主推荐卡"""
+additional_type_ugc: AdditionalType.ValueType  # 7
+"""附加卡-ugc"""
+additional_type_up_reservation: AdditionalType.ValueType  # 8
+"""UP主预约卡"""
 global___AdditionalType = AdditionalType
 
-
-#
-class CampusTabType(_CampusTabType, metaclass=_CampusTabTypeEnumTypeWrapper):
-    pass
 class _CampusTabType:
-    V = typing.NewType('V', builtins.int)
-class _CampusTabTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_CampusTabType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    campus_none = CampusTabType.V(0)
-    #
-    campus_school = CampusTabType.V(1)
-    #
-    campus_dynamic = CampusTabType.V(2)
-    #
-    campus_account = CampusTabType.V(3)
-    #
-    campus_billboard = CampusTabType.V(4)
-    #
-    campus_topic = CampusTabType.V(5)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-campus_none = CampusTabType.V(0)
-#
-campus_school = CampusTabType.V(1)
-#
-campus_dynamic = CampusTabType.V(2)
-#
-campus_account = CampusTabType.V(3)
-#
-campus_billboard = CampusTabType.V(4)
-#
-campus_topic = CampusTabType.V(5)
+class _CampusTabTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_CampusTabType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    campus_none: _CampusTabType.ValueType  # 0
+    """"""
+    campus_school: _CampusTabType.ValueType  # 1
+    """"""
+    campus_dynamic: _CampusTabType.ValueType  # 2
+    """"""
+    campus_account: _CampusTabType.ValueType  # 3
+    """"""
+    campus_billboard: _CampusTabType.ValueType  # 4
+    """"""
+    campus_topic: _CampusTabType.ValueType  # 5
+    """"""
+
+class CampusTabType(_CampusTabType, metaclass=_CampusTabTypeEnumTypeWrapper):
+    """"""
+
+campus_none: CampusTabType.ValueType  # 0
+""""""
+campus_school: CampusTabType.ValueType  # 1
+""""""
+campus_dynamic: CampusTabType.ValueType  # 2
+""""""
+campus_account: CampusTabType.ValueType  # 3
+""""""
+campus_billboard: CampusTabType.ValueType  # 4
+""""""
+campus_topic: CampusTabType.ValueType  # 5
+""""""
 global___CampusTabType = CampusTabType
 
-
-#
-class CoverIcon(_CoverIcon, metaclass=_CoverIconEnumTypeWrapper):
-    pass
 class _CoverIcon:
-    V = typing.NewType('V', builtins.int)
-class _CoverIconEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_CoverIcon.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位 啥都不展示
-    cover_icon_none = CoverIcon.V(0)
-    # 播放icon
-    cover_icon_play = CoverIcon.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位 啥都不展示
-cover_icon_none = CoverIcon.V(0)
-# 播放icon
-cover_icon_play = CoverIcon.V(1)
+class _CoverIconEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_CoverIcon.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    cover_icon_none: _CoverIcon.ValueType  # 0
+    """占位 啥都不展示"""
+    cover_icon_play: _CoverIcon.ValueType  # 1
+    """播放icon"""
+
+class CoverIcon(_CoverIcon, metaclass=_CoverIconEnumTypeWrapper):
+    """"""
+
+cover_icon_none: CoverIcon.ValueType  # 0
+"""占位 啥都不展示"""
+cover_icon_play: CoverIcon.ValueType  # 1
+"""播放icon"""
 global___CoverIcon = CoverIcon
 
-
-# 文本类型
-class DescType(_DescType, metaclass=_DescTypeEnumTypeWrapper):
-    pass
 class _DescType:
-    V = typing.NewType('V', builtins.int)
-class _DescTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DescType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    desc_type_none = DescType.V(0)
-    # 文本
-    desc_type_text = DescType.V(1)
-    # @
-    desc_type_aite = DescType.V(2)
-    # 抽奖
-    desc_type_lottery = DescType.V(3)
-    # 投票
-    desc_type_vote = DescType.V(4)
-    # 话题
-    desc_type_topic = DescType.V(5)
-    # 商品
-    desc_type_goods = DescType.V(6)
-    # bv
-    desc_type_bv = DescType.V(7)
-    # av
-    desc_type_av = DescType.V(8)
-    # 表情
-    desc_type_emoji = DescType.V(9)
-    # 外露用户
-    desc_type_user = DescType.V(10)
-    # 专栏
-    desc_type_cv = DescType.V(11)
-    # 小视频
-    desc_type_vc = DescType.V(12)
-    # 网址
-    desc_type_web = DescType.V(13)
-    # 淘宝
-    desc_type_taobao = DescType.V(14)
-    # 邮箱
-    desc_type_mail = DescType.V(15)
-    # 番剧season
-    desc_type_ogv_season = DescType.V(16)
-    # 番剧ep
-    desc_type_ogv_ep = DescType.V(17)
-    #
-    desc_type_search_word = DescType.V(18)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-desc_type_none = DescType.V(0)
-# 文本
-desc_type_text = DescType.V(1)
-# @
-desc_type_aite = DescType.V(2)
-# 抽奖
-desc_type_lottery = DescType.V(3)
-# 投票
-desc_type_vote = DescType.V(4)
-# 话题
-desc_type_topic = DescType.V(5)
-# 商品
-desc_type_goods = DescType.V(6)
-# bv
-desc_type_bv = DescType.V(7)
-# av
-desc_type_av = DescType.V(8)
-# 表情
-desc_type_emoji = DescType.V(9)
-# 外露用户
-desc_type_user = DescType.V(10)
-# 专栏
-desc_type_cv = DescType.V(11)
-# 小视频
-desc_type_vc = DescType.V(12)
-# 网址
-desc_type_web = DescType.V(13)
-# 淘宝
-desc_type_taobao = DescType.V(14)
-# 邮箱
-desc_type_mail = DescType.V(15)
-# 番剧season
-desc_type_ogv_season = DescType.V(16)
-# 番剧ep
-desc_type_ogv_ep = DescType.V(17)
-#
-desc_type_search_word = DescType.V(18)
+class _DescTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DescType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    desc_type_none: _DescType.ValueType  # 0
+    """占位"""
+    desc_type_text: _DescType.ValueType  # 1
+    """文本"""
+    desc_type_aite: _DescType.ValueType  # 2
+    """@"""
+    desc_type_lottery: _DescType.ValueType  # 3
+    """抽奖"""
+    desc_type_vote: _DescType.ValueType  # 4
+    """投票"""
+    desc_type_topic: _DescType.ValueType  # 5
+    """话题"""
+    desc_type_goods: _DescType.ValueType  # 6
+    """商品"""
+    desc_type_bv: _DescType.ValueType  # 7
+    """bv"""
+    desc_type_av: _DescType.ValueType  # 8
+    """av"""
+    desc_type_emoji: _DescType.ValueType  # 9
+    """表情"""
+    desc_type_user: _DescType.ValueType  # 10
+    """外露用户"""
+    desc_type_cv: _DescType.ValueType  # 11
+    """专栏"""
+    desc_type_vc: _DescType.ValueType  # 12
+    """小视频"""
+    desc_type_web: _DescType.ValueType  # 13
+    """网址"""
+    desc_type_taobao: _DescType.ValueType  # 14
+    """淘宝"""
+    desc_type_mail: _DescType.ValueType  # 15
+    """邮箱"""
+    desc_type_ogv_season: _DescType.ValueType  # 16
+    """番剧season"""
+    desc_type_ogv_ep: _DescType.ValueType  # 17
+    """番剧ep"""
+    desc_type_search_word: _DescType.ValueType  # 18
+    """"""
+
+class DescType(_DescType, metaclass=_DescTypeEnumTypeWrapper):
+    """文本类型"""
+
+desc_type_none: DescType.ValueType  # 0
+"""占位"""
+desc_type_text: DescType.ValueType  # 1
+"""文本"""
+desc_type_aite: DescType.ValueType  # 2
+"""@"""
+desc_type_lottery: DescType.ValueType  # 3
+"""抽奖"""
+desc_type_vote: DescType.ValueType  # 4
+"""投票"""
+desc_type_topic: DescType.ValueType  # 5
+"""话题"""
+desc_type_goods: DescType.ValueType  # 6
+"""商品"""
+desc_type_bv: DescType.ValueType  # 7
+"""bv"""
+desc_type_av: DescType.ValueType  # 8
+"""av"""
+desc_type_emoji: DescType.ValueType  # 9
+"""表情"""
+desc_type_user: DescType.ValueType  # 10
+"""外露用户"""
+desc_type_cv: DescType.ValueType  # 11
+"""专栏"""
+desc_type_vc: DescType.ValueType  # 12
+"""小视频"""
+desc_type_web: DescType.ValueType  # 13
+"""网址"""
+desc_type_taobao: DescType.ValueType  # 14
+"""淘宝"""
+desc_type_mail: DescType.ValueType  # 15
+"""邮箱"""
+desc_type_ogv_season: DescType.ValueType  # 16
+"""番剧season"""
+desc_type_ogv_ep: DescType.ValueType  # 17
+"""番剧ep"""
+desc_type_search_word: DescType.ValueType  # 18
+""""""
 global___DescType = DescType
 
-
-#
-class DisableState(_DisableState, metaclass=_DisableStateEnumTypeWrapper):
-    pass
 class _DisableState:
-    V = typing.NewType('V', builtins.int)
-class _DisableStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DisableState.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 高亮
-    highlight = DisableState.V(0)
-    # 置灰(按钮不可点击)
-    gary = DisableState.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 高亮
-highlight = DisableState.V(0)
-# 置灰(按钮不可点击)
-gary = DisableState.V(1)
+class _DisableStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DisableState.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    highlight: _DisableState.ValueType  # 0
+    """高亮"""
+    gary: _DisableState.ValueType  # 1
+    """置灰(按钮不可点击)"""
+
+class DisableState(_DisableState, metaclass=_DisableStateEnumTypeWrapper):
+    """"""
+
+highlight: DisableState.ValueType  # 0
+"""高亮"""
+gary: DisableState.ValueType  # 1
+"""置灰(按钮不可点击)"""
 global___DisableState = DisableState
 
-
-# 动态小卡类型
-class DynExtendType(_DynExtendType, metaclass=_DynExtendTypeEnumTypeWrapper):
-    pass
 class _DynExtendType:
-    V = typing.NewType('V', builtins.int)
-class _DynExtendTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynExtendType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    dyn_ext_type_none = DynExtendType.V(0)
-    # 话题小卡
-    dyn_ext_type_topic = DynExtendType.V(1)
-    # lbs小卡
-    dyn_ext_type_lbs = DynExtendType.V(2)
-    # 热门小卡
-    dyn_ext_type_hot = DynExtendType.V(3)
-    # 游戏小卡
-    dyn_ext_type_game = DynExtendType.V(4)
-    # 通用小卡
-    dyn_ext_type_common = DynExtendType.V(5)
-    # 必剪小卡
-    dyn_ext_type_biliCut = DynExtendType.V(6)
-    # ogv小卡
-    dyn_ext_type_ogv = DynExtendType.V(7)
-    # 自动附加ogv小卡
-    dyn_ext_type_auto_ogv = DynExtendType.V(8)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-dyn_ext_type_none = DynExtendType.V(0)
-# 话题小卡
-dyn_ext_type_topic = DynExtendType.V(1)
-# lbs小卡
-dyn_ext_type_lbs = DynExtendType.V(2)
-# 热门小卡
-dyn_ext_type_hot = DynExtendType.V(3)
-# 游戏小卡
-dyn_ext_type_game = DynExtendType.V(4)
-# 通用小卡
-dyn_ext_type_common = DynExtendType.V(5)
-# 必剪小卡
-dyn_ext_type_biliCut = DynExtendType.V(6)
-# ogv小卡
-dyn_ext_type_ogv = DynExtendType.V(7)
-# 自动附加ogv小卡
-dyn_ext_type_auto_ogv = DynExtendType.V(8)
+class _DynExtendTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynExtendType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    dyn_ext_type_none: _DynExtendType.ValueType  # 0
+    """占位"""
+    dyn_ext_type_topic: _DynExtendType.ValueType  # 1
+    """话题小卡"""
+    dyn_ext_type_lbs: _DynExtendType.ValueType  # 2
+    """lbs小卡"""
+    dyn_ext_type_hot: _DynExtendType.ValueType  # 3
+    """热门小卡"""
+    dyn_ext_type_game: _DynExtendType.ValueType  # 4
+    """游戏小卡"""
+    dyn_ext_type_common: _DynExtendType.ValueType  # 5
+    """通用小卡"""
+    dyn_ext_type_biliCut: _DynExtendType.ValueType  # 6
+    """必剪小卡"""
+    dyn_ext_type_ogv: _DynExtendType.ValueType  # 7
+    """ogv小卡"""
+    dyn_ext_type_auto_ogv: _DynExtendType.ValueType  # 8
+    """自动附加ogv小卡"""
+
+class DynExtendType(_DynExtendType, metaclass=_DynExtendTypeEnumTypeWrapper):
+    """动态小卡类型"""
+
+dyn_ext_type_none: DynExtendType.ValueType  # 0
+"""占位"""
+dyn_ext_type_topic: DynExtendType.ValueType  # 1
+"""话题小卡"""
+dyn_ext_type_lbs: DynExtendType.ValueType  # 2
+"""lbs小卡"""
+dyn_ext_type_hot: DynExtendType.ValueType  # 3
+"""热门小卡"""
+dyn_ext_type_game: DynExtendType.ValueType  # 4
+"""游戏小卡"""
+dyn_ext_type_common: DynExtendType.ValueType  # 5
+"""通用小卡"""
+dyn_ext_type_biliCut: DynExtendType.ValueType  # 6
+"""必剪小卡"""
+dyn_ext_type_ogv: DynExtendType.ValueType  # 7
+"""ogv小卡"""
+dyn_ext_type_auto_ogv: DynExtendType.ValueType  # 8
+"""自动附加ogv小卡"""
 global___DynExtendType = DynExtendType
 
-
-# 动态模块类型
-class DynModuleType(_DynModuleType, metaclass=_DynModuleTypeEnumTypeWrapper):
-    pass
 class _DynModuleType:
-    V = typing.NewType('V', builtins.int)
-class _DynModuleTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynModuleType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    module_none = DynModuleType.V(0)
-    # 发布人模块
-    module_author = DynModuleType.V(1)
-    # 争议小黄条
-    module_dispute = DynModuleType.V(2)
-    # 描述文案
-    module_desc = DynModuleType.V(3)
-    # 动态卡片
-    module_dynamic = DynModuleType.V(4)
-    # 转发模块
-    module_forward = DynModuleType.V(5)
-    # 点赞用户(废弃)
-    module_likeUser = DynModuleType.V(6)
-    # 小卡模块
-    module_extend = DynModuleType.V(7)
-    # 附加卡
-    module_additional = DynModuleType.V(8)
-    # 计数信息
-    module_stat = DynModuleType.V(9)
-    # 折叠
-    module_fold = DynModuleType.V(10)
-    # 评论外露(废弃)
-    module_comment = DynModuleType.V(11)
-    # 外露交互模块(点赞、评论)
-    module_interaction = DynModuleType.V(12)
-    # 转发卡的发布人模块
-    module_author_forward = DynModuleType.V(13)
-    # 广告卡模块
-    module_ad = DynModuleType.V(14)
-    # 通栏模块
-    module_banner = DynModuleType.V(15)
-    # 获取物料失败模块
-    module_item_null = DynModuleType.V(16)
-    # 分享组件
-    module_share_info = DynModuleType.V(17)
-    # 相关推荐模块
-    module_recommend = DynModuleType.V(18)
-    # 转发卡计数信息
-    module_stat_forward = DynModuleType.V(19)
-    # 顶部模块
-    module_top = DynModuleType.V(20)
-    # 底部模块
-    module_bottom = DynModuleType.V(21)
-    #
-    module_story = DynModuleType.V(22)
-    #
-    module_topic = DynModuleType.V(23)
-    #
-    module_topic_details_ext = DynModuleType.V(24)
-    #
-    module_top_tag = DynModuleType.V(25)
-    #
-    module_topic_brief = DynModuleType.V(26)
-    #
-    module_title = DynModuleType.V(27)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-module_none = DynModuleType.V(0)
-# 发布人模块
-module_author = DynModuleType.V(1)
-# 争议小黄条
-module_dispute = DynModuleType.V(2)
-# 描述文案
-module_desc = DynModuleType.V(3)
-# 动态卡片
-module_dynamic = DynModuleType.V(4)
-# 转发模块
-module_forward = DynModuleType.V(5)
-# 点赞用户(废弃)
-module_likeUser = DynModuleType.V(6)
-# 小卡模块
-module_extend = DynModuleType.V(7)
-# 附加卡
-module_additional = DynModuleType.V(8)
-# 计数信息
-module_stat = DynModuleType.V(9)
-# 折叠
-module_fold = DynModuleType.V(10)
-# 评论外露(废弃)
-module_comment = DynModuleType.V(11)
-# 外露交互模块(点赞、评论)
-module_interaction = DynModuleType.V(12)
-# 转发卡的发布人模块
-module_author_forward = DynModuleType.V(13)
-# 广告卡模块
-module_ad = DynModuleType.V(14)
-# 通栏模块
-module_banner = DynModuleType.V(15)
-# 获取物料失败模块
-module_item_null = DynModuleType.V(16)
-# 分享组件
-module_share_info = DynModuleType.V(17)
-# 相关推荐模块
-module_recommend = DynModuleType.V(18)
-# 转发卡计数信息
-module_stat_forward = DynModuleType.V(19)
-# 顶部模块
-module_top = DynModuleType.V(20)
-# 底部模块
-module_bottom = DynModuleType.V(21)
-#
-module_story = DynModuleType.V(22)
-#
-module_topic = DynModuleType.V(23)
-#
-module_topic_details_ext = DynModuleType.V(24)
-#
-module_top_tag = DynModuleType.V(25)
-#
-module_topic_brief = DynModuleType.V(26)
-#
-module_title = DynModuleType.V(27)
+class _DynModuleTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynModuleType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    module_none: _DynModuleType.ValueType  # 0
+    """占位"""
+    module_author: _DynModuleType.ValueType  # 1
+    """发布人模块"""
+    module_dispute: _DynModuleType.ValueType  # 2
+    """争议小黄条"""
+    module_desc: _DynModuleType.ValueType  # 3
+    """描述文案"""
+    module_dynamic: _DynModuleType.ValueType  # 4
+    """动态卡片"""
+    module_forward: _DynModuleType.ValueType  # 5
+    """转发模块"""
+    module_likeUser: _DynModuleType.ValueType  # 6
+    """点赞用户(废弃)"""
+    module_extend: _DynModuleType.ValueType  # 7
+    """小卡模块"""
+    module_additional: _DynModuleType.ValueType  # 8
+    """附加卡"""
+    module_stat: _DynModuleType.ValueType  # 9
+    """计数信息"""
+    module_fold: _DynModuleType.ValueType  # 10
+    """折叠"""
+    module_comment: _DynModuleType.ValueType  # 11
+    """评论外露(废弃)"""
+    module_interaction: _DynModuleType.ValueType  # 12
+    """外露交互模块(点赞、评论)"""
+    module_author_forward: _DynModuleType.ValueType  # 13
+    """转发卡的发布人模块"""
+    module_ad: _DynModuleType.ValueType  # 14
+    """广告卡模块"""
+    module_banner: _DynModuleType.ValueType  # 15
+    """通栏模块"""
+    module_item_null: _DynModuleType.ValueType  # 16
+    """获取物料失败模块"""
+    module_share_info: _DynModuleType.ValueType  # 17
+    """分享组件"""
+    module_recommend: _DynModuleType.ValueType  # 18
+    """相关推荐模块"""
+    module_stat_forward: _DynModuleType.ValueType  # 19
+    """转发卡计数信息"""
+    module_top: _DynModuleType.ValueType  # 20
+    """顶部模块"""
+    module_bottom: _DynModuleType.ValueType  # 21
+    """底部模块"""
+    module_story: _DynModuleType.ValueType  # 22
+    """"""
+    module_topic: _DynModuleType.ValueType  # 23
+    """"""
+    module_topic_details_ext: _DynModuleType.ValueType  # 24
+    """"""
+    module_top_tag: _DynModuleType.ValueType  # 25
+    """"""
+    module_topic_brief: _DynModuleType.ValueType  # 26
+    """"""
+    module_title: _DynModuleType.ValueType  # 27
+    """"""
+
+class DynModuleType(_DynModuleType, metaclass=_DynModuleTypeEnumTypeWrapper):
+    """动态模块类型"""
+
+module_none: DynModuleType.ValueType  # 0
+"""占位"""
+module_author: DynModuleType.ValueType  # 1
+"""发布人模块"""
+module_dispute: DynModuleType.ValueType  # 2
+"""争议小黄条"""
+module_desc: DynModuleType.ValueType  # 3
+"""描述文案"""
+module_dynamic: DynModuleType.ValueType  # 4
+"""动态卡片"""
+module_forward: DynModuleType.ValueType  # 5
+"""转发模块"""
+module_likeUser: DynModuleType.ValueType  # 6
+"""点赞用户(废弃)"""
+module_extend: DynModuleType.ValueType  # 7
+"""小卡模块"""
+module_additional: DynModuleType.ValueType  # 8
+"""附加卡"""
+module_stat: DynModuleType.ValueType  # 9
+"""计数信息"""
+module_fold: DynModuleType.ValueType  # 10
+"""折叠"""
+module_comment: DynModuleType.ValueType  # 11
+"""评论外露(废弃)"""
+module_interaction: DynModuleType.ValueType  # 12
+"""外露交互模块(点赞、评论)"""
+module_author_forward: DynModuleType.ValueType  # 13
+"""转发卡的发布人模块"""
+module_ad: DynModuleType.ValueType  # 14
+"""广告卡模块"""
+module_banner: DynModuleType.ValueType  # 15
+"""通栏模块"""
+module_item_null: DynModuleType.ValueType  # 16
+"""获取物料失败模块"""
+module_share_info: DynModuleType.ValueType  # 17
+"""分享组件"""
+module_recommend: DynModuleType.ValueType  # 18
+"""相关推荐模块"""
+module_stat_forward: DynModuleType.ValueType  # 19
+"""转发卡计数信息"""
+module_top: DynModuleType.ValueType  # 20
+"""顶部模块"""
+module_bottom: DynModuleType.ValueType  # 21
+"""底部模块"""
+module_story: DynModuleType.ValueType  # 22
+""""""
+module_topic: DynModuleType.ValueType  # 23
+""""""
+module_topic_details_ext: DynModuleType.ValueType  # 24
+""""""
+module_top_tag: DynModuleType.ValueType  # 25
+""""""
+module_topic_brief: DynModuleType.ValueType  # 26
+""""""
+module_title: DynModuleType.ValueType  # 27
+""""""
 global___DynModuleType = DynModuleType
 
-
-#
-class DynUriType(_DynUriType, metaclass=_DynUriTypeEnumTypeWrapper):
-    pass
 class _DynUriType:
-    V = typing.NewType('V', builtins.int)
-class _DynUriTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynUriType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    dyn_uri_type_none = DynUriType.V(0)
-    # 直接跳转对应uri
-    dyn_uri_type_direct = DynUriType.V(1)
-    # 作为后缀拼接
-    dyn_uri_type_suffix = DynUriType.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-dyn_uri_type_none = DynUriType.V(0)
-# 直接跳转对应uri
-dyn_uri_type_direct = DynUriType.V(1)
-# 作为后缀拼接
-dyn_uri_type_suffix = DynUriType.V(2)
+class _DynUriTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynUriType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    dyn_uri_type_none: _DynUriType.ValueType  # 0
+    """"""
+    dyn_uri_type_direct: _DynUriType.ValueType  # 1
+    """直接跳转对应uri"""
+    dyn_uri_type_suffix: _DynUriType.ValueType  # 2
+    """作为后缀拼接"""
+
+class DynUriType(_DynUriType, metaclass=_DynUriTypeEnumTypeWrapper):
+    """"""
+
+dyn_uri_type_none: DynUriType.ValueType  # 0
+""""""
+dyn_uri_type_direct: DynUriType.ValueType  # 1
+"""直接跳转对应uri"""
+dyn_uri_type_suffix: DynUriType.ValueType  # 2
+"""作为后缀拼接"""
 global___DynUriType = DynUriType
 
-
-# 枚举-动态类型
-class DynamicType(_DynamicType, metaclass=_DynamicTypeEnumTypeWrapper):
-    pass
 class _DynamicType:
-    V = typing.NewType('V', builtins.int)
-class _DynamicTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynamicType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    dyn_none = DynamicType.V(0)
-    # 转发
-    forward = DynamicType.V(1)
-    # 稿件: ugc、小视频、短视频、UGC转PGC
-    av = DynamicType.V(2)
-    # pgc：番剧、PGC番剧、PGC电影、PGC电视剧、PGC国创、PGC纪录片
-    pgc = DynamicType.V(3)
-    # 付费更新批次
-    courses = DynamicType.V(4)
-    # 折叠
-    fold = DynamicType.V(5)
-    # 纯文字
-    word = DynamicType.V(6)
-    # 图文
-    draw = DynamicType.V(7)
-    # 专栏 原仅phone端
-    article = DynamicType.V(8)
-    # 音频 原仅phone端
-    music = DynamicType.V(9)
-    # 通用卡 方形
-    common_square = DynamicType.V(10)
-    # 通用卡 竖形
-    common_vertical = DynamicType.V(11)
-    # 直播卡 只有转发态
-    live = DynamicType.V(12)
-    # 播单 原仅phone端 只有转发态
-    medialist = DynamicType.V(13)
-    # 付费更新批次 只有转发态
-    courses_season = DynamicType.V(14)
-    # 广告卡
-    ad = DynamicType.V(15)
-    # 小程序卡
-    applet = DynamicType.V(16)
-    # 订阅卡
-    subscription = DynamicType.V(17)
-    # 直播推荐卡
-    live_rcmd = DynamicType.V(18)
-    # 通栏
-    banner = DynamicType.V(19)
-    # 合集卡
-    ugc_season = DynamicType.V(20)
-    # 新订阅卡
-    subscription_new = DynamicType.V(21)
-    #
-    story = DynamicType.V(22)
-    #
-    topic_rcmd = DynamicType.V(23)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-dyn_none = DynamicType.V(0)
-# 转发
-forward = DynamicType.V(1)
-# 稿件: ugc、小视频、短视频、UGC转PGC
-av = DynamicType.V(2)
-# pgc：番剧、PGC番剧、PGC电影、PGC电视剧、PGC国创、PGC纪录片
-pgc = DynamicType.V(3)
-# 付费更新批次
-courses = DynamicType.V(4)
-# 折叠
-fold = DynamicType.V(5)
-# 纯文字
-word = DynamicType.V(6)
-# 图文
-draw = DynamicType.V(7)
-# 专栏 原仅phone端
-article = DynamicType.V(8)
-# 音频 原仅phone端
-music = DynamicType.V(9)
-# 通用卡 方形
-common_square = DynamicType.V(10)
-# 通用卡 竖形
-common_vertical = DynamicType.V(11)
-# 直播卡 只有转发态
-live = DynamicType.V(12)
-# 播单 原仅phone端 只有转发态
-medialist = DynamicType.V(13)
-# 付费更新批次 只有转发态
-courses_season = DynamicType.V(14)
-# 广告卡
-ad = DynamicType.V(15)
-# 小程序卡
-applet = DynamicType.V(16)
-# 订阅卡
-subscription = DynamicType.V(17)
-# 直播推荐卡
-live_rcmd = DynamicType.V(18)
-# 通栏
-banner = DynamicType.V(19)
-# 合集卡
-ugc_season = DynamicType.V(20)
-# 新订阅卡
-subscription_new = DynamicType.V(21)
-#
-story = DynamicType.V(22)
-#
-topic_rcmd = DynamicType.V(23)
+class _DynamicTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_DynamicType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    dyn_none: _DynamicType.ValueType  # 0
+    """占位"""
+    forward: _DynamicType.ValueType  # 1
+    """转发"""
+    av: _DynamicType.ValueType  # 2
+    """稿件: ugc、小视频、短视频、UGC转PGC"""
+    pgc: _DynamicType.ValueType  # 3
+    """pgc：番剧、PGC番剧、PGC电影、PGC电视剧、PGC国创、PGC纪录片"""
+    courses: _DynamicType.ValueType  # 4
+    """付费更新批次"""
+    fold: _DynamicType.ValueType  # 5
+    """折叠"""
+    word: _DynamicType.ValueType  # 6
+    """纯文字"""
+    draw: _DynamicType.ValueType  # 7
+    """图文"""
+    article: _DynamicType.ValueType  # 8
+    """专栏 原仅phone端"""
+    music: _DynamicType.ValueType  # 9
+    """音频 原仅phone端"""
+    common_square: _DynamicType.ValueType  # 10
+    """通用卡 方形"""
+    common_vertical: _DynamicType.ValueType  # 11
+    """通用卡 竖形"""
+    live: _DynamicType.ValueType  # 12
+    """直播卡 只有转发态"""
+    medialist: _DynamicType.ValueType  # 13
+    """播单 原仅phone端 只有转发态"""
+    courses_season: _DynamicType.ValueType  # 14
+    """付费更新批次 只有转发态"""
+    ad: _DynamicType.ValueType  # 15
+    """广告卡"""
+    applet: _DynamicType.ValueType  # 16
+    """小程序卡"""
+    subscription: _DynamicType.ValueType  # 17
+    """订阅卡"""
+    live_rcmd: _DynamicType.ValueType  # 18
+    """直播推荐卡"""
+    banner: _DynamicType.ValueType  # 19
+    """通栏"""
+    ugc_season: _DynamicType.ValueType  # 20
+    """合集卡"""
+    subscription_new: _DynamicType.ValueType  # 21
+    """新订阅卡"""
+    story: _DynamicType.ValueType  # 22
+    """"""
+    topic_rcmd: _DynamicType.ValueType  # 23
+    """"""
+
+class DynamicType(_DynamicType, metaclass=_DynamicTypeEnumTypeWrapper):
+    """枚举-动态类型"""
+
+dyn_none: DynamicType.ValueType  # 0
+"""占位"""
+forward: DynamicType.ValueType  # 1
+"""转发"""
+av: DynamicType.ValueType  # 2
+"""稿件: ugc、小视频、短视频、UGC转PGC"""
+pgc: DynamicType.ValueType  # 3
+"""pgc：番剧、PGC番剧、PGC电影、PGC电视剧、PGC国创、PGC纪录片"""
+courses: DynamicType.ValueType  # 4
+"""付费更新批次"""
+fold: DynamicType.ValueType  # 5
+"""折叠"""
+word: DynamicType.ValueType  # 6
+"""纯文字"""
+draw: DynamicType.ValueType  # 7
+"""图文"""
+article: DynamicType.ValueType  # 8
+"""专栏 原仅phone端"""
+music: DynamicType.ValueType  # 9
+"""音频 原仅phone端"""
+common_square: DynamicType.ValueType  # 10
+"""通用卡 方形"""
+common_vertical: DynamicType.ValueType  # 11
+"""通用卡 竖形"""
+live: DynamicType.ValueType  # 12
+"""直播卡 只有转发态"""
+medialist: DynamicType.ValueType  # 13
+"""播单 原仅phone端 只有转发态"""
+courses_season: DynamicType.ValueType  # 14
+"""付费更新批次 只有转发态"""
+ad: DynamicType.ValueType  # 15
+"""广告卡"""
+applet: DynamicType.ValueType  # 16
+"""小程序卡"""
+subscription: DynamicType.ValueType  # 17
+"""订阅卡"""
+live_rcmd: DynamicType.ValueType  # 18
+"""直播推荐卡"""
+banner: DynamicType.ValueType  # 19
+"""通栏"""
+ugc_season: DynamicType.ValueType  # 20
+"""合集卡"""
+subscription_new: DynamicType.ValueType  # 21
+"""新订阅卡"""
+story: DynamicType.ValueType  # 22
+""""""
+topic_rcmd: DynamicType.ValueType  # 23
+""""""
 global___DynamicType = DynamicType
 
-
-# 表情包类型
-class EmojiType(_EmojiType, metaclass=_EmojiTypeEnumTypeWrapper):
-    pass
 class _EmojiType:
-    V = typing.NewType('V', builtins.int)
-class _EmojiTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_EmojiType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    emoji_none = EmojiType.V(0)
-    # emoji旧类型
-    emoji_old = EmojiType.V(1)
-    # emoji新类型
-    emoji_new = EmojiType.V(2)
-    # 大会员表情
-    vip = EmojiType.V(3)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-emoji_none = EmojiType.V(0)
-# emoji旧类型
-emoji_old = EmojiType.V(1)
-# emoji新类型
-emoji_new = EmojiType.V(2)
-# 大会员表情
-vip = EmojiType.V(3)
+class _EmojiTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_EmojiType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    emoji_none: _EmojiType.ValueType  # 0
+    """占位"""
+    emoji_old: _EmojiType.ValueType  # 1
+    """emoji旧类型"""
+    emoji_new: _EmojiType.ValueType  # 2
+    """emoji新类型"""
+    vip: _EmojiType.ValueType  # 3
+    """大会员表情"""
+
+class EmojiType(_EmojiType, metaclass=_EmojiTypeEnumTypeWrapper):
+    """表情包类型"""
+
+emoji_none: EmojiType.ValueType  # 0
+"""占位"""
+emoji_old: EmojiType.ValueType  # 1
+"""emoji旧类型"""
+emoji_new: EmojiType.ValueType  # 2
+"""emoji新类型"""
+vip: EmojiType.ValueType  # 3
+"""大会员表情"""
 global___EmojiType = EmojiType
 
-
-# 附加大卡-电竞卡样式
-class EspaceStyle(_EspaceStyle, metaclass=_EspaceStyleEnumTypeWrapper):
-    pass
 class _EspaceStyle:
-    V = typing.NewType('V', builtins.int)
-class _EspaceStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_EspaceStyle.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # moba类
-    moba = EspaceStyle.V(0)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# moba类
-moba = EspaceStyle.V(0)
+class _EspaceStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_EspaceStyle.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    moba: _EspaceStyle.ValueType  # 0
+    """moba类"""
+
+class EspaceStyle(_EspaceStyle, metaclass=_EspaceStyleEnumTypeWrapper):
+    """附加大卡-电竞卡样式"""
+
+moba: EspaceStyle.ValueType  # 0
+"""moba类"""
 global___EspaceStyle = EspaceStyle
 
-
-# 折叠类型
-class FoldType(_FoldType, metaclass=_FoldTypeEnumTypeWrapper):
-    pass
 class _FoldType:
-    V = typing.NewType('V', builtins.int)
-class _FoldTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_FoldType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    FoldTypeZore = FoldType.V(0)
-    # 用户发布折叠
-    FoldTypePublish = FoldType.V(1)
-    # 转发超频折叠
-    FoldTypeFrequent = FoldType.V(2)
-    # 联合投稿折叠
-    FoldTypeUnite = FoldType.V(3)
-    # 动态受限折叠
-    FoldTypeLimit = FoldType.V(4)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-FoldTypeZore = FoldType.V(0)
-# 用户发布折叠
-FoldTypePublish = FoldType.V(1)
-# 转发超频折叠
-FoldTypeFrequent = FoldType.V(2)
-# 联合投稿折叠
-FoldTypeUnite = FoldType.V(3)
-# 动态受限折叠
-FoldTypeLimit = FoldType.V(4)
+class _FoldTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_FoldType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    FoldTypeZore: _FoldType.ValueType  # 0
+    """占位"""
+    FoldTypePublish: _FoldType.ValueType  # 1
+    """用户发布折叠"""
+    FoldTypeFrequent: _FoldType.ValueType  # 2
+    """转发超频折叠"""
+    FoldTypeUnite: _FoldType.ValueType  # 3
+    """联合投稿折叠"""
+    FoldTypeLimit: _FoldType.ValueType  # 4
+    """动态受限折叠"""
+
+class FoldType(_FoldType, metaclass=_FoldTypeEnumTypeWrapper):
+    """折叠类型"""
+
+FoldTypeZore: FoldType.ValueType  # 0
+"""占位"""
+FoldTypePublish: FoldType.ValueType  # 1
+"""用户发布折叠"""
+FoldTypeFrequent: FoldType.ValueType  # 2
+"""转发超频折叠"""
+FoldTypeUnite: FoldType.ValueType  # 3
+"""联合投稿折叠"""
+FoldTypeLimit: FoldType.ValueType  # 4
+"""动态受限折叠"""
 global___FoldType = FoldType
 
-
-#
-class FollowType(_FollowType, metaclass=_FollowTypeEnumTypeWrapper):
-    pass
 class _FollowType:
-    V = typing.NewType('V', builtins.int)
-class _FollowTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_FollowType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    ft_not_follow = FollowType.V(0)
-    #
-    ft_follow = FollowType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-ft_not_follow = FollowType.V(0)
-#
-ft_follow = FollowType.V(1)
+class _FollowTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_FollowType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    ft_not_follow: _FollowType.ValueType  # 0
+    """"""
+    ft_follow: _FollowType.ValueType  # 1
+    """"""
+
+class FollowType(_FollowType, metaclass=_FollowTypeEnumTypeWrapper):
+    """"""
+
+ft_not_follow: FollowType.ValueType  # 0
+""""""
+ft_follow: FollowType.ValueType  # 1
+""""""
 global___FollowType = FollowType
 
-
-# 文本高亮枚举
-class HighlightTextStyle(_HighlightTextStyle, metaclass=_HighlightTextStyleEnumTypeWrapper):
-    pass
 class _HighlightTextStyle:
-    V = typing.NewType('V', builtins.int)
-class _HighlightTextStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_HighlightTextStyle.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 默认
-    style_none = HighlightTextStyle.V(0)
-    # 高亮
-    style_highlight = HighlightTextStyle.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 默认
-style_none = HighlightTextStyle.V(0)
-# 高亮
-style_highlight = HighlightTextStyle.V(1)
+class _HighlightTextStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_HighlightTextStyle.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    style_none: _HighlightTextStyle.ValueType  # 0
+    """默认"""
+    style_highlight: _HighlightTextStyle.ValueType  # 1
+    """高亮"""
+
+class HighlightTextStyle(_HighlightTextStyle, metaclass=_HighlightTextStyleEnumTypeWrapper):
+    """文本高亮枚举"""
+
+style_none: HighlightTextStyle.ValueType  # 0
+"""默认"""
+style_highlight: HighlightTextStyle.ValueType  # 1
+"""高亮"""
 global___HighlightTextStyle = HighlightTextStyle
 
-
-# 枚举-附加卡样式
-class ImageStyle(_ImageStyle, metaclass=_ImageStyleEnumTypeWrapper):
-    pass
 class _ImageStyle:
-    V = typing.NewType('V', builtins.int)
-class _ImageStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ImageStyle.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    add_style_vertical = ImageStyle.V(0)
-    #
-    add_style_square = ImageStyle.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-add_style_vertical = ImageStyle.V(0)
-#
-add_style_square = ImageStyle.V(1)
+class _ImageStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ImageStyle.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    add_style_vertical: _ImageStyle.ValueType  # 0
+    """"""
+    add_style_square: _ImageStyle.ValueType  # 1
+    """"""
+
+class ImageStyle(_ImageStyle, metaclass=_ImageStyleEnumTypeWrapper):
+    """枚举-附加卡样式"""
+
+add_style_vertical: ImageStyle.ValueType  # 0
+""""""
+add_style_square: ImageStyle.ValueType  # 1
+""""""
 global___ImageStyle = ImageStyle
 
-
-#
-class LightFromType(_LightFromType, metaclass=_LightFromTypeEnumTypeWrapper):
-    pass
 class _LightFromType:
-    V = typing.NewType('V', builtins.int)
-class _LightFromTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_LightFromType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    from_login = LightFromType.V(0)
-    #
-    from_unlogin = LightFromType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-from_login = LightFromType.V(0)
-#
-from_unlogin = LightFromType.V(1)
+class _LightFromTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_LightFromType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    from_login: _LightFromType.ValueType  # 0
+    """"""
+    from_unlogin: _LightFromType.ValueType  # 1
+    """"""
+
+class LightFromType(_LightFromType, metaclass=_LightFromTypeEnumTypeWrapper):
+    """"""
+
+from_login: LightFromType.ValueType  # 0
+""""""
+from_unlogin: LightFromType.ValueType  # 1
+""""""
 global___LightFromType = LightFromType
 
-
-# 直播状态
-class LiveState(_LiveState, metaclass=_LiveStateEnumTypeWrapper):
-    pass
 class _LiveState:
-    V = typing.NewType('V', builtins.int)
-class _LiveStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_LiveState.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 未直播
-    live_none = LiveState.V(0)
-    # 直播中
-    live_live = LiveState.V(1)
-    # 轮播中
-    live_rotation = LiveState.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 未直播
-live_none = LiveState.V(0)
-# 直播中
-live_live = LiveState.V(1)
-# 轮播中
-live_rotation = LiveState.V(2)
+class _LiveStateEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_LiveState.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    live_none: _LiveState.ValueType  # 0
+    """未直播"""
+    live_live: _LiveState.ValueType  # 1
+    """直播中"""
+    live_rotation: _LiveState.ValueType  # 2
+    """轮播中"""
+
+class LiveState(_LiveState, metaclass=_LiveStateEnumTypeWrapper):
+    """直播状态"""
+
+live_none: LiveState.ValueType  # 0
+"""未直播"""
+live_live: LiveState.ValueType  # 1
+"""直播中"""
+live_rotation: LiveState.ValueType  # 2
+"""轮播中"""
 global___LiveState = LiveState
 
-
-# 外露模块类型
-class LocalIconType(_LocalIconType, metaclass=_LocalIconTypeEnumTypeWrapper):
-    pass
 class _LocalIconType:
-    V = typing.NewType('V', builtins.int)
-class _LocalIconTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_LocalIconType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    local_icon_comment = LocalIconType.V(0)
-    #
-    local_icon_like = LocalIconType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-local_icon_comment = LocalIconType.V(0)
-#
-local_icon_like = LocalIconType.V(1)
+class _LocalIconTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_LocalIconType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    local_icon_comment: _LocalIconType.ValueType  # 0
+    """"""
+    local_icon_like: _LocalIconType.ValueType  # 1
+    """"""
+
+class LocalIconType(_LocalIconType, metaclass=_LocalIconTypeEnumTypeWrapper):
+    """外露模块类型"""
+
+local_icon_comment: LocalIconType.ValueType  # 0
+""""""
+local_icon_like: LocalIconType.ValueType  # 1
+""""""
 global___LocalIconType = LocalIconType
 
-
-#
-class MdlDynCommonType(_MdlDynCommonType, metaclass=_MdlDynCommonTypeEnumTypeWrapper):
-    pass
 class _MdlDynCommonType:
-    V = typing.NewType('V', builtins.int)
-class _MdlDynCommonTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MdlDynCommonType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    mdl_dyn_common_none = MdlDynCommonType.V(0)
-    #
-    mdl_dyn_common_square = MdlDynCommonType.V(1)
-    #
-    mdl_dyn_common_vertica = MdlDynCommonType.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-mdl_dyn_common_none = MdlDynCommonType.V(0)
-#
-mdl_dyn_common_square = MdlDynCommonType.V(1)
-#
-mdl_dyn_common_vertica = MdlDynCommonType.V(2)
+class _MdlDynCommonTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MdlDynCommonType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    mdl_dyn_common_none: _MdlDynCommonType.ValueType  # 0
+    """"""
+    mdl_dyn_common_square: _MdlDynCommonType.ValueType  # 1
+    """"""
+    mdl_dyn_common_vertica: _MdlDynCommonType.ValueType  # 2
+    """"""
+
+class MdlDynCommonType(_MdlDynCommonType, metaclass=_MdlDynCommonTypeEnumTypeWrapper):
+    """"""
+
+mdl_dyn_common_none: MdlDynCommonType.ValueType  # 0
+""""""
+mdl_dyn_common_square: MdlDynCommonType.ValueType  # 1
+""""""
+mdl_dyn_common_vertica: MdlDynCommonType.ValueType  # 2
+""""""
 global___MdlDynCommonType = MdlDynCommonType
 
-
-# 图文标签类型
-class MdlDynDrawTagType(_MdlDynDrawTagType, metaclass=_MdlDynDrawTagTypeEnumTypeWrapper):
-    pass
 class _MdlDynDrawTagType:
-    V = typing.NewType('V', builtins.int)
-class _MdlDynDrawTagTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MdlDynDrawTagType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    mdl_draw_tag_none = MdlDynDrawTagType.V(0)
-    # 普通标签
-    mdl_draw_tag_common = MdlDynDrawTagType.V(1)
-    # 商品标签
-    mdl_draw_tag_goods = MdlDynDrawTagType.V(2)
-    # 用户昵称
-    mdl_draw_tag_user = MdlDynDrawTagType.V(3)
-    # 话题名称
-    mdl_draw_tag_topic = MdlDynDrawTagType.V(4)
-    # lbs标签
-    mdl_draw_tag_lbs = MdlDynDrawTagType.V(5)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-mdl_draw_tag_none = MdlDynDrawTagType.V(0)
-# 普通标签
-mdl_draw_tag_common = MdlDynDrawTagType.V(1)
-# 商品标签
-mdl_draw_tag_goods = MdlDynDrawTagType.V(2)
-# 用户昵称
-mdl_draw_tag_user = MdlDynDrawTagType.V(3)
-# 话题名称
-mdl_draw_tag_topic = MdlDynDrawTagType.V(4)
-# lbs标签
-mdl_draw_tag_lbs = MdlDynDrawTagType.V(5)
+class _MdlDynDrawTagTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MdlDynDrawTagType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    mdl_draw_tag_none: _MdlDynDrawTagType.ValueType  # 0
+    """占位"""
+    mdl_draw_tag_common: _MdlDynDrawTagType.ValueType  # 1
+    """普通标签"""
+    mdl_draw_tag_goods: _MdlDynDrawTagType.ValueType  # 2
+    """商品标签"""
+    mdl_draw_tag_user: _MdlDynDrawTagType.ValueType  # 3
+    """用户昵称"""
+    mdl_draw_tag_topic: _MdlDynDrawTagType.ValueType  # 4
+    """话题名称"""
+    mdl_draw_tag_lbs: _MdlDynDrawTagType.ValueType  # 5
+    """lbs标签"""
+
+class MdlDynDrawTagType(_MdlDynDrawTagType, metaclass=_MdlDynDrawTagTypeEnumTypeWrapper):
+    """图文标签类型"""
+
+mdl_draw_tag_none: MdlDynDrawTagType.ValueType  # 0
+"""占位"""
+mdl_draw_tag_common: MdlDynDrawTagType.ValueType  # 1
+"""普通标签"""
+mdl_draw_tag_goods: MdlDynDrawTagType.ValueType  # 2
+"""商品标签"""
+mdl_draw_tag_user: MdlDynDrawTagType.ValueType  # 3
+"""用户昵称"""
+mdl_draw_tag_topic: MdlDynDrawTagType.ValueType  # 4
+"""话题名称"""
+mdl_draw_tag_lbs: MdlDynDrawTagType.ValueType  # 5
+"""lbs标签"""
 global___MdlDynDrawTagType = MdlDynDrawTagType
 
-
-#
-class MdlDynSubscriptionNewStyle(_MdlDynSubscriptionNewStyle, metaclass=_MdlDynSubscriptionNewStyleEnumTypeWrapper):
-    pass
 class _MdlDynSubscriptionNewStyle:
-    V = typing.NewType('V', builtins.int)
-class _MdlDynSubscriptionNewStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MdlDynSubscriptionNewStyle.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    mdl_dyn_subscription_new_style_nont = MdlDynSubscriptionNewStyle.V(0)
-    # 直播
-    mdl_dyn_subscription_new_style_live = MdlDynSubscriptionNewStyle.V(1)
-    # 图文
-    mdl_dyn_subscription_new_style_draw = MdlDynSubscriptionNewStyle.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-mdl_dyn_subscription_new_style_nont = MdlDynSubscriptionNewStyle.V(0)
-# 直播
-mdl_dyn_subscription_new_style_live = MdlDynSubscriptionNewStyle.V(1)
-# 图文
-mdl_dyn_subscription_new_style_draw = MdlDynSubscriptionNewStyle.V(2)
+class _MdlDynSubscriptionNewStyleEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MdlDynSubscriptionNewStyle.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    mdl_dyn_subscription_new_style_nont: _MdlDynSubscriptionNewStyle.ValueType  # 0
+    """占位"""
+    mdl_dyn_subscription_new_style_live: _MdlDynSubscriptionNewStyle.ValueType  # 1
+    """直播"""
+    mdl_dyn_subscription_new_style_draw: _MdlDynSubscriptionNewStyle.ValueType  # 2
+    """图文"""
+
+class MdlDynSubscriptionNewStyle(_MdlDynSubscriptionNewStyle, metaclass=_MdlDynSubscriptionNewStyleEnumTypeWrapper):
+    """"""
+
+mdl_dyn_subscription_new_style_nont: MdlDynSubscriptionNewStyle.ValueType  # 0
+"""占位"""
+mdl_dyn_subscription_new_style_live: MdlDynSubscriptionNewStyle.ValueType  # 1
+"""直播"""
+mdl_dyn_subscription_new_style_draw: MdlDynSubscriptionNewStyle.ValueType  # 2
+"""图文"""
 global___MdlDynSubscriptionNewStyle = MdlDynSubscriptionNewStyle
 
-
-# 播放器类型
-class MediaType(_MediaType, metaclass=_MediaTypeEnumTypeWrapper):
-    pass
 class _MediaType:
-    V = typing.NewType('V', builtins.int)
-class _MediaTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MediaType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 本地
-    MediaTypeNone = MediaType.V(0)
-    # UGC
-    MediaTypeUGC = MediaType.V(1)
-    # PGC
-    MediaTypePGC = MediaType.V(2)
-    # 直播
-    MediaTypeLive = MediaType.V(3)
-    # 小视频
-    MediaTypeVCS = MediaType.V(4)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 本地
-MediaTypeNone = MediaType.V(0)
-# UGC
-MediaTypeUGC = MediaType.V(1)
-# PGC
-MediaTypePGC = MediaType.V(2)
-# 直播
-MediaTypeLive = MediaType.V(3)
-# 小视频
-MediaTypeVCS = MediaType.V(4)
+class _MediaTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_MediaType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    MediaTypeNone: _MediaType.ValueType  # 0
+    """本地"""
+    MediaTypeUGC: _MediaType.ValueType  # 1
+    """UGC"""
+    MediaTypePGC: _MediaType.ValueType  # 2
+    """PGC"""
+    MediaTypeLive: _MediaType.ValueType  # 3
+    """直播"""
+    MediaTypeVCS: _MediaType.ValueType  # 4
+    """小视频"""
+
+class MediaType(_MediaType, metaclass=_MediaTypeEnumTypeWrapper):
+    """播放器类型"""
+
+MediaTypeNone: MediaType.ValueType  # 0
+"""本地"""
+MediaTypeUGC: MediaType.ValueType  # 1
+"""UGC"""
+MediaTypePGC: MediaType.ValueType  # 2
+"""PGC"""
+MediaTypeLive: MediaType.ValueType  # 3
+"""直播"""
+MediaTypeVCS: MediaType.ValueType  # 4
+"""小视频"""
 global___MediaType = MediaType
 
-
-# 右侧操作区域样式枚举
-class ModuleAuthorBadgeType(_ModuleAuthorBadgeType, metaclass=_ModuleAuthorBadgeTypeEnumTypeWrapper):
-    pass
 class _ModuleAuthorBadgeType:
-    V = typing.NewType('V', builtins.int)
-class _ModuleAuthorBadgeTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ModuleAuthorBadgeType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    module_author_badge_type_none = ModuleAuthorBadgeType.V(0)
-    # 三点
-    module_author_badge_type_threePoint = ModuleAuthorBadgeType.V(1)
-    # 按钮类型
-    module_author_badge_type_button = ModuleAuthorBadgeType.V(2)
-    # 提权
-    module_author_badge_type_weight = ModuleAuthorBadgeType.V(3)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-module_author_badge_type_none = ModuleAuthorBadgeType.V(0)
-# 三点
-module_author_badge_type_threePoint = ModuleAuthorBadgeType.V(1)
-# 按钮类型
-module_author_badge_type_button = ModuleAuthorBadgeType.V(2)
-# 提权
-module_author_badge_type_weight = ModuleAuthorBadgeType.V(3)
+class _ModuleAuthorBadgeTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ModuleAuthorBadgeType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    module_author_badge_type_none: _ModuleAuthorBadgeType.ValueType  # 0
+    """占位"""
+    module_author_badge_type_threePoint: _ModuleAuthorBadgeType.ValueType  # 1
+    """三点"""
+    module_author_badge_type_button: _ModuleAuthorBadgeType.ValueType  # 2
+    """按钮类型"""
+    module_author_badge_type_weight: _ModuleAuthorBadgeType.ValueType  # 3
+    """提权"""
+
+class ModuleAuthorBadgeType(_ModuleAuthorBadgeType, metaclass=_ModuleAuthorBadgeTypeEnumTypeWrapper):
+    """右侧操作区域样式枚举"""
+
+module_author_badge_type_none: ModuleAuthorBadgeType.ValueType  # 0
+"""占位"""
+module_author_badge_type_threePoint: ModuleAuthorBadgeType.ValueType  # 1
+"""三点"""
+module_author_badge_type_button: ModuleAuthorBadgeType.ValueType  # 2
+"""按钮类型"""
+module_author_badge_type_weight: ModuleAuthorBadgeType.ValueType  # 3
+"""提权"""
 global___ModuleAuthorBadgeType = ModuleAuthorBadgeType
 
-
-# 动态列表-通栏类型
-class ModuleBannerType(_ModuleBannerType, metaclass=_ModuleBannerTypeEnumTypeWrapper):
-    pass
 class _ModuleBannerType:
-    V = typing.NewType('V', builtins.int)
-class _ModuleBannerTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ModuleBannerType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    module_banner_type_none = ModuleBannerType.V(0)
-    #
-    module_banner_type_user = ModuleBannerType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-module_banner_type_none = ModuleBannerType.V(0)
-#
-module_banner_type_user = ModuleBannerType.V(1)
+class _ModuleBannerTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ModuleBannerType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    module_banner_type_none: _ModuleBannerType.ValueType  # 0
+    """"""
+    module_banner_type_user: _ModuleBannerType.ValueType  # 1
+    """"""
+
+class ModuleBannerType(_ModuleBannerType, metaclass=_ModuleBannerTypeEnumTypeWrapper):
+    """动态列表-通栏类型"""
+
+module_banner_type_none: ModuleBannerType.ValueType  # 0
+""""""
+module_banner_type_user: ModuleBannerType.ValueType  # 1
+""""""
 global___ModuleBannerType = ModuleBannerType
 
-
-# 动态详情模块类型
-class ModuleDynamicType(_ModuleDynamicType, metaclass=_ModuleDynamicTypeEnumTypeWrapper):
-    pass
 class _ModuleDynamicType:
-    V = typing.NewType('V', builtins.int)
-class _ModuleDynamicTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ModuleDynamicType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 稿件
-    mdl_dyn_archive = ModuleDynamicType.V(0)
-    # pgc
-    mdl_dyn_pgc = ModuleDynamicType.V(1)
-    # 付费课程-系列
-    mdl_dyn_cour_season = ModuleDynamicType.V(2)
-    # 付费课程-批次
-    mdl_dyn_cour_batch = ModuleDynamicType.V(3)
-    # 转发卡
-    mdl_dyn_forward = ModuleDynamicType.V(4)
-    # 图文
-    mdl_dyn_draw = ModuleDynamicType.V(5)
-    # 专栏
-    mdl_dyn_article = ModuleDynamicType.V(6)
-    # 音频
-    mdl_dyn_music = ModuleDynamicType.V(7)
-    # 通用卡方
-    mdl_dyn_common = ModuleDynamicType.V(8)
-    # 直播卡
-    mdl_dyn_live = ModuleDynamicType.V(9)
-    # 播单
-    mdl_dyn_medialist = ModuleDynamicType.V(10)
-    # 小程序卡
-    mdl_dyn_applet = ModuleDynamicType.V(11)
-    # 订阅卡
-    mdl_dyn_subscription = ModuleDynamicType.V(12)
-    # 直播推荐卡
-    mdl_dyn_live_rcmd = ModuleDynamicType.V(13)
-    # UGC合集
-    mdl_dyn_ugc_season = ModuleDynamicType.V(14)
-    # 订阅卡
-    mdl_dyn_subscription_new = ModuleDynamicType.V(15)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 稿件
-mdl_dyn_archive = ModuleDynamicType.V(0)
-# pgc
-mdl_dyn_pgc = ModuleDynamicType.V(1)
-# 付费课程-系列
-mdl_dyn_cour_season = ModuleDynamicType.V(2)
-# 付费课程-批次
-mdl_dyn_cour_batch = ModuleDynamicType.V(3)
-# 转发卡
-mdl_dyn_forward = ModuleDynamicType.V(4)
-# 图文
-mdl_dyn_draw = ModuleDynamicType.V(5)
-# 专栏
-mdl_dyn_article = ModuleDynamicType.V(6)
-# 音频
-mdl_dyn_music = ModuleDynamicType.V(7)
-# 通用卡方
-mdl_dyn_common = ModuleDynamicType.V(8)
-# 直播卡
-mdl_dyn_live = ModuleDynamicType.V(9)
-# 播单
-mdl_dyn_medialist = ModuleDynamicType.V(10)
-# 小程序卡
-mdl_dyn_applet = ModuleDynamicType.V(11)
-# 订阅卡
-mdl_dyn_subscription = ModuleDynamicType.V(12)
-# 直播推荐卡
-mdl_dyn_live_rcmd = ModuleDynamicType.V(13)
-# UGC合集
-mdl_dyn_ugc_season = ModuleDynamicType.V(14)
-# 订阅卡
-mdl_dyn_subscription_new = ModuleDynamicType.V(15)
+class _ModuleDynamicTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ModuleDynamicType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    mdl_dyn_archive: _ModuleDynamicType.ValueType  # 0
+    """稿件"""
+    mdl_dyn_pgc: _ModuleDynamicType.ValueType  # 1
+    """pgc"""
+    mdl_dyn_cour_season: _ModuleDynamicType.ValueType  # 2
+    """付费课程-系列"""
+    mdl_dyn_cour_batch: _ModuleDynamicType.ValueType  # 3
+    """付费课程-批次"""
+    mdl_dyn_forward: _ModuleDynamicType.ValueType  # 4
+    """转发卡"""
+    mdl_dyn_draw: _ModuleDynamicType.ValueType  # 5
+    """图文"""
+    mdl_dyn_article: _ModuleDynamicType.ValueType  # 6
+    """专栏"""
+    mdl_dyn_music: _ModuleDynamicType.ValueType  # 7
+    """音频"""
+    mdl_dyn_common: _ModuleDynamicType.ValueType  # 8
+    """通用卡方"""
+    mdl_dyn_live: _ModuleDynamicType.ValueType  # 9
+    """直播卡"""
+    mdl_dyn_medialist: _ModuleDynamicType.ValueType  # 10
+    """播单"""
+    mdl_dyn_applet: _ModuleDynamicType.ValueType  # 11
+    """小程序卡"""
+    mdl_dyn_subscription: _ModuleDynamicType.ValueType  # 12
+    """订阅卡"""
+    mdl_dyn_live_rcmd: _ModuleDynamicType.ValueType  # 13
+    """直播推荐卡"""
+    mdl_dyn_ugc_season: _ModuleDynamicType.ValueType  # 14
+    """UGC合集"""
+    mdl_dyn_subscription_new: _ModuleDynamicType.ValueType  # 15
+    """订阅卡"""
+
+class ModuleDynamicType(_ModuleDynamicType, metaclass=_ModuleDynamicTypeEnumTypeWrapper):
+    """动态详情模块类型"""
+
+mdl_dyn_archive: ModuleDynamicType.ValueType  # 0
+"""稿件"""
+mdl_dyn_pgc: ModuleDynamicType.ValueType  # 1
+"""pgc"""
+mdl_dyn_cour_season: ModuleDynamicType.ValueType  # 2
+"""付费课程-系列"""
+mdl_dyn_cour_batch: ModuleDynamicType.ValueType  # 3
+"""付费课程-批次"""
+mdl_dyn_forward: ModuleDynamicType.ValueType  # 4
+"""转发卡"""
+mdl_dyn_draw: ModuleDynamicType.ValueType  # 5
+"""图文"""
+mdl_dyn_article: ModuleDynamicType.ValueType  # 6
+"""专栏"""
+mdl_dyn_music: ModuleDynamicType.ValueType  # 7
+"""音频"""
+mdl_dyn_common: ModuleDynamicType.ValueType  # 8
+"""通用卡方"""
+mdl_dyn_live: ModuleDynamicType.ValueType  # 9
+"""直播卡"""
+mdl_dyn_medialist: ModuleDynamicType.ValueType  # 10
+"""播单"""
+mdl_dyn_applet: ModuleDynamicType.ValueType  # 11
+"""小程序卡"""
+mdl_dyn_subscription: ModuleDynamicType.ValueType  # 12
+"""订阅卡"""
+mdl_dyn_live_rcmd: ModuleDynamicType.ValueType  # 13
+"""直播推荐卡"""
+mdl_dyn_ugc_season: ModuleDynamicType.ValueType  # 14
+"""UGC合集"""
+mdl_dyn_subscription_new: ModuleDynamicType.ValueType  # 15
+"""订阅卡"""
 global___ModuleDynamicType = ModuleDynamicType
 
-
-class NetworkType(_NetworkType, metaclass=_NetworkTypeEnumTypeWrapper):
-    pass
 class _NetworkType:
-    V = typing.NewType('V', builtins.int)
-class _NetworkTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_NetworkType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    NT_UNKNOWN = NetworkType.V(0)
-    #
-    WIFI = NetworkType.V(1)
-    #
-    CELLULAR = NetworkType.V(2)
-    #
-    OFFLINE = NetworkType.V(3)
-    #
-    OTHERNET = NetworkType.V(4)
-    #
-    ETHERNET = NetworkType.V(5)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-NT_UNKNOWN = NetworkType.V(0)
-#
-WIFI = NetworkType.V(1)
-#
-CELLULAR = NetworkType.V(2)
-#
-OFFLINE = NetworkType.V(3)
-#
-OTHERNET = NetworkType.V(4)
-#
-ETHERNET = NetworkType.V(5)
+class _NetworkTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_NetworkType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    NT_UNKNOWN: _NetworkType.ValueType  # 0
+    """"""
+    WIFI: _NetworkType.ValueType  # 1
+    """"""
+    CELLULAR: _NetworkType.ValueType  # 2
+    """"""
+    OFFLINE: _NetworkType.ValueType  # 3
+    """"""
+    OTHERNET: _NetworkType.ValueType  # 4
+    """"""
+    ETHERNET: _NetworkType.ValueType  # 5
+    """"""
+
+class NetworkType(_NetworkType, metaclass=_NetworkTypeEnumTypeWrapper): ...
+
+NT_UNKNOWN: NetworkType.ValueType  # 0
+""""""
+WIFI: NetworkType.ValueType  # 1
+""""""
+CELLULAR: NetworkType.ValueType  # 2
+""""""
+OFFLINE: NetworkType.ValueType  # 3
+""""""
+OTHERNET: NetworkType.ValueType  # 4
+""""""
+ETHERNET: NetworkType.ValueType  # 5
+""""""
 global___NetworkType = NetworkType
 
-
-# 推荐模块数据类型
-class RcmdType(_RcmdType, metaclass=_RcmdTypeEnumTypeWrapper):
-    pass
 class _RcmdType:
-    V = typing.NewType('V', builtins.int)
-class _RcmdTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_RcmdType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 稿件
-    rcmd_archive = RcmdType.V(0)
-    # 动态
-    rcmd_dynamic = RcmdType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 稿件
-rcmd_archive = RcmdType.V(0)
-# 动态
-rcmd_dynamic = RcmdType.V(1)
+class _RcmdTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_RcmdType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    rcmd_archive: _RcmdType.ValueType  # 0
+    """稿件"""
+    rcmd_dynamic: _RcmdType.ValueType  # 1
+    """动态"""
+
+class RcmdType(_RcmdType, metaclass=_RcmdTypeEnumTypeWrapper):
+    """推荐模块数据类型"""
+
+rcmd_archive: RcmdType.ValueType  # 0
+"""稿件"""
+rcmd_dynamic: RcmdType.ValueType  # 1
+"""动态"""
 global___RcmdType = RcmdType
 
-
-# 刷新方式
-class Refresh(_Refresh, metaclass=_RefreshEnumTypeWrapper):
-    pass
 class _Refresh:
-    V = typing.NewType('V', builtins.int)
-class _RefreshEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Refresh.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 刷新列表
-    refresh_new = Refresh.V(0)
-    # 请求历史
-    refresh_history = Refresh.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 刷新列表
-refresh_new = Refresh.V(0)
-# 请求历史
-refresh_history = Refresh.V(1)
+class _RefreshEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_Refresh.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    refresh_new: _Refresh.ValueType  # 0
+    """刷新列表"""
+    refresh_history: _Refresh.ValueType  # 1
+    """请求历史"""
+
+class Refresh(_Refresh, metaclass=_RefreshEnumTypeWrapper):
+    """刷新方式"""
+
+refresh_new: Refresh.ValueType  # 0
+"""刷新列表"""
+refresh_history: Refresh.ValueType  # 1
+"""请求历史"""
 global___Refresh = Refresh
 
-
-# 关注关系 枚举
-class RelationStatus(_RelationStatus, metaclass=_RelationStatusEnumTypeWrapper):
-    pass
 class _RelationStatus:
-    V = typing.NewType('V', builtins.int)
-class _RelationStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_RelationStatus.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 1-未关注 2-关注 3-被关注 4-互相关注 5-特别关注
-    relation_status_none = RelationStatus.V(0)
-    relation_status_nofollow = RelationStatus.V(1)
-    relation_status_follow = RelationStatus.V(2)
-    relation_status_followed = RelationStatus.V(3)
-    relation_status_mutual_concern = RelationStatus.V(4)
-    relation_status_special = RelationStatus.V(5)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 1-未关注 2-关注 3-被关注 4-互相关注 5-特别关注
-relation_status_none = RelationStatus.V(0)
-relation_status_nofollow = RelationStatus.V(1)
-relation_status_follow = RelationStatus.V(2)
-relation_status_followed = RelationStatus.V(3)
-relation_status_mutual_concern = RelationStatus.V(4)
-relation_status_special = RelationStatus.V(5)
+class _RelationStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_RelationStatus.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    relation_status_none: _RelationStatus.ValueType  # 0
+    """1-未关注 2-关注 3-被关注 4-互相关注 5-特别关注"""
+    relation_status_nofollow: _RelationStatus.ValueType  # 1
+    relation_status_follow: _RelationStatus.ValueType  # 2
+    relation_status_followed: _RelationStatus.ValueType  # 3
+    relation_status_mutual_concern: _RelationStatus.ValueType  # 4
+    relation_status_special: _RelationStatus.ValueType  # 5
+
+class RelationStatus(_RelationStatus, metaclass=_RelationStatusEnumTypeWrapper):
+    """关注关系 枚举"""
+
+relation_status_none: RelationStatus.ValueType  # 0
+"""1-未关注 2-关注 3-被关注 4-互相关注 5-特别关注"""
+relation_status_nofollow: RelationStatus.ValueType  # 1
+relation_status_follow: RelationStatus.ValueType  # 2
+relation_status_followed: RelationStatus.ValueType  # 3
+relation_status_mutual_concern: RelationStatus.ValueType  # 4
+relation_status_special: RelationStatus.ValueType  # 5
 global___RelationStatus = RelationStatus
 
-
-# 评论类型
-class RepostType(_RepostType, metaclass=_RepostTypeEnumTypeWrapper):
-    pass
 class _RepostType:
-    V = typing.NewType('V', builtins.int)
-class _RepostTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_RepostType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 热门评论
-    repost_hot = RepostType.V(0)
-    # 普通评论
-    repost_general = RepostType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 热门评论
-repost_hot = RepostType.V(0)
-# 普通评论
-repost_general = RepostType.V(1)
+class _RepostTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_RepostType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    repost_hot: _RepostType.ValueType  # 0
+    """热门评论"""
+    repost_general: _RepostType.ValueType  # 1
+    """普通评论"""
+
+class RepostType(_RepostType, metaclass=_RepostTypeEnumTypeWrapper):
+    """评论类型"""
+
+repost_hot: RepostType.ValueType  # 0
+"""热门评论"""
+repost_general: RepostType.ValueType  # 1
+"""普通评论"""
 global___RepostType = RepostType
 
-
-#
-class ReserveRelationLotteryType(_ReserveRelationLotteryType, metaclass=_ReserveRelationLotteryTypeEnumTypeWrapper):
-    pass
 class _ReserveRelationLotteryType:
-    V = typing.NewType('V', builtins.int)
-class _ReserveRelationLotteryTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ReserveRelationLotteryType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    reserve_relation_lottery_type_default = ReserveRelationLotteryType.V(0)
-    #
-    reserve_relation_lottery_type_cron = ReserveRelationLotteryType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-reserve_relation_lottery_type_default = ReserveRelationLotteryType.V(0)
-#
-reserve_relation_lottery_type_cron = ReserveRelationLotteryType.V(1)
+class _ReserveRelationLotteryTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ReserveRelationLotteryType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    reserve_relation_lottery_type_default: _ReserveRelationLotteryType.ValueType  # 0
+    """"""
+    reserve_relation_lottery_type_cron: _ReserveRelationLotteryType.ValueType  # 1
+    """"""
+
+class ReserveRelationLotteryType(_ReserveRelationLotteryType, metaclass=_ReserveRelationLotteryTypeEnumTypeWrapper):
+    """"""
+
+reserve_relation_lottery_type_default: ReserveRelationLotteryType.ValueType  # 0
+""""""
+reserve_relation_lottery_type_cron: ReserveRelationLotteryType.ValueType  # 1
+""""""
 global___ReserveRelationLotteryType = ReserveRelationLotteryType
 
-
-#
-class ReserveType(_ReserveType, metaclass=_ReserveTypeEnumTypeWrapper):
-    pass
 class _ReserveType:
-    V = typing.NewType('V', builtins.int)
-class _ReserveTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ReserveType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    reserve_none = ReserveType.V(0)
-    # 预约召回
-    reserve_recall = ReserveType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-reserve_none = ReserveType.V(0)
-# 预约召回
-reserve_recall = ReserveType.V(1)
+class _ReserveTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ReserveType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    reserve_none: _ReserveType.ValueType  # 0
+    """占位"""
+    reserve_recall: _ReserveType.ValueType  # 1
+    """预约召回"""
+
+class ReserveType(_ReserveType, metaclass=_ReserveTypeEnumTypeWrapper):
+    """"""
+
+reserve_none: ReserveType.ValueType  # 0
+"""占位"""
+reserve_recall: ReserveType.ValueType  # 1
+"""预约召回"""
 global___ReserveType = ReserveType
 
-
-#
-class ShowType(_ShowType, metaclass=_ShowTypeEnumTypeWrapper):
-    pass
 class _ShowType:
-    V = typing.NewType('V', builtins.int)
-class _ShowTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ShowType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    show_type_none = ShowType.V(0)
-    #
-    show_type_backup = ShowType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-show_type_none = ShowType.V(0)
-#
-show_type_backup = ShowType.V(1)
+class _ShowTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ShowType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    show_type_none: _ShowType.ValueType  # 0
+    """"""
+    show_type_backup: _ShowType.ValueType  # 1
+    """"""
+
+class ShowType(_ShowType, metaclass=_ShowTypeEnumTypeWrapper):
+    """"""
+
+show_type_none: ShowType.ValueType  # 0
+""""""
+show_type_backup: ShowType.ValueType  # 1
+""""""
 global___ShowType = ShowType
 
-
-#
-class StyleType(_StyleType, metaclass=_StyleTypeEnumTypeWrapper):
-    pass
 class _StyleType:
-    V = typing.NewType('V', builtins.int)
-class _StyleTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_StyleType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    STYLE_TYPE_NONE = StyleType.V(0)
-    #
-    STYLE_TYPE_LIVE = StyleType.V(1)
-    #
-    STYLE_TYPE_DYN_UP = StyleType.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-STYLE_TYPE_NONE = StyleType.V(0)
-#
-STYLE_TYPE_LIVE = StyleType.V(1)
-#
-STYLE_TYPE_DYN_UP = StyleType.V(2)
+class _StyleTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_StyleType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    STYLE_TYPE_NONE: _StyleType.ValueType  # 0
+    """"""
+    STYLE_TYPE_LIVE: _StyleType.ValueType  # 1
+    """"""
+    STYLE_TYPE_DYN_UP: _StyleType.ValueType  # 2
+    """"""
+
+class StyleType(_StyleType, metaclass=_StyleTypeEnumTypeWrapper):
+    """"""
+
+STYLE_TYPE_NONE: StyleType.ValueType  # 0
+""""""
+STYLE_TYPE_LIVE: StyleType.ValueType  # 1
+""""""
+STYLE_TYPE_DYN_UP: StyleType.ValueType  # 2
+""""""
 global___StyleType = StyleType
 
-
-#
-class TFType(_TFType, metaclass=_TFTypeEnumTypeWrapper):
-    pass
 class _TFType:
-    V = typing.NewType('V', builtins.int)
-class _TFTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_TFType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    U_CARD = TFType.V(0)
-    #
-    U_PKG = TFType.V(1)
-    #
-    C_CARD = TFType.V(2)
-    #
-    C_PKG = TFType.V(3)
-    #
-    T_CARD = TFType.V(4)
-    #
-    T_PKG = TFType.V(5)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-U_CARD = TFType.V(0)
-#
-U_PKG = TFType.V(1)
-#
-C_CARD = TFType.V(2)
-#
-C_PKG = TFType.V(3)
-#
-T_CARD = TFType.V(4)
-#
-T_PKG = TFType.V(5)
+class _TFTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_TFType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    U_CARD: _TFType.ValueType  # 0
+    """"""
+    U_PKG: _TFType.ValueType  # 1
+    """"""
+    C_CARD: _TFType.ValueType  # 2
+    """"""
+    C_PKG: _TFType.ValueType  # 3
+    """"""
+    T_CARD: _TFType.ValueType  # 4
+    """"""
+    T_PKG: _TFType.ValueType  # 5
+    """"""
+
+class TFType(_TFType, metaclass=_TFTypeEnumTypeWrapper):
+    """"""
+
+U_CARD: TFType.ValueType  # 0
+""""""
+U_PKG: TFType.ValueType  # 1
+""""""
+C_CARD: TFType.ValueType  # 2
+""""""
+C_PKG: TFType.ValueType  # 3
+""""""
+T_CARD: TFType.ValueType  # 4
+""""""
+T_PKG: TFType.ValueType  # 5
+""""""
 global___TFType = TFType
 
-
-# 枚举-三点关注状态
-class ThreePointAttentionStatus(_ThreePointAttentionStatus, metaclass=_ThreePointAttentionStatusEnumTypeWrapper):
-    pass
 class _ThreePointAttentionStatus:
-    V = typing.NewType('V', builtins.int)
-class _ThreePointAttentionStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ThreePointAttentionStatus.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    tp_not_attention = ThreePointAttentionStatus.V(0)
-    #
-    tp_attention = ThreePointAttentionStatus.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-tp_not_attention = ThreePointAttentionStatus.V(0)
-#
-tp_attention = ThreePointAttentionStatus.V(1)
+class _ThreePointAttentionStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ThreePointAttentionStatus.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    tp_not_attention: _ThreePointAttentionStatus.ValueType  # 0
+    """"""
+    tp_attention: _ThreePointAttentionStatus.ValueType  # 1
+    """"""
+
+class ThreePointAttentionStatus(_ThreePointAttentionStatus, metaclass=_ThreePointAttentionStatusEnumTypeWrapper):
+    """枚举-三点关注状态"""
+
+tp_not_attention: ThreePointAttentionStatus.ValueType  # 0
+""""""
+tp_attention: ThreePointAttentionStatus.ValueType  # 1
+""""""
 global___ThreePointAttentionStatus = ThreePointAttentionStatus
 
-
-# 三点类型
-class ThreePointType(_ThreePointType, metaclass=_ThreePointTypeEnumTypeWrapper):
-    pass
 class _ThreePointType:
-    V = typing.NewType('V', builtins.int)
-class _ThreePointTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ThreePointType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 占位
-    tp_none = ThreePointType.V(0)
-    # 使用此背景
-    background = ThreePointType.V(1)
-    # 自动播放
-    auto_play = ThreePointType.V(2)
-    # 分享
-    share = ThreePointType.V(3)
-    # 稍后再播
-    wait = ThreePointType.V(4)
-    # 关注
-    attention = ThreePointType.V(5)
-    # 举报
-    report = ThreePointType.V(6)
-    # 删除
-    delete = ThreePointType.V(7)
-    # 不感兴趣
-    dislike = ThreePointType.V(8)
-    # 收藏
-    favorite = ThreePointType.V(9)
-    # 置顶
-    top = ThreePointType.V(10)
-    # 评论
-    comment = ThreePointType.V(11)
-    #
-    hide = ThreePointType.V(12)
-    #
-    campus_delete = ThreePointType.V(13)
-    #
-    topic_irrelevant = ThreePointType.V(14)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 占位
-tp_none = ThreePointType.V(0)
-# 使用此背景
-background = ThreePointType.V(1)
-# 自动播放
-auto_play = ThreePointType.V(2)
-# 分享
-share = ThreePointType.V(3)
-# 稍后再播
-wait = ThreePointType.V(4)
-# 关注
-attention = ThreePointType.V(5)
-# 举报
-report = ThreePointType.V(6)
-# 删除
-delete = ThreePointType.V(7)
-# 不感兴趣
-dislike = ThreePointType.V(8)
-# 收藏
-favorite = ThreePointType.V(9)
-# 置顶
-top = ThreePointType.V(10)
-# 评论
-comment = ThreePointType.V(11)
-#
-hide = ThreePointType.V(12)
-#
-campus_delete = ThreePointType.V(13)
-#
-topic_irrelevant = ThreePointType.V(14)
+class _ThreePointTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ThreePointType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    tp_none: _ThreePointType.ValueType  # 0
+    """占位"""
+    background: _ThreePointType.ValueType  # 1
+    """使用此背景"""
+    auto_play: _ThreePointType.ValueType  # 2
+    """自动播放"""
+    share: _ThreePointType.ValueType  # 3
+    """分享"""
+    wait: _ThreePointType.ValueType  # 4
+    """稍后再播"""
+    attention: _ThreePointType.ValueType  # 5
+    """关注"""
+    report: _ThreePointType.ValueType  # 6
+    """举报"""
+    delete: _ThreePointType.ValueType  # 7
+    """删除"""
+    dislike: _ThreePointType.ValueType  # 8
+    """不感兴趣"""
+    favorite: _ThreePointType.ValueType  # 9
+    """收藏"""
+    top: _ThreePointType.ValueType  # 10
+    """置顶"""
+    comment: _ThreePointType.ValueType  # 11
+    """评论"""
+    hide: _ThreePointType.ValueType  # 12
+    """"""
+    campus_delete: _ThreePointType.ValueType  # 13
+    """"""
+    topic_irrelevant: _ThreePointType.ValueType  # 14
+    """"""
+
+class ThreePointType(_ThreePointType, metaclass=_ThreePointTypeEnumTypeWrapper):
+    """三点类型"""
+
+tp_none: ThreePointType.ValueType  # 0
+"""占位"""
+background: ThreePointType.ValueType  # 1
+"""使用此背景"""
+auto_play: ThreePointType.ValueType  # 2
+"""自动播放"""
+share: ThreePointType.ValueType  # 3
+"""分享"""
+wait: ThreePointType.ValueType  # 4
+"""稍后再播"""
+attention: ThreePointType.ValueType  # 5
+"""关注"""
+report: ThreePointType.ValueType  # 6
+"""举报"""
+delete: ThreePointType.ValueType  # 7
+"""删除"""
+dislike: ThreePointType.ValueType  # 8
+"""不感兴趣"""
+favorite: ThreePointType.ValueType  # 9
+"""收藏"""
+top: ThreePointType.ValueType  # 10
+"""置顶"""
+comment: ThreePointType.ValueType  # 11
+"""评论"""
+hide: ThreePointType.ValueType  # 12
+""""""
+campus_delete: ThreePointType.ValueType  # 13
+""""""
+topic_irrelevant: ThreePointType.ValueType  # 14
+""""""
 global___ThreePointType = ThreePointType
 
-
-#
-class ThumbType(_ThumbType, metaclass=_ThumbTypeEnumTypeWrapper):
-    pass
 class _ThumbType:
-    V = typing.NewType('V', builtins.int)
-class _ThumbTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ThumbType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    cancel = ThumbType.V(0)
-    #
-    thumb = ThumbType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-cancel = ThumbType.V(0)
-#
-thumb = ThumbType.V(1)
+class _ThumbTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_ThumbType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    cancel: _ThumbType.ValueType  # 0
+    """"""
+    thumb: _ThumbType.ValueType  # 1
+    """"""
+
+class ThumbType(_ThumbType, metaclass=_ThumbTypeEnumTypeWrapper):
+    """"""
+
+cancel: ThumbType.ValueType  # 0
+""""""
+thumb: ThumbType.ValueType  # 1
+""""""
 global___ThumbType = ThumbType
 
-
-# 状态
-class TopType(_TopType, metaclass=_TopTypeEnumTypeWrapper):
-    pass
 class _TopType:
-    V = typing.NewType('V', builtins.int)
-class _TopTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_TopType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 默认 置顶
-    top_none = TopType.V(0)
-    # 取消置顶
-    top_cancel = TopType.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 默认 置顶
-top_none = TopType.V(0)
-# 取消置顶
-top_cancel = TopType.V(1)
+class _TopTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_TopType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    top_none: _TopType.ValueType  # 0
+    """默认 置顶"""
+    top_cancel: _TopType.ValueType  # 1
+    """取消置顶"""
+
+class TopType(_TopType, metaclass=_TopTypeEnumTypeWrapper):
+    """状态"""
+
+top_none: TopType.ValueType  # 0
+"""默认 置顶"""
+top_cancel: TopType.ValueType  # 1
+"""取消置顶"""
 global___TopType = TopType
 
-
-# 用户类型
-class UserItemType(_UserItemType, metaclass=_UserItemTypeEnumTypeWrapper):
-    pass
 class _UserItemType:
-    V = typing.NewType('V', builtins.int)
-class _UserItemTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_UserItemType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #
-    user_item_type_none = UserItemType.V(0)
-    #
-    user_item_type_live = UserItemType.V(1)
-    #
-    user_item_type_live_custom = UserItemType.V(2)
-    #
-    user_item_type_normal = UserItemType.V(3)
-    #
-    user_item_type_extend = UserItemType.V(4)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#
-user_item_type_none = UserItemType.V(0)
-#
-user_item_type_live = UserItemType.V(1)
-#
-user_item_type_live_custom = UserItemType.V(2)
-#
-user_item_type_normal = UserItemType.V(3)
-#
-user_item_type_extend = UserItemType.V(4)
+class _UserItemTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_UserItemType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    user_item_type_none: _UserItemType.ValueType  # 0
+    """"""
+    user_item_type_live: _UserItemType.ValueType  # 1
+    """"""
+    user_item_type_live_custom: _UserItemType.ValueType  # 2
+    """"""
+    user_item_type_normal: _UserItemType.ValueType  # 3
+    """"""
+    user_item_type_extend: _UserItemType.ValueType  # 4
+    """"""
+
+class UserItemType(_UserItemType, metaclass=_UserItemTypeEnumTypeWrapper):
+    """用户类型"""
+
+user_item_type_none: UserItemType.ValueType  # 0
+""""""
+user_item_type_live: UserItemType.ValueType  # 1
+""""""
+user_item_type_live_custom: UserItemType.ValueType  # 2
+""""""
+user_item_type_normal: UserItemType.ValueType  # 3
+""""""
+user_item_type_extend: UserItemType.ValueType  # 4
+""""""
 global___UserItemType = UserItemType
 
-
-# 番剧类型
-class VideoSubType(_VideoSubType, metaclass=_VideoSubTypeEnumTypeWrapper):
-    pass
 class _VideoSubType:
-    V = typing.NewType('V', builtins.int)
-class _VideoSubTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_VideoSubType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 没有子类型
-    VideoSubTypeNone = VideoSubType.V(0)
-    # 番剧
-    VideoSubTypeBangumi = VideoSubType.V(1)
-    # 电影
-    VideoSubTypeMovie = VideoSubType.V(2)
-    # 纪录片
-    VideoSubTypeDocumentary = VideoSubType.V(3)
-    # 国创
-    VideoSubTypeDomestic = VideoSubType.V(4)
-    # 电视剧
-    VideoSubTypeTeleplay = VideoSubType.V(5)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 没有子类型
-VideoSubTypeNone = VideoSubType.V(0)
-# 番剧
-VideoSubTypeBangumi = VideoSubType.V(1)
-# 电影
-VideoSubTypeMovie = VideoSubType.V(2)
-# 纪录片
-VideoSubTypeDocumentary = VideoSubType.V(3)
-# 国创
-VideoSubTypeDomestic = VideoSubType.V(4)
-# 电视剧
-VideoSubTypeTeleplay = VideoSubType.V(5)
+class _VideoSubTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_VideoSubType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    VideoSubTypeNone: _VideoSubType.ValueType  # 0
+    """没有子类型"""
+    VideoSubTypeBangumi: _VideoSubType.ValueType  # 1
+    """番剧"""
+    VideoSubTypeMovie: _VideoSubType.ValueType  # 2
+    """电影"""
+    VideoSubTypeDocumentary: _VideoSubType.ValueType  # 3
+    """纪录片"""
+    VideoSubTypeDomestic: _VideoSubType.ValueType  # 4
+    """国创"""
+    VideoSubTypeTeleplay: _VideoSubType.ValueType  # 5
+    """电视剧"""
+
+class VideoSubType(_VideoSubType, metaclass=_VideoSubTypeEnumTypeWrapper):
+    """番剧类型"""
+
+VideoSubTypeNone: VideoSubType.ValueType  # 0
+"""没有子类型"""
+VideoSubTypeBangumi: VideoSubType.ValueType  # 1
+"""番剧"""
+VideoSubTypeMovie: VideoSubType.ValueType  # 2
+"""电影"""
+VideoSubTypeDocumentary: VideoSubType.ValueType  # 3
+"""纪录片"""
+VideoSubTypeDomestic: VideoSubType.ValueType  # 4
+"""国创"""
+VideoSubTypeTeleplay: VideoSubType.ValueType  # 5
+"""电视剧"""
 global___VideoSubType = VideoSubType
 
-
-# 视频类型
-class VideoType(_VideoType, metaclass=_VideoTypeEnumTypeWrapper):
-    pass
 class _VideoType:
-    V = typing.NewType('V', builtins.int)
-class _VideoTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_VideoType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    #普通视频
-    video_type_general = VideoType.V(0)
-    #动态视频
-    video_type_dynamic = VideoType.V(1)
-    #直播回放视频
-    video_type_playback = VideoType.V(2)
-    #
-    video_type_story = VideoType.V(3)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-#普通视频
-video_type_general = VideoType.V(0)
-#动态视频
-video_type_dynamic = VideoType.V(1)
-#直播回放视频
-video_type_playback = VideoType.V(2)
-#
-video_type_story = VideoType.V(3)
+class _VideoTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_VideoType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    video_type_general: _VideoType.ValueType  # 0
+    """普通视频"""
+    video_type_dynamic: _VideoType.ValueType  # 1
+    """动态视频"""
+    video_type_playback: _VideoType.ValueType  # 2
+    """直播回放视频"""
+    video_type_story: _VideoType.ValueType  # 3
+    """"""
+
+class VideoType(_VideoType, metaclass=_VideoTypeEnumTypeWrapper):
+    """视频类型"""
+
+video_type_general: VideoType.ValueType  # 0
+"""普通视频"""
+video_type_dynamic: VideoType.ValueType  # 1
+"""动态视频"""
+video_type_playback: VideoType.ValueType  # 2
+"""直播回放视频"""
+video_type_story: VideoType.ValueType  # 3
+""""""
 global___VideoType = VideoType
 
-
-# 状态
-class VoteStatus(_VoteStatus, metaclass=_VoteStatusEnumTypeWrapper):
-    pass
 class _VoteStatus:
-    V = typing.NewType('V', builtins.int)
-class _VoteStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_VoteStatus.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 正常
-    normal = VoteStatus.V(0)
-    # 匿名
-    anonymous = VoteStatus.V(1)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 正常
-normal = VoteStatus.V(0)
-# 匿名
-anonymous = VoteStatus.V(1)
+class _VoteStatusEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_VoteStatus.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    normal: _VoteStatus.ValueType  # 0
+    """正常"""
+    anonymous: _VoteStatus.ValueType  # 1
+    """匿名"""
+
+class VoteStatus(_VoteStatus, metaclass=_VoteStatusEnumTypeWrapper):
+    """状态"""
+
+normal: VoteStatus.ValueType  # 0
+"""正常"""
+anonymous: VoteStatus.ValueType  # 1
+"""匿名"""
 global___VoteStatus = VoteStatus
 
-
-# 枚举-提权类型
-class WeightType(_WeightType, metaclass=_WeightTypeEnumTypeWrapper):
-    pass
 class _WeightType:
-    V = typing.NewType('V', builtins.int)
-class _WeightTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_WeightType.V], builtins.type):
-    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor = ...
-    # 默认 占位
-    weight_none = WeightType.V(0)
-    # 不感兴趣
-    weight_dislike = WeightType.V(1)
-    # 跳链
-    weight_jump = WeightType.V(2)
+    ValueType = typing.NewType("ValueType", builtins.int)
+    V: typing_extensions.TypeAlias = ValueType
 
-# 默认 占位
-weight_none = WeightType.V(0)
-# 不感兴趣
-weight_dislike = WeightType.V(1)
-# 跳链
-weight_jump = WeightType.V(2)
+class _WeightTypeEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[_WeightType.ValueType], builtins.type):
+    DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
+    weight_none: _WeightType.ValueType  # 0
+    """默认 占位"""
+    weight_dislike: _WeightType.ValueType  # 1
+    """不感兴趣"""
+    weight_jump: _WeightType.ValueType  # 2
+    """跳链"""
+
+class WeightType(_WeightType, metaclass=_WeightTypeEnumTypeWrapper):
+    """枚举-提权类型"""
+
+weight_none: WeightType.ValueType  # 0
+"""默认 占位"""
+weight_dislike: WeightType.ValueType  # 1
+"""不感兴趣"""
+weight_jump: WeightType.ValueType  # 2
+"""跳链"""
 global___WeightType = WeightType
 
-
-# 综合页请求广告所需字段，由客户端-网关透传
+@typing_extensions.final
 class AdParam(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """综合页请求广告所需字段，由客户端-网关透传"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     AD_EXTRA_FIELD_NUMBER: builtins.int
     REQUEST_ID_FIELD_NUMBER: builtins.int
-    # 综合页请求广告所需字段，由客户端-网关透传
-    ad_extra: typing.Text = ...
-    # request_id
-    request_id: typing.Text = ...
-    def __init__(self,
+    ad_extra: builtins.str
+    """综合页请求广告所需字段，由客户端-网关透传"""
+    request_id: builtins.str
+    """request_id"""
+    def __init__(
+        self,
         *,
-        ad_extra : typing.Text = ...,
-        request_id : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad_extra",b"ad_extra",u"request_id",b"request_id"]) -> None: ...
+        ad_extra: builtins.str = ...,
+        request_id: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad_extra", b"ad_extra", "request_id", b"request_id"]) -> None: ...
+
 global___AdParam = AdParam
 
-# 动态-附加卡-通用卡
+@typing_extensions.final
 class AdditionCommon(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-通用卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HEAD_TEXT_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     IMAGE_URL_FIELD_NUMBER: builtins.int
@@ -1627,80 +1692,92 @@ class AdditionCommon(google.protobuf.message.Message):
     STYLE_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     CARD_TYPE_FIELD_NUMBER: builtins.int
-    # 头部说明文案
-    head_text: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 展示图
-    image_url: typing.Text = ...
-    # 描述文字1
-    desc_text_1: typing.Text = ...
-    # 描述文字2
-    desc_text_2: typing.Text = ...
-    # 点击跳转链接
-    url: typing.Text = ...
-    # 按钮
+    head_text: builtins.str
+    """头部说明文案"""
+    title: builtins.str
+    """标题"""
+    image_url: builtins.str
+    """展示图"""
+    desc_text_1: builtins.str
+    """描述文字1"""
+    desc_text_2: builtins.str
+    """描述文字2"""
+    url: builtins.str
+    """点击跳转链接"""
     @property
-    def button(self) -> global___AdditionalButton: ...
-    # 头部icon
-    head_icon: typing.Text = ...
-    # style
-    style: global___ImageStyle.V = ...
-    # 动态本身的类型 type
-    type: typing.Text = ...
-    # 附加卡类型
-    # ogv manga
-    card_type: typing.Text = ...
-    def __init__(self,
+    def button(self) -> global___AdditionalButton:
+        """按钮"""
+    head_icon: builtins.str
+    """头部icon"""
+    style: global___ImageStyle.ValueType
+    """style"""
+    type: builtins.str
+    """动态本身的类型 type"""
+    card_type: builtins.str
+    """附加卡类型
+    ogv manga
+    """
+    def __init__(
+        self,
         *,
-        head_text : typing.Text = ...,
-        title : typing.Text = ...,
-        image_url : typing.Text = ...,
-        desc_text_1 : typing.Text = ...,
-        desc_text_2 : typing.Text = ...,
-        url : typing.Text = ...,
-        button : typing.Optional[global___AdditionalButton] = ...,
-        head_icon : typing.Text = ...,
-        style : global___ImageStyle.V = ...,
-        type : typing.Text = ...,
-        card_type : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"card_type",b"card_type",u"desc_text_1",b"desc_text_1",u"desc_text_2",b"desc_text_2",u"head_icon",b"head_icon",u"head_text",b"head_text",u"image_url",b"image_url",u"style",b"style",u"title",b"title",u"type",b"type",u"url",b"url"]) -> None: ...
+        head_text: builtins.str = ...,
+        title: builtins.str = ...,
+        image_url: builtins.str = ...,
+        desc_text_1: builtins.str = ...,
+        desc_text_2: builtins.str = ...,
+        url: builtins.str = ...,
+        button: global___AdditionalButton | None = ...,
+        head_icon: builtins.str = ...,
+        style: global___ImageStyle.ValueType = ...,
+        type: builtins.str = ...,
+        card_type: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "card_type", b"card_type", "desc_text_1", b"desc_text_1", "desc_text_2", b"desc_text_2", "head_icon", b"head_icon", "head_text", b"head_text", "image_url", b"image_url", "style", b"style", "title", b"title", "type", b"type", "url", b"url"]) -> None: ...
+
 global___AdditionCommon = AdditionCommon
 
-# 动态-附加卡-电竞卡
+@typing_extensions.final
 class AdditionEsport(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-电竞卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     STYLE_FIELD_NUMBER: builtins.int
     ADDITION_ESPORT_MOBA_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     CARD_TYPE_FIELD_NUMBER: builtins.int
-    # 电竞类型
-    style: global___EspaceStyle.V = ...
-    # moba类
+    style: global___EspaceStyle.ValueType
+    """电竞类型"""
     @property
-    def addition_esport_moba(self) -> global___AdditionEsportMoba: ...
-    # 动态本身的类型 type
-    type: typing.Text = ...
-    # 附加卡类型
-    # ogv manga
-    card_type: typing.Text = ...
-    def __init__(self,
+    def addition_esport_moba(self) -> global___AdditionEsportMoba:
+        """moba类"""
+    type: builtins.str
+    """动态本身的类型 type"""
+    card_type: builtins.str
+    """附加卡类型
+    ogv manga
+    """
+    def __init__(
+        self,
         *,
-        style : global___EspaceStyle.V = ...,
-        addition_esport_moba : typing.Optional[global___AdditionEsportMoba] = ...,
-        type : typing.Text = ...,
-        card_type : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"addition_esport_moba",b"addition_esport_moba",u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"addition_esport_moba",b"addition_esport_moba",u"card_type",b"card_type",u"item",b"item",u"style",b"style",u"type",b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"item",b"item"]) -> typing.Optional[typing_extensions.Literal["addition_esport_moba"]]: ...
+        style: global___EspaceStyle.ValueType = ...,
+        addition_esport_moba: global___AdditionEsportMoba | None = ...,
+        type: builtins.str = ...,
+        card_type: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["addition_esport_moba", b"addition_esport_moba", "item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["addition_esport_moba", b"addition_esport_moba", "card_type", b"card_type", "item", b"item", "style", b"style", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["item", b"item"]) -> typing_extensions.Literal["addition_esport_moba"] | None: ...
+
 global___AdditionEsport = AdditionEsport
 
-# 动态-附加卡-电竞卡-moba类
+@typing_extensions.final
 class AdditionEsportMoba(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-电竞卡-moba类"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HEAD_TEXT_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     MATCH_TEAM_FIELD_NUMBER: builtins.int
@@ -1711,135 +1788,156 @@ class AdditionEsportMoba(google.protobuf.message.Message):
     TYPE_FIELD_NUMBER: builtins.int
     CARD_TYPE_FIELD_NUMBER: builtins.int
     HEAD_ICON_FIELD_NUMBER: builtins.int
-    # 头部说明文案
-    head_text: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 战队列表
+    head_text: builtins.str
+    """头部说明文案"""
+    title: builtins.str
+    """标题"""
     @property
-    def match_team(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MatchTeam]: ...
-    # 比赛信息
+    def match_team(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MatchTeam]:
+        """战队列表"""
     @property
-    def addition_esport_moba_status(self) -> global___AdditionEsportMobaStatus: ...
-    # 卡片跳转
-    uri: typing.Text = ...
-    # 按钮
+    def addition_esport_moba_status(self) -> global___AdditionEsportMobaStatus:
+        """比赛信息"""
+    uri: builtins.str
+    """卡片跳转"""
     @property
-    def button(self) -> global___AdditionalButton: ...
-    # 副标题
-    sub_title: typing.Text = ...
-    # 动态本身的类型 type
-    type: typing.Text = ...
-    # 附加卡类型
-    card_type: typing.Text = ...
-    # 附加卡图标
-    head_icon: typing.Text = ...
-    def __init__(self,
+    def button(self) -> global___AdditionalButton:
+        """按钮"""
+    sub_title: builtins.str
+    """副标题"""
+    type: builtins.str
+    """动态本身的类型 type"""
+    card_type: builtins.str
+    """附加卡类型"""
+    head_icon: builtins.str
+    """附加卡图标"""
+    def __init__(
+        self,
         *,
-        head_text : typing.Text = ...,
-        title : typing.Text = ...,
-        match_team : typing.Optional[typing.Iterable[global___MatchTeam]] = ...,
-        addition_esport_moba_status : typing.Optional[global___AdditionEsportMobaStatus] = ...,
-        uri : typing.Text = ...,
-        button : typing.Optional[global___AdditionalButton] = ...,
-        sub_title : typing.Text = ...,
-        type : typing.Text = ...,
-        card_type : typing.Text = ...,
-        head_icon : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"addition_esport_moba_status",b"addition_esport_moba_status",u"button",b"button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"addition_esport_moba_status",b"addition_esport_moba_status",u"button",b"button",u"card_type",b"card_type",u"head_icon",b"head_icon",u"head_text",b"head_text",u"match_team",b"match_team",u"sub_title",b"sub_title",u"title",b"title",u"type",b"type",u"uri",b"uri"]) -> None: ...
+        head_text: builtins.str = ...,
+        title: builtins.str = ...,
+        match_team: collections.abc.Iterable[global___MatchTeam] | None = ...,
+        addition_esport_moba_status: global___AdditionEsportMobaStatus | None = ...,
+        uri: builtins.str = ...,
+        button: global___AdditionalButton | None = ...,
+        sub_title: builtins.str = ...,
+        type: builtins.str = ...,
+        card_type: builtins.str = ...,
+        head_icon: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["addition_esport_moba_status", b"addition_esport_moba_status", "button", b"button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["addition_esport_moba_status", b"addition_esport_moba_status", "button", b"button", "card_type", b"card_type", "head_icon", b"head_icon", "head_text", b"head_text", "match_team", b"match_team", "sub_title", b"sub_title", "title", b"title", "type", b"type", "uri", b"uri"]) -> None: ...
+
 global___AdditionEsportMoba = AdditionEsportMoba
 
-# 动态-附加卡-电竞卡-moba类-比赛信息
+@typing_extensions.final
 class AdditionEsportMobaStatus(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-电竞卡-moba类-比赛信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ADDITION_ESPORT_MOBA_STATUS_DESC_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     COLOR_FIELD_NUMBER: builtins.int
     NIGHT_COLOR_FIELD_NUMBER: builtins.int
-    # 文案类
     @property
-    def addition_esport_moba_status_desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionEsportMobaStatusDesc]: ...
-    # 比赛状态文案
-    title: typing.Text = ...
-    # 比赛状态状态
-    status: builtins.int = ...
-    # 日间色值
-    color: typing.Text = ...
-    # 夜间色值
-    night_color: typing.Text = ...
-    def __init__(self,
+    def addition_esport_moba_status_desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionEsportMobaStatusDesc]:
+        """文案类"""
+    title: builtins.str
+    """比赛状态文案"""
+    status: builtins.int
+    """比赛状态状态"""
+    color: builtins.str
+    """日间色值"""
+    night_color: builtins.str
+    """夜间色值"""
+    def __init__(
+        self,
         *,
-        addition_esport_moba_status_desc : typing.Optional[typing.Iterable[global___AdditionEsportMobaStatusDesc]] = ...,
-        title : typing.Text = ...,
-        status : builtins.int = ...,
-        color : typing.Text = ...,
-        night_color : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"addition_esport_moba_status_desc",b"addition_esport_moba_status_desc",u"color",b"color",u"night_color",b"night_color",u"status",b"status",u"title",b"title"]) -> None: ...
+        addition_esport_moba_status_desc: collections.abc.Iterable[global___AdditionEsportMobaStatusDesc] | None = ...,
+        title: builtins.str = ...,
+        status: builtins.int = ...,
+        color: builtins.str = ...,
+        night_color: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["addition_esport_moba_status_desc", b"addition_esport_moba_status_desc", "color", b"color", "night_color", b"night_color", "status", b"status", "title", b"title"]) -> None: ...
+
 global___AdditionEsportMobaStatus = AdditionEsportMobaStatus
 
-# 动态-附加卡-电竞卡-moba类-比赛信息-文案类
+@typing_extensions.final
 class AdditionEsportMobaStatusDesc(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-电竞卡-moba类-比赛信息-文案类"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COLOR_FIELD_NUMBER: builtins.int
     NIGHT_COLOR_FIELD_NUMBER: builtins.int
-    # 文案
-    title: typing.Text = ...
-    # 日间色值
-    color: typing.Text = ...
-    # 夜间色值
-    night_color: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """文案"""
+    color: builtins.str
+    """日间色值"""
+    night_color: builtins.str
+    """夜间色值"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        color : typing.Text = ...,
-        night_color : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"color",b"color",u"night_color",b"night_color",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        color: builtins.str = ...,
+        night_color: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["color", b"color", "night_color", b"night_color", "title", b"title"]) -> None: ...
+
 global___AdditionEsportMobaStatusDesc = AdditionEsportMobaStatusDesc
 
-# 动态-附加卡-商品卡
+@typing_extensions.final
 class AdditionGoods(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-商品卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     RCMD_DESC_FIELD_NUMBER: builtins.int
     GOODS_ITEMS_FIELD_NUMBER: builtins.int
     CARD_TYPE_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     SOURCE_TYPE_FIELD_NUMBER: builtins.int
-    # 推荐文案
-    rcmd_desc: typing.Text = ...
-    # 商品信息
+    rcmd_desc: builtins.str
+    """推荐文案"""
     @property
-    def goods_items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___GoodsItem]: ...
-    # 附加卡类型
-    card_type: typing.Text = ...
-    # 头部icon
-    icon: typing.Text = ...
-    # 商品附加卡整卡跳转
-    uri: typing.Text = ...
-    # 商品类型
-    # 1:淘宝 2:会员购，注：实际是获取的goods_items里面的第一个source_type
-    source_type: builtins.int = ...
-    def __init__(self,
+    def goods_items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___GoodsItem]:
+        """商品信息"""
+    card_type: builtins.str
+    """附加卡类型"""
+    icon: builtins.str
+    """头部icon"""
+    uri: builtins.str
+    """商品附加卡整卡跳转"""
+    source_type: builtins.int
+    """商品类型
+    1:淘宝 2:会员购，注：实际是获取的goods_items里面的第一个source_type
+    """
+    def __init__(
+        self,
         *,
-        rcmd_desc : typing.Text = ...,
-        goods_items : typing.Optional[typing.Iterable[global___GoodsItem]] = ...,
-        card_type : typing.Text = ...,
-        icon : typing.Text = ...,
-        uri : typing.Text = ...,
-        source_type : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"card_type",b"card_type",u"goods_items",b"goods_items",u"icon",b"icon",u"rcmd_desc",b"rcmd_desc",u"source_type",b"source_type",u"uri",b"uri"]) -> None: ...
+        rcmd_desc: builtins.str = ...,
+        goods_items: collections.abc.Iterable[global___GoodsItem] | None = ...,
+        card_type: builtins.str = ...,
+        icon: builtins.str = ...,
+        uri: builtins.str = ...,
+        source_type: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["card_type", b"card_type", "goods_items", b"goods_items", "icon", b"icon", "rcmd_desc", b"rcmd_desc", "source_type", b"source_type", "uri", b"uri"]) -> None: ...
+
 global___AdditionGoods = AdditionGoods
 
-# up主预约发布卡
+@typing_extensions.final
 class AdditionUP(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """up主预约发布卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     DESC_TEXT_1_FIELD_NUMBER: builtins.int
     DESC_TEXT_2_FIELD_NUMBER: builtins.int
@@ -1857,72 +1955,77 @@ class AdditionUP(google.protobuf.message.Message):
     SHOW_TEXT2_FIELD_NUMBER: builtins.int
     DYN_TYPE_FIELD_NUMBER: builtins.int
     BUSINESS_ID_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 高亮文本，描述文字1
+    title: builtins.str
+    """标题"""
     @property
-    def desc_text_1(self) -> global___HighlightText: ...
-    # 描述文字2
-    desc_text_2: typing.Text = ...
-    # 点击跳转链接
-    url: typing.Text = ...
-    # 按钮
+    def desc_text_1(self) -> global___HighlightText:
+        """高亮文本，描述文字1"""
+    desc_text_2: builtins.str
+    """描述文字2"""
+    url: builtins.str
+    """点击跳转链接"""
     @property
-    def button(self) -> global___AdditionalButton: ...
-    # 附加卡类型
-    card_type: typing.Text = ...
-    # 预约人数(用于预约人数变化)
-    reserve_total: builtins.int = ...
-    # 活动皮肤
+    def button(self) -> global___AdditionalButton:
+        """按钮"""
+    card_type: builtins.str
+    """附加卡类型"""
+    reserve_total: builtins.int
+    """预约人数(用于预约人数变化)"""
     @property
-    def act_skin(self) -> global___AdditionalActSkin: ...
-    # 预约id
-    rid: builtins.int = ...
-    #
-    lottery_type: builtins.int = ...
-    #
+    def act_skin(self) -> global___AdditionalActSkin:
+        """活动皮肤"""
+    rid: builtins.int
+    """预约id"""
+    lottery_type: builtins.int
+    """"""
     @property
-    def desc_text3(self) -> global___HighlightText: ...
-    #
-    up_mid: builtins.int = ...
-    #
+    def desc_text3(self) -> global___HighlightText:
+        """"""
+    up_mid: builtins.int
+    """"""
     @property
-    def user_info(self) -> global___AdditionUserInfo: ...
-    #
-    dynamic_id: typing.Text = ...
-    #
-    show_text2: builtins.bool = ...
-    #
-    dyn_type: builtins.int = ...
-    #
-    business_id: typing.Text = ...
-    def __init__(self,
+    def user_info(self) -> global___AdditionUserInfo:
+        """"""
+    dynamic_id: builtins.str
+    """"""
+    show_text2: builtins.bool
+    """"""
+    dyn_type: builtins.int
+    """"""
+    business_id: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        desc_text_1 : typing.Optional[global___HighlightText] = ...,
-        desc_text_2 : typing.Text = ...,
-        url : typing.Text = ...,
-        button : typing.Optional[global___AdditionalButton] = ...,
-        card_type : typing.Text = ...,
-        reserve_total : builtins.int = ...,
-        act_skin : typing.Optional[global___AdditionalActSkin] = ...,
-        rid : builtins.int = ...,
-        lottery_type : builtins.int = ...,
-        desc_text3 : typing.Optional[global___HighlightText] = ...,
-        up_mid : builtins.int = ...,
-        user_info : typing.Optional[global___AdditionUserInfo] = ...,
-        dynamic_id : typing.Text = ...,
-        show_text2 : builtins.bool = ...,
-        dyn_type : builtins.int = ...,
-        business_id : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"act_skin",b"act_skin",u"button",b"button",u"desc_text3",b"desc_text3",u"desc_text_1",b"desc_text_1",u"user_info",b"user_info"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"act_skin",b"act_skin",u"business_id",b"business_id",u"button",b"button",u"card_type",b"card_type",u"desc_text3",b"desc_text3",u"desc_text_1",b"desc_text_1",u"desc_text_2",b"desc_text_2",u"dyn_type",b"dyn_type",u"dynamic_id",b"dynamic_id",u"lottery_type",b"lottery_type",u"reserve_total",b"reserve_total",u"rid",b"rid",u"show_text2",b"show_text2",u"title",b"title",u"up_mid",b"up_mid",u"url",b"url",u"user_info",b"user_info"]) -> None: ...
+        title: builtins.str = ...,
+        desc_text_1: global___HighlightText | None = ...,
+        desc_text_2: builtins.str = ...,
+        url: builtins.str = ...,
+        button: global___AdditionalButton | None = ...,
+        card_type: builtins.str = ...,
+        reserve_total: builtins.int = ...,
+        act_skin: global___AdditionalActSkin | None = ...,
+        rid: builtins.int = ...,
+        lottery_type: builtins.int = ...,
+        desc_text3: global___HighlightText | None = ...,
+        up_mid: builtins.int = ...,
+        user_info: global___AdditionUserInfo | None = ...,
+        dynamic_id: builtins.str = ...,
+        show_text2: builtins.bool = ...,
+        dyn_type: builtins.int = ...,
+        business_id: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["act_skin", b"act_skin", "button", b"button", "desc_text3", b"desc_text3", "desc_text_1", b"desc_text_1", "user_info", b"user_info"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["act_skin", b"act_skin", "business_id", b"business_id", "button", b"button", "card_type", b"card_type", "desc_text3", b"desc_text3", "desc_text_1", b"desc_text_1", "desc_text_2", b"desc_text_2", "dyn_type", b"dyn_type", "dynamic_id", b"dynamic_id", "lottery_type", b"lottery_type", "reserve_total", b"reserve_total", "rid", b"rid", "show_text2", b"show_text2", "title", b"title", "up_mid", b"up_mid", "url", b"url", "user_info", b"user_info"]) -> None: ...
+
 global___AdditionUP = AdditionUP
 
-# 动态-附加卡-UGC视频附加卡
+@typing_extensions.final
 class AdditionUgc(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-UGC视频附加卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HEAD_TEXT_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
@@ -1932,88 +2035,103 @@ class AdditionUgc(google.protobuf.message.Message):
     DURATION_FIELD_NUMBER: builtins.int
     LINE_FEED_FIELD_NUMBER: builtins.int
     CARD_TYPE_FIELD_NUMBER: builtins.int
-    # 说明文案
-    head_text: typing.Text = ...
-    # 稿件标题
-    title: typing.Text = ...
-    # 封面
-    cover: typing.Text = ...
-    # 描述文字1
-    desc_text_1: typing.Text = ...
-    # 描述文字2
-    desc_text_2: typing.Text = ...
-    # 接秒开
-    uri: typing.Text = ...
-    # 时长
-    duration: typing.Text = ...
-    # 标题支持换行-标题支持单行和双行，本期不支持填充up昵称，支持双行展示，字段默认为true
-    line_feed: builtins.bool = ...
-    # 附加卡类型
-    card_type: typing.Text = ...
-    def __init__(self,
+    head_text: builtins.str
+    """说明文案"""
+    title: builtins.str
+    """稿件标题"""
+    cover: builtins.str
+    """封面"""
+    desc_text_1: builtins.str
+    """描述文字1"""
+    desc_text_2: builtins.str
+    """描述文字2"""
+    uri: builtins.str
+    """接秒开"""
+    duration: builtins.str
+    """时长"""
+    line_feed: builtins.bool
+    """标题支持换行-标题支持单行和双行，本期不支持填充up昵称，支持双行展示，字段默认为true"""
+    card_type: builtins.str
+    """附加卡类型"""
+    def __init__(
+        self,
         *,
-        head_text : typing.Text = ...,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        desc_text_1 : typing.Text = ...,
-        desc_text_2 : typing.Text = ...,
-        uri : typing.Text = ...,
-        duration : typing.Text = ...,
-        line_feed : builtins.bool = ...,
-        card_type : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"card_type",b"card_type",u"cover",b"cover",u"desc_text_1",b"desc_text_1",u"desc_text_2",b"desc_text_2",u"duration",b"duration",u"head_text",b"head_text",u"line_feed",b"line_feed",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        head_text: builtins.str = ...,
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        desc_text_1: builtins.str = ...,
+        desc_text_2: builtins.str = ...,
+        uri: builtins.str = ...,
+        duration: builtins.str = ...,
+        line_feed: builtins.bool = ...,
+        card_type: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["card_type", b"card_type", "cover", b"cover", "desc_text_1", b"desc_text_1", "desc_text_2", b"desc_text_2", "duration", b"duration", "head_text", b"head_text", "line_feed", b"line_feed", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___AdditionUgc = AdditionUgc
 
-#
+@typing_extensions.final
 class AdditionUserInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     NAME_FIELD_NUMBER: builtins.int
     FACE_FIELD_NUMBER: builtins.int
-    #
-    name: typing.Text = ...
-    #
-    face: typing.Text = ...
-    def __init__(self,
+    name: builtins.str
+    """"""
+    face: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        name : typing.Text = ...,
-        face : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"face",b"face",u"name",b"name"]) -> None: ...
+        name: builtins.str = ...,
+        face: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["face", b"face", "name", b"name"]) -> None: ...
+
 global___AdditionUserInfo = AdditionUserInfo
 
-# 动态-附加卡-投票
+@typing_extensions.final
 class AdditionVote(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-投票"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     IMAGE_URL_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     TEXT_1_FIELD_NUMBER: builtins.int
     BUTTON_TEXT_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
-    # 封面图
-    image_url: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 展示项1
-    text_1: typing.Text = ...
-    # button文案
-    button_text: typing.Text = ...
-    # 点击跳转链接
-    url: typing.Text = ...
-    def __init__(self,
+    image_url: builtins.str
+    """封面图"""
+    title: builtins.str
+    """标题"""
+    text_1: builtins.str
+    """展示项1"""
+    button_text: builtins.str
+    """button文案"""
+    url: builtins.str
+    """点击跳转链接"""
+    def __init__(
+        self,
         *,
-        image_url : typing.Text = ...,
-        title : typing.Text = ...,
-        text_1 : typing.Text = ...,
-        button_text : typing.Text = ...,
-        url : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button_text",b"button_text",u"image_url",b"image_url",u"text_1",b"text_1",u"title",b"title",u"url",b"url"]) -> None: ...
+        image_url: builtins.str = ...,
+        title: builtins.str = ...,
+        text_1: builtins.str = ...,
+        button_text: builtins.str = ...,
+        url: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button_text", b"button_text", "image_url", b"image_url", "text_1", b"text_1", "title", b"title", "url", b"url"]) -> None: ...
+
 global___AdditionVote = AdditionVote
 
-# 动态模块-投票
+@typing_extensions.final
 class AdditionVote2(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态模块-投票"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ADDITION_VOTE_TYPE_FIELD_NUMBER: builtins.int
     VOTE_ID_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
@@ -2034,110 +2152,127 @@ class AdditionVote2(google.protobuf.message.Message):
     IS_VOTED_FIELD_NUMBER: builtins.int
     CHOICE_CNT_FIELD_NUMBER: builtins.int
     DEFAULE_SELECT_SHARE_FIELD_NUMBER: builtins.int
-    # 投票类型
-    addition_vote_type: global___AdditionVoteType.V = ...
-    # 投票ID
-    vote_id: builtins.int = ...
-    # 标题
-    title: typing.Text = ...
-    # 已过期： xxx人参与· 投票已过期。button 展示去查看
-    # 未过期： xxx人参与· 剩xx天xx时xx分。button展示去投票
-    label: typing.Text = ...
-    # 剩余时间
-    deadline: builtins.int = ...
-    # 生效文案
-    open_text: typing.Text = ...
-    # 过期文案
-    close_text: typing.Text = ...
-    # 已投票
-    voted_text: typing.Text = ...
-    # 投票状态
-    state: global___AdditionVoteState.V = ...
-    #
+    addition_vote_type: global___AdditionVoteType.ValueType
+    """投票类型"""
+    vote_id: builtins.int
+    """投票ID"""
+    title: builtins.str
+    """标题"""
+    label: builtins.str
+    """已过期： xxx人参与· 投票已过期。button 展示去查看
+    未过期： xxx人参与· 剩xx天xx时xx分。button展示去投票
+    """
+    deadline: builtins.int
+    """剩余时间"""
+    open_text: builtins.str
+    """生效文案"""
+    close_text: builtins.str
+    """过期文案"""
+    voted_text: builtins.str
+    """已投票"""
+    state: global___AdditionVoteState.ValueType
+    """投票状态"""
     @property
-    def addition_vote_word(self) -> global___AdditionVoteWord: ...
-    #
+    def addition_vote_word(self) -> global___AdditionVoteWord:
+        """"""
     @property
-    def addition_vote_pic(self) -> global___AdditionVotePic: ...
-    #
+    def addition_vote_pic(self) -> global___AdditionVotePic:
+        """"""
     @property
-    def addition_vote_defaule(self) -> global___AdditionVoteDefaule: ...
-    # 业务类型
-    # 0:动态投票 1:话题h5组件
-    biz_type: builtins.int = ...
-    # 投票总人数
-    total: builtins.int = ...
-    # 附加卡类型
-    card_type: typing.Text = ...
-    # 异常提示
-    tips: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 是否投票
-    is_voted: builtins.bool = ...
-    # 投票最多多选个数，单选为1
-    choice_cnt: builtins.int = ...
-    # 是否默认选中分享到动态
-    defaule_select_share: builtins.bool = ...
-    def __init__(self,
+    def addition_vote_defaule(self) -> global___AdditionVoteDefaule:
+        """"""
+    biz_type: builtins.int
+    """业务类型
+    0:动态投票 1:话题h5组件
+    """
+    total: builtins.int
+    """投票总人数"""
+    card_type: builtins.str
+    """附加卡类型"""
+    tips: builtins.str
+    """异常提示"""
+    uri: builtins.str
+    """跳转地址"""
+    is_voted: builtins.bool
+    """是否投票"""
+    choice_cnt: builtins.int
+    """投票最多多选个数，单选为1"""
+    defaule_select_share: builtins.bool
+    """是否默认选中分享到动态"""
+    def __init__(
+        self,
         *,
-        addition_vote_type : global___AdditionVoteType.V = ...,
-        vote_id : builtins.int = ...,
-        title : typing.Text = ...,
-        label : typing.Text = ...,
-        deadline : builtins.int = ...,
-        open_text : typing.Text = ...,
-        close_text : typing.Text = ...,
-        voted_text : typing.Text = ...,
-        state : global___AdditionVoteState.V = ...,
-        addition_vote_word : typing.Optional[global___AdditionVoteWord] = ...,
-        addition_vote_pic : typing.Optional[global___AdditionVotePic] = ...,
-        addition_vote_defaule : typing.Optional[global___AdditionVoteDefaule] = ...,
-        biz_type : builtins.int = ...,
-        total : builtins.int = ...,
-        card_type : typing.Text = ...,
-        tips : typing.Text = ...,
-        uri : typing.Text = ...,
-        is_voted : builtins.bool = ...,
-        choice_cnt : builtins.int = ...,
-        defaule_select_share : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"addition_vote_defaule",b"addition_vote_defaule",u"addition_vote_pic",b"addition_vote_pic",u"addition_vote_word",b"addition_vote_word",u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"addition_vote_defaule",b"addition_vote_defaule",u"addition_vote_pic",b"addition_vote_pic",u"addition_vote_type",b"addition_vote_type",u"addition_vote_word",b"addition_vote_word",u"biz_type",b"biz_type",u"card_type",b"card_type",u"choice_cnt",b"choice_cnt",u"close_text",b"close_text",u"deadline",b"deadline",u"defaule_select_share",b"defaule_select_share",u"is_voted",b"is_voted",u"item",b"item",u"label",b"label",u"open_text",b"open_text",u"state",b"state",u"tips",b"tips",u"title",b"title",u"total",b"total",u"uri",b"uri",u"vote_id",b"vote_id",u"voted_text",b"voted_text"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"item",b"item"]) -> typing.Optional[typing_extensions.Literal["addition_vote_word","addition_vote_pic","addition_vote_defaule"]]: ...
+        addition_vote_type: global___AdditionVoteType.ValueType = ...,
+        vote_id: builtins.int = ...,
+        title: builtins.str = ...,
+        label: builtins.str = ...,
+        deadline: builtins.int = ...,
+        open_text: builtins.str = ...,
+        close_text: builtins.str = ...,
+        voted_text: builtins.str = ...,
+        state: global___AdditionVoteState.ValueType = ...,
+        addition_vote_word: global___AdditionVoteWord | None = ...,
+        addition_vote_pic: global___AdditionVotePic | None = ...,
+        addition_vote_defaule: global___AdditionVoteDefaule | None = ...,
+        biz_type: builtins.int = ...,
+        total: builtins.int = ...,
+        card_type: builtins.str = ...,
+        tips: builtins.str = ...,
+        uri: builtins.str = ...,
+        is_voted: builtins.bool = ...,
+        choice_cnt: builtins.int = ...,
+        defaule_select_share: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["addition_vote_defaule", b"addition_vote_defaule", "addition_vote_pic", b"addition_vote_pic", "addition_vote_word", b"addition_vote_word", "item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["addition_vote_defaule", b"addition_vote_defaule", "addition_vote_pic", b"addition_vote_pic", "addition_vote_type", b"addition_vote_type", "addition_vote_word", b"addition_vote_word", "biz_type", b"biz_type", "card_type", b"card_type", "choice_cnt", b"choice_cnt", "close_text", b"close_text", "deadline", b"deadline", "defaule_select_share", b"defaule_select_share", "is_voted", b"is_voted", "item", b"item", "label", b"label", "open_text", b"open_text", "state", b"state", "tips", b"tips", "title", b"title", "total", b"total", "uri", b"uri", "vote_id", b"vote_id", "voted_text", b"voted_text"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["item", b"item"]) -> typing_extensions.Literal["addition_vote_word", "addition_vote_pic", "addition_vote_defaule"] | None: ...
+
 global___AdditionVote2 = AdditionVote2
 
-# 外露投票
+@typing_extensions.final
 class AdditionVoteDefaule(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """外露投票"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     COVER_FIELD_NUMBER: builtins.int
-    # 图片 多张
     @property
-    def cover(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    def __init__(self,
+    def cover(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """图片 多张"""
+    def __init__(
+        self,
         *,
-        cover : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cover",b"cover"]) -> None: ...
+        cover: collections.abc.Iterable[builtins.str] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cover", b"cover"]) -> None: ...
+
 global___AdditionVoteDefaule = AdditionVoteDefaule
 
-# 外露图片类型
+@typing_extensions.final
 class AdditionVotePic(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """外露图片类型"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEM_FIELD_NUMBER: builtins.int
-    # 图片投票详情
     @property
-    def item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionVotePicItem]: ...
-    def __init__(self,
+    def item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionVotePicItem]:
+        """图片投票详情"""
+    def __init__(
+        self,
         *,
-        item : typing.Optional[typing.Iterable[global___AdditionVotePicItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> None: ...
+        item: collections.abc.Iterable[global___AdditionVotePicItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item", b"item"]) -> None: ...
+
 global___AdditionVotePic = AdditionVotePic
 
-# 图片投票详情
+@typing_extensions.final
 class AdditionVotePicItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """图片投票详情"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     OPT_IDX_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     IS_VOTE_FIELD_NUMBER: builtins.int
@@ -2145,104 +2280,124 @@ class AdditionVotePicItem(google.protobuf.message.Message):
     PERSENT_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     IS_MAX_OPTION_FIELD_NUMBER: builtins.int
-    # 选项索引，从1开始
-    opt_idx: builtins.int = ...
-    # 图片
-    cover: typing.Text = ...
-    # 选中状态
-    is_vote: builtins.bool = ...
-    # 人数
-    total: builtins.int = ...
-    # 占比
-    persent: builtins.float = ...
-    # 标题文案
-    title: typing.Text = ...
-    # 是否投票人数最多的选项
-    is_max_option: builtins.bool = ...
-    def __init__(self,
+    opt_idx: builtins.int
+    """选项索引，从1开始"""
+    cover: builtins.str
+    """图片"""
+    is_vote: builtins.bool
+    """选中状态"""
+    total: builtins.int
+    """人数"""
+    persent: builtins.float
+    """占比"""
+    title: builtins.str
+    """标题文案"""
+    is_max_option: builtins.bool
+    """是否投票人数最多的选项"""
+    def __init__(
+        self,
         *,
-        opt_idx : builtins.int = ...,
-        cover : typing.Text = ...,
-        is_vote : builtins.bool = ...,
-        total : builtins.int = ...,
-        persent : builtins.float = ...,
-        title : typing.Text = ...,
-        is_max_option : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cover",b"cover",u"is_max_option",b"is_max_option",u"is_vote",b"is_vote",u"opt_idx",b"opt_idx",u"persent",b"persent",u"title",b"title",u"total",b"total"]) -> None: ...
+        opt_idx: builtins.int = ...,
+        cover: builtins.str = ...,
+        is_vote: builtins.bool = ...,
+        total: builtins.int = ...,
+        persent: builtins.float = ...,
+        title: builtins.str = ...,
+        is_max_option: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cover", b"cover", "is_max_option", b"is_max_option", "is_vote", b"is_vote", "opt_idx", b"opt_idx", "persent", b"persent", "title", b"title", "total", b"total"]) -> None: ...
+
 global___AdditionVotePicItem = AdditionVotePicItem
 
-# 外露文字类型
+@typing_extensions.final
 class AdditionVoteWord(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """外露文字类型"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEM_FIELD_NUMBER: builtins.int
-    # 外露文字投票详情
     @property
-    def item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionVoteWordItem]: ...
-    def __init__(self,
+    def item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionVoteWordItem]:
+        """外露文字投票详情"""
+    def __init__(
+        self,
         *,
-        item : typing.Optional[typing.Iterable[global___AdditionVoteWordItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> None: ...
+        item: collections.abc.Iterable[global___AdditionVoteWordItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item", b"item"]) -> None: ...
+
 global___AdditionVoteWord = AdditionVoteWord
 
-# 外露文字投票详情
+@typing_extensions.final
 class AdditionVoteWordItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """外露文字投票详情"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     OPT_IDX_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     IS_VOTE_FIELD_NUMBER: builtins.int
     TOTAL_FIELD_NUMBER: builtins.int
     PERSENT_FIELD_NUMBER: builtins.int
     IS_MAX_OPTION_FIELD_NUMBER: builtins.int
-    # 选项索引，从1开始
-    opt_idx: builtins.int = ...
-    # 文案
-    title: typing.Text = ...
-    # 选中状态
-    is_vote: builtins.bool = ...
-    # 人数
-    total: builtins.int = ...
-    # 占比
-    persent: builtins.float = ...
-    # 是否投票人数最多的选项
-    is_max_option: builtins.bool = ...
-    def __init__(self,
+    opt_idx: builtins.int
+    """选项索引，从1开始"""
+    title: builtins.str
+    """文案"""
+    is_vote: builtins.bool
+    """选中状态"""
+    total: builtins.int
+    """人数"""
+    persent: builtins.float
+    """占比"""
+    is_max_option: builtins.bool
+    """是否投票人数最多的选项"""
+    def __init__(
+        self,
         *,
-        opt_idx : builtins.int = ...,
-        title : typing.Text = ...,
-        is_vote : builtins.bool = ...,
-        total : builtins.int = ...,
-        persent : builtins.float = ...,
-        is_max_option : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"is_max_option",b"is_max_option",u"is_vote",b"is_vote",u"opt_idx",b"opt_idx",u"persent",b"persent",u"title",b"title",u"total",b"total"]) -> None: ...
+        opt_idx: builtins.int = ...,
+        title: builtins.str = ...,
+        is_vote: builtins.bool = ...,
+        total: builtins.int = ...,
+        persent: builtins.float = ...,
+        is_max_option: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["is_max_option", b"is_max_option", "is_vote", b"is_vote", "opt_idx", b"opt_idx", "persent", b"persent", "title", b"title", "total", b"total"]) -> None: ...
+
 global___AdditionVoteWordItem = AdditionVoteWordItem
 
-# 活动皮肤
+@typing_extensions.final
 class AdditionalActSkin(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """活动皮肤"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SVGA_FIELD_NUMBER: builtins.int
     LAST_IMAGE_FIELD_NUMBER: builtins.int
     PLAY_TIMES_FIELD_NUMBER: builtins.int
-    # 动画SVGA资源
-    svga: typing.Text = ...
-    # 动画SVGA最后一帧图片资源
-    last_image: typing.Text = ...
-    # 动画播放次数
-    play_times: builtins.int = ...
-    def __init__(self,
+    svga: builtins.str
+    """动画SVGA资源"""
+    last_image: builtins.str
+    """动画SVGA最后一帧图片资源"""
+    play_times: builtins.int
+    """动画播放次数"""
+    def __init__(
+        self,
         *,
-        svga : typing.Text = ...,
-        last_image : typing.Text = ...,
-        play_times : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"last_image",b"last_image",u"play_times",b"play_times",u"svga",b"svga"]) -> None: ...
+        svga: builtins.str = ...,
+        last_image: builtins.str = ...,
+        play_times: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["last_image", b"last_image", "play_times", b"play_times", "svga", b"svga"]) -> None: ...
+
 global___AdditionalActSkin = AdditionalActSkin
 
-# 动态-附加卡-按钮
+@typing_extensions.final
 class AdditionalButton(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-按钮"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     JUMP_STYLE_FIELD_NUMBER: builtins.int
     JUMP_URL_FIELD_NUMBER: builtins.int
@@ -2250,86 +2405,101 @@ class AdditionalButton(google.protobuf.message.Message):
     CHECK_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     CLICK_TYPE_FIELD_NUMBER: builtins.int
-    # 按钮类型
-    type: global___AddButtonType.V = ...
-    # jump-跳转样式
+    type: global___AddButtonType.ValueType
+    """按钮类型"""
     @property
-    def jump_style(self) -> global___AdditionalButtonStyle: ...
-    # jump-跳转链接
-    jump_url: typing.Text = ...
-    # button-未点样式
+    def jump_style(self) -> global___AdditionalButtonStyle:
+        """jump-跳转样式"""
+    jump_url: builtins.str
+    """jump-跳转链接"""
     @property
-    def uncheck(self) -> global___AdditionalButtonStyle: ...
-    # button-已点样式
+    def uncheck(self) -> global___AdditionalButtonStyle:
+        """button-未点样式"""
     @property
-    def check(self) -> global___AdditionalButtonStyle: ...
-    # button-当前状态
-    status: global___AdditionalButtonStatus.V = ...
-    # 按钮点击样式
-    click_type: global___AdditionalButtonClickType.V = ...
-    def __init__(self,
+    def check(self) -> global___AdditionalButtonStyle:
+        """button-已点样式"""
+    status: global___AdditionalButtonStatus.ValueType
+    """button-当前状态"""
+    click_type: global___AdditionalButtonClickType.ValueType
+    """按钮点击样式"""
+    def __init__(
+        self,
         *,
-        type : global___AddButtonType.V = ...,
-        jump_style : typing.Optional[global___AdditionalButtonStyle] = ...,
-        jump_url : typing.Text = ...,
-        uncheck : typing.Optional[global___AdditionalButtonStyle] = ...,
-        check : typing.Optional[global___AdditionalButtonStyle] = ...,
-        status : global___AdditionalButtonStatus.V = ...,
-        click_type : global___AdditionalButtonClickType.V = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"check",b"check",u"jump_style",b"jump_style",u"uncheck",b"uncheck"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"check",b"check",u"click_type",b"click_type",u"jump_style",b"jump_style",u"jump_url",b"jump_url",u"status",b"status",u"type",b"type",u"uncheck",b"uncheck"]) -> None: ...
+        type: global___AddButtonType.ValueType = ...,
+        jump_style: global___AdditionalButtonStyle | None = ...,
+        jump_url: builtins.str = ...,
+        uncheck: global___AdditionalButtonStyle | None = ...,
+        check: global___AdditionalButtonStyle | None = ...,
+        status: global___AdditionalButtonStatus.ValueType = ...,
+        click_type: global___AdditionalButtonClickType.ValueType = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["check", b"check", "jump_style", b"jump_style", "uncheck", b"uncheck"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["check", b"check", "click_type", b"click_type", "jump_style", b"jump_style", "jump_url", b"jump_url", "status", b"status", "type", b"type", "uncheck", b"uncheck"]) -> None: ...
+
 global___AdditionalButton = AdditionalButton
 
-#
+@typing_extensions.final
 class AdditionalButtonInteractive(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     POPUPS_FIELD_NUMBER: builtins.int
     CONFIRM_FIELD_NUMBER: builtins.int
     CANCEL_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
-    # 是否弹窗
-    popups: typing.Text = ...
-    # 弹窗确认文案
-    confirm: typing.Text = ...
-    # 弹窗取消文案
-    cancel: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    def __init__(self,
+    popups: builtins.str
+    """是否弹窗"""
+    confirm: builtins.str
+    """弹窗确认文案"""
+    cancel: builtins.str
+    """弹窗取消文案"""
+    desc: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        popups : typing.Text = ...,
-        confirm : typing.Text = ...,
-        cancel : typing.Text = ...,
-        desc : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cancel",b"cancel",u"confirm",b"confirm",u"desc",b"desc",u"popups",b"popups"]) -> None: ...
+        popups: builtins.str = ...,
+        confirm: builtins.str = ...,
+        cancel: builtins.str = ...,
+        desc: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cancel", b"cancel", "confirm", b"confirm", "desc", b"desc", "popups", b"popups"]) -> None: ...
+
 global___AdditionalButtonInteractive = AdditionalButtonInteractive
 
-#
+@typing_extensions.final
 class AdditionalButtonShare(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SHOW_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
-    #
-    show: builtins.int = ...
-    #
-    icon: typing.Text = ...
-    #
-    text: typing.Text = ...
-    def __init__(self,
+    show: builtins.int
+    """"""
+    icon: builtins.str
+    """"""
+    text: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        show : builtins.int = ...,
-        icon : typing.Text = ...,
-        text : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"show",b"show",u"text",b"text"]) -> None: ...
+        show: builtins.int = ...,
+        icon: builtins.str = ...,
+        text: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "show", b"show", "text", b"text"]) -> None: ...
+
 global___AdditionalButtonShare = AdditionalButtonShare
 
-# 动态-附加卡-按钮样式
+@typing_extensions.final
 class AdditionalButtonStyle(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-按钮样式"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
     INTERACTIVE_FIELD_NUMBER: builtins.int
@@ -2337,40 +2507,46 @@ class AdditionalButtonStyle(google.protobuf.message.Message):
     TOAST_FIELD_NUMBER: builtins.int
     DISABLE_FIELD_NUMBER: builtins.int
     SHARE_FIELD_NUMBER: builtins.int
-    # icon
-    icon: typing.Text = ...
-    # 文案
-    text: typing.Text = ...
-    # 按钮点击交互
+    icon: builtins.str
+    """icon"""
+    text: builtins.str
+    """文案"""
     @property
-    def interactive(self) -> global___AdditionalButtonInteractive: ...
-    # 当前按钮填充样式
-    bg_style: global___AddButtonBgStyle.V = ...
-    # toast文案, 当disable=1时有效
-    toast: typing.Text = ...
-    # 当前按钮样式,
-    # 0:高亮 1:置灰(按钮不可点击)
-    disable: global___DisableState.V = ...
-    #
+    def interactive(self) -> global___AdditionalButtonInteractive:
+        """按钮点击交互"""
+    bg_style: global___AddButtonBgStyle.ValueType
+    """当前按钮填充样式"""
+    toast: builtins.str
+    """toast文案, 当disable=1时有效"""
+    disable: global___DisableState.ValueType
+    """当前按钮样式,
+    0:高亮 1:置灰(按钮不可点击)
+    """
     @property
-    def share(self) -> global___AdditionalButtonShare: ...
-    def __init__(self,
+    def share(self) -> global___AdditionalButtonShare:
+        """"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        text : typing.Text = ...,
-        interactive : typing.Optional[global___AdditionalButtonInteractive] = ...,
-        bg_style : global___AddButtonBgStyle.V = ...,
-        toast : typing.Text = ...,
-        disable : global___DisableState.V = ...,
-        share : typing.Optional[global___AdditionalButtonShare] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"interactive",b"interactive",u"share",b"share"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"bg_style",b"bg_style",u"disable",b"disable",u"icon",b"icon",u"interactive",b"interactive",u"share",b"share",u"text",b"text",u"toast",b"toast"]) -> None: ...
+        icon: builtins.str = ...,
+        text: builtins.str = ...,
+        interactive: global___AdditionalButtonInteractive | None = ...,
+        bg_style: global___AddButtonBgStyle.ValueType = ...,
+        toast: builtins.str = ...,
+        disable: global___DisableState.ValueType = ...,
+        share: global___AdditionalButtonShare | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["interactive", b"interactive", "share", b"share"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bg_style", b"bg_style", "disable", b"disable", "icon", b"icon", "interactive", b"interactive", "share", b"share", "text", b"text", "toast", b"toast"]) -> None: ...
+
 global___AdditionalButtonStyle = AdditionalButtonStyle
 
-# 动态-附加卡-番剧卡
+@typing_extensions.final
 class AdditionalPGC(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-番剧卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HEAD_TEXT_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     IMAGE_URL_FIELD_NUMBER: builtins.int
@@ -2381,113 +2557,133 @@ class AdditionalPGC(google.protobuf.message.Message):
     HEAD_ICON_FIELD_NUMBER: builtins.int
     STYLE_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
-    # 头部说明文案
-    head_text: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 展示图
-    image_url: typing.Text = ...
-    # 描述文字1
-    desc_text_1: typing.Text = ...
-    # 描述文字2
-    desc_text_2: typing.Text = ...
-    # 点击跳转链接
-    url: typing.Text = ...
-    # 按钮
+    head_text: builtins.str
+    """头部说明文案"""
+    title: builtins.str
+    """标题"""
+    image_url: builtins.str
+    """展示图"""
+    desc_text_1: builtins.str
+    """描述文字1"""
+    desc_text_2: builtins.str
+    """描述文字2"""
+    url: builtins.str
+    """点击跳转链接"""
     @property
-    def button(self) -> global___AdditionalButton: ...
-    # 头部icon
-    head_icon: typing.Text = ...
-    # style
-    style: global___ImageStyle.V = ...
-    # 动态本身的类型 type
-    type: typing.Text = ...
-    def __init__(self,
+    def button(self) -> global___AdditionalButton:
+        """按钮"""
+    head_icon: builtins.str
+    """头部icon"""
+    style: global___ImageStyle.ValueType
+    """style"""
+    type: builtins.str
+    """动态本身的类型 type"""
+    def __init__(
+        self,
         *,
-        head_text : typing.Text = ...,
-        title : typing.Text = ...,
-        image_url : typing.Text = ...,
-        desc_text_1 : typing.Text = ...,
-        desc_text_2 : typing.Text = ...,
-        url : typing.Text = ...,
-        button : typing.Optional[global___AdditionalButton] = ...,
-        head_icon : typing.Text = ...,
-        style : global___ImageStyle.V = ...,
-        type : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"desc_text_1",b"desc_text_1",u"desc_text_2",b"desc_text_2",u"head_icon",b"head_icon",u"head_text",b"head_text",u"image_url",b"image_url",u"style",b"style",u"title",b"title",u"type",b"type",u"url",b"url"]) -> None: ...
+        head_text: builtins.str = ...,
+        title: builtins.str = ...,
+        image_url: builtins.str = ...,
+        desc_text_1: builtins.str = ...,
+        desc_text_2: builtins.str = ...,
+        url: builtins.str = ...,
+        button: global___AdditionalButton | None = ...,
+        head_icon: builtins.str = ...,
+        style: global___ImageStyle.ValueType = ...,
+        type: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "desc_text_1", b"desc_text_1", "desc_text_2", b"desc_text_2", "head_icon", b"head_icon", "head_text", b"head_text", "image_url", b"image_url", "style", b"style", "title", b"title", "type", b"type", "url", b"url"]) -> None: ...
+
 global___AdditionalPGC = AdditionalPGC
 
-#
+@typing_extensions.final
 class AlumniDynamicsReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
-    #
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    #
-    toast: typing.Text = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """"""
+    toast: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        toast : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"list",b"list",u"toast",b"toast"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        toast: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["list", b"list", "toast", b"toast"]) -> None: ...
+
 global___AlumniDynamicsReply = AlumniDynamicsReply
 
-#
+@typing_extensions.final
 class AlumniDynamicsReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     FIRST_TIME_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    first_time: builtins.int = ...
-    #
+    campus_id: builtins.int
+    """"""
+    first_time: builtins.int
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    #
-    local_time: builtins.int = ...
-    #
-    page: builtins.int = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    local_time: builtins.int
+    """"""
+    page: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        first_time : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        local_time : builtins.int = ...,
-        page : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"first_time",b"first_time",u"local_time",b"local_time",u"page",b"page",u"player_args",b"player_args"]) -> None: ...
+        campus_id: builtins.int = ...,
+        first_time: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        local_time: builtins.int = ...,
+        page: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "first_time", b"first_time", "local_time", b"local_time", "page", b"page", "player_args", b"player_args"]) -> None: ...
+
 global___AlumniDynamicsReq = AlumniDynamicsReq
 
-#
+@typing_extensions.final
 class CampusBannerInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     IMAGE_FIELD_NUMBER: builtins.int
     JUMP_URL_FIELD_NUMBER: builtins.int
-    #
-    image: typing.Text = ...
-    #
-    jump_url: typing.Text = ...
-    def __init__(self,
+    image: builtins.str
+    """"""
+    jump_url: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        image : typing.Text = ...,
-        jump_url : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"image",b"image",u"jump_url",b"jump_url"]) -> None: ...
+        image: builtins.str = ...,
+        jump_url: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["image", b"image", "jump_url", b"jump_url"]) -> None: ...
+
 global___CampusBannerInfo = CampusBannerInfo
 
-#
+@typing_extensions.final
 class CampusBillBoardReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     HELP_URI_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
@@ -2498,271 +2694,331 @@ class CampusBillBoardReply(google.protobuf.message.Message):
     BIND_NOTICE_FIELD_NUMBER: builtins.int
     UPDATE_TOAST_FIELD_NUMBER: builtins.int
     CAMPUS_ID_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    help_uri: typing.Text = ...
-    #
-    campus_name: typing.Text = ...
-    #
-    build_time: builtins.int = ...
-    #
-    version_code: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
+    help_uri: builtins.str
+    """"""
+    campus_name: builtins.str
+    """"""
+    build_time: builtins.int
+    """"""
+    version_code: builtins.str
+    """"""
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___OfficialItem]: ...
-    #
-    share_uri: typing.Text = ...
-    #
-    bind_notice: builtins.int = ...
-    #
-    update_toast: typing.Text = ...
-    #
-    campus_id: builtins.int = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___OfficialItem]:
+        """"""
+    share_uri: builtins.str
+    """"""
+    bind_notice: builtins.int
+    """"""
+    update_toast: builtins.str
+    """"""
+    campus_id: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        help_uri : typing.Text = ...,
-        campus_name : typing.Text = ...,
-        build_time : builtins.int = ...,
-        version_code : typing.Text = ...,
-        list : typing.Optional[typing.Iterable[global___OfficialItem]] = ...,
-        share_uri : typing.Text = ...,
-        bind_notice : builtins.int = ...,
-        update_toast : typing.Text = ...,
-        campus_id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"bind_notice",b"bind_notice",u"build_time",b"build_time",u"campus_id",b"campus_id",u"campus_name",b"campus_name",u"help_uri",b"help_uri",u"list",b"list",u"share_uri",b"share_uri",u"title",b"title",u"update_toast",b"update_toast",u"version_code",b"version_code"]) -> None: ...
+        title: builtins.str = ...,
+        help_uri: builtins.str = ...,
+        campus_name: builtins.str = ...,
+        build_time: builtins.int = ...,
+        version_code: builtins.str = ...,
+        list: collections.abc.Iterable[global___OfficialItem] | None = ...,
+        share_uri: builtins.str = ...,
+        bind_notice: builtins.int = ...,
+        update_toast: builtins.str = ...,
+        campus_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bind_notice", b"bind_notice", "build_time", b"build_time", "campus_id", b"campus_id", "campus_name", b"campus_name", "help_uri", b"help_uri", "list", b"list", "share_uri", b"share_uri", "title", b"title", "update_toast", b"update_toast", "version_code", b"version_code"]) -> None: ...
+
 global___CampusBillBoardReply = CampusBillBoardReply
 
-#
+@typing_extensions.final
 class CampusBillBoardReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     VERSION_CODE_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    version_code: typing.Text = ...
-    #
+    campus_id: builtins.int
+    """"""
+    version_code: builtins.str
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        version_code : typing.Text = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"player_args",b"player_args",u"version_code",b"version_code"]) -> None: ...
+        campus_id: builtins.int = ...,
+        version_code: builtins.str = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "player_args", b"player_args", "version_code", b"version_code"]) -> None: ...
+
 global___CampusBillBoardReq = CampusBillBoardReq
 
-#
+@typing_extensions.final
 class CampusBillboardInternalReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MID_FIELD_NUMBER: builtins.int
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     VERSION_CODE_FIELD_NUMBER: builtins.int
-    #
-    mid: builtins.int = ...
-    #
-    campus_id: builtins.int = ...
-    #
-    version_code: typing.Text = ...
-    def __init__(self,
+    mid: builtins.int
+    """"""
+    campus_id: builtins.int
+    """"""
+    version_code: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        mid : builtins.int = ...,
-        campus_id : builtins.int = ...,
-        version_code : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"mid",b"mid",u"version_code",b"version_code"]) -> None: ...
+        mid: builtins.int = ...,
+        campus_id: builtins.int = ...,
+        version_code: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "mid", b"mid", "version_code", b"version_code"]) -> None: ...
+
 global___CampusBillboardInternalReq = CampusBillboardInternalReq
 
-#
+@typing_extensions.final
 class CampusFeedbackInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     BIZ_TYPE_FIELD_NUMBER: builtins.int
     BIZ_ID_FIELD_NUMBER: builtins.int
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     REASON_FIELD_NUMBER: builtins.int
-    #
-    biz_type: builtins.int = ...
-    #
-    biz_id: builtins.int = ...
-    #
-    campus_id: builtins.int = ...
-    #
-    reason: typing.Text = ...
-    def __init__(self,
+    biz_type: builtins.int
+    """"""
+    biz_id: builtins.int
+    """"""
+    campus_id: builtins.int
+    """"""
+    reason: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        biz_type : builtins.int = ...,
-        biz_id : builtins.int = ...,
-        campus_id : builtins.int = ...,
-        reason : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"biz_id",b"biz_id",u"biz_type",b"biz_type",u"campus_id",b"campus_id",u"reason",b"reason"]) -> None: ...
+        biz_type: builtins.int = ...,
+        biz_id: builtins.int = ...,
+        campus_id: builtins.int = ...,
+        reason: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["biz_id", b"biz_id", "biz_type", b"biz_type", "campus_id", b"campus_id", "reason", b"reason"]) -> None: ...
+
 global___CampusFeedbackInfo = CampusFeedbackInfo
 
-#
+@typing_extensions.final
 class CampusFeedbackReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MESSAGE_FIELD_NUMBER: builtins.int
-    #
-    message: typing.Text = ...
-    def __init__(self,
+    message: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        message : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"message",b"message"]) -> None: ...
+        message: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["message", b"message"]) -> None: ...
+
 global___CampusFeedbackReply = CampusFeedbackReply
 
-#
+@typing_extensions.final
 class CampusFeedbackReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     INFOS_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
-    #
     @property
-    def infos(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusFeedbackInfo]: ...
-    def __init__(self,
+    def infos(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusFeedbackInfo]:
+        """"""
+    def __init__(
+        self,
         *,
-        infos : typing.Optional[typing.Iterable[global___CampusFeedbackInfo]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"from",b"from",u"infos",b"infos"]) -> None: ...
+        infos: collections.abc.Iterable[global___CampusFeedbackInfo] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["from", b"from", "infos", b"infos"]) -> None: ...
+
 global___CampusFeedbackReq = CampusFeedbackReq
 
-#
+@typing_extensions.final
 class CampusInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     ONLINE_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    #
-    online: builtins.int = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    online: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        desc : typing.Text = ...,
-        online : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"campus_name",b"campus_name",u"desc",b"desc",u"online",b"online"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+        desc: builtins.str = ...,
+        online: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "campus_name", b"campus_name", "desc", b"desc", "online", b"online"]) -> None: ...
+
 global___CampusInfo = CampusInfo
 
-#
+@typing_extensions.final
 class CampusLabel(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
-    #
-    text: typing.Text = ...
-    #
-    url: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    def __init__(self,
+    text: builtins.str
+    """"""
+    url: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        url : typing.Text = ...,
-        desc : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"text",b"text",u"url",b"url"]) -> None: ...
+        text: builtins.str = ...,
+        url: builtins.str = ...,
+        desc: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "text", b"text", "url", b"url"]) -> None: ...
+
 global___CampusLabel = CampusLabel
 
-#
+@typing_extensions.final
 class CampusMateLikeListReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
-    #
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleAuthor]: ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleAuthor]:
+        """"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___ModuleAuthor]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"list",b"list"]) -> None: ...
+        list: collections.abc.Iterable[global___ModuleAuthor] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["list", b"list"]) -> None: ...
+
 global___CampusMateLikeListReply = CampusMateLikeListReply
 
-#
+@typing_extensions.final
 class CampusMateLikeListReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYNAMIC_ID_FIELD_NUMBER: builtins.int
-    #
-    dynamic_id: builtins.int = ...
-    def __init__(self,
+    dynamic_id: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        dynamic_id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dynamic_id",b"dynamic_id"]) -> None: ...
+        dynamic_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dynamic_id", b"dynamic_id"]) -> None: ...
+
 global___CampusMateLikeListReq = CampusMateLikeListReq
 
-#
+@typing_extensions.final
 class CampusNoticeInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     BUTTON_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
     @property
-    def button(self) -> global___CampusLabel: ...
-    def __init__(self,
+    def button(self) -> global___CampusLabel:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        button : typing.Optional[global___CampusLabel] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"desc",b"desc",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+        button: global___CampusLabel | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "desc", b"desc", "title", b"title"]) -> None: ...
+
 global___CampusNoticeInfo = CampusNoticeInfo
 
-#
+@typing_extensions.final
 class CampusRcmdFeedReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
     GUIDE_BAR_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     UPDATE_FIELD_NUMBER: builtins.int
-    #
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    #
-    toast: typing.Text = ...
-    #
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """"""
+    toast: builtins.str
+    """"""
     @property
-    def guide_bar(self) -> global___GuideBarInfo: ...
-    #
-    has_more: builtins.bool = ...
-    #
-    update: builtins.bool = ...
-    def __init__(self,
+    def guide_bar(self) -> global___GuideBarInfo:
+        """"""
+    has_more: builtins.bool
+    """"""
+    update: builtins.bool
+    """"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        toast : typing.Text = ...,
-        guide_bar : typing.Optional[global___GuideBarInfo] = ...,
-        has_more : builtins.bool = ...,
-        update : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"guide_bar",b"guide_bar"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"guide_bar",b"guide_bar",u"has_more",b"has_more",u"list",b"list",u"toast",b"toast",u"update",b"update"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        toast: builtins.str = ...,
+        guide_bar: global___GuideBarInfo | None = ...,
+        has_more: builtins.bool = ...,
+        update: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["guide_bar", b"guide_bar"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["guide_bar", b"guide_bar", "has_more", b"has_more", "list", b"list", "toast", b"toast", "update", b"update"]) -> None: ...
+
 global___CampusRcmdFeedReply = CampusRcmdFeedReply
 
-#
+@typing_extensions.final
 class CampusRcmdFeedReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     FIRST_TIME_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
@@ -2770,144 +3026,169 @@ class CampusRcmdFeedReq(google.protobuf.message.Message):
     PAGE_FIELD_NUMBER: builtins.int
     SCROLL_FIELD_NUMBER: builtins.int
     VIEW_DYN_ID_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    first_time: builtins.int = ...
-    #
+    campus_id: builtins.int
+    """"""
+    first_time: builtins.int
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    #
-    local_time: builtins.int = ...
-    #
-    page: builtins.int = ...
-    #
-    scroll: builtins.int = ...
-    #
-    view_dyn_id: typing.Text = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    local_time: builtins.int
+    """"""
+    page: builtins.int
+    """"""
+    scroll: builtins.int
+    """"""
+    view_dyn_id: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        first_time : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        local_time : builtins.int = ...,
-        page : builtins.int = ...,
-        scroll : builtins.int = ...,
-        view_dyn_id : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"first_time",b"first_time",u"local_time",b"local_time",u"page",b"page",u"player_args",b"player_args",u"scroll",b"scroll",u"view_dyn_id",b"view_dyn_id"]) -> None: ...
+        campus_id: builtins.int = ...,
+        first_time: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        local_time: builtins.int = ...,
+        page: builtins.int = ...,
+        scroll: builtins.int = ...,
+        view_dyn_id: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "first_time", b"first_time", "local_time", b"local_time", "page", b"page", "player_args", b"player_args", "scroll", b"scroll", "view_dyn_id", b"view_dyn_id"]) -> None: ...
+
 global___CampusRcmdFeedReq = CampusRcmdFeedReq
 
-#
+@typing_extensions.final
 class CampusRcmdInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     ITEMS_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusRcmdItem]: ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusRcmdItem]:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        items : typing.Optional[typing.Iterable[global___CampusRcmdItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        items: collections.abc.Iterable[global___CampusRcmdItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items", "title", b"title"]) -> None: ...
+
 global___CampusRcmdInfo = CampusRcmdInfo
 
-#
+@typing_extensions.final
 class CampusRcmdItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     ITEMS_FIELD_NUMBER: builtins.int
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     ENTRY_LABEL_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___RcmdItem]: ...
-    #
-    campus_id: builtins.int = ...
-    #
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___RcmdItem]:
+        """"""
+    campus_id: builtins.int
+    """"""
     @property
-    def entry_label(self) -> global___CampusLabel: ...
-    def __init__(self,
+    def entry_label(self) -> global___CampusLabel:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        items : typing.Optional[typing.Iterable[global___RcmdItem]] = ...,
-        campus_id : builtins.int = ...,
-        entry_label : typing.Optional[global___CampusLabel] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"entry_label",b"entry_label"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"entry_label",b"entry_label",u"items",b"items",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        items: collections.abc.Iterable[global___RcmdItem] | None = ...,
+        campus_id: builtins.int = ...,
+        entry_label: global___CampusLabel | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["entry_label", b"entry_label"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "entry_label", b"entry_label", "items", b"items", "title", b"title"]) -> None: ...
+
 global___CampusRcmdItem = CampusRcmdItem
 
-#
+@typing_extensions.final
 class CampusRcmdReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TOP_FIELD_NUMBER: builtins.int
     RCMD_FIELD_NUMBER: builtins.int
     CAMPUS_TOP_FIELD_NUMBER: builtins.int
     PAGE_TYPE_FIELD_NUMBER: builtins.int
-    #
     @property
-    def top(self) -> global___CampusRcmdTop: ...
-    #
+    def top(self) -> global___CampusRcmdTop:
+        """"""
     @property
-    def rcmd(self) -> global___CampusRcmdInfo: ...
-    #
+    def rcmd(self) -> global___CampusRcmdInfo:
+        """"""
     @property
-    def campus_top(self) -> global___CampusTop: ...
-    #
-    page_type: builtins.int = ...
-    def __init__(self,
+    def campus_top(self) -> global___CampusTop:
+        """"""
+    page_type: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        top : typing.Optional[global___CampusRcmdTop] = ...,
-        rcmd : typing.Optional[global___CampusRcmdInfo] = ...,
-        campus_top : typing.Optional[global___CampusTop] = ...,
-        page_type : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"campus_top",b"campus_top",u"rcmd",b"rcmd",u"top",b"top"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_top",b"campus_top",u"page_type",b"page_type",u"rcmd",b"rcmd",u"top",b"top"]) -> None: ...
+        top: global___CampusRcmdTop | None = ...,
+        rcmd: global___CampusRcmdInfo | None = ...,
+        campus_top: global___CampusTop | None = ...,
+        page_type: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["campus_top", b"campus_top", "rcmd", b"rcmd", "top", b"top"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_top", b"campus_top", "page_type", b"page_type", "rcmd", b"rcmd", "top", b"top"]) -> None: ...
+
 global___CampusRcmdReply = CampusRcmdReply
 
-#
+@typing_extensions.final
 class CampusRcmdReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
     LAT_FIELD_NUMBER: builtins.int
     LNG_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    #
-    lat: builtins.float = ...
-    #
-    lng: builtins.float = ...
-    #
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
+    lat: builtins.float
+    """"""
+    lng: builtins.float
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        lat : builtins.float = ...,
-        lng : builtins.float = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"campus_name",b"campus_name",u"lat",b"lat",u"lng",b"lng",u"player_args",b"player_args"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+        lat: builtins.float = ...,
+        lng: builtins.float = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "campus_name", b"campus_name", "lat", b"lat", "lng", b"lng", "player_args", b"player_args"]) -> None: ...
+
 global___CampusRcmdReq = CampusRcmdReq
 
-#
+@typing_extensions.final
 class CampusRcmdTop(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
@@ -2921,111 +3202,131 @@ class CampusRcmdTop(google.protobuf.message.Message):
     INVITE_LABEL_FIELD_NUMBER: builtins.int
     RESERVE_LABEL_FIELD_NUMBER: builtins.int
     RESERVE_NUMBER_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    #
-    title: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    #
-    type: builtins.int = ...
-    #
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
+    title: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    type: builtins.int
+    """"""
     @property
-    def button(self) -> global___RcmdTopButton: ...
-    #
+    def button(self) -> global___RcmdTopButton:
+        """"""
     @property
-    def switch_label(self) -> global___CampusLabel: ...
-    #
+    def switch_label(self) -> global___CampusLabel:
+        """"""
     @property
-    def notice_label(self) -> global___CampusLabel: ...
-    #
-    desc2: typing.Text = ...
-    #
-    desc3: typing.Text = ...
-    #
+    def notice_label(self) -> global___CampusLabel:
+        """"""
+    desc2: builtins.str
+    """"""
+    desc3: builtins.str
+    """"""
     @property
-    def invite_label(self) -> global___CampusLabel: ...
-    #
+    def invite_label(self) -> global___CampusLabel:
+        """"""
     @property
-    def reserve_label(self) -> global___CampusLabel: ...
-    #
-    reserve_number: builtins.int = ...
-    def __init__(self,
+    def reserve_label(self) -> global___CampusLabel:
+        """"""
+    reserve_number: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        type : builtins.int = ...,
-        button : typing.Optional[global___RcmdTopButton] = ...,
-        switch_label : typing.Optional[global___CampusLabel] = ...,
-        notice_label : typing.Optional[global___CampusLabel] = ...,
-        desc2 : typing.Text = ...,
-        desc3 : typing.Text = ...,
-        invite_label : typing.Optional[global___CampusLabel] = ...,
-        reserve_label : typing.Optional[global___CampusLabel] = ...,
-        reserve_number : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button",u"invite_label",b"invite_label",u"notice_label",b"notice_label",u"reserve_label",b"reserve_label",u"switch_label",b"switch_label"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"campus_id",b"campus_id",u"campus_name",b"campus_name",u"desc",b"desc",u"desc2",b"desc2",u"desc3",b"desc3",u"invite_label",b"invite_label",u"notice_label",b"notice_label",u"reserve_label",b"reserve_label",u"reserve_number",b"reserve_number",u"switch_label",b"switch_label",u"title",b"title",u"type",b"type"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+        type: builtins.int = ...,
+        button: global___RcmdTopButton | None = ...,
+        switch_label: global___CampusLabel | None = ...,
+        notice_label: global___CampusLabel | None = ...,
+        desc2: builtins.str = ...,
+        desc3: builtins.str = ...,
+        invite_label: global___CampusLabel | None = ...,
+        reserve_label: global___CampusLabel | None = ...,
+        reserve_number: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button", "invite_label", b"invite_label", "notice_label", b"notice_label", "reserve_label", b"reserve_label", "switch_label", b"switch_label"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "campus_id", b"campus_id", "campus_name", b"campus_name", "desc", b"desc", "desc2", b"desc2", "desc3", b"desc3", "invite_label", b"invite_label", "notice_label", b"notice_label", "reserve_label", b"reserve_label", "reserve_number", b"reserve_number", "switch_label", b"switch_label", "title", b"title", "type", b"type"]) -> None: ...
+
 global___CampusRcmdTop = CampusRcmdTop
 
-#
+@typing_extensions.final
 class CampusRedDotReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     RED_DOT_FIELD_NUMBER: builtins.int
-    #
-    red_dot: builtins.int = ...
-    def __init__(self,
+    red_dot: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        red_dot : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"red_dot",b"red_dot"]) -> None: ...
+        red_dot: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["red_dot", b"red_dot"]) -> None: ...
+
 global___CampusRedDotReply = CampusRedDotReply
 
-#
+@typing_extensions.final
 class CampusRedDotReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id"]) -> None: ...
+        campus_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id"]) -> None: ...
+
 global___CampusRedDotReq = CampusRedDotReq
 
-#
+@typing_extensions.final
 class CampusShowTabInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     NAME_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     RED_DOT_FIELD_NUMBER: builtins.int
-    #
-    name: typing.Text = ...
-    #
-    url: typing.Text = ...
-    #
-    type: builtins.int = ...
-    #
-    red_dot: builtins.int = ...
-    def __init__(self,
+    name: builtins.str
+    """"""
+    url: builtins.str
+    """"""
+    type: builtins.int
+    """"""
+    red_dot: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        name : typing.Text = ...,
-        url : typing.Text = ...,
-        type : builtins.int = ...,
-        red_dot : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"name",b"name",u"red_dot",b"red_dot",u"type",b"type",u"url",b"url"]) -> None: ...
+        name: builtins.str = ...,
+        url: builtins.str = ...,
+        type: builtins.int = ...,
+        red_dot: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["name", b"name", "red_dot", b"red_dot", "type", b"type", "url", b"url"]) -> None: ...
+
 global___CampusShowTabInfo = CampusShowTabInfo
 
-#
+@typing_extensions.final
 class CampusTop(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
     TABS_FIELD_NUMBER: builtins.int
@@ -3037,156 +3338,181 @@ class CampusTop(google.protobuf.message.Message):
     TOPIC_SQUARE_FIELD_NUMBER: builtins.int
     CAMPUS_BADGE_FIELD_NUMBER: builtins.int
     CAMPUS_BACKGROUND_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    #
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
     @property
-    def tabs(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusShowTabInfo]: ...
-    #
+    def tabs(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusShowTabInfo]:
+        """"""
     @property
-    def switch_label(self) -> global___CampusLabel: ...
-    #
-    title: typing.Text = ...
-    #
+    def switch_label(self) -> global___CampusLabel:
+        """"""
+    title: builtins.str
+    """"""
     @property
-    def banner(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusBannerInfo]: ...
-    #
+    def banner(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusBannerInfo]:
+        """"""
     @property
-    def invite_label(self) -> global___CampusLabel: ...
-    #
+    def invite_label(self) -> global___CampusLabel:
+        """"""
     @property
-    def notice(self) -> global___CampusNoticeInfo: ...
-    #
+    def notice(self) -> global___CampusNoticeInfo:
+        """"""
     @property
-    def topic_square(self) -> global___TopicSquareInfo: ...
-    #
-    campus_badge: typing.Text = ...
-    #
-    campus_background: typing.Text = ...
-    def __init__(self,
+    def topic_square(self) -> global___TopicSquareInfo:
+        """"""
+    campus_badge: builtins.str
+    """"""
+    campus_background: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        tabs : typing.Optional[typing.Iterable[global___CampusShowTabInfo]] = ...,
-        switch_label : typing.Optional[global___CampusLabel] = ...,
-        title : typing.Text = ...,
-        banner : typing.Optional[typing.Iterable[global___CampusBannerInfo]] = ...,
-        invite_label : typing.Optional[global___CampusLabel] = ...,
-        notice : typing.Optional[global___CampusNoticeInfo] = ...,
-        topic_square : typing.Optional[global___TopicSquareInfo] = ...,
-        campus_badge : typing.Text = ...,
-        campus_background : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"invite_label",b"invite_label",u"notice",b"notice",u"switch_label",b"switch_label",u"topic_square",b"topic_square"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"banner",b"banner",u"campus_background",b"campus_background",u"campus_badge",b"campus_badge",u"campus_id",b"campus_id",u"campus_name",b"campus_name",u"invite_label",b"invite_label",u"notice",b"notice",u"switch_label",b"switch_label",u"tabs",b"tabs",u"title",b"title",u"topic_square",b"topic_square"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+        tabs: collections.abc.Iterable[global___CampusShowTabInfo] | None = ...,
+        switch_label: global___CampusLabel | None = ...,
+        title: builtins.str = ...,
+        banner: collections.abc.Iterable[global___CampusBannerInfo] | None = ...,
+        invite_label: global___CampusLabel | None = ...,
+        notice: global___CampusNoticeInfo | None = ...,
+        topic_square: global___TopicSquareInfo | None = ...,
+        campus_badge: builtins.str = ...,
+        campus_background: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["invite_label", b"invite_label", "notice", b"notice", "switch_label", b"switch_label", "topic_square", b"topic_square"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["banner", b"banner", "campus_background", b"campus_background", "campus_badge", b"campus_badge", "campus_id", b"campus_id", "campus_name", b"campus_name", "invite_label", b"invite_label", "notice", b"notice", "switch_label", b"switch_label", "tabs", b"tabs", "title", b"title", "topic_square", b"topic_square"]) -> None: ...
+
 global___CampusTop = CampusTop
 
-#
+@typing_extensions.final
 class CampusTopicRcmdFeedReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
-    #
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    #
-    toast: typing.Text = ...
-    #
-    has_more: builtins.bool = ...
-    #
-    offset: typing.Text = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """"""
+    toast: builtins.str
+    """"""
+    has_more: builtins.bool
+    """"""
+    offset: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        toast : typing.Text = ...,
-        has_more : builtins.bool = ...,
-        offset : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"list",b"list",u"offset",b"offset",u"toast",b"toast"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        toast: builtins.str = ...,
+        has_more: builtins.bool = ...,
+        offset: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "list", b"list", "offset", b"offset", "toast", b"toast"]) -> None: ...
+
 global___CampusTopicRcmdFeedReply = CampusTopicRcmdFeedReply
 
-#
+@typing_extensions.final
 class CampusTopicRcmdFeedReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    offset: typing.Text = ...
-    #
+    campus_id: builtins.int
+    """"""
+    offset: builtins.str
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    #
-    local_time: builtins.int = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    local_time: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        offset : typing.Text = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        local_time : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"local_time",b"local_time",u"offset",b"offset",u"player_args",b"player_args"]) -> None: ...
+        campus_id: builtins.int = ...,
+        offset: builtins.str = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        local_time: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "local_time", b"local_time", "offset", b"offset", "player_args", b"player_args"]) -> None: ...
+
 global___CampusTopicRcmdFeedReq = CampusTopicRcmdFeedReq
 
-# 动态卡片列表
+@typing_extensions.final
 class CardVideoDynList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态卡片列表"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     UPDATE_NUM_FIELD_NUMBER: builtins.int
     HISTORY_OFFSET_FIELD_NUMBER: builtins.int
     UPDATE_BASELINE_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
-    # 动态列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    # 更新的动态数
-    update_num: builtins.int = ...
-    # 历史偏移
-    history_offset: typing.Text = ...
-    # 更新基础信息
-    update_baseline: typing.Text = ...
-    # 是否还有更多数据
-    has_more: builtins.bool = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """动态列表"""
+    update_num: builtins.int
+    """更新的动态数"""
+    history_offset: builtins.str
+    """历史偏移"""
+    update_baseline: builtins.str
+    """更新基础信息"""
+    has_more: builtins.bool
+    """是否还有更多数据"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        update_num : builtins.int = ...,
-        history_offset : typing.Text = ...,
-        update_baseline : typing.Text = ...,
-        has_more : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"history_offset",b"history_offset",u"list",b"list",u"update_baseline",b"update_baseline",u"update_num",b"update_num"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        update_num: builtins.int = ...,
+        history_offset: builtins.str = ...,
+        update_baseline: builtins.str = ...,
+        has_more: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "history_offset", b"history_offset", "list", b"list", "update_baseline", b"update_baseline", "update_num", b"update_num"]) -> None: ...
+
 global___CardVideoDynList = CardVideoDynList
 
-# 视频页-我的追番
+@typing_extensions.final
 class CardVideoFollowList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """视频页-我的追番"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     VIEW_ALL_LINK_FIELD_NUMBER: builtins.int
     LIST_FIELD_NUMBER: builtins.int
-    # 查看全部(跳转链接)
-    view_all_link: typing.Text = ...
-    # 追番列表
+    view_all_link: builtins.str
+    """查看全部(跳转链接)"""
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___FollowListItem]: ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___FollowListItem]:
+        """追番列表"""
+    def __init__(
+        self,
         *,
-        view_all_link : typing.Text = ...,
-        list : typing.Optional[typing.Iterable[global___FollowListItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"list",b"list",u"view_all_link",b"view_all_link"]) -> None: ...
+        view_all_link: builtins.str = ...,
+        list: collections.abc.Iterable[global___FollowListItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["list", b"list", "view_all_link", b"view_all_link"]) -> None: ...
+
 global___CardVideoFollowList = CardVideoFollowList
 
-# 视频页-最近访问
+@typing_extensions.final
 class CardVideoUpList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """视频页-最近访问"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     LIST_FIELD_NUMBER: builtins.int
     FOOTPRINT_FIELD_NUMBER: builtins.int
@@ -3196,45 +3522,50 @@ class CardVideoUpList(google.protobuf.message.Message):
     SHOW_MORE_LABEL_FIELD_NUMBER: builtins.int
     SHOW_IN_PERSONAL_FIELD_NUMBER: builtins.int
     SHOW_MORE_BUTTON_FIELD_NUMBER: builtins.int
-    # 标题展示文案
-    title: typing.Text = ...
-    # up主列表
+    title: builtins.str
+    """标题展示文案"""
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___UpListItem]: ...
-    # 服务端生成的透传上报字段
-    footprint: typing.Text = ...
-    # 直播数
-    show_live_num: builtins.int = ...
-    # 跳转label
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___UpListItem]:
+        """up主列表"""
+    footprint: builtins.str
+    """服务端生成的透传上报字段"""
+    show_live_num: builtins.int
+    """直播数"""
     @property
-    def more_label(self) -> global___UpListMoreLabel: ...
-    # 标题开关(综合页)
-    title_switch: builtins.int = ...
-    # 是否展示右上角查看更多label
-    show_more_label: builtins.bool = ...
-    # 是否在快速消费页查看更多按钮
-    show_in_personal: builtins.bool = ...
-    # 是否展示右侧查看更多按钮
-    show_more_button: builtins.bool = ...
-    def __init__(self,
+    def more_label(self) -> global___UpListMoreLabel:
+        """跳转label"""
+    title_switch: builtins.int
+    """标题开关(综合页)"""
+    show_more_label: builtins.bool
+    """是否展示右上角查看更多label"""
+    show_in_personal: builtins.bool
+    """是否在快速消费页查看更多按钮"""
+    show_more_button: builtins.bool
+    """是否展示右侧查看更多按钮"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        list : typing.Optional[typing.Iterable[global___UpListItem]] = ...,
-        footprint : typing.Text = ...,
-        show_live_num : builtins.int = ...,
-        more_label : typing.Optional[global___UpListMoreLabel] = ...,
-        title_switch : builtins.int = ...,
-        show_more_label : builtins.bool = ...,
-        show_in_personal : builtins.bool = ...,
-        show_more_button : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"more_label",b"more_label"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"footprint",b"footprint",u"list",b"list",u"more_label",b"more_label",u"show_in_personal",b"show_in_personal",u"show_live_num",b"show_live_num",u"show_more_button",b"show_more_button",u"show_more_label",b"show_more_label",u"title",b"title",u"title_switch",b"title_switch"]) -> None: ...
+        title: builtins.str = ...,
+        list: collections.abc.Iterable[global___UpListItem] | None = ...,
+        footprint: builtins.str = ...,
+        show_live_num: builtins.int = ...,
+        more_label: global___UpListMoreLabel | None = ...,
+        title_switch: builtins.int = ...,
+        show_more_label: builtins.bool = ...,
+        show_in_personal: builtins.bool = ...,
+        show_more_button: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["more_label", b"more_label"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["footprint", b"footprint", "list", b"list", "more_label", b"more_label", "show_in_personal", b"show_in_personal", "show_live_num", b"show_live_num", "show_more_button", b"show_more_button", "show_more_label", b"show_more_label", "title", b"title", "title_switch", b"title_switch"]) -> None: ...
+
 global___CardVideoUpList = CardVideoUpList
 
-#
+@typing_extensions.final
 class ChannelInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CHANNEL_ID_FIELD_NUMBER: builtins.int
     CHANNEL_NAME_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
@@ -3243,135 +3574,161 @@ class ChannelInfo(google.protobuf.message.Message):
     ITEMS_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
     JUMP_URI_FIELD_NUMBER: builtins.int
-    #
-    channel_id: builtins.int = ...
-    #
-    channel_name: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    #
-    is_atten: builtins.bool = ...
-    #
-    type_icon: typing.Text = ...
-    #
+    channel_id: builtins.int
+    """"""
+    channel_name: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    is_atten: builtins.bool
+    """"""
+    type_icon: builtins.str
+    """"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___RcmdItem]: ...
-    #
-    icon: typing.Text = ...
-    #
-    jump_uri: typing.Text = ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___RcmdItem]:
+        """"""
+    icon: builtins.str
+    """"""
+    jump_uri: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        channel_id : builtins.int = ...,
-        channel_name : typing.Text = ...,
-        desc : typing.Text = ...,
-        is_atten : builtins.bool = ...,
-        type_icon : typing.Text = ...,
-        items : typing.Optional[typing.Iterable[global___RcmdItem]] = ...,
-        icon : typing.Text = ...,
-        jump_uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"channel_id",b"channel_id",u"channel_name",b"channel_name",u"desc",b"desc",u"icon",b"icon",u"is_atten",b"is_atten",u"items",b"items",u"jump_uri",b"jump_uri",u"type_icon",b"type_icon"]) -> None: ...
+        channel_id: builtins.int = ...,
+        channel_name: builtins.str = ...,
+        desc: builtins.str = ...,
+        is_atten: builtins.bool = ...,
+        type_icon: builtins.str = ...,
+        items: collections.abc.Iterable[global___RcmdItem] | None = ...,
+        icon: builtins.str = ...,
+        jump_uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["channel_id", b"channel_id", "channel_name", b"channel_name", "desc", b"desc", "icon", b"icon", "is_atten", b"is_atten", "items", b"items", "jump_uri", b"jump_uri", "type_icon", b"type_icon"]) -> None: ...
+
 global___ChannelInfo = ChannelInfo
 
-# 评论外露展示项
+@typing_extensions.final
 class CmtShowItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """评论外露展示项"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UID_FIELD_NUMBER: builtins.int
     UNAME_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     COMMENT_FIELD_NUMBER: builtins.int
-    # 用户mid
-    uid: builtins.int = ...
-    # 用户昵称
-    uname: typing.Text = ...
-    # 点击跳转链接
-    uri: typing.Text = ...
-    # 评论内容
-    comment: typing.Text = ...
-    def __init__(self,
+    uid: builtins.int
+    """用户mid"""
+    uname: builtins.str
+    """用户昵称"""
+    uri: builtins.str
+    """点击跳转链接"""
+    comment: builtins.str
+    """评论内容"""
+    def __init__(
+        self,
         *,
-        uid : builtins.int = ...,
-        uname : typing.Text = ...,
-        uri : typing.Text = ...,
-        comment : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"comment",b"comment",u"uid",b"uid",u"uname",b"uname",u"uri",b"uri"]) -> None: ...
+        uid: builtins.int = ...,
+        uname: builtins.str = ...,
+        uri: builtins.str = ...,
+        comment: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["comment", b"comment", "uid", b"uid", "uname", b"uname", "uri", b"uri"]) -> None: ...
+
 global___CmtShowItem = CmtShowItem
 
-# 精选评论区
+@typing_extensions.final
 class CommentDetail(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """精选评论区"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAN_MODIFY_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
-    # 该功能能不能用
-    can_modify: builtins.bool = ...
-    # up关闭评论区功能 1允许关闭 0允许开放
-    # 精选评论区功能 1允许停止评论精选 0允许评论精选
-    status: builtins.int = ...
-    def __init__(self,
+    can_modify: builtins.bool
+    """该功能能不能用"""
+    status: builtins.int
+    """up关闭评论区功能 1允许关闭 0允许开放
+    精选评论区功能 1允许停止评论精选 0允许评论精选
+    """
+    def __init__(
+        self,
         *,
-        can_modify : builtins.bool = ...,
-        status : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"can_modify",b"can_modify",u"status",b"status"]) -> None: ...
+        can_modify: builtins.bool = ...,
+        status: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["can_modify", b"can_modify", "status", b"status"]) -> None: ...
+
 global___CommentDetail = CommentDetail
 
-# 装扮卡片-粉丝勋章信息
+@typing_extensions.final
 class DecoCardFan(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """装扮卡片-粉丝勋章信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     IS_FAN_FIELD_NUMBER: builtins.int
     NUMBER_FIELD_NUMBER: builtins.int
     NUMBER_STR_FIELD_NUMBER: builtins.int
     COLOR_FIELD_NUMBER: builtins.int
-    # 是否是粉丝
-    is_fan: builtins.int = ...
-    # 数量
-    number: builtins.int = ...
-    # 数量 str
-    number_str: typing.Text = ...
-    # 颜色
-    color: typing.Text = ...
-    def __init__(self,
+    is_fan: builtins.int
+    """是否是粉丝"""
+    number: builtins.int
+    """数量"""
+    number_str: builtins.str
+    """数量 str"""
+    color: builtins.str
+    """颜色"""
+    def __init__(
+        self,
         *,
-        is_fan : builtins.int = ...,
-        number : builtins.int = ...,
-        number_str : typing.Text = ...,
-        color : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"color",b"color",u"is_fan",b"is_fan",u"number",b"number",u"number_str",b"number_str"]) -> None: ...
+        is_fan: builtins.int = ...,
+        number: builtins.int = ...,
+        number_str: builtins.str = ...,
+        color: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["color", b"color", "is_fan", b"is_fan", "number", b"number", "number_str", b"number_str"]) -> None: ...
+
 global___DecoCardFan = DecoCardFan
 
-# 装扮卡片
+@typing_extensions.final
 class DecorateCard(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """装扮卡片"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     CARD_URL_FIELD_NUMBER: builtins.int
     JUMP_URL_FIELD_NUMBER: builtins.int
     FAN_FIELD_NUMBER: builtins.int
-    # 装扮卡片id
-    id: builtins.int = ...
-    # 装扮卡片链接
-    card_url: typing.Text = ...
-    # 装扮卡片点击跳转链接
-    jump_url: typing.Text = ...
-    # 粉丝样式
+    id: builtins.int
+    """装扮卡片id"""
+    card_url: builtins.str
+    """装扮卡片链接"""
+    jump_url: builtins.str
+    """装扮卡片点击跳转链接"""
     @property
-    def fan(self) -> global___DecoCardFan: ...
-    def __init__(self,
+    def fan(self) -> global___DecoCardFan:
+        """粉丝样式"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        card_url : typing.Text = ...,
-        jump_url : typing.Text = ...,
-        fan : typing.Optional[global___DecoCardFan] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"fan",b"fan"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"card_url",b"card_url",u"fan",b"fan",u"id",b"id",u"jump_url",b"jump_url"]) -> None: ...
+        id: builtins.int = ...,
+        card_url: builtins.str = ...,
+        jump_url: builtins.str = ...,
+        fan: global___DecoCardFan | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["fan", b"fan"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["card_url", b"card_url", "fan", b"fan", "id", b"id", "jump_url", b"jump_url"]) -> None: ...
+
 global___DecorateCard = DecorateCard
 
-# 文本描述
+@typing_extensions.final
 class Description(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """文本描述"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -3383,142 +3740,167 @@ class Description(google.protobuf.message.Message):
     GOODS_FIELD_NUMBER: builtins.int
     ORIG_TEXT_FIELD_NUMBER: builtins.int
     EMOJI_SIZE_FIELD_NUMBER: builtins.int
-    # 文本内容
-    text: typing.Text = ...
-    # 文本类型
-    type: global___DescType.V = ...
-    # 点击跳转链接
-    uri: typing.Text = ...
-    # emoji类型
-    emoji_type: global___EmojiType.V = ...
-    # 商品类型
-    goods_type: typing.Text = ...
-    # 前置Icon
-    icon_url: typing.Text = ...
-    # icon_name
-    icon_name: typing.Text = ...
-    # 资源ID
-    rid: typing.Text = ...
-    # 商品卡特殊字段
+    text: builtins.str
+    """文本内容"""
+    type: global___DescType.ValueType
+    """文本类型"""
+    uri: builtins.str
+    """点击跳转链接"""
+    emoji_type: global___EmojiType.ValueType
+    """emoji类型"""
+    goods_type: builtins.str
+    """商品类型"""
+    icon_url: builtins.str
+    """前置Icon"""
+    icon_name: builtins.str
+    """icon_name"""
+    rid: builtins.str
+    """资源ID"""
     @property
-    def goods(self) -> global___ModuleDescGoods: ...
-    # 文本原始文案
-    orig_text: typing.Text = ...
-    #
-    emoji_size: builtins.int = ...
-    def __init__(self,
+    def goods(self) -> global___ModuleDescGoods:
+        """商品卡特殊字段"""
+    orig_text: builtins.str
+    """文本原始文案"""
+    emoji_size: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        type : global___DescType.V = ...,
-        uri : typing.Text = ...,
-        emoji_type : global___EmojiType.V = ...,
-        goods_type : typing.Text = ...,
-        icon_url : typing.Text = ...,
-        icon_name : typing.Text = ...,
-        rid : typing.Text = ...,
-        goods : typing.Optional[global___ModuleDescGoods] = ...,
-        orig_text : typing.Text = ...,
-        emoji_size : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"goods",b"goods"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"emoji_size",b"emoji_size",u"emoji_type",b"emoji_type",u"goods",b"goods",u"goods_type",b"goods_type",u"icon_name",b"icon_name",u"icon_url",b"icon_url",u"orig_text",b"orig_text",u"rid",b"rid",u"text",b"text",u"type",b"type",u"uri",b"uri"]) -> None: ...
+        text: builtins.str = ...,
+        type: global___DescType.ValueType = ...,
+        uri: builtins.str = ...,
+        emoji_type: global___EmojiType.ValueType = ...,
+        goods_type: builtins.str = ...,
+        icon_url: builtins.str = ...,
+        icon_name: builtins.str = ...,
+        rid: builtins.str = ...,
+        goods: global___ModuleDescGoods | None = ...,
+        orig_text: builtins.str = ...,
+        emoji_size: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["goods", b"goods"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["emoji_size", b"emoji_size", "emoji_type", b"emoji_type", "goods", b"goods", "goods_type", b"goods_type", "icon_name", b"icon_name", "icon_url", b"icon_url", "orig_text", b"orig_text", "rid", b"rid", "text", b"text", "type", b"type", "uri", b"uri"]) -> None: ...
+
 global___Description = Description
 
-# 尺寸信息
+@typing_extensions.final
 class Dimension(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """尺寸信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HEIGHT_FIELD_NUMBER: builtins.int
     WIDTH_FIELD_NUMBER: builtins.int
     ROTATE_FIELD_NUMBER: builtins.int
-    #
-    height: builtins.int = ...
-    #
-    width: builtins.int = ...
-    #
-    rotate: builtins.int = ...
-    def __init__(self,
+    height: builtins.int
+    """"""
+    width: builtins.int
+    """"""
+    rotate: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        height : builtins.int = ...,
-        width : builtins.int = ...,
-        rotate : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"height",b"height",u"rotate",b"rotate",u"width",b"width"]) -> None: ...
+        height: builtins.int = ...,
+        width: builtins.int = ...,
+        rotate: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["height", b"height", "rotate", b"rotate", "width", b"width"]) -> None: ...
+
 global___Dimension = Dimension
 
-# 动态通用附加卡-follow/取消follow-响应
+@typing_extensions.final
 class DynAdditionCommonFollowReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态通用附加卡-follow/取消follow-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     STATUS_FIELD_NUMBER: builtins.int
-    #
-    status: global___AdditionalButtonStatus.V = ...
-    def __init__(self,
+    status: global___AdditionalButtonStatus.ValueType
+    """"""
+    def __init__(
+        self,
         *,
-        status : global___AdditionalButtonStatus.V = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"status",b"status"]) -> None: ...
+        status: global___AdditionalButtonStatus.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["status", b"status"]) -> None: ...
+
 global___DynAdditionCommonFollowReply = DynAdditionCommonFollowReply
 
-# 动态通用附加卡-follow/取消follow-请求
+@typing_extensions.final
 class DynAdditionCommonFollowReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态通用附加卡-follow/取消follow-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     STATUS_FIELD_NUMBER: builtins.int
     DYN_ID_FIELD_NUMBER: builtins.int
     CARD_TYPE_FIELD_NUMBER: builtins.int
-    #
-    status: global___AdditionalButtonStatus.V = ...
-    #
-    dyn_id: typing.Text = ...
-    #
-    card_type: typing.Text = ...
-    def __init__(self,
+    status: global___AdditionalButtonStatus.ValueType
+    """"""
+    dyn_id: builtins.str
+    """"""
+    card_type: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        status : global___AdditionalButtonStatus.V = ...,
-        dyn_id : typing.Text = ...,
-        card_type : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"card_type",b"card_type",u"dyn_id",b"dyn_id",u"status",b"status"]) -> None: ...
+        status: global___AdditionalButtonStatus.ValueType = ...,
+        dyn_id: builtins.str = ...,
+        card_type: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["card_type", b"card_type", "dyn_id", b"dyn_id", "status", b"status"]) -> None: ...
+
 global___DynAdditionCommonFollowReq = DynAdditionCommonFollowReq
 
-# 最近访问-个人feed流列表-返回
+@typing_extensions.final
 class DynAllPersonalReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最近访问-个人feed流列表-返回"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     READ_OFFSET_FIELD_NUMBER: builtins.int
     RELATION_FIELD_NUMBER: builtins.int
     ADDITION_UP_FIELD_NUMBER: builtins.int
-    # 动态列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    # 偏移量
-    offset: typing.Text = ...
-    # 是否还有更多数据
-    has_more: builtins.bool = ...
-    # 已读进度
-    read_offset: typing.Text = ...
-    # 关注状态
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """动态列表"""
+    offset: builtins.str
+    """偏移量"""
+    has_more: builtins.bool
+    """是否还有更多数据"""
+    read_offset: builtins.str
+    """已读进度"""
     @property
-    def relation(self) -> global___Relation: ...
-    # 顶部预约卡
+    def relation(self) -> global___Relation:
+        """关注状态"""
     @property
-    def addition_up(self) -> global___TopAdditionUP: ...
-    def __init__(self,
+    def addition_up(self) -> global___TopAdditionUP:
+        """顶部预约卡"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        offset : typing.Text = ...,
-        has_more : builtins.bool = ...,
-        read_offset : typing.Text = ...,
-        relation : typing.Optional[global___Relation] = ...,
-        addition_up : typing.Optional[global___TopAdditionUP] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"addition_up",b"addition_up",u"relation",b"relation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"addition_up",b"addition_up",u"has_more",b"has_more",u"list",b"list",u"offset",b"offset",u"read_offset",b"read_offset",u"relation",b"relation"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        offset: builtins.str = ...,
+        has_more: builtins.bool = ...,
+        read_offset: builtins.str = ...,
+        relation: global___Relation | None = ...,
+        addition_up: global___TopAdditionUP | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["addition_up", b"addition_up", "relation", b"relation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["addition_up", b"addition_up", "has_more", b"has_more", "list", b"list", "offset", b"offset", "read_offset", b"read_offset", "relation", b"relation"]) -> None: ...
+
 global___DynAllPersonalReply = DynAllPersonalReply
 
-# 最近访问-个人feed流列表-请求
+@typing_extensions.final
 class DynAllPersonalReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最近访问-个人feed流列表-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HOST_UID_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
@@ -3528,77 +3910,87 @@ class DynAllPersonalReq(google.protobuf.message.Message):
     FOOTPRINT_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    # 被访问者的 UID
-    host_uid: builtins.int = ...
-    # 偏移量 第一页可传空
-    offset: typing.Text = ...
-    # 标明下拉几次
-    page: builtins.int = ...
-    # 是否是预加载 默认是1；客户端预加载。1：是预加载，不更新已读进度，不会影响小红点；0：非预加载，更新已读进度
-    is_preload: builtins.int = ...
-    # 秒开参数 新版本废弃，统一使用player_args
+    host_uid: builtins.int
+    """被访问者的 UID"""
+    offset: builtins.str
+    """偏移量 第一页可传空"""
+    page: builtins.int
+    """标明下拉几次"""
+    is_preload: builtins.int
+    """是否是预加载 默认是1；客户端预加载。1：是预加载，不更新已读进度，不会影响小红点；0：非预加载，更新已读进度"""
     @property
-    def playurl_param(self) -> global___PlayurlParam: ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    # 服务端生成的透传上报字段
-    footprint: typing.Text = ...
-    # 秒开用
+    def playurl_param(self) -> global___PlayurlParam:
+        """秒开参数 新版本废弃，统一使用player_args"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
+    footprint: builtins.str
+    """服务端生成的透传上报字段"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开用"""
+    def __init__(
+        self,
         *,
-        host_uid : builtins.int = ...,
-        offset : typing.Text = ...,
-        page : builtins.int = ...,
-        is_preload : builtins.int = ...,
-        playurl_param : typing.Optional[global___PlayurlParam] = ...,
-        local_time : builtins.int = ...,
-        footprint : typing.Text = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args",u"playurl_param",b"playurl_param"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"footprint",b"footprint",u"from",b"from",u"host_uid",b"host_uid",u"is_preload",b"is_preload",u"local_time",b"local_time",u"offset",b"offset",u"page",b"page",u"player_args",b"player_args",u"playurl_param",b"playurl_param"]) -> None: ...
+        host_uid: builtins.int = ...,
+        offset: builtins.str = ...,
+        page: builtins.int = ...,
+        is_preload: builtins.int = ...,
+        playurl_param: global___PlayurlParam | None = ...,
+        local_time: builtins.int = ...,
+        footprint: builtins.str = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args", "playurl_param", b"playurl_param"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["footprint", b"footprint", "from", b"from", "host_uid", b"host_uid", "is_preload", b"is_preload", "local_time", b"local_time", "offset", b"offset", "page", b"page", "player_args", b"player_args", "playurl_param", b"playurl_param"]) -> None: ...
+
 global___DynAllPersonalReq = DynAllPersonalReq
 
-# 动态综合页-响应
+@typing_extensions.final
 class DynAllReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态综合页-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYNAMIC_LIST_FIELD_NUMBER: builtins.int
     UP_LIST_FIELD_NUMBER: builtins.int
     TOPIC_LIST_FIELD_NUMBER: builtins.int
     UNFOLLOW_FIELD_NUMBER: builtins.int
     REGION_RCMD_FIELD_NUMBER: builtins.int
-    # 卡片列表
     @property
-    def dynamic_list(self) -> global___DynamicList: ...
-    # 顶部up list
+    def dynamic_list(self) -> global___DynamicList:
+        """卡片列表"""
     @property
-    def up_list(self) -> global___CardVideoUpList: ...
-    # 话题广场
+    def up_list(self) -> global___CardVideoUpList:
+        """顶部up list"""
     @property
-    def topic_list(self) -> global___TopicList: ...
-    # 无关注推荐
+    def topic_list(self) -> global___TopicList:
+        """话题广场"""
     @property
-    def unfollow(self) -> global___Unfollow: ...
-    # 分区UP推荐
+    def unfollow(self) -> global___Unfollow:
+        """无关注推荐"""
     @property
-    def region_rcmd(self) -> global___DynRegionRcmd: ...
-    def __init__(self,
+    def region_rcmd(self) -> global___DynRegionRcmd:
+        """分区UP推荐"""
+    def __init__(
+        self,
         *,
-        dynamic_list : typing.Optional[global___DynamicList] = ...,
-        up_list : typing.Optional[global___CardVideoUpList] = ...,
-        topic_list : typing.Optional[global___TopicList] = ...,
-        unfollow : typing.Optional[global___Unfollow] = ...,
-        region_rcmd : typing.Optional[global___DynRegionRcmd] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list",u"region_rcmd",b"region_rcmd",u"topic_list",b"topic_list",u"unfollow",b"unfollow",u"up_list",b"up_list"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list",u"region_rcmd",b"region_rcmd",u"topic_list",b"topic_list",u"unfollow",b"unfollow",u"up_list",b"up_list"]) -> None: ...
+        dynamic_list: global___DynamicList | None = ...,
+        up_list: global___CardVideoUpList | None = ...,
+        topic_list: global___TopicList | None = ...,
+        unfollow: global___Unfollow | None = ...,
+        region_rcmd: global___DynRegionRcmd | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list", "region_rcmd", b"region_rcmd", "topic_list", b"topic_list", "unfollow", b"unfollow", "up_list", b"up_list"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list", "region_rcmd", b"region_rcmd", "topic_list", b"topic_list", "unfollow", b"unfollow", "up_list", b"up_list"]) -> None: ...
+
 global___DynAllReply = DynAllReply
 
-# 动态综合页-请求
+@typing_extensions.final
 class DynAllReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态综合页-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UPDATE_BASELINE_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
@@ -3613,95 +4005,110 @@ class DynAllReq(google.protobuf.message.Message):
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
     TAB_RECALL_UID_FIELD_NUMBER: builtins.int
     TAB_RECALL_TYPE_FIELD_NUMBER: builtins.int
-    # 透传 update_baseline
-    update_baseline: typing.Text = ...
-    # 透传 history_offset
-    offset: typing.Text = ...
-    # 向下翻页数
-    page: builtins.int = ...
-    # 刷新方式 1向上刷新 2向下翻页
-    refresh_type: global___Refresh.V = ...
-    # 秒开参数 新版本废弃，统一使用player_args
+    update_baseline: builtins.str
+    """透传 update_baseline"""
+    offset: builtins.str
+    """透传 history_offset"""
+    page: builtins.int
+    """向下翻页数"""
+    refresh_type: global___Refresh.ValueType
+    """刷新方式 1向上刷新 2向下翻页"""
     @property
-    def playurl_param(self) -> global___PlayurlParam: ...
-    # 综合页当前更新的最大值
-    assist_baseline: typing.Text = ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    # 推荐up主入参(new的时候传)
+    def playurl_param(self) -> global___PlayurlParam:
+        """秒开参数 新版本废弃，统一使用player_args"""
+    assist_baseline: builtins.str
+    """综合页当前更新的最大值"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
     @property
-    def rcmd_ups_param(self) -> global___RcmdUPsParam: ...
-    # 广告参数
+    def rcmd_ups_param(self) -> global___RcmdUPsParam:
+        """推荐up主入参(new的时候传)"""
     @property
-    def ad_param(self) -> global___AdParam: ...
-    # 是否冷启
-    cold_start: builtins.int = ...
-    # 秒开参数
+    def ad_param(self) -> global___AdParam:
+        """广告参数"""
+    cold_start: builtins.int
+    """是否冷启"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    #
-    tab_recall_uid: builtins.int = ...
-    #
-    tab_recall_type: builtins.int = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    tab_recall_uid: builtins.int
+    """"""
+    tab_recall_type: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        update_baseline : typing.Text = ...,
-        offset : typing.Text = ...,
-        page : builtins.int = ...,
-        refresh_type : global___Refresh.V = ...,
-        playurl_param : typing.Optional[global___PlayurlParam] = ...,
-        assist_baseline : typing.Text = ...,
-        local_time : builtins.int = ...,
-        rcmd_ups_param : typing.Optional[global___RcmdUPsParam] = ...,
-        ad_param : typing.Optional[global___AdParam] = ...,
-        cold_start : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        tab_recall_uid : builtins.int = ...,
-        tab_recall_type : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"ad_param",b"ad_param",u"player_args",b"player_args",u"playurl_param",b"playurl_param",u"rcmd_ups_param",b"rcmd_ups_param"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad_param",b"ad_param",u"assist_baseline",b"assist_baseline",u"cold_start",b"cold_start",u"from",b"from",u"local_time",b"local_time",u"offset",b"offset",u"page",b"page",u"player_args",b"player_args",u"playurl_param",b"playurl_param",u"rcmd_ups_param",b"rcmd_ups_param",u"refresh_type",b"refresh_type",u"tab_recall_type",b"tab_recall_type",u"tab_recall_uid",b"tab_recall_uid",u"update_baseline",b"update_baseline"]) -> None: ...
+        update_baseline: builtins.str = ...,
+        offset: builtins.str = ...,
+        page: builtins.int = ...,
+        refresh_type: global___Refresh.ValueType = ...,
+        playurl_param: global___PlayurlParam | None = ...,
+        assist_baseline: builtins.str = ...,
+        local_time: builtins.int = ...,
+        rcmd_ups_param: global___RcmdUPsParam | None = ...,
+        ad_param: global___AdParam | None = ...,
+        cold_start: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        tab_recall_uid: builtins.int = ...,
+        tab_recall_type: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["ad_param", b"ad_param", "player_args", b"player_args", "playurl_param", b"playurl_param", "rcmd_ups_param", b"rcmd_ups_param"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad_param", b"ad_param", "assist_baseline", b"assist_baseline", "cold_start", b"cold_start", "from", b"from", "local_time", b"local_time", "offset", b"offset", "page", b"page", "player_args", b"player_args", "playurl_param", b"playurl_param", "rcmd_ups_param", b"rcmd_ups_param", "refresh_type", b"refresh_type", "tab_recall_type", b"tab_recall_type", "tab_recall_uid", b"tab_recall_uid", "update_baseline", b"update_baseline"]) -> None: ...
+
 global___DynAllReq = DynAllReq
 
-# 最近访问-标记已读-请求
+@typing_extensions.final
 class DynAllUpdOffsetReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最近访问-标记已读-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HOST_UID_FIELD_NUMBER: builtins.int
     READ_OFFSET_FIELD_NUMBER: builtins.int
     FOOTPRINT_FIELD_NUMBER: builtins.int
-    # 被访问者的UID
-    host_uid: builtins.int = ...
-    # 用户已读进度
-    read_offset: typing.Text = ...
-    # 服务端生成的透传上报字段
-    footprint: typing.Text = ...
-    def __init__(self,
+    host_uid: builtins.int
+    """被访问者的UID"""
+    read_offset: builtins.str
+    """用户已读进度"""
+    footprint: builtins.str
+    """服务端生成的透传上报字段"""
+    def __init__(
+        self,
         *,
-        host_uid : builtins.int = ...,
-        read_offset : typing.Text = ...,
-        footprint : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"footprint",b"footprint",u"host_uid",b"host_uid",u"read_offset",b"read_offset"]) -> None: ...
+        host_uid: builtins.int = ...,
+        read_offset: builtins.str = ...,
+        footprint: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["footprint", b"footprint", "host_uid", b"host_uid", "read_offset", b"read_offset"]) -> None: ...
+
 global___DynAllUpdOffsetReq = DynAllUpdOffsetReq
 
-# 动态详情页-响应
+@typing_extensions.final
 class DynDetailReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态详情页-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEM_FIELD_NUMBER: builtins.int
-    # 动态详情
     @property
-    def item(self) -> global___DynamicItem: ...
-    def __init__(self,
+    def item(self) -> global___DynamicItem:
+        """动态详情"""
+    def __init__(
+        self,
         *,
-        item : typing.Optional[global___DynamicItem] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> None: ...
+        item: global___DynamicItem | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item", b"item"]) -> None: ...
+
 global___DynDetailReply = DynDetailReply
 
-# 动态详情页-请求
+@typing_extensions.final
 class DynDetailReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态详情页-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UID_FIELD_NUMBER: builtins.int
     DYNAMIC_ID_FIELD_NUMBER: builtins.int
     DYN_TYPE_FIELD_NUMBER: builtins.int
@@ -3713,134 +4120,165 @@ class DynDetailReq(google.protobuf.message.Message):
     SHARE_MODE_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     PATTERN_FIELD_NUMBER: builtins.int
-    # up主uid
-    uid: builtins.int = ...
-    # 动态ID
-    dynamic_id: typing.Text = ...
-    # 动态类型
-    dyn_type: builtins.int = ...
-    # 业务方资源id
-    rid: builtins.int = ...
-    # 广告参数
+    uid: builtins.int
+    """up主uid"""
+    dynamic_id: builtins.str
+    """动态ID"""
+    dyn_type: builtins.int
+    """动态类型"""
+    rid: builtins.int
+    """业务方资源id"""
     @property
-    def ad_param(self) -> global___AdParam: ...
-    # 秒开参数
+    def ad_param(self) -> global___AdParam:
+        """广告参数"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    # 分享id
-    share_id: typing.Text = ...
-    # 分享类型
-    # 1:文字 2:图片 3:链接 4:视频 5:音频
-    share_mode: builtins.int = ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    # pattern
-    pattern: typing.Text = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    share_id: builtins.str
+    """分享id"""
+    share_mode: builtins.int
+    """分享类型
+    1:文字 2:图片 3:链接 4:视频 5:音频
+    """
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
+    pattern: builtins.str
+    """pattern"""
+    def __init__(
+        self,
         *,
-        uid : builtins.int = ...,
-        dynamic_id : typing.Text = ...,
-        dyn_type : builtins.int = ...,
-        rid : builtins.int = ...,
-        ad_param : typing.Optional[global___AdParam] = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        share_id : typing.Text = ...,
-        share_mode : builtins.int = ...,
-        local_time : builtins.int = ...,
-        pattern : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"ad_param",b"ad_param",u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad_param",b"ad_param",u"dyn_type",b"dyn_type",u"dynamic_id",b"dynamic_id",u"from",b"from",u"local_time",b"local_time",u"pattern",b"pattern",u"player_args",b"player_args",u"rid",b"rid",u"share_id",b"share_id",u"share_mode",b"share_mode",u"uid",b"uid"]) -> None: ...
+        uid: builtins.int = ...,
+        dynamic_id: builtins.str = ...,
+        dyn_type: builtins.int = ...,
+        rid: builtins.int = ...,
+        ad_param: global___AdParam | None = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        share_id: builtins.str = ...,
+        share_mode: builtins.int = ...,
+        local_time: builtins.int = ...,
+        pattern: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["ad_param", b"ad_param", "player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad_param", b"ad_param", "dyn_type", b"dyn_type", "dynamic_id", b"dynamic_id", "from", b"from", "local_time", b"local_time", "pattern", b"pattern", "player_args", b"player_args", "rid", b"rid", "share_id", b"share_id", "share_mode", b"share_mode", "uid", b"uid"]) -> None: ...
+
 global___DynDetailReq = DynDetailReq
 
-# 批量动态id获取动态详情-响应
+@typing_extensions.final
 class DynDetailsReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """批量动态id获取动态详情-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
-    # 动态列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """动态列表"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"list",b"list"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["list", b"list"]) -> None: ...
+
 global___DynDetailsReply = DynDetailsReply
 
-# 批量动态id获取动态详情-请求
+@typing_extensions.final
 class DynDetailsReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """批量动态id获取动态详情-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYNAMIC_IDS_FIELD_NUMBER: builtins.int
     PLAYURL_PARAM_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    # 动态id
-    dynamic_ids: typing.Text = ...
-    # 秒开参数 新版本废弃，统一使用player_args
+    dynamic_ids: builtins.str
+    """动态id"""
     @property
-    def playurl_param(self) -> global___PlayurlParam: ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    # 秒开参数
+    def playurl_param(self) -> global___PlayurlParam:
+        """秒开参数 新版本废弃，统一使用player_args"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    def __init__(
+        self,
         *,
-        dynamic_ids : typing.Text = ...,
-        playurl_param : typing.Optional[global___PlayurlParam] = ...,
-        local_time : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args",u"playurl_param",b"playurl_param"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dynamic_ids",b"dynamic_ids",u"local_time",b"local_time",u"player_args",b"player_args",u"playurl_param",b"playurl_param"]) -> None: ...
+        dynamic_ids: builtins.str = ...,
+        playurl_param: global___PlayurlParam | None = ...,
+        local_time: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args", "playurl_param", b"playurl_param"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dynamic_ids", b"dynamic_ids", "local_time", b"local_time", "player_args", b"player_args", "playurl_param", b"playurl_param"]) -> None: ...
+
 global___DynDetailsReq = DynDetailsReq
 
-# 动态发布生成临时卡-响应
+@typing_extensions.final
 class DynFakeCardReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态发布生成临时卡-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEM_FIELD_NUMBER: builtins.int
-    # 动态卡片
     @property
-    def item(self) -> global___DynamicItem: ...
-    def __init__(self,
+    def item(self) -> global___DynamicItem:
+        """动态卡片"""
+    def __init__(
+        self,
         *,
-        item : typing.Optional[global___DynamicItem] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> None: ...
+        item: global___DynamicItem | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item", b"item"]) -> None: ...
+
 global___DynFakeCardReply = DynFakeCardReply
 
-# 动态发布生成临时卡-请求
+@typing_extensions.final
 class DynFakeCardReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态发布生成临时卡-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CONTENT_FIELD_NUMBER: builtins.int
-    #卡片内容json string
-    content: typing.Text = ...
-    def __init__(self,
+    content: builtins.str
+    """卡片内容json string"""
+    def __init__(
+        self,
         *,
-        content : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"content",b"content"]) -> None: ...
+        content: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["content", b"content"]) -> None: ...
+
 global___DynFakeCardReq = DynFakeCardReq
 
-# 轻浏览-响应
+@typing_extensions.final
 class DynLightReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """轻浏览-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYNAMIC_LIST_FIELD_NUMBER: builtins.int
-    # 卡片列表
     @property
-    def dynamic_list(self) -> global___DynamicList: ...
-    def __init__(self,
+    def dynamic_list(self) -> global___DynamicList:
+        """卡片列表"""
+    def __init__(
+        self,
         *,
-        dynamic_list : typing.Optional[global___DynamicList] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list"]) -> None: ...
+        dynamic_list: global___DynamicList | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list"]) -> None: ...
+
 global___DynLightReply = DynLightReply
 
-# 轻浏览-请求
+@typing_extensions.final
 class DynLightReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """轻浏览-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HISTORY_OFFSET_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
@@ -3848,283 +4286,347 @@ class DynLightReq(google.protobuf.message.Message):
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     FROM_TYPE_FIELD_NUMBER: builtins.int
     FAKE_UID_FIELD_NUMBER: builtins.int
-    # 透传 history_offset
-    history_offset: typing.Text = ...
-    # 向下翻页数
-    page: builtins.int = ...
-    # 秒开参数
+    history_offset: builtins.str
+    """透传 history_offset"""
+    page: builtins.int
+    """向下翻页数"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    #
-    from_type: builtins.int = ...
-    #
-    fake_uid: builtins.int = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
+    from_type: builtins.int
+    """"""
+    fake_uid: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        history_offset : typing.Text = ...,
-        page : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        local_time : builtins.int = ...,
-        from_type : builtins.int = ...,
-        fake_uid : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"fake_uid",b"fake_uid",u"from",b"from",u"from_type",b"from_type",u"history_offset",b"history_offset",u"local_time",b"local_time",u"page",b"page",u"player_args",b"player_args"]) -> None: ...
+        history_offset: builtins.str = ...,
+        page: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        local_time: builtins.int = ...,
+        from_type: builtins.int = ...,
+        fake_uid: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fake_uid", b"fake_uid", "from", b"from", "from_type", b"from_type", "history_offset", b"history_offset", "local_time", b"local_time", "page", b"page", "player_args", b"player_args"]) -> None: ...
+
 global___DynLightReq = DynLightReq
 
-# 查看更多-列表-响应
+@typing_extensions.final
 class DynMixUpListViewMoreReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """查看更多-列表-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEMS_FIELD_NUMBER: builtins.int
     SEARCH_DEFAULT_TEXT_FIELD_NUMBER: builtins.int
     SORT_TYPES_FIELD_NUMBER: builtins.int
     SHOW_MORE_SORT_TYPES_FIELD_NUMBER: builtins.int
     DEFAULT_SORT_TYPE_FIELD_NUMBER: builtins.int
-    #
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MixUpListItem]: ...
-    #
-    search_default_text: typing.Text = ...
-    # 排序类型列表
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MixUpListItem]:
+        """"""
+    search_default_text: builtins.str
+    """"""
     @property
-    def sort_types(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___SortType]: ...
-    # 是否展示更多的排序策略
-    show_more_sort_types: builtins.bool = ...
-    # 默认排序策略
-    default_sort_type: builtins.int = ...
-    def __init__(self,
+    def sort_types(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___SortType]:
+        """排序类型列表"""
+    show_more_sort_types: builtins.bool
+    """是否展示更多的排序策略"""
+    default_sort_type: builtins.int
+    """默认排序策略"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___MixUpListItem]] = ...,
-        search_default_text : typing.Text = ...,
-        sort_types : typing.Optional[typing.Iterable[global___SortType]] = ...,
-        show_more_sort_types : builtins.bool = ...,
-        default_sort_type : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"default_sort_type",b"default_sort_type",u"items",b"items",u"search_default_text",b"search_default_text",u"show_more_sort_types",b"show_more_sort_types",u"sort_types",b"sort_types"]) -> None: ...
+        items: collections.abc.Iterable[global___MixUpListItem] | None = ...,
+        search_default_text: builtins.str = ...,
+        sort_types: collections.abc.Iterable[global___SortType] | None = ...,
+        show_more_sort_types: builtins.bool = ...,
+        default_sort_type: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["default_sort_type", b"default_sort_type", "items", b"items", "search_default_text", b"search_default_text", "show_more_sort_types", b"show_more_sort_types", "sort_types", b"sort_types"]) -> None: ...
+
 global___DynMixUpListViewMoreReply = DynMixUpListViewMoreReply
 
-# 查看更多-请求
+@typing_extensions.final
 class DynMixUpListViewMoreReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """查看更多-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SORT_TYPE_FIELD_NUMBER: builtins.int
-    # 排序策略
-    # 1:推荐排序 2:最常访问 3:最近关注，其他值为默认排序
-    sort_type: builtins.int = ...
-    def __init__(self,
+    sort_type: builtins.int
+    """排序策略
+    1:推荐排序 2:最常访问 3:最近关注，其他值为默认排序
+    """
+    def __init__(
+        self,
         *,
-        sort_type : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"sort_type",b"sort_type"]) -> None: ...
+        sort_type: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["sort_type", b"sort_type"]) -> None: ...
+
 global___DynMixUpListViewMoreReq = DynMixUpListViewMoreReq
 
-# 推荐页-响应
+@typing_extensions.final
 class DynRcmdReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """推荐页-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     REGION_RCMD_FIELD_NUMBER: builtins.int
     DYNAMIC_LIST_FIELD_NUMBER: builtins.int
-    # 推荐页返回参数
     @property
-    def region_rcmd(self) -> global___DynRegionRcmd: ...
-    #
+    def region_rcmd(self) -> global___DynRegionRcmd:
+        """推荐页返回参数"""
     @property
-    def dynamic_list(self) -> global___DynamicList: ...
-    def __init__(self,
+    def dynamic_list(self) -> global___DynamicList:
+        """"""
+    def __init__(
+        self,
         *,
-        region_rcmd : typing.Optional[global___DynRegionRcmd] = ...,
-        dynamic_list : typing.Optional[global___DynamicList] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list",u"region_rcmd",b"region_rcmd"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list",u"region_rcmd",b"region_rcmd"]) -> None: ...
+        region_rcmd: global___DynRegionRcmd | None = ...,
+        dynamic_list: global___DynamicList | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list", "region_rcmd", b"region_rcmd"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list", "region_rcmd", b"region_rcmd"]) -> None: ...
+
 global___DynRcmdReply = DynRcmdReply
 
-# 推荐页-请求
+@typing_extensions.final
 class DynRcmdReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """推荐页-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     FAKE_UID_FIELD_NUMBER: builtins.int
     IS_REFRESH_FIELD_NUMBER: builtins.int
-    # 秒开参数
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    #
-    fake_uid: builtins.int = ...
-    #
-    is_refresh: builtins.bool = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
+    fake_uid: builtins.int
+    """"""
+    is_refresh: builtins.bool
+    """"""
+    def __init__(
+        self,
         *,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        local_time : builtins.int = ...,
-        fake_uid : builtins.int = ...,
-        is_refresh : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"fake_uid",b"fake_uid",u"is_refresh",b"is_refresh",u"local_time",b"local_time",u"player_args",b"player_args"]) -> None: ...
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        local_time: builtins.int = ...,
+        fake_uid: builtins.int = ...,
+        is_refresh: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fake_uid", b"fake_uid", "is_refresh", b"is_refresh", "local_time", b"local_time", "player_args", b"player_args"]) -> None: ...
+
 global___DynRcmdReq = DynRcmdReq
 
-# 关注推荐up主换一换-响应
+@typing_extensions.final
 class DynRcmdUpExchangeReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """关注推荐up主换一换-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UNFOLLOW_FIELD_NUMBER: builtins.int
-    # 无关注推荐
     @property
-    def unfollow(self) -> global___Unfollow: ...
-    def __init__(self,
+    def unfollow(self) -> global___Unfollow:
+        """无关注推荐"""
+    def __init__(
+        self,
         *,
-        unfollow : typing.Optional[global___Unfollow] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"unfollow",b"unfollow"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"unfollow",b"unfollow"]) -> None: ...
+        unfollow: global___Unfollow | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["unfollow", b"unfollow"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["unfollow", b"unfollow"]) -> None: ...
+
 global___DynRcmdUpExchangeReply = DynRcmdUpExchangeReply
 
-# 关注推荐up主换一换-请求
+@typing_extensions.final
 class DynRcmdUpExchangeReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """关注推荐up主换一换-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UID_FIELD_NUMBER: builtins.int
     DISLIKETS_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
-    # 登录用户id
-    uid: builtins.int = ...
-    # 上一次不感兴趣的ts，单位：秒；该字段透传给搜索
-    dislikeTs: builtins.int = ...
-    def __init__(self,
+    uid: builtins.int
+    """登录用户id"""
+    dislikeTs: builtins.int
+    """上一次不感兴趣的ts，单位：秒；该字段透传给搜索"""
+    def __init__(
+        self,
         *,
-        uid : builtins.int = ...,
-        dislikeTs : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dislikeTs",b"dislikeTs",u"from",b"from",u"uid",b"uid"]) -> None: ...
+        uid: builtins.int = ...,
+        dislikeTs: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dislikeTs", b"dislikeTs", "from", b"from", "uid", b"uid"]) -> None: ...
+
 global___DynRcmdUpExchangeReq = DynRcmdUpExchangeReq
 
-# 推荐页返回参数
+@typing_extensions.final
 class DynRegionRcmd(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """推荐页返回参数"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEMS_FIELD_NUMBER: builtins.int
     OPTS_FIELD_NUMBER: builtins.int
-    # 分区推荐项目列表
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynRegionRcmdItem]: ...
-    # 分区聚类推荐选项
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynRegionRcmdItem]:
+        """分区推荐项目列表"""
     @property
-    def opts(self) -> global___RcmdOption: ...
-    def __init__(self,
+    def opts(self) -> global___RcmdOption:
+        """分区聚类推荐选项"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___DynRegionRcmdItem]] = ...,
-        opts : typing.Optional[global___RcmdOption] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"opts",b"opts"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items",u"opts",b"opts"]) -> None: ...
+        items: collections.abc.Iterable[global___DynRegionRcmdItem] | None = ...,
+        opts: global___RcmdOption | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["opts", b"opts"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items", "opts", b"opts"]) -> None: ...
+
 global___DynRegionRcmd = DynRegionRcmd
 
-# 分区推荐项目
+@typing_extensions.final
 class DynRegionRcmdItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """分区推荐项目"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     RID_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     ITEMS_FIELD_NUMBER: builtins.int
-    # 分区id
-    rid: builtins.int = ...
-    # 标题
-    title: typing.Text = ...
-    # 推荐模块
+    rid: builtins.int
+    """分区id"""
+    title: builtins.str
+    """标题"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleRcmd]: ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleRcmd]:
+        """推荐模块"""
+    def __init__(
+        self,
         *,
-        rid : builtins.int = ...,
-        title : typing.Text = ...,
-        items : typing.Optional[typing.Iterable[global___ModuleRcmd]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items",u"rid",b"rid",u"title",b"title"]) -> None: ...
+        rid: builtins.int = ...,
+        title: builtins.str = ...,
+        items: collections.abc.Iterable[global___ModuleRcmd] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items", "rid", b"rid", "title", b"title"]) -> None: ...
+
 global___DynRegionRcmdItem = DynRegionRcmdItem
 
-#
+@typing_extensions.final
 class DynSearchReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CHANNEL_INFO_FIELD_NUMBER: builtins.int
     SEARCH_TOPIC_FIELD_NUMBER: builtins.int
     SEARCH_INFO_FIELD_NUMBER: builtins.int
-    #
     @property
-    def channel_info(self) -> global___SearchChannel: ...
-    #
+    def channel_info(self) -> global___SearchChannel:
+        """"""
     @property
-    def search_topic(self) -> global___SearchTopic: ...
-    #
+    def search_topic(self) -> global___SearchTopic:
+        """"""
     @property
-    def search_info(self) -> global___SearchInfo: ...
-    def __init__(self,
+    def search_info(self) -> global___SearchInfo:
+        """"""
+    def __init__(
+        self,
         *,
-        channel_info : typing.Optional[global___SearchChannel] = ...,
-        search_topic : typing.Optional[global___SearchTopic] = ...,
-        search_info : typing.Optional[global___SearchInfo] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"channel_info",b"channel_info",u"search_info",b"search_info",u"search_topic",b"search_topic"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"channel_info",b"channel_info",u"search_info",b"search_info",u"search_topic",b"search_topic"]) -> None: ...
+        channel_info: global___SearchChannel | None = ...,
+        search_topic: global___SearchTopic | None = ...,
+        search_info: global___SearchInfo | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["channel_info", b"channel_info", "search_info", b"search_info", "search_topic", b"search_topic"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["channel_info", b"channel_info", "search_info", b"search_info", "search_topic", b"search_topic"]) -> None: ...
+
 global___DynSearchReply = DynSearchReply
 
-#
+@typing_extensions.final
 class DynSearchReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     KEYWORD_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    #
-    keyword: typing.Text = ...
-    #
-    page: builtins.int = ...
-    #
-    local_time: builtins.int = ...
-    #
+    keyword: builtins.str
+    """"""
+    page: builtins.int
+    """"""
+    local_time: builtins.int
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    def __init__(
+        self,
         *,
-        keyword : typing.Text = ...,
-        page : builtins.int = ...,
-        local_time : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"keyword",b"keyword",u"local_time",b"local_time",u"page",b"page",u"player_args",b"player_args"]) -> None: ...
+        keyword: builtins.str = ...,
+        page: builtins.int = ...,
+        local_time: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["keyword", b"keyword", "local_time", b"local_time", "page", b"page", "player_args", b"player_args"]) -> None: ...
+
 global___DynSearchReq = DynSearchReq
 
-#
+@typing_extensions.final
 class DynServerDetailsReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    @typing_extensions.final
     class ItemsEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
-        key: builtins.int = ...
+        key: builtins.int
         @property
         def value(self) -> global___DynamicItem: ...
-        def __init__(self,
+        def __init__(
+            self,
             *,
-            key : builtins.int = ...,
-            value : typing.Optional[global___DynamicItem] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+            key: builtins.int = ...,
+            value: global___DynamicItem | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value", b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key", b"key", "value", b"value"]) -> None: ...
 
     ITEMS_FIELD_NUMBER: builtins.int
-    #
     @property
-    def items(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, global___DynamicItem]: ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, global___DynamicItem]:
+        """"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Mapping[builtins.int, global___DynamicItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items"]) -> None: ...
+        items: collections.abc.Mapping[builtins.int, global___DynamicItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items"]) -> None: ...
+
 global___DynServerDetailsReply = DynServerDetailsReply
 
-#
+@typing_extensions.final
 class DynServerDetailsReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
     MOBI_APP_FIELD_NUMBER: builtins.int
@@ -4134,127 +4636,150 @@ class DynServerDetailsReq(google.protobuf.message.Message):
     MID_FIELD_NUMBER: builtins.int
     PLATFORM_FIELD_NUMBER: builtins.int
     IS_MASTER_FIELD_NUMBER: builtins.int
-    #
-    local_time: builtins.int = ...
-    #
+    local_time: builtins.int
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    #
-    mobi_app: typing.Text = ...
-    #
-    device: typing.Text = ...
-    #
-    buvid: typing.Text = ...
-    #
-    build: builtins.int = ...
-    #
-    mid: builtins.int = ...
-    #
-    platform: typing.Text = ...
-    #
-    is_master: builtins.bool = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    mobi_app: builtins.str
+    """"""
+    device: builtins.str
+    """"""
+    buvid: builtins.str
+    """"""
+    build: builtins.int
+    """"""
+    mid: builtins.int
+    """"""
+    platform: builtins.str
+    """"""
+    is_master: builtins.bool
+    """"""
+    def __init__(
+        self,
         *,
-        local_time : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        mobi_app : typing.Text = ...,
-        device : typing.Text = ...,
-        buvid : typing.Text = ...,
-        build : builtins.int = ...,
-        mid : builtins.int = ...,
-        platform : typing.Text = ...,
-        is_master : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"build",b"build",u"buvid",b"buvid",u"device",b"device",u"is_master",b"is_master",u"local_time",b"local_time",u"mid",b"mid",u"mobi_app",b"mobi_app",u"platform",b"platform",u"player_args",b"player_args"]) -> None: ...
+        local_time: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        mobi_app: builtins.str = ...,
+        device: builtins.str = ...,
+        buvid: builtins.str = ...,
+        build: builtins.int = ...,
+        mid: builtins.int = ...,
+        platform: builtins.str = ...,
+        is_master: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["build", b"build", "buvid", b"buvid", "device", b"device", "is_master", b"is_master", "local_time", b"local_time", "mid", b"mid", "mobi_app", b"mobi_app", "platform", b"platform", "player_args", b"player_args"]) -> None: ...
+
 global___DynServerDetailsReq = DynServerDetailsReq
 
-# 空间页动态-请求
+@typing_extensions.final
 class DynSpaceReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """空间页动态-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HOST_UID_FIELD_NUMBER: builtins.int
     HISTORY_OFFSET_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
-    # 被访问者，也就是空间主人的uid
-    host_uid: builtins.int = ...
-    # 动态偏移history_offset
-    history_offset: typing.Text = ...
-    # 秒开参数
+    host_uid: builtins.int
+    """被访问者，也就是空间主人的uid"""
+    history_offset: builtins.str
+    """动态偏移history_offset"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    # 向下翻页数，默认从1开始
-    page: builtins.int = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
+    page: builtins.int
+    """向下翻页数，默认从1开始"""
+    def __init__(
+        self,
         *,
-        host_uid : builtins.int = ...,
-        history_offset : typing.Text = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        local_time : builtins.int = ...,
-        page : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"from",b"from",u"history_offset",b"history_offset",u"host_uid",b"host_uid",u"local_time",b"local_time",u"page",b"page",u"player_args",b"player_args"]) -> None: ...
+        host_uid: builtins.int = ...,
+        history_offset: builtins.str = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        local_time: builtins.int = ...,
+        page: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["from", b"from", "history_offset", b"history_offset", "host_uid", b"host_uid", "local_time", b"local_time", "page", b"page", "player_args", b"player_args"]) -> None: ...
+
 global___DynSpaceReq = DynSpaceReq
 
-# 空间页动态-响应
+@typing_extensions.final
 class DynSpaceRsp(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """空间页动态-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     HISTORY_OFFSET_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
-    # 卡片列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    # 历史偏移
-    history_offset: typing.Text = ...
-    # 是否还有更多数据
-    has_more: builtins.bool = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """卡片列表"""
+    history_offset: builtins.str
+    """历史偏移"""
+    has_more: builtins.bool
+    """是否还有更多数据"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        history_offset : typing.Text = ...,
-        has_more : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"history_offset",b"history_offset",u"list",b"list"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        history_offset: builtins.str = ...,
+        has_more: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "history_offset", b"history_offset", "list", b"list"]) -> None: ...
+
 global___DynSpaceRsp = DynSpaceRsp
 
-#
+@typing_extensions.final
 class DynSpaceSearchDetailsReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    @typing_extensions.final
     class ItemsEntry(google.protobuf.message.Message):
-        DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+        DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
         KEY_FIELD_NUMBER: builtins.int
         VALUE_FIELD_NUMBER: builtins.int
-        key: builtins.int = ...
+        key: builtins.int
         @property
         def value(self) -> global___DynamicItem: ...
-        def __init__(self,
+        def __init__(
+            self,
             *,
-            key : builtins.int = ...,
-            value : typing.Optional[global___DynamicItem] = ...,
-            ) -> None: ...
-        def HasField(self, field_name: typing_extensions.Literal[u"value",b"value"]) -> builtins.bool: ...
-        def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+            key: builtins.int = ...,
+            value: global___DynamicItem | None = ...,
+        ) -> None: ...
+        def HasField(self, field_name: typing_extensions.Literal["value", b"value"]) -> builtins.bool: ...
+        def ClearField(self, field_name: typing_extensions.Literal["key", b"key", "value", b"value"]) -> None: ...
 
     ITEMS_FIELD_NUMBER: builtins.int
-    #
     @property
-    def items(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, global___DynamicItem]: ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.MessageMap[builtins.int, global___DynamicItem]:
+        """"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Mapping[builtins.int, global___DynamicItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items"]) -> None: ...
+        items: collections.abc.Mapping[builtins.int, global___DynamicItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items"]) -> None: ...
+
 global___DynSpaceSearchDetailsReply = DynSpaceSearchDetailsReply
 
-#
+@typing_extensions.final
 class DynSpaceSearchDetailsReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SEARCH_WORDS_FIELD_NUMBER: builtins.int
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
@@ -4267,54 +4792,59 @@ class DynSpaceSearchDetailsReq(google.protobuf.message.Message):
     IP_FIELD_NUMBER: builtins.int
     NET_TYPE_FIELD_NUMBER: builtins.int
     TF_TYPE_FIELD_NUMBER: builtins.int
-    #
     @property
-    def search_words(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    #
-    local_time: builtins.int = ...
-    #
+    def search_words(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """"""
+    local_time: builtins.int
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    #
-    mobi_app: typing.Text = ...
-    #
-    device: typing.Text = ...
-    #
-    buvid: typing.Text = ...
-    #
-    build: builtins.int = ...
-    #
-    mid: builtins.int = ...
-    #
-    platform: typing.Text = ...
-    #
-    ip: typing.Text = ...
-    #
-    net_type: builtins.int = ...
-    #
-    tf_type: builtins.int = ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    mobi_app: builtins.str
+    """"""
+    device: builtins.str
+    """"""
+    buvid: builtins.str
+    """"""
+    build: builtins.int
+    """"""
+    mid: builtins.int
+    """"""
+    platform: builtins.str
+    """"""
+    ip: builtins.str
+    """"""
+    net_type: builtins.int
+    """"""
+    tf_type: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        search_words : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        local_time : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        mobi_app : typing.Text = ...,
-        device : typing.Text = ...,
-        buvid : typing.Text = ...,
-        build : builtins.int = ...,
-        mid : builtins.int = ...,
-        platform : typing.Text = ...,
-        ip : typing.Text = ...,
-        net_type : builtins.int = ...,
-        tf_type : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"build",b"build",u"buvid",b"buvid",u"device",b"device",u"ip",b"ip",u"local_time",b"local_time",u"mid",b"mid",u"mobi_app",b"mobi_app",u"net_type",b"net_type",u"platform",b"platform",u"player_args",b"player_args",u"search_words",b"search_words",u"tf_type",b"tf_type"]) -> None: ...
+        search_words: collections.abc.Iterable[builtins.str] | None = ...,
+        local_time: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+        mobi_app: builtins.str = ...,
+        device: builtins.str = ...,
+        buvid: builtins.str = ...,
+        build: builtins.int = ...,
+        mid: builtins.int = ...,
+        platform: builtins.str = ...,
+        ip: builtins.str = ...,
+        net_type: builtins.int = ...,
+        tf_type: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["build", b"build", "buvid", b"buvid", "device", b"device", "ip", b"ip", "local_time", b"local_time", "mid", b"mid", "mobi_app", b"mobi_app", "net_type", b"net_type", "platform", b"platform", "player_args", b"player_args", "search_words", b"search_words", "tf_type", b"tf_type"]) -> None: ...
+
 global___DynSpaceSearchDetailsReq = DynSpaceSearchDetailsReq
 
-#
+@typing_extensions.final
 class DynTab(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     BUBBLE_FIELD_NUMBER: builtins.int
@@ -4328,150 +4858,175 @@ class DynTab(google.protobuf.message.Message):
     INTERNAL_TEST_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     BACK_UP_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    uri: typing.Text = ...
-    #
-    bubble: typing.Text = ...
-    #
-    red_point: builtins.int = ...
-    #
-    city_id: builtins.int = ...
-    #
-    is_popup: builtins.int = ...
-    #
+    title: builtins.str
+    """"""
+    uri: builtins.str
+    """"""
+    bubble: builtins.str
+    """"""
+    red_point: builtins.int
+    """"""
+    city_id: builtins.int
+    """"""
+    is_popup: builtins.int
+    """"""
     @property
-    def popup(self) -> global___Popup: ...
-    #
-    default_tab: builtins.bool = ...
-    #
-    sub_title: typing.Text = ...
-    #
-    anchor: typing.Text = ...
-    #
-    internal_test: typing.Text = ...
-    #
-    type: builtins.int = ...
-    #
+    def popup(self) -> global___Popup:
+        """"""
+    default_tab: builtins.bool
+    """"""
+    sub_title: builtins.str
+    """"""
+    anchor: builtins.str
+    """"""
+    internal_test: builtins.str
+    """"""
+    type: builtins.int
+    """"""
     @property
-    def back_up(self) -> global___DynTab: ...
-    def __init__(self,
+    def back_up(self) -> global___DynTab:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        bubble : typing.Text = ...,
-        red_point : builtins.int = ...,
-        city_id : builtins.int = ...,
-        is_popup : builtins.int = ...,
-        popup : typing.Optional[global___Popup] = ...,
-        default_tab : builtins.bool = ...,
-        sub_title : typing.Text = ...,
-        anchor : typing.Text = ...,
-        internal_test : typing.Text = ...,
-        type : builtins.int = ...,
-        back_up : typing.Optional[global___DynTab] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"back_up",b"back_up",u"popup",b"popup"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"anchor",b"anchor",u"back_up",b"back_up",u"bubble",b"bubble",u"city_id",b"city_id",u"default_tab",b"default_tab",u"internal_test",b"internal_test",u"is_popup",b"is_popup",u"popup",b"popup",u"red_point",b"red_point",u"sub_title",b"sub_title",u"title",b"title",u"type",b"type",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        bubble: builtins.str = ...,
+        red_point: builtins.int = ...,
+        city_id: builtins.int = ...,
+        is_popup: builtins.int = ...,
+        popup: global___Popup | None = ...,
+        default_tab: builtins.bool = ...,
+        sub_title: builtins.str = ...,
+        anchor: builtins.str = ...,
+        internal_test: builtins.str = ...,
+        type: builtins.int = ...,
+        back_up: global___DynTab | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["back_up", b"back_up", "popup", b"popup"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["anchor", b"anchor", "back_up", b"back_up", "bubble", b"bubble", "city_id", b"city_id", "default_tab", b"default_tab", "internal_test", b"internal_test", "is_popup", b"is_popup", "popup", b"popup", "red_point", b"red_point", "sub_title", b"sub_title", "title", b"title", "type", b"type", "uri", b"uri"]) -> None: ...
+
 global___DynTab = DynTab
 
-#
+@typing_extensions.final
 class DynTabReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYN_TAB_FIELD_NUMBER: builtins.int
-    #
     @property
-    def dyn_tab(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynTab]: ...
-    def __init__(self,
+    def dyn_tab(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynTab]:
+        """"""
+    def __init__(
+        self,
         *,
-        dyn_tab : typing.Optional[typing.Iterable[global___DynTab]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dyn_tab",b"dyn_tab"]) -> None: ...
+        dyn_tab: collections.abc.Iterable[global___DynTab] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dyn_tab", b"dyn_tab"]) -> None: ...
+
 global___DynTabReply = DynTabReply
 
-#
+@typing_extensions.final
 class DynTabReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEENAGERS_MODE_FIELD_NUMBER: builtins.int
-    #
-    teenagers_mode: builtins.int = ...
-    def __init__(self,
+    teenagers_mode: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        teenagers_mode : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"teenagers_mode",b"teenagers_mode"]) -> None: ...
+        teenagers_mode: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["teenagers_mode", b"teenagers_mode"]) -> None: ...
+
 global___DynTabReq = DynTabReq
 
-# 动态点赞-请求
+@typing_extensions.final
 class DynThumbReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态点赞-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UID_FIELD_NUMBER: builtins.int
     DYN_ID_FIELD_NUMBER: builtins.int
     DYN_TYPE_FIELD_NUMBER: builtins.int
     RID_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
-    # 用户uid
-    uid: builtins.int = ...
-    # 动态id
-    dyn_id: typing.Text = ...
-    # 动态类型(透传extend中的dyn_type)
-    dyn_type: builtins.int = ...
-    # 业务方资源id
-    rid: typing.Text = ...
-    # 点赞类型
-    type: global___ThumbType.V = ...
-    def __init__(self,
+    uid: builtins.int
+    """用户uid"""
+    dyn_id: builtins.str
+    """动态id"""
+    dyn_type: builtins.int
+    """动态类型(透传extend中的dyn_type)"""
+    rid: builtins.str
+    """业务方资源id"""
+    type: global___ThumbType.ValueType
+    """点赞类型"""
+    def __init__(
+        self,
         *,
-        uid : builtins.int = ...,
-        dyn_id : typing.Text = ...,
-        dyn_type : builtins.int = ...,
-        rid : typing.Text = ...,
-        type : global___ThumbType.V = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dyn_id",b"dyn_id",u"dyn_type",b"dyn_type",u"rid",b"rid",u"type",b"type",u"uid",b"uid"]) -> None: ...
+        uid: builtins.int = ...,
+        dyn_id: builtins.str = ...,
+        dyn_type: builtins.int = ...,
+        rid: builtins.str = ...,
+        type: global___ThumbType.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dyn_id", b"dyn_id", "dyn_type", b"dyn_type", "rid", b"rid", "type", b"type", "uid", b"uid"]) -> None: ...
+
 global___DynThumbReq = DynThumbReq
 
-# 最近访问-个人feed流列表-响应
+@typing_extensions.final
 class DynVideoPersonalReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最近访问-个人feed流列表-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     READ_OFFSET_FIELD_NUMBER: builtins.int
     RELATION_FIELD_NUMBER: builtins.int
     ADDITION_UP_FIELD_NUMBER: builtins.int
-    # 动态列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    # 偏移量
-    offset: typing.Text = ...
-    # 是否还有更多数据
-    has_more: builtins.bool = ...
-    # 已读进度
-    read_offset: typing.Text = ...
-    # 关注状态
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """动态列表"""
+    offset: builtins.str
+    """偏移量"""
+    has_more: builtins.bool
+    """是否还有更多数据"""
+    read_offset: builtins.str
+    """已读进度"""
     @property
-    def relation(self) -> global___Relation: ...
-    # 顶部预约卡
+    def relation(self) -> global___Relation:
+        """关注状态"""
     @property
-    def addition_up(self) -> global___TopAdditionUP: ...
-    def __init__(self,
+    def addition_up(self) -> global___TopAdditionUP:
+        """顶部预约卡"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        offset : typing.Text = ...,
-        has_more : builtins.bool = ...,
-        read_offset : typing.Text = ...,
-        relation : typing.Optional[global___Relation] = ...,
-        addition_up : typing.Optional[global___TopAdditionUP] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"addition_up",b"addition_up",u"relation",b"relation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"addition_up",b"addition_up",u"has_more",b"has_more",u"list",b"list",u"offset",b"offset",u"read_offset",b"read_offset",u"relation",b"relation"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        offset: builtins.str = ...,
+        has_more: builtins.bool = ...,
+        read_offset: builtins.str = ...,
+        relation: global___Relation | None = ...,
+        addition_up: global___TopAdditionUP | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["addition_up", b"addition_up", "relation", b"relation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["addition_up", b"addition_up", "has_more", b"has_more", "list", b"list", "offset", b"offset", "read_offset", b"read_offset", "relation", b"relation"]) -> None: ...
+
 global___DynVideoPersonalReply = DynVideoPersonalReply
 
-# 最近访问-个人feed流列表-请求
+@typing_extensions.final
 class DynVideoPersonalReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最近访问-个人feed流列表-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HOST_UID_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
@@ -4481,67 +5036,77 @@ class DynVideoPersonalReq(google.protobuf.message.Message):
     FOOTPRINT_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    # 被访问者的 UID
-    host_uid: builtins.int = ...
-    # 偏移量 第一页可传空
-    offset: typing.Text = ...
-    # 标明下拉几次
-    page: builtins.int = ...
-    # 是否是预加载
-    is_preload: builtins.int = ...
-    # 秒开参数 新版本废弃，统一使用player_args
+    host_uid: builtins.int
+    """被访问者的 UID"""
+    offset: builtins.str
+    """偏移量 第一页可传空"""
+    page: builtins.int
+    """标明下拉几次"""
+    is_preload: builtins.int
+    """是否是预加载"""
     @property
-    def playurl_param(self) -> global___PlayurlParam: ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    # 服务端生成的透传上报字段
-    footprint: typing.Text = ...
-    # 秒开参数
+    def playurl_param(self) -> global___PlayurlParam:
+        """秒开参数 新版本废弃，统一使用player_args"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
+    footprint: builtins.str
+    """服务端生成的透传上报字段"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    def __init__(
+        self,
         *,
-        host_uid : builtins.int = ...,
-        offset : typing.Text = ...,
-        page : builtins.int = ...,
-        is_preload : builtins.int = ...,
-        playurl_param : typing.Optional[global___PlayurlParam] = ...,
-        local_time : builtins.int = ...,
-        footprint : typing.Text = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args",u"playurl_param",b"playurl_param"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"footprint",b"footprint",u"from",b"from",u"host_uid",b"host_uid",u"is_preload",b"is_preload",u"local_time",b"local_time",u"offset",b"offset",u"page",b"page",u"player_args",b"player_args",u"playurl_param",b"playurl_param"]) -> None: ...
+        host_uid: builtins.int = ...,
+        offset: builtins.str = ...,
+        page: builtins.int = ...,
+        is_preload: builtins.int = ...,
+        playurl_param: global___PlayurlParam | None = ...,
+        local_time: builtins.int = ...,
+        footprint: builtins.str = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args", "playurl_param", b"playurl_param"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["footprint", b"footprint", "from", b"from", "host_uid", b"host_uid", "is_preload", b"is_preload", "local_time", b"local_time", "offset", b"offset", "page", b"page", "player_args", b"player_args", "playurl_param", b"playurl_param"]) -> None: ...
+
 global___DynVideoPersonalReq = DynVideoPersonalReq
 
-# 动态视频页-响应
+@typing_extensions.final
 class DynVideoReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态视频页-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYNAMIC_LIST_FIELD_NUMBER: builtins.int
     VIDEO_UP_LIST_FIELD_NUMBER: builtins.int
     VIDEO_FOLLOW_LIST_FIELD_NUMBER: builtins.int
-    # 卡片列表
     @property
-    def dynamic_list(self) -> global___CardVideoDynList: ...
-    # 动态卡片
+    def dynamic_list(self) -> global___CardVideoDynList:
+        """卡片列表"""
     @property
-    def video_up_list(self) -> global___CardVideoUpList: ...
-    # 视频页-我的追番
+    def video_up_list(self) -> global___CardVideoUpList:
+        """动态卡片"""
     @property
-    def video_follow_list(self) -> global___CardVideoFollowList: ...
-    def __init__(self,
+    def video_follow_list(self) -> global___CardVideoFollowList:
+        """视频页-我的追番"""
+    def __init__(
+        self,
         *,
-        dynamic_list : typing.Optional[global___CardVideoDynList] = ...,
-        video_up_list : typing.Optional[global___CardVideoUpList] = ...,
-        video_follow_list : typing.Optional[global___CardVideoFollowList] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list",u"video_follow_list",b"video_follow_list",u"video_up_list",b"video_up_list"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dynamic_list",b"dynamic_list",u"video_follow_list",b"video_follow_list",u"video_up_list",b"video_up_list"]) -> None: ...
+        dynamic_list: global___CardVideoDynList | None = ...,
+        video_up_list: global___CardVideoUpList | None = ...,
+        video_follow_list: global___CardVideoFollowList | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list", "video_follow_list", b"video_follow_list", "video_up_list", b"video_up_list"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dynamic_list", b"dynamic_list", "video_follow_list", b"video_follow_list", "video_up_list", b"video_up_list"]) -> None: ...
+
 global___DynVideoReply = DynVideoReply
 
-# 动态视频页-请求
+@typing_extensions.final
 class DynVideoReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态视频页-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UPDATE_BASELINE_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
@@ -4551,179 +5116,210 @@ class DynVideoReq(google.protobuf.message.Message):
     LOCAL_TIME_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    # 透传 update_baseline
-    update_baseline: typing.Text = ...
-    # 透传 history_offset
-    offset: typing.Text = ...
-    # 向下翻页数
-    page: builtins.int = ...
-    # 刷新方式
-    # 1:向上刷新 2:向下翻页
-    refresh_type: global___Refresh.V = ...
-    # 秒开参数 新版本废弃，统一使用player_args
+    update_baseline: builtins.str
+    """透传 update_baseline"""
+    offset: builtins.str
+    """透传 history_offset"""
+    page: builtins.int
+    """向下翻页数"""
+    refresh_type: global___Refresh.ValueType
+    """刷新方式
+    1:向上刷新 2:向下翻页
+    """
     @property
-    def playurl_param(self) -> global___PlayurlParam: ...
-    # 综合页当前更新的最大值
-    assist_baseline: typing.Text = ...
-    # 客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8
-    local_time: builtins.int = ...
-    # 秒开参数
+    def playurl_param(self) -> global___PlayurlParam:
+        """秒开参数 新版本废弃，统一使用player_args"""
+    assist_baseline: builtins.str
+    """综合页当前更新的最大值"""
+    local_time: builtins.int
+    """客户端时区 兼容UTC-14和Etc/GMT+12,时区区间[-12,14] 东八区为8"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """秒开参数"""
+    def __init__(
+        self,
         *,
-        update_baseline : typing.Text = ...,
-        offset : typing.Text = ...,
-        page : builtins.int = ...,
-        refresh_type : global___Refresh.V = ...,
-        playurl_param : typing.Optional[global___PlayurlParam] = ...,
-        assist_baseline : typing.Text = ...,
-        local_time : builtins.int = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args",u"playurl_param",b"playurl_param"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"assist_baseline",b"assist_baseline",u"from",b"from",u"local_time",b"local_time",u"offset",b"offset",u"page",b"page",u"player_args",b"player_args",u"playurl_param",b"playurl_param",u"refresh_type",b"refresh_type",u"update_baseline",b"update_baseline"]) -> None: ...
+        update_baseline: builtins.str = ...,
+        offset: builtins.str = ...,
+        page: builtins.int = ...,
+        refresh_type: global___Refresh.ValueType = ...,
+        playurl_param: global___PlayurlParam | None = ...,
+        assist_baseline: builtins.str = ...,
+        local_time: builtins.int = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args", "playurl_param", b"playurl_param"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["assist_baseline", b"assist_baseline", "from", b"from", "local_time", b"local_time", "offset", b"offset", "page", b"page", "player_args", b"player_args", "playurl_param", b"playurl_param", "refresh_type", b"refresh_type", "update_baseline", b"update_baseline"]) -> None: ...
+
 global___DynVideoReq = DynVideoReq
 
-# 最近访问-标记已读-请求
+@typing_extensions.final
 class DynVideoUpdOffsetReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最近访问-标记已读-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HOST_UID_FIELD_NUMBER: builtins.int
     READ_OFFSET_FIELD_NUMBER: builtins.int
     FOOTPRINT_FIELD_NUMBER: builtins.int
-    # 被访问者的UID
-    host_uid: builtins.int = ...
-    # 用户已读进度
-    read_offset: typing.Text = ...
-    # 服务端生成的透传上报字段
-    footprint: typing.Text = ...
-    def __init__(self,
+    host_uid: builtins.int
+    """被访问者的UID"""
+    read_offset: builtins.str
+    """用户已读进度"""
+    footprint: builtins.str
+    """服务端生成的透传上报字段"""
+    def __init__(
+        self,
         *,
-        host_uid : builtins.int = ...,
-        read_offset : typing.Text = ...,
-        footprint : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"footprint",b"footprint",u"host_uid",b"host_uid",u"read_offset",b"read_offset"]) -> None: ...
+        host_uid: builtins.int = ...,
+        read_offset: builtins.str = ...,
+        footprint: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["footprint", b"footprint", "host_uid", b"host_uid", "read_offset", b"read_offset"]) -> None: ...
+
 global___DynVideoUpdOffsetReq = DynVideoUpdOffsetReq
 
-# 投票操作-响应
+@typing_extensions.final
 class DynVoteReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """投票操作-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEM_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
-    # 投票详情
     @property
-    def item(self) -> global___AdditionVote2: ...
-    # 投票操作返回状态
-    toast: typing.Text = ...
-    def __init__(self,
+    def item(self) -> global___AdditionVote2:
+        """投票详情"""
+    toast: builtins.str
+    """投票操作返回状态"""
+    def __init__(
+        self,
         *,
-        item : typing.Optional[global___AdditionVote2] = ...,
-        toast : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item",b"item",u"toast",b"toast"]) -> None: ...
+        item: global___AdditionVote2 | None = ...,
+        toast: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item", b"item", "toast", b"toast"]) -> None: ...
+
 global___DynVoteReply = DynVoteReply
 
-# 投票操作-请求
+@typing_extensions.final
 class DynVoteReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """投票操作-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     VOTE_ID_FIELD_NUMBER: builtins.int
     VOTES_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     DYNAMIC_ID_FIELD_NUMBER: builtins.int
     SHARE_FIELD_NUMBER: builtins.int
-    # 投票ID
-    vote_id: builtins.int = ...
-    # 选项索引数组
+    vote_id: builtins.int
+    """投票ID"""
     @property
-    def votes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]: ...
-    # 状态
-    status: global___VoteStatus.V = ...
-    # 动态ID
-    dynamic_id: typing.Text = ...
-    # 是否分享
-    share: builtins.bool = ...
-    def __init__(self,
+    def votes(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.int]:
+        """选项索引数组"""
+    status: global___VoteStatus.ValueType
+    """状态"""
+    dynamic_id: builtins.str
+    """动态ID"""
+    share: builtins.bool
+    """是否分享"""
+    def __init__(
+        self,
         *,
-        vote_id : builtins.int = ...,
-        votes : typing.Optional[typing.Iterable[builtins.int]] = ...,
-        status : global___VoteStatus.V = ...,
-        dynamic_id : typing.Text = ...,
-        share : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dynamic_id",b"dynamic_id",u"share",b"share",u"status",b"status",u"vote_id",b"vote_id",u"votes",b"votes"]) -> None: ...
+        vote_id: builtins.int = ...,
+        votes: collections.abc.Iterable[builtins.int] | None = ...,
+        status: global___VoteStatus.ValueType = ...,
+        dynamic_id: builtins.str = ...,
+        share: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dynamic_id", b"dynamic_id", "share", b"share", "status", b"status", "vote_id", b"vote_id", "votes", b"votes"]) -> None: ...
+
 global___DynVoteReq = DynVoteReq
 
-# 动态卡片
+@typing_extensions.final
 class DynamicItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态卡片"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CARD_TYPE_FIELD_NUMBER: builtins.int
     ITEM_TYPE_FIELD_NUMBER: builtins.int
     MODULES_FIELD_NUMBER: builtins.int
     EXTEND_FIELD_NUMBER: builtins.int
     HAS_FOLD_FIELD_NUMBER: builtins.int
     SERVER_INFO_FIELD_NUMBER: builtins.int
-    # 动态卡片类型
-    card_type: global___DynamicType.V = ...
-    # 转发类型下，源卡片类型
-    item_type: global___DynamicType.V = ...
-    # 模块内容
+    card_type: global___DynamicType.ValueType
+    """动态卡片类型"""
+    item_type: global___DynamicType.ValueType
+    """转发类型下，源卡片类型"""
     @property
-    def modules(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Module]: ...
-    # 操作相关字段
+    def modules(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Module]:
+        """模块内容"""
     @property
-    def extend(self) -> global___Extend: ...
-    # 该卡片下面是否含有折叠卡
-    has_fold: builtins.int = ...
-    # 透传到客户端的埋点字段。
-    server_info: typing.Text = ...
-    def __init__(self,
+    def extend(self) -> global___Extend:
+        """操作相关字段"""
+    has_fold: builtins.int
+    """该卡片下面是否含有折叠卡"""
+    server_info: builtins.str
+    """透传到客户端的埋点字段。"""
+    def __init__(
+        self,
         *,
-        card_type : global___DynamicType.V = ...,
-        item_type : global___DynamicType.V = ...,
-        modules : typing.Optional[typing.Iterable[global___Module]] = ...,
-        extend : typing.Optional[global___Extend] = ...,
-        has_fold : builtins.int = ...,
-        server_info : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"extend",b"extend"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"card_type",b"card_type",u"extend",b"extend",u"has_fold",b"has_fold",u"item_type",b"item_type",u"modules",b"modules",u"server_info",b"server_info"]) -> None: ...
+        card_type: global___DynamicType.ValueType = ...,
+        item_type: global___DynamicType.ValueType = ...,
+        modules: collections.abc.Iterable[global___Module] | None = ...,
+        extend: global___Extend | None = ...,
+        has_fold: builtins.int = ...,
+        server_info: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["extend", b"extend"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["card_type", b"card_type", "extend", b"extend", "has_fold", b"has_fold", "item_type", b"item_type", "modules", b"modules", "server_info", b"server_info"]) -> None: ...
+
 global___DynamicItem = DynamicItem
 
-#动态卡片列表
+@typing_extensions.final
 class DynamicList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态卡片列表"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     UPDATE_NUM_FIELD_NUMBER: builtins.int
     HISTORY_OFFSET_FIELD_NUMBER: builtins.int
     UPDATE_BASELINE_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
-    # 动态列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    # 更新的动态数
-    update_num: builtins.int = ...
-    # 历史偏移
-    history_offset: typing.Text = ...
-    # 更新基础信息
-    update_baseline: typing.Text = ...
-    # 是否还有更多数据
-    has_more: builtins.bool = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """动态列表"""
+    update_num: builtins.int
+    """更新的动态数"""
+    history_offset: builtins.str
+    """历史偏移"""
+    update_baseline: builtins.str
+    """更新基础信息"""
+    has_more: builtins.bool
+    """是否还有更多数据"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        update_num : builtins.int = ...,
-        history_offset : typing.Text = ...,
-        update_baseline : typing.Text = ...,
-        has_more : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"history_offset",b"history_offset",u"list",b"list",u"update_baseline",b"update_baseline",u"update_num",b"update_num"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        update_num: builtins.int = ...,
+        history_offset: builtins.str = ...,
+        update_baseline: builtins.str = ...,
+        has_more: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "history_offset", b"history_offset", "list", b"list", "update_baseline", b"update_baseline", "update_num", b"update_num"]) -> None: ...
+
 global___DynamicList = DynamicList
 
-# 动态-拓展小卡模块-通用小卡
+@typing_extensions.final
 class ExtInfoCommon(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块-通用小卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
@@ -4734,147 +5330,177 @@ class ExtInfoCommon(google.protobuf.message.Message):
     ACTION_URL_FIELD_NUMBER: builtins.int
     RID_FIELD_NUMBER: builtins.int
     IS_SHOW_LIGHT_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 小图标
-    icon: typing.Text = ...
-    # poiType
-    poi_type: builtins.int = ...
-    # 类型
-    type: global___DynExtendType.V = ...
-    # 客户端埋点用
-    sub_module: typing.Text = ...
-    # 行动点文案
-    action_text: typing.Text = ...
-    # 行动点链接
-    action_url: typing.Text = ...
-    # 资源rid
-    rid: builtins.int = ...
-    # 轻浏览是否展示
-    is_show_light: builtins.bool = ...
-    def __init__(self,
+    title: builtins.str
+    """标题"""
+    uri: builtins.str
+    """跳转地址"""
+    icon: builtins.str
+    """小图标"""
+    poi_type: builtins.int
+    """poiType"""
+    type: global___DynExtendType.ValueType
+    """类型"""
+    sub_module: builtins.str
+    """客户端埋点用"""
+    action_text: builtins.str
+    """行动点文案"""
+    action_url: builtins.str
+    """行动点链接"""
+    rid: builtins.int
+    """资源rid"""
+    is_show_light: builtins.bool
+    """轻浏览是否展示"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        icon : typing.Text = ...,
-        poi_type : builtins.int = ...,
-        type : global___DynExtendType.V = ...,
-        sub_module : typing.Text = ...,
-        action_text : typing.Text = ...,
-        action_url : typing.Text = ...,
-        rid : builtins.int = ...,
-        is_show_light : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"action_text",b"action_text",u"action_url",b"action_url",u"icon",b"icon",u"is_show_light",b"is_show_light",u"poi_type",b"poi_type",u"rid",b"rid",u"sub_module",b"sub_module",u"title",b"title",u"type",b"type",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        icon: builtins.str = ...,
+        poi_type: builtins.int = ...,
+        type: global___DynExtendType.ValueType = ...,
+        sub_module: builtins.str = ...,
+        action_text: builtins.str = ...,
+        action_url: builtins.str = ...,
+        rid: builtins.int = ...,
+        is_show_light: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["action_text", b"action_text", "action_url", b"action_url", "icon", b"icon", "is_show_light", b"is_show_light", "poi_type", b"poi_type", "rid", b"rid", "sub_module", b"sub_module", "title", b"title", "type", b"type", "uri", b"uri"]) -> None: ...
+
 global___ExtInfoCommon = ExtInfoCommon
 
-# 动态-拓展小卡模块-游戏小卡
+@typing_extensions.final
 class ExtInfoGame(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块-游戏小卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 小图标
-    icon: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """标题"""
+    uri: builtins.str
+    """跳转地址"""
+    icon: builtins.str
+    """小图标"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        icon : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        icon: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___ExtInfoGame = ExtInfoGame
 
-# 动态-拓展小卡模块-热门小卡
+@typing_extensions.final
 class ExtInfoHot(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块-热门小卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 小图标
-    icon: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """标题"""
+    uri: builtins.str
+    """跳转地址"""
+    icon: builtins.str
+    """小图标"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        icon : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        icon: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___ExtInfoHot = ExtInfoHot
 
-# 动态-拓展小卡模块-lbs小卡
+@typing_extensions.final
 class ExtInfoLBS(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块-lbs小卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
     POI_TYPE_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 小图标
-    icon: typing.Text = ...
-    # poiType
-    poi_type: builtins.int = ...
-    def __init__(self,
+    title: builtins.str
+    """标题"""
+    uri: builtins.str
+    """跳转地址"""
+    icon: builtins.str
+    """小图标"""
+    poi_type: builtins.int
+    """poiType"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        icon : typing.Text = ...,
-        poi_type : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"poi_type",b"poi_type",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        icon: builtins.str = ...,
+        poi_type: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "poi_type", b"poi_type", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___ExtInfoLBS = ExtInfoLBS
 
-# 动态-拓展小卡模块-ogv小卡
+@typing_extensions.final
 class ExtInfoOGV(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块-ogv小卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     INFO_OGV_FIELD_NUMBER: builtins.int
-    # ogv小卡
     @property
-    def info_ogv(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___InfoOGV]: ...
-    def __init__(self,
+    def info_ogv(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___InfoOGV]:
+        """ogv小卡"""
+    def __init__(
+        self,
         *,
-        info_ogv : typing.Optional[typing.Iterable[global___InfoOGV]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"info_ogv",b"info_ogv"]) -> None: ...
+        info_ogv: collections.abc.Iterable[global___InfoOGV] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["info_ogv", b"info_ogv"]) -> None: ...
+
 global___ExtInfoOGV = ExtInfoOGV
 
-# 动态-拓展小卡模块-话题小卡
+@typing_extensions.final
 class ExtInfoTopic(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块-话题小卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
-    # 标题-话题名
-    title: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 小图标
-    icon: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """标题-话题名"""
+    uri: builtins.str
+    """跳转地址"""
+    icon: builtins.str
+    """小图标"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        icon : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        icon: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___ExtInfoTopic = ExtInfoTopic
 
-# 扩展字段，用于动态部分操作使用
+@typing_extensions.final
 class Extend(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """扩展字段，用于动态部分操作使用"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYN_ID_STR_FIELD_NUMBER: builtins.int
     BUSINESS_ID_FIELD_NUMBER: builtins.int
     ORIG_DYN_ID_STR_FIELD_NUMBER: builtins.int
@@ -4893,109 +5519,124 @@ class Extend(google.protobuf.message.Message):
     SOURCE_CONTENT_FIELD_NUMBER: builtins.int
     ORIG_FACE_FIELD_NUMBER: builtins.int
     REPLY_FIELD_NUMBER: builtins.int
-    # 动态id
-    dyn_id_str: typing.Text = ...
-    # 业务方id
-    business_id: typing.Text = ...
-    # 源动态id
-    orig_dyn_id_str: typing.Text = ...
-    # 转发卡：用户名
-    orig_name: typing.Text = ...
-    # 转发卡：图片url
-    orig_img_url: typing.Text = ...
-    # 转发卡：文字内容
+    dyn_id_str: builtins.str
+    """动态id"""
+    business_id: builtins.str
+    """业务方id"""
+    orig_dyn_id_str: builtins.str
+    """源动态id"""
+    orig_name: builtins.str
+    """转发卡：用户名"""
+    orig_img_url: builtins.str
+    """转发卡：图片url"""
     @property
-    def orig_desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]: ...
-    # 填充文字内容
+    def orig_desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]:
+        """转发卡：文字内容"""
     @property
-    def desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]: ...
-    # 被转发的源动态类型
-    orig_dyn_type: global___DynamicType.V = ...
-    # 分享到站外展示类型
-    share_type: typing.Text = ...
-    # 分享的场景
-    share_scene: typing.Text = ...
-    # 是否快速转发
-    is_fast_share: builtins.bool = ...
-    # r_type 分享和转发
-    r_type: builtins.int = ...
-    # 数据源的动态类型
-    dyn_type: builtins.int = ...
-    # 用户id
-    uid: builtins.int = ...
-    # 卡片跳转
-    card_url: typing.Text = ...
-    # 透传字段
+    def desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]:
+        """填充文字内容"""
+    orig_dyn_type: global___DynamicType.ValueType
+    """被转发的源动态类型"""
+    share_type: builtins.str
+    """分享到站外展示类型"""
+    share_scene: builtins.str
+    """分享的场景"""
+    is_fast_share: builtins.bool
+    """是否快速转发"""
+    r_type: builtins.int
+    """r_type 分享和转发"""
+    dyn_type: builtins.int
+    """数据源的动态类型"""
+    uid: builtins.int
+    """用户id"""
+    card_url: builtins.str
+    """卡片跳转"""
     @property
-    def source_content(self) -> google.protobuf.any_pb2.Any: ...
-    # 转发卡：用户头像
-    orig_face: typing.Text = ...
-    # 评论跳转
+    def source_content(self) -> google.protobuf.any_pb2.Any:
+        """透传字段"""
+    orig_face: builtins.str
+    """转发卡：用户头像"""
     @property
-    def reply(self) -> global___ExtendReply: ...
-    def __init__(self,
+    def reply(self) -> global___ExtendReply:
+        """评论跳转"""
+    def __init__(
+        self,
         *,
-        dyn_id_str : typing.Text = ...,
-        business_id : typing.Text = ...,
-        orig_dyn_id_str : typing.Text = ...,
-        orig_name : typing.Text = ...,
-        orig_img_url : typing.Text = ...,
-        orig_desc : typing.Optional[typing.Iterable[global___Description]] = ...,
-        desc : typing.Optional[typing.Iterable[global___Description]] = ...,
-        orig_dyn_type : global___DynamicType.V = ...,
-        share_type : typing.Text = ...,
-        share_scene : typing.Text = ...,
-        is_fast_share : builtins.bool = ...,
-        r_type : builtins.int = ...,
-        dyn_type : builtins.int = ...,
-        uid : builtins.int = ...,
-        card_url : typing.Text = ...,
-        source_content : typing.Optional[google.protobuf.any_pb2.Any] = ...,
-        orig_face : typing.Text = ...,
-        reply : typing.Optional[global___ExtendReply] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"reply",b"reply",u"source_content",b"source_content"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"business_id",b"business_id",u"card_url",b"card_url",u"desc",b"desc",u"dyn_id_str",b"dyn_id_str",u"dyn_type",b"dyn_type",u"is_fast_share",b"is_fast_share",u"orig_desc",b"orig_desc",u"orig_dyn_id_str",b"orig_dyn_id_str",u"orig_dyn_type",b"orig_dyn_type",u"orig_face",b"orig_face",u"orig_img_url",b"orig_img_url",u"orig_name",b"orig_name",u"r_type",b"r_type",u"reply",b"reply",u"share_scene",b"share_scene",u"share_type",b"share_type",u"source_content",b"source_content",u"uid",b"uid"]) -> None: ...
+        dyn_id_str: builtins.str = ...,
+        business_id: builtins.str = ...,
+        orig_dyn_id_str: builtins.str = ...,
+        orig_name: builtins.str = ...,
+        orig_img_url: builtins.str = ...,
+        orig_desc: collections.abc.Iterable[global___Description] | None = ...,
+        desc: collections.abc.Iterable[global___Description] | None = ...,
+        orig_dyn_type: global___DynamicType.ValueType = ...,
+        share_type: builtins.str = ...,
+        share_scene: builtins.str = ...,
+        is_fast_share: builtins.bool = ...,
+        r_type: builtins.int = ...,
+        dyn_type: builtins.int = ...,
+        uid: builtins.int = ...,
+        card_url: builtins.str = ...,
+        source_content: google.protobuf.any_pb2.Any | None = ...,
+        orig_face: builtins.str = ...,
+        reply: global___ExtendReply | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["reply", b"reply", "source_content", b"source_content"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["business_id", b"business_id", "card_url", b"card_url", "desc", b"desc", "dyn_id_str", b"dyn_id_str", "dyn_type", b"dyn_type", "is_fast_share", b"is_fast_share", "orig_desc", b"orig_desc", "orig_dyn_id_str", b"orig_dyn_id_str", "orig_dyn_type", b"orig_dyn_type", "orig_face", b"orig_face", "orig_img_url", b"orig_img_url", "orig_name", b"orig_name", "r_type", b"r_type", "reply", b"reply", "share_scene", b"share_scene", "share_type", b"share_type", "source_content", b"source_content", "uid", b"uid"]) -> None: ...
+
 global___Extend = Extend
 
-# 评论扩展
+@typing_extensions.final
 class ExtendReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """评论扩展"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     URI_FIELD_NUMBER: builtins.int
     PARAMS_FIELD_NUMBER: builtins.int
-    # 基础跳转地址
-    uri: typing.Text = ...
-    # 参数部分
+    uri: builtins.str
+    """基础跳转地址"""
     @property
-    def params(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ExtendReplyParam]: ...
-    def __init__(self,
+    def params(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ExtendReplyParam]:
+        """参数部分"""
+    def __init__(
+        self,
         *,
-        uri : typing.Text = ...,
-        params : typing.Optional[typing.Iterable[global___ExtendReplyParam]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"params",b"params",u"uri",b"uri"]) -> None: ...
+        uri: builtins.str = ...,
+        params: collections.abc.Iterable[global___ExtendReplyParam] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["params", b"params", "uri", b"uri"]) -> None: ...
+
 global___ExtendReply = ExtendReply
 
-# 评论扩展参数部分
+@typing_extensions.final
 class ExtendReplyParam(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """评论扩展参数部分"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     KEY_FIELD_NUMBER: builtins.int
     VALUE_FIELD_NUMBER: builtins.int
-    # 参数名
-    key: typing.Text = ...
-    # 参数值
-    value: typing.Text = ...
-    def __init__(self,
+    key: builtins.str
+    """参数名"""
+    value: builtins.str
+    """参数值"""
+    def __init__(
+        self,
         *,
-        key : typing.Text = ...,
-        value : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"key",b"key",u"value",b"value"]) -> None: ...
+        key: builtins.str = ...,
+        value: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["key", b"key", "value", b"value"]) -> None: ...
+
 global___ExtendReplyParam = ExtendReplyParam
 
-# 视频页-我的追番-番剧信息
+@typing_extensions.final
 class FollowListItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """视频页-我的追番-番剧信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SEASON_ID_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
@@ -5003,38 +5644,43 @@ class FollowListItem(google.protobuf.message.Message):
     NEW_EP_FIELD_NUMBER: builtins.int
     SUB_TITLE_FIELD_NUMBER: builtins.int
     POS_FIELD_NUMBER: builtins.int
-    # season_id
-    season_id: builtins.int = ...
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 跳转链接
-    url: typing.Text = ...
-    # new_ep
+    season_id: builtins.int
+    """season_id"""
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    url: builtins.str
+    """跳转链接"""
     @property
-    def new_ep(self) -> global___NewEP: ...
-    # 子标题
-    sub_title: typing.Text = ...
-    # 卡片位次
-    pos: builtins.int = ...
-    def __init__(self,
+    def new_ep(self) -> global___NewEP:
+        """new_ep"""
+    sub_title: builtins.str
+    """子标题"""
+    pos: builtins.int
+    """卡片位次"""
+    def __init__(
+        self,
         *,
-        season_id : builtins.int = ...,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        url : typing.Text = ...,
-        new_ep : typing.Optional[global___NewEP] = ...,
-        sub_title : typing.Text = ...,
-        pos : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"new_ep",b"new_ep"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cover",b"cover",u"new_ep",b"new_ep",u"pos",b"pos",u"season_id",b"season_id",u"sub_title",b"sub_title",u"title",b"title",u"url",b"url"]) -> None: ...
+        season_id: builtins.int = ...,
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        url: builtins.str = ...,
+        new_ep: global___NewEP | None = ...,
+        sub_title: builtins.str = ...,
+        pos: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["new_ep", b"new_ep"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cover", b"cover", "new_ep", b"new_ep", "pos", b"pos", "season_id", b"season_id", "sub_title", b"sub_title", "title", b"title", "url", b"url"]) -> None: ...
+
 global___FollowListItem = FollowListItem
 
-# 动态-附加卡-商品卡-商品
+@typing_extensions.final
 class GoodsItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-商品卡-商品"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     COVER_FIELD_NUMBER: builtins.int
     SCHEMA_PACKAGE_NAME_FIELD_NUMBER: builtins.int
     SOURCE_TYPE_FIELD_NUMBER: builtins.int
@@ -5048,198 +5694,234 @@ class GoodsItem(google.protobuf.message.Message):
     OPEN_WHITE_LIST_FIELD_NUMBER: builtins.int
     USER_WEB_V2_FIELD_NUMBER: builtins.int
     AD_MARK_FIELD_NUMBER: builtins.int
-    # 图片
-    cover: typing.Text = ...
-    # schemaPackageName(Android用)
-    schema_package_name: typing.Text = ...
-    # 商品类型
-    # 1:淘宝 2:会员购
-    source_type: builtins.int = ...
-    # 跳转链接
-    jump_url: typing.Text = ...
-    # 跳转文案
-    jump_desc: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 摘要
-    brief: typing.Text = ...
-    # 价格
-    price: typing.Text = ...
-    # item_id
-    item_id: builtins.int = ...
-    # schema_url
-    schema_url: typing.Text = ...
-    # open_white_list
+    cover: builtins.str
+    """图片"""
+    schema_package_name: builtins.str
+    """schemaPackageName(Android用)"""
+    source_type: builtins.int
+    """商品类型
+    1:淘宝 2:会员购
+    """
+    jump_url: builtins.str
+    """跳转链接"""
+    jump_desc: builtins.str
+    """跳转文案"""
+    title: builtins.str
+    """标题"""
+    brief: builtins.str
+    """摘要"""
+    price: builtins.str
+    """价格"""
+    item_id: builtins.int
+    """item_id"""
+    schema_url: builtins.str
+    """schema_url"""
     @property
-    def open_white_list(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    # use_web_v2
-    user_web_v2: builtins.bool = ...
-    # ad mark
-    ad_mark: typing.Text = ...
-    def __init__(self,
+    def open_white_list(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """open_white_list"""
+    user_web_v2: builtins.bool
+    """use_web_v2"""
+    ad_mark: builtins.str
+    """ad mark"""
+    def __init__(
+        self,
         *,
-        cover : typing.Text = ...,
-        schema_package_name : typing.Text = ...,
-        source_type : builtins.int = ...,
-        jump_url : typing.Text = ...,
-        jump_desc : typing.Text = ...,
-        title : typing.Text = ...,
-        brief : typing.Text = ...,
-        price : typing.Text = ...,
-        item_id : builtins.int = ...,
-        schema_url : typing.Text = ...,
-        open_white_list : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        user_web_v2 : builtins.bool = ...,
-        ad_mark : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad_mark",b"ad_mark",u"brief",b"brief",u"cover",b"cover",u"item_id",b"item_id",u"jump_desc",b"jump_desc",u"jump_url",b"jump_url",u"open_white_list",b"open_white_list",u"price",b"price",u"schema_package_name",b"schema_package_name",u"schema_url",b"schema_url",u"source_type",b"source_type",u"title",b"title",u"user_web_v2",b"user_web_v2"]) -> None: ...
+        cover: builtins.str = ...,
+        schema_package_name: builtins.str = ...,
+        source_type: builtins.int = ...,
+        jump_url: builtins.str = ...,
+        jump_desc: builtins.str = ...,
+        title: builtins.str = ...,
+        brief: builtins.str = ...,
+        price: builtins.str = ...,
+        item_id: builtins.int = ...,
+        schema_url: builtins.str = ...,
+        open_white_list: collections.abc.Iterable[builtins.str] | None = ...,
+        user_web_v2: builtins.bool = ...,
+        ad_mark: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad_mark", b"ad_mark", "brief", b"brief", "cover", b"cover", "item_id", b"item_id", "jump_desc", b"jump_desc", "jump_url", b"jump_url", "open_white_list", b"open_white_list", "price", b"price", "schema_package_name", b"schema_package_name", "schema_url", b"schema_url", "source_type", b"source_type", "title", b"title", "user_web_v2", b"user_web_v2"]) -> None: ...
+
 global___GoodsItem = GoodsItem
 
-#
+@typing_extensions.final
 class GuideBarInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SHOW_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
     POSITION_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     JUMP_PAGE_FIELD_NUMBER: builtins.int
     JUMP_POSITION_FIELD_NUMBER: builtins.int
-    #
-    show: builtins.int = ...
-    #
-    page: builtins.int = ...
-    #
-    position: builtins.int = ...
-    #
-    desc: typing.Text = ...
-    #
-    jump_page: builtins.int = ...
-    #
-    jump_position: builtins.int = ...
-    def __init__(self,
+    show: builtins.int
+    """"""
+    page: builtins.int
+    """"""
+    position: builtins.int
+    """"""
+    desc: builtins.str
+    """"""
+    jump_page: builtins.int
+    """"""
+    jump_position: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        show : builtins.int = ...,
-        page : builtins.int = ...,
-        position : builtins.int = ...,
-        desc : typing.Text = ...,
-        jump_page : builtins.int = ...,
-        jump_position : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"jump_page",b"jump_page",u"jump_position",b"jump_position",u"page",b"page",u"position",b"position",u"show",b"show"]) -> None: ...
+        show: builtins.int = ...,
+        page: builtins.int = ...,
+        position: builtins.int = ...,
+        desc: builtins.str = ...,
+        jump_page: builtins.int = ...,
+        jump_position: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "jump_page", b"jump_page", "jump_position", b"jump_position", "page", b"page", "position", b"position", "show", b"show"]) -> None: ...
+
 global___GuideBarInfo = GuideBarInfo
 
-# 高亮文本
+@typing_extensions.final
 class HighlightText(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """高亮文本"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     TEXT_STYLE_FIELD_NUMBER: builtins.int
     JUMP_URL_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
-    # 展示文本
-    text: typing.Text = ...
-    # 高亮类型
-    text_style: global___HighlightTextStyle.V = ...
-    #
-    jump_url: typing.Text = ...
-    #
-    icon: typing.Text = ...
-    def __init__(self,
+    text: builtins.str
+    """展示文本"""
+    text_style: global___HighlightTextStyle.ValueType
+    """高亮类型"""
+    jump_url: builtins.str
+    """"""
+    icon: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        text_style : global___HighlightTextStyle.V = ...,
-        jump_url : typing.Text = ...,
-        icon : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"jump_url",b"jump_url",u"text",b"text",u"text_style",b"text_style"]) -> None: ...
+        text: builtins.str = ...,
+        text_style: global___HighlightTextStyle.ValueType = ...,
+        jump_url: builtins.str = ...,
+        icon: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "jump_url", b"jump_url", "text", b"text", "text_style", b"text_style"]) -> None: ...
+
 global___HighlightText = HighlightText
 
-#
+@typing_extensions.final
 class IconBadge(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_BG_URL_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
-    #
-    icon_bg_url: typing.Text = ...
-    #
-    text: typing.Text = ...
-    def __init__(self,
+    icon_bg_url: builtins.str
+    """"""
+    text: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        icon_bg_url : typing.Text = ...,
-        text : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon_bg_url",b"icon_bg_url",u"text",b"text"]) -> None: ...
+        icon_bg_url: builtins.str = ...,
+        text: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon_bg_url", b"icon_bg_url", "text", b"text"]) -> None: ...
+
 global___IconBadge = IconBadge
 
-#
+@typing_extensions.final
 class IconButton(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     ICON_HEAD_FIELD_NUMBER: builtins.int
     ICON_TAIL_FIELD_NUMBER: builtins.int
     JUMP_URI_FIELD_NUMBER: builtins.int
-    #
-    text: typing.Text = ...
-    #
-    icon_head: typing.Text = ...
-    #
-    icon_tail: typing.Text = ...
-    #
-    jump_uri: typing.Text = ...
-    def __init__(self,
+    text: builtins.str
+    """"""
+    icon_head: builtins.str
+    """"""
+    icon_tail: builtins.str
+    """"""
+    jump_uri: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        icon_head : typing.Text = ...,
-        icon_tail : typing.Text = ...,
-        jump_uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon_head",b"icon_head",u"icon_tail",b"icon_tail",u"jump_uri",b"jump_uri",u"text",b"text"]) -> None: ...
+        text: builtins.str = ...,
+        icon_head: builtins.str = ...,
+        icon_tail: builtins.str = ...,
+        jump_uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon_head", b"icon_head", "icon_tail", b"icon_tail", "jump_uri", b"jump_uri", "text", b"text"]) -> None: ...
+
 global___IconButton = IconButton
 
-# 动态-拓展小卡模块-ogv小卡-(one of 片单、榜单、分区)
+@typing_extensions.final
 class InfoOGV(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块-ogv小卡-(one of 片单、榜单、分区)"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
     SUB_MODULE_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 小图标
-    icon: typing.Text = ...
-    # 客户端埋点用
-    sub_module: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """标题"""
+    uri: builtins.str
+    """跳转地址"""
+    icon: builtins.str
+    """小图标"""
+    sub_module: builtins.str
+    """客户端埋点用"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        icon : typing.Text = ...,
-        sub_module : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"sub_module",b"sub_module",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        icon: builtins.str = ...,
+        sub_module: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "sub_module", b"sub_module", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___InfoOGV = InfoOGV
 
-#
+@typing_extensions.final
 class InteractionFace(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MID_FIELD_NUMBER: builtins.int
     FACE_FIELD_NUMBER: builtins.int
-    #
-    mid: builtins.int = ...
-    #
-    face: typing.Text = ...
-    def __init__(self,
+    mid: builtins.int
+    """"""
+    face: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        mid : builtins.int = ...,
-        face : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"face",b"face",u"mid",b"mid"]) -> None: ...
+        mid: builtins.int = ...,
+        face: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["face", b"face", "mid", b"mid"]) -> None: ...
+
 global___InteractionFace = InteractionFace
 
-# 外露交互模块
+@typing_extensions.final
 class InteractionItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """外露交互模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_TYPE_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -5248,244 +5930,295 @@ class InteractionItem(google.protobuf.message.Message):
     FACES_FIELD_NUMBER: builtins.int
     STAT_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
-    # 外露模块类型
-    icon_type: global___LocalIconType.V = ...
-    # 外露模块文案
+    icon_type: global___LocalIconType.ValueType
+    """外露模块类型"""
     @property
-    def desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]: ...
-    # 外露模块uri相关 根据type不同用法不同
-    uri: typing.Text = ...
-    # 动态id
-    dynamic_id: typing.Text = ...
-    # 评论mid
-    comment_mid: builtins.int = ...
-    #
+    def desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]:
+        """外露模块文案"""
+    uri: builtins.str
+    """外露模块uri相关 根据type不同用法不同"""
+    dynamic_id: builtins.str
+    """动态id"""
+    comment_mid: builtins.int
+    """评论mid"""
     @property
-    def faces(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___InteractionFace]: ...
-    #
+    def faces(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___InteractionFace]:
+        """"""
     @property
-    def stat(self) -> global___InteractionStat: ...
-    #
-    icon: typing.Text = ...
-    def __init__(self,
+    def stat(self) -> global___InteractionStat:
+        """"""
+    icon: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        icon_type : global___LocalIconType.V = ...,
-        desc : typing.Optional[typing.Iterable[global___Description]] = ...,
-        uri : typing.Text = ...,
-        dynamic_id : typing.Text = ...,
-        comment_mid : builtins.int = ...,
-        faces : typing.Optional[typing.Iterable[global___InteractionFace]] = ...,
-        stat : typing.Optional[global___InteractionStat] = ...,
-        icon : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"stat",b"stat"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"comment_mid",b"comment_mid",u"desc",b"desc",u"dynamic_id",b"dynamic_id",u"faces",b"faces",u"icon",b"icon",u"icon_type",b"icon_type",u"stat",b"stat",u"uri",b"uri"]) -> None: ...
+        icon_type: global___LocalIconType.ValueType = ...,
+        desc: collections.abc.Iterable[global___Description] | None = ...,
+        uri: builtins.str = ...,
+        dynamic_id: builtins.str = ...,
+        comment_mid: builtins.int = ...,
+        faces: collections.abc.Iterable[global___InteractionFace] | None = ...,
+        stat: global___InteractionStat | None = ...,
+        icon: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["stat", b"stat"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["comment_mid", b"comment_mid", "desc", b"desc", "dynamic_id", b"dynamic_id", "faces", b"faces", "icon", b"icon", "icon_type", b"icon_type", "stat", b"stat", "uri", b"uri"]) -> None: ...
+
 global___InteractionItem = InteractionItem
 
-#
+@typing_extensions.final
 class InteractionStat(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIKE_FIELD_NUMBER: builtins.int
-    #
-    like: builtins.int = ...
-    def __init__(self,
+    like: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        like : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"like",b"like"]) -> None: ...
+        like: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["like", b"like"]) -> None: ...
+
 global___InteractionStat = InteractionStat
 
-# 点赞动画
+@typing_extensions.final
 class LikeAnimation(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """点赞动画"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     BEGIN_FIELD_NUMBER: builtins.int
     PROC_FIELD_NUMBER: builtins.int
     END_FIELD_NUMBER: builtins.int
     LIKE_ICON_ID_FIELD_NUMBER: builtins.int
-    # 开始动画
-    begin: typing.Text = ...
-    # 过程动画
-    proc: typing.Text = ...
-    # 结束动画
-    end: typing.Text = ...
-    # id
-    like_icon_id: builtins.int = ...
-    def __init__(self,
+    begin: builtins.str
+    """开始动画"""
+    proc: builtins.str
+    """过程动画"""
+    end: builtins.str
+    """结束动画"""
+    like_icon_id: builtins.int
+    """id"""
+    def __init__(
+        self,
         *,
-        begin : typing.Text = ...,
-        proc : typing.Text = ...,
-        end : typing.Text = ...,
-        like_icon_id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"begin",b"begin",u"end",b"end",u"like_icon_id",b"like_icon_id",u"proc",b"proc"]) -> None: ...
+        begin: builtins.str = ...,
+        proc: builtins.str = ...,
+        end: builtins.str = ...,
+        like_icon_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["begin", b"begin", "end", b"end", "like_icon_id", b"like_icon_id", "proc", b"proc"]) -> None: ...
+
 global___LikeAnimation = LikeAnimation
 
-# 点赞拓展信息
+@typing_extensions.final
 class LikeInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """点赞拓展信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ANIMATION_FIELD_NUMBER: builtins.int
     IS_LIKE_FIELD_NUMBER: builtins.int
-    # 点赞动画
     @property
-    def animation(self) -> global___LikeAnimation: ...
-    # 是否点赞
-    is_like: builtins.bool = ...
-    def __init__(self,
+    def animation(self) -> global___LikeAnimation:
+        """点赞动画"""
+    is_like: builtins.bool
+    """是否点赞"""
+    def __init__(
+        self,
         *,
-        animation : typing.Optional[global___LikeAnimation] = ...,
-        is_like : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"animation",b"animation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"animation",b"animation",u"is_like",b"is_like"]) -> None: ...
+        animation: global___LikeAnimation | None = ...,
+        is_like: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["animation", b"animation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["animation", b"animation", "is_like", b"is_like"]) -> None: ...
+
 global___LikeInfo = LikeInfo
 
-# 点赞列表-响应
+@typing_extensions.final
 class LikeListReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """点赞列表-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     TOTAL_COUNT_FIELD_NUMBER: builtins.int
-    # 用户模块列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleAuthor]: ...
-    # 是否还有更多数据
-    has_more: builtins.bool = ...
-    # 点赞总数
-    total_count: builtins.int = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleAuthor]:
+        """用户模块列表"""
+    has_more: builtins.bool
+    """是否还有更多数据"""
+    total_count: builtins.int
+    """点赞总数"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___ModuleAuthor]] = ...,
-        has_more : builtins.bool = ...,
-        total_count : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"list",b"list",u"total_count",b"total_count"]) -> None: ...
+        list: collections.abc.Iterable[global___ModuleAuthor] | None = ...,
+        has_more: builtins.bool = ...,
+        total_count: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "list", b"list", "total_count", b"total_count"]) -> None: ...
+
 global___LikeListReply = LikeListReply
 
-# 点赞列表-请求
+@typing_extensions.final
 class LikeListReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """点赞列表-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYNAMIC_ID_FIELD_NUMBER: builtins.int
     DYN_TYPE_FIELD_NUMBER: builtins.int
     RID_FIELD_NUMBER: builtins.int
     UID_OFFSET_FIELD_NUMBER: builtins.int
     PAGE_FIELD_NUMBER: builtins.int
-    # 动态ID
-    dynamic_id: typing.Text = ...
-    # 动态类型
-    dyn_type: builtins.int = ...
-    # 业务方资源id
-    rid: builtins.int = ...
-    #上一页最后一个uid
-    uid_offset: builtins.int = ...
-    # 下拉页数
-    page: builtins.int = ...
-    def __init__(self,
+    dynamic_id: builtins.str
+    """动态ID"""
+    dyn_type: builtins.int
+    """动态类型"""
+    rid: builtins.int
+    """业务方资源id"""
+    uid_offset: builtins.int
+    """上一页最后一个uid"""
+    page: builtins.int
+    """下拉页数"""
+    def __init__(
+        self,
         *,
-        dynamic_id : typing.Text = ...,
-        dyn_type : builtins.int = ...,
-        rid : builtins.int = ...,
-        uid_offset : builtins.int = ...,
-        page : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dyn_type",b"dyn_type",u"dynamic_id",b"dynamic_id",u"page",b"page",u"rid",b"rid",u"uid_offset",b"uid_offset"]) -> None: ...
+        dynamic_id: builtins.str = ...,
+        dyn_type: builtins.int = ...,
+        rid: builtins.int = ...,
+        uid_offset: builtins.int = ...,
+        page: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dyn_type", b"dyn_type", "dynamic_id", b"dynamic_id", "page", b"page", "rid", b"rid", "uid_offset", b"uid_offset"]) -> None: ...
+
 global___LikeListReq = LikeListReq
 
-# 点赞用户
+@typing_extensions.final
 class LikeUser(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """点赞用户"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UID_FIELD_NUMBER: builtins.int
     UNAME_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # 用户mid
-    uid: builtins.int = ...
-    # 用户昵称
-    uname: typing.Text = ...
-    # 点击跳转链接
-    uri: typing.Text = ...
-    def __init__(self,
+    uid: builtins.int
+    """用户mid"""
+    uname: builtins.str
+    """用户昵称"""
+    uri: builtins.str
+    """点击跳转链接"""
+    def __init__(
+        self,
         *,
-        uid : builtins.int = ...,
-        uname : typing.Text = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"uid",b"uid",u"uname",b"uname",u"uri",b"uri"]) -> None: ...
+        uid: builtins.int = ...,
+        uname: builtins.str = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["uid", b"uid", "uname", b"uname", "uri", b"uri"]) -> None: ...
+
 global___LikeUser = LikeUser
 
-# 直播信息
+@typing_extensions.final
 class LiveInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """直播信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     IS_LIVING_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     LIVE_STATE_FIELD_NUMBER: builtins.int
-    # 是否在直播
-    # 0:未直播 1:正在直播 (废弃)
-    is_living: builtins.int = ...
-    # 跳转链接
-    uri: typing.Text = ...
-    # 直播状态
-    live_state: global___LiveState.V = ...
-    def __init__(self,
+    is_living: builtins.int
+    """是否在直播
+    0:未直播 1:正在直播 (废弃)
+    """
+    uri: builtins.str
+    """跳转链接"""
+    live_state: global___LiveState.ValueType
+    """直播状态"""
+    def __init__(
+        self,
         *,
-        is_living : builtins.int = ...,
-        uri : typing.Text = ...,
-        live_state : global___LiveState.V = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"is_living",b"is_living",u"live_state",b"live_state",u"uri",b"uri"]) -> None: ...
+        is_living: builtins.int = ...,
+        uri: builtins.str = ...,
+        live_state: global___LiveState.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["is_living", b"is_living", "live_state", b"live_state", "uri", b"uri"]) -> None: ...
+
 global___LiveInfo = LiveInfo
 
-#
+@typing_extensions.final
 class LivePendant(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
     PENDANT_ID_FIELD_NUMBER: builtins.int
-    #
-    text: typing.Text = ...
-    #
-    icon: typing.Text = ...
-    #
-    pendant_id: builtins.int = ...
-    def __init__(self,
+    text: builtins.str
+    """"""
+    icon: builtins.str
+    """"""
+    pendant_id: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        icon : typing.Text = ...,
-        pendant_id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"pendant_id",b"pendant_id",u"text",b"text"]) -> None: ...
+        text: builtins.str = ...,
+        icon: builtins.str = ...,
+        pendant_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "pendant_id", b"pendant_id", "text", b"text"]) -> None: ...
+
 global___LivePendant = LivePendant
 
-# 动态-附加卡-电竞卡-战队
+@typing_extensions.final
 class MatchTeam(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡-电竞卡-战队"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     COLOR_FIELD_NUMBER: builtins.int
     NIGHT_COLOR_FIELD_NUMBER: builtins.int
-    # 战队ID
-    id: builtins.int = ...
-    # 战队名
-    name: typing.Text = ...
-    # 战队图标
-    cover: typing.Text = ...
-    # 日间色值
-    color: typing.Text = ...
-    # 夜间色值
-    night_color: typing.Text = ...
-    def __init__(self,
+    id: builtins.int
+    """战队ID"""
+    name: builtins.str
+    """战队名"""
+    cover: builtins.str
+    """战队图标"""
+    color: builtins.str
+    """日间色值"""
+    night_color: builtins.str
+    """夜间色值"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        name : typing.Text = ...,
-        cover : typing.Text = ...,
-        color : typing.Text = ...,
-        night_color : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"color",b"color",u"cover",b"cover",u"id",b"id",u"name",b"name",u"night_color",b"night_color"]) -> None: ...
+        id: builtins.int = ...,
+        name: builtins.str = ...,
+        cover: builtins.str = ...,
+        color: builtins.str = ...,
+        night_color: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["color", b"color", "cover", b"cover", "id", b"id", "name", b"name", "night_color", b"night_color"]) -> None: ...
+
 global___MatchTeam = MatchTeam
 
-# 动态列表渲染部分-详情模块-小程序/小游戏
+@typing_extensions.final
 class MdlDynApplet(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-小程序/小游戏"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
@@ -5494,39 +6227,44 @@ class MdlDynApplet(google.protobuf.message.Message):
     ICON_FIELD_NUMBER: builtins.int
     LABEL_FIELD_NUMBER: builtins.int
     BUTTON_TITLE_FIELD_NUMBER: builtins.int
-    # 小程序id
-    id: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 主标题
-    title: typing.Text = ...
-    # 副标题
-    sub_title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 小程序icon
-    icon: typing.Text = ...
-    # 小程序标题
-    label: typing.Text = ...
-    # 按钮文案
-    button_title: typing.Text = ...
-    def __init__(self,
+    id: builtins.int
+    """小程序id"""
+    uri: builtins.str
+    """跳转地址"""
+    title: builtins.str
+    """主标题"""
+    sub_title: builtins.str
+    """副标题"""
+    cover: builtins.str
+    """封面图"""
+    icon: builtins.str
+    """小程序icon"""
+    label: builtins.str
+    """小程序标题"""
+    button_title: builtins.str
+    """按钮文案"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        uri : typing.Text = ...,
-        title : typing.Text = ...,
-        sub_title : typing.Text = ...,
-        cover : typing.Text = ...,
-        icon : typing.Text = ...,
-        label : typing.Text = ...,
-        button_title : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button_title",b"button_title",u"cover",b"cover",u"icon",b"icon",u"id",b"id",u"label",b"label",u"sub_title",b"sub_title",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        id: builtins.int = ...,
+        uri: builtins.str = ...,
+        title: builtins.str = ...,
+        sub_title: builtins.str = ...,
+        cover: builtins.str = ...,
+        icon: builtins.str = ...,
+        label: builtins.str = ...,
+        button_title: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button_title", b"button_title", "cover", b"cover", "icon", b"icon", "id", b"id", "label", b"label", "sub_title", b"sub_title", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynApplet = MdlDynApplet
 
-# 动态-详情模块-稿件
+@typing_extensions.final
 class MdlDynArchive(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-详情模块-稿件"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -5554,100 +6292,105 @@ class MdlDynArchive(google.protobuf.message.Message):
     RESERVE_TYPE_FIELD_NUMBER: builtins.int
     BVID_FIELD_NUMBER: builtins.int
     VIEW_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 秒开地址
-    uri: typing.Text = ...
-    # 视频封面展示项 1
-    cover_left_text_1: typing.Text = ...
-    # 视频封面展示项 2
-    cover_left_text_2: typing.Text = ...
-    # 封面视频展示项 3
-    cover_left_text_3: typing.Text = ...
-    # avid
-    avid: builtins.int = ...
-    # cid
-    cid: builtins.int = ...
-    # 视频源类型
-    media_type: global___MediaType.V = ...
-    # 尺寸信息
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    uri: builtins.str
+    """秒开地址"""
+    cover_left_text_1: builtins.str
+    """视频封面展示项 1"""
+    cover_left_text_2: builtins.str
+    """视频封面展示项 2"""
+    cover_left_text_3: builtins.str
+    """封面视频展示项 3"""
+    avid: builtins.int
+    """avid"""
+    cid: builtins.int
+    """cid"""
+    media_type: global___MediaType.ValueType
+    """视频源类型"""
     @property
-    def dimension(self) -> global___Dimension: ...
-    # 角标，多个角标之前有间距
+    def dimension(self) -> global___Dimension:
+        """尺寸信息"""
     @property
-    def badge(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]: ...
-    # 是否能够自动播放
-    can_play: builtins.bool = ...
-    # stype
-    stype: global___VideoType.V = ...
-    # 是否PGC
-    isPGC: builtins.bool = ...
-    # inline播放地址
-    inlineURL: typing.Text = ...
-    # PGC的epid
-    EpisodeId: builtins.int = ...
-    # 子类型
-    SubType: builtins.int = ...
-    # PGC的ssid
-    PgcSeasonId: builtins.int = ...
-    # 播放按钮
-    play_icon: typing.Text = ...
-    # 时长
-    duration: builtins.int = ...
-    # 跳转地址
-    jump_url: typing.Text = ...
-    # 番剧是否为预览视频
-    is_preview: builtins.bool = ...
-    # 新角标，多个角标之前没有间距
+    def badge(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]:
+        """角标，多个角标之前有间距"""
+    can_play: builtins.bool
+    """是否能够自动播放"""
+    stype: global___VideoType.ValueType
+    """stype"""
+    isPGC: builtins.bool
+    """是否PGC"""
+    inlineURL: builtins.str
+    """inline播放地址"""
+    EpisodeId: builtins.int
+    """PGC的epid"""
+    SubType: builtins.int
+    """子类型"""
+    PgcSeasonId: builtins.int
+    """PGC的ssid"""
+    play_icon: builtins.str
+    """播放按钮"""
+    duration: builtins.int
+    """时长"""
+    jump_url: builtins.str
+    """跳转地址"""
+    is_preview: builtins.bool
+    """番剧是否为预览视频"""
     @property
-    def badge_category(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]: ...
-    # 当前是否是pgc正片
-    is_feature: builtins.bool = ...
-    # 是否是预约召回
-    reserve_type: global___ReserveType.V = ...
-    # bvid
-    bvid: typing.Text = ...
-    # 播放数
-    view: builtins.int = ...
-    def __init__(self,
+    def badge_category(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]:
+        """新角标，多个角标之前没有间距"""
+    is_feature: builtins.bool
+    """当前是否是pgc正片"""
+    reserve_type: global___ReserveType.ValueType
+    """是否是预约召回"""
+    bvid: builtins.str
+    """bvid"""
+    view: builtins.int
+    """播放数"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        uri : typing.Text = ...,
-        cover_left_text_1 : typing.Text = ...,
-        cover_left_text_2 : typing.Text = ...,
-        cover_left_text_3 : typing.Text = ...,
-        avid : builtins.int = ...,
-        cid : builtins.int = ...,
-        media_type : global___MediaType.V = ...,
-        dimension : typing.Optional[global___Dimension] = ...,
-        badge : typing.Optional[typing.Iterable[global___VideoBadge]] = ...,
-        can_play : builtins.bool = ...,
-        stype : global___VideoType.V = ...,
-        isPGC : builtins.bool = ...,
-        inlineURL : typing.Text = ...,
-        EpisodeId : builtins.int = ...,
-        SubType : builtins.int = ...,
-        PgcSeasonId : builtins.int = ...,
-        play_icon : typing.Text = ...,
-        duration : builtins.int = ...,
-        jump_url : typing.Text = ...,
-        is_preview : builtins.bool = ...,
-        badge_category : typing.Optional[typing.Iterable[global___VideoBadge]] = ...,
-        is_feature : builtins.bool = ...,
-        reserve_type : global___ReserveType.V = ...,
-        bvid : typing.Text = ...,
-        view : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dimension",b"dimension"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"EpisodeId",b"EpisodeId",u"PgcSeasonId",b"PgcSeasonId",u"SubType",b"SubType",u"avid",b"avid",u"badge",b"badge",u"badge_category",b"badge_category",u"bvid",b"bvid",u"can_play",b"can_play",u"cid",b"cid",u"cover",b"cover",u"cover_left_text_1",b"cover_left_text_1",u"cover_left_text_2",b"cover_left_text_2",u"cover_left_text_3",b"cover_left_text_3",u"dimension",b"dimension",u"duration",b"duration",u"inlineURL",b"inlineURL",u"isPGC",b"isPGC",u"is_feature",b"is_feature",u"is_preview",b"is_preview",u"jump_url",b"jump_url",u"media_type",b"media_type",u"play_icon",b"play_icon",u"reserve_type",b"reserve_type",u"stype",b"stype",u"title",b"title",u"uri",b"uri",u"view",b"view"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        uri: builtins.str = ...,
+        cover_left_text_1: builtins.str = ...,
+        cover_left_text_2: builtins.str = ...,
+        cover_left_text_3: builtins.str = ...,
+        avid: builtins.int = ...,
+        cid: builtins.int = ...,
+        media_type: global___MediaType.ValueType = ...,
+        dimension: global___Dimension | None = ...,
+        badge: collections.abc.Iterable[global___VideoBadge] | None = ...,
+        can_play: builtins.bool = ...,
+        stype: global___VideoType.ValueType = ...,
+        isPGC: builtins.bool = ...,
+        inlineURL: builtins.str = ...,
+        EpisodeId: builtins.int = ...,
+        SubType: builtins.int = ...,
+        PgcSeasonId: builtins.int = ...,
+        play_icon: builtins.str = ...,
+        duration: builtins.int = ...,
+        jump_url: builtins.str = ...,
+        is_preview: builtins.bool = ...,
+        badge_category: collections.abc.Iterable[global___VideoBadge] | None = ...,
+        is_feature: builtins.bool = ...,
+        reserve_type: global___ReserveType.ValueType = ...,
+        bvid: builtins.str = ...,
+        view: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dimension", b"dimension"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["EpisodeId", b"EpisodeId", "PgcSeasonId", b"PgcSeasonId", "SubType", b"SubType", "avid", b"avid", "badge", b"badge", "badge_category", b"badge_category", "bvid", b"bvid", "can_play", b"can_play", "cid", b"cid", "cover", b"cover", "cover_left_text_1", b"cover_left_text_1", "cover_left_text_2", b"cover_left_text_2", "cover_left_text_3", b"cover_left_text_3", "dimension", b"dimension", "duration", b"duration", "inlineURL", b"inlineURL", "isPGC", b"isPGC", "is_feature", b"is_feature", "is_preview", b"is_preview", "jump_url", b"jump_url", "media_type", b"media_type", "play_icon", b"play_icon", "reserve_type", b"reserve_type", "stype", b"stype", "title", b"title", "uri", b"uri", "view", b"view"]) -> None: ...
+
 global___MdlDynArchive = MdlDynArchive
 
-# 动态列表渲染部分-详情模块-专栏模块
+@typing_extensions.final
 class MdlDynArticle(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-专栏模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
@@ -5655,37 +6398,42 @@ class MdlDynArticle(google.protobuf.message.Message):
     COVERS_FIELD_NUMBER: builtins.int
     LABEL_FIELD_NUMBER: builtins.int
     TEMPLATEID_FIELD_NUMBER: builtins.int
-    # 专栏id
-    id: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 文案部分
-    desc: typing.Text = ...
-    # 配图
+    id: builtins.int
+    """专栏id"""
+    uri: builtins.str
+    """跳转地址"""
+    title: builtins.str
+    """标题"""
+    desc: builtins.str
+    """文案部分"""
     @property
-    def covers(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    # 阅读量标签
-    label: typing.Text = ...
-    # 模板类型
-    templateID: builtins.int = ...
-    def __init__(self,
+    def covers(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """配图"""
+    label: builtins.str
+    """阅读量标签"""
+    templateID: builtins.int
+    """模板类型"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        uri : typing.Text = ...,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        covers : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        label : typing.Text = ...,
-        templateID : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"covers",b"covers",u"desc",b"desc",u"id",b"id",u"label",b"label",u"templateID",b"templateID",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        id: builtins.int = ...,
+        uri: builtins.str = ...,
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+        covers: collections.abc.Iterable[builtins.str] | None = ...,
+        label: builtins.str = ...,
+        templateID: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["covers", b"covers", "desc", b"desc", "id", b"id", "label", b"label", "templateID", b"templateID", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynArticle = MdlDynArticle
 
-# 动态列表渲染部分-详情模块-通用
+@typing_extensions.final
 class MdlDynCommon(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-通用"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     OID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
@@ -5697,51 +6445,56 @@ class MdlDynCommon(google.protobuf.message.Message):
     STYLE_FIELD_NUMBER: builtins.int
     BADGE_FIELD_NUMBER: builtins.int
     BUTTON_FIELD_NUMBER: builtins.int
-    # 物料id
-    oid: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 描述 漫画卡标题下第一行
-    desc: typing.Text = ...
-    # 封面
-    cover: typing.Text = ...
-    # 标签1 漫画卡标题下第二行
-    label: typing.Text = ...
-    # 所属业务类型
-    bizType: builtins.int = ...
-    # 镜像数据ID
-    sketchID: builtins.int = ...
-    # 卡片样式
-    style: global___MdlDynCommonType.V = ...
-    # 角标
+    oid: builtins.int
+    """物料id"""
+    uri: builtins.str
+    """跳转地址"""
+    title: builtins.str
+    """标题"""
+    desc: builtins.str
+    """描述 漫画卡标题下第一行"""
+    cover: builtins.str
+    """封面"""
+    label: builtins.str
+    """标签1 漫画卡标题下第二行"""
+    bizType: builtins.int
+    """所属业务类型"""
+    sketchID: builtins.int
+    """镜像数据ID"""
+    style: global___MdlDynCommonType.ValueType
+    """卡片样式"""
     @property
-    def badge(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]: ...
-    #
+    def badge(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]:
+        """角标"""
     @property
-    def button(self) -> global___AdditionalButton: ...
-    def __init__(self,
+    def button(self) -> global___AdditionalButton:
+        """"""
+    def __init__(
+        self,
         *,
-        oid : builtins.int = ...,
-        uri : typing.Text = ...,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        cover : typing.Text = ...,
-        label : typing.Text = ...,
-        bizType : builtins.int = ...,
-        sketchID : builtins.int = ...,
-        style : global___MdlDynCommonType.V = ...,
-        badge : typing.Optional[typing.Iterable[global___VideoBadge]] = ...,
-        button : typing.Optional[global___AdditionalButton] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"badge",b"badge",u"bizType",b"bizType",u"button",b"button",u"cover",b"cover",u"desc",b"desc",u"label",b"label",u"oid",b"oid",u"sketchID",b"sketchID",u"style",b"style",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        oid: builtins.int = ...,
+        uri: builtins.str = ...,
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+        cover: builtins.str = ...,
+        label: builtins.str = ...,
+        bizType: builtins.int = ...,
+        sketchID: builtins.int = ...,
+        style: global___MdlDynCommonType.ValueType = ...,
+        badge: collections.abc.Iterable[global___VideoBadge] | None = ...,
+        button: global___AdditionalButton | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["badge", b"badge", "bizType", b"bizType", "button", b"button", "cover", b"cover", "desc", b"desc", "label", b"label", "oid", b"oid", "sketchID", b"sketchID", "style", b"style", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynCommon = MdlDynCommon
 
-# 动态-详情模块-付费课程批次
+@typing_extensions.final
 class MdlDynCourBatch(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-详情模块-付费课程批次"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -5749,38 +6502,43 @@ class MdlDynCourBatch(google.protobuf.message.Message):
     TEXT_2_FIELD_NUMBER: builtins.int
     BADGE_FIELD_NUMBER: builtins.int
     PLAY_ICON_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 展示项 1(本集标题)
-    text_1: typing.Text = ...
-    # 展示项 2(更新了多少个视频)
-    text_2: typing.Text = ...
-    # 角标
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    uri: builtins.str
+    """跳转地址"""
+    text_1: builtins.str
+    """展示项 1(本集标题)"""
+    text_2: builtins.str
+    """展示项 2(更新了多少个视频)"""
     @property
-    def badge(self) -> global___VideoBadge: ...
-    # 播放按钮
-    play_icon: typing.Text = ...
-    def __init__(self,
+    def badge(self) -> global___VideoBadge:
+        """角标"""
+    play_icon: builtins.str
+    """播放按钮"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        uri : typing.Text = ...,
-        text_1 : typing.Text = ...,
-        text_2 : typing.Text = ...,
-        badge : typing.Optional[global___VideoBadge] = ...,
-        play_icon : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"badge",b"badge"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"badge",b"badge",u"cover",b"cover",u"play_icon",b"play_icon",u"text_1",b"text_1",u"text_2",b"text_2",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        uri: builtins.str = ...,
+        text_1: builtins.str = ...,
+        text_2: builtins.str = ...,
+        badge: global___VideoBadge | None = ...,
+        play_icon: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["badge", b"badge"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["badge", b"badge", "cover", b"cover", "play_icon", b"play_icon", "text_1", b"text_1", "text_2", b"text_2", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynCourBatch = MdlDynCourBatch
 
-# 动态-详情模块-付费课程系列
+@typing_extensions.final
 class MdlDynCourSeason(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-详情模块-付费课程系列"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -5788,109 +6546,129 @@ class MdlDynCourSeason(google.protobuf.message.Message):
     DESC_FIELD_NUMBER: builtins.int
     BADGE_FIELD_NUMBER: builtins.int
     PLAY_ICON_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 展示项 1(更新信息)
-    text_1: typing.Text = ...
-    # 描述信息
-    desc: typing.Text = ...
-    # 角标
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    uri: builtins.str
+    """跳转地址"""
+    text_1: builtins.str
+    """展示项 1(更新信息)"""
+    desc: builtins.str
+    """描述信息"""
     @property
-    def badge(self) -> global___VideoBadge: ...
-    # 播放按钮
-    play_icon: typing.Text = ...
-    def __init__(self,
+    def badge(self) -> global___VideoBadge:
+        """角标"""
+    play_icon: builtins.str
+    """播放按钮"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        uri : typing.Text = ...,
-        text_1 : typing.Text = ...,
-        desc : typing.Text = ...,
-        badge : typing.Optional[global___VideoBadge] = ...,
-        play_icon : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"badge",b"badge"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"badge",b"badge",u"cover",b"cover",u"desc",b"desc",u"play_icon",b"play_icon",u"text_1",b"text_1",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        uri: builtins.str = ...,
+        text_1: builtins.str = ...,
+        desc: builtins.str = ...,
+        badge: global___VideoBadge | None = ...,
+        play_icon: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["badge", b"badge"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["badge", b"badge", "cover", b"cover", "desc", b"desc", "play_icon", b"play_icon", "text_1", b"text_1", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynCourSeason = MdlDynCourSeason
 
-# 动态列表渲染部分-详情模块-图文模块
+@typing_extensions.final
 class MdlDynDraw(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-图文模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEMS_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ID_FIELD_NUMBER: builtins.int
-    # 图片
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MdlDynDrawItem]: ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 图文ID
-    id: builtins.int = ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MdlDynDrawItem]:
+        """图片"""
+    uri: builtins.str
+    """跳转地址"""
+    id: builtins.int
+    """图文ID"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___MdlDynDrawItem]] = ...,
-        uri : typing.Text = ...,
-        id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"id",b"id",u"items",b"items",u"uri",b"uri"]) -> None: ...
+        items: collections.abc.Iterable[global___MdlDynDrawItem] | None = ...,
+        uri: builtins.str = ...,
+        id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["id", b"id", "items", b"items", "uri", b"uri"]) -> None: ...
+
 global___MdlDynDraw = MdlDynDraw
 
-# 动态列表渲染部分-详情模块-图文
+@typing_extensions.final
 class MdlDynDrawItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-图文"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SRC_FIELD_NUMBER: builtins.int
     WIDTH_FIELD_NUMBER: builtins.int
     HEIGHT_FIELD_NUMBER: builtins.int
     SIZE_FIELD_NUMBER: builtins.int
     TAGS_FIELD_NUMBER: builtins.int
-    # 图片链接
-    src: typing.Text = ...
-    # 图片宽度
-    width: builtins.int = ...
-    # 图片高度
-    height: builtins.int = ...
-    # 图片大小
-    size: builtins.float = ...
-    # 图片标签
+    src: builtins.str
+    """图片链接"""
+    width: builtins.int
+    """图片宽度"""
+    height: builtins.int
+    """图片高度"""
+    size: builtins.float
+    """图片大小"""
     @property
-    def tags(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MdlDynDrawTag]: ...
-    def __init__(self,
+    def tags(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___MdlDynDrawTag]:
+        """图片标签"""
+    def __init__(
+        self,
         *,
-        src : typing.Text = ...,
-        width : builtins.int = ...,
-        height : builtins.int = ...,
-        size : builtins.float = ...,
-        tags : typing.Optional[typing.Iterable[global___MdlDynDrawTag]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"height",b"height",u"size",b"size",u"src",b"src",u"tags",b"tags",u"width",b"width"]) -> None: ...
+        src: builtins.str = ...,
+        width: builtins.int = ...,
+        height: builtins.int = ...,
+        size: builtins.float = ...,
+        tags: collections.abc.Iterable[global___MdlDynDrawTag] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["height", b"height", "size", b"size", "src", b"src", "tags", b"tags", "width", b"width"]) -> None: ...
+
 global___MdlDynDrawItem = MdlDynDrawItem
 
-# 动态列表渲染部分-详情模块-图文-标签
+@typing_extensions.final
 class MdlDynDrawTag(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-图文-标签"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     ITEM_FIELD_NUMBER: builtins.int
-    # 标签类型
-    type: global___MdlDynDrawTagType.V = ...
-    # 标签详情
+    type: global___MdlDynDrawTagType.ValueType
+    """标签类型"""
     @property
-    def item(self) -> global___MdlDynDrawTagItem: ...
-    def __init__(self,
+    def item(self) -> global___MdlDynDrawTagItem:
+        """标签详情"""
+    def __init__(
+        self,
         *,
-        type : global___MdlDynDrawTagType.V = ...,
-        item : typing.Optional[global___MdlDynDrawTagItem] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item",b"item",u"type",b"type"]) -> None: ...
+        type: global___MdlDynDrawTagType.ValueType = ...,
+        item: global___MdlDynDrawTagItem | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item", b"item", "type", b"type"]) -> None: ...
+
 global___MdlDynDrawTag = MdlDynDrawTag
 
-# 动态列表部分-详情模块-图文-标签详情
+@typing_extensions.final
 class MdlDynDrawTagItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表部分-详情模块-图文-标签详情"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     URL_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
     X_FIELD_NUMBER: builtins.int
@@ -5902,69 +6680,81 @@ class MdlDynDrawTagItem(google.protobuf.message.Message):
     TID_FIELD_NUMBER: builtins.int
     POI_FIELD_NUMBER: builtins.int
     SCHEMA_URL_FIELD_NUMBER: builtins.int
-    # 跳转链接
-    url: typing.Text = ...
-    # 标签内容
-    text: typing.Text = ...
-    # 坐标-x
-    x: builtins.int = ...
-    # 坐标-y
-    y: builtins.int = ...
-    # 方向
-    orientation: builtins.int = ...
-    # 来源
-    # 0:未知 1:淘宝 2:自营
-    source: builtins.int = ...
-    # 商品id
-    item_id: builtins.int = ...
-    # 用户mid
-    mid: builtins.int = ...
-    # 话题id
-    tid: builtins.int = ...
-    # lbs信息
-    poi: typing.Text = ...
-    # 商品标签链接
-    schema_url: typing.Text = ...
-    def __init__(self,
+    url: builtins.str
+    """跳转链接"""
+    text: builtins.str
+    """标签内容"""
+    x: builtins.int
+    """坐标-x"""
+    y: builtins.int
+    """坐标-y"""
+    orientation: builtins.int
+    """方向"""
+    source: builtins.int
+    """来源
+    0:未知 1:淘宝 2:自营
+    """
+    item_id: builtins.int
+    """商品id"""
+    mid: builtins.int
+    """用户mid"""
+    tid: builtins.int
+    """话题id"""
+    poi: builtins.str
+    """lbs信息"""
+    schema_url: builtins.str
+    """商品标签链接"""
+    def __init__(
+        self,
         *,
-        url : typing.Text = ...,
-        text : typing.Text = ...,
-        x : builtins.int = ...,
-        y : builtins.int = ...,
-        orientation : builtins.int = ...,
-        source : builtins.int = ...,
-        item_id : builtins.int = ...,
-        mid : builtins.int = ...,
-        tid : builtins.int = ...,
-        poi : typing.Text = ...,
-        schema_url : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item_id",b"item_id",u"mid",b"mid",u"orientation",b"orientation",u"poi",b"poi",u"schema_url",b"schema_url",u"source",b"source",u"text",b"text",u"tid",b"tid",u"url",b"url",u"x",b"x",u"y",b"y"]) -> None: ...
+        url: builtins.str = ...,
+        text: builtins.str = ...,
+        x: builtins.int = ...,
+        y: builtins.int = ...,
+        orientation: builtins.int = ...,
+        source: builtins.int = ...,
+        item_id: builtins.int = ...,
+        mid: builtins.int = ...,
+        tid: builtins.int = ...,
+        poi: builtins.str = ...,
+        schema_url: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item_id", b"item_id", "mid", b"mid", "orientation", b"orientation", "poi", b"poi", "schema_url", b"schema_url", "source", b"source", "text", b"text", "tid", b"tid", "url", b"url", "x", b"x", "y", b"y"]) -> None: ...
+
 global___MdlDynDrawTagItem = MdlDynDrawTagItem
 
-# 动态列表渲染部分-详情模块-转发模块
+@typing_extensions.final
 class MdlDynForward(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-转发模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEM_FIELD_NUMBER: builtins.int
     RTYPE_FIELD_NUMBER: builtins.int
-    # 动态转发核心模块 套娃
     @property
-    def item(self) -> global___DynamicItem: ...
-    # 透传类型
-    # 0:分享 1:转发
-    rtype: builtins.int = ...
-    def __init__(self,
+    def item(self) -> global___DynamicItem:
+        """动态转发核心模块 套娃"""
+    rtype: builtins.int
+    """透传类型
+    0:分享 1:转发
+    """
+    def __init__(
+        self,
         *,
-        item : typing.Optional[global___DynamicItem] = ...,
-        rtype : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"item",b"item",u"rtype",b"rtype"]) -> None: ...
+        item: global___DynamicItem | None = ...,
+        rtype: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["item", b"item", "rtype", b"rtype"]) -> None: ...
+
 global___MdlDynForward = MdlDynForward
 
-# 动态列表渲染部分-详情模块-直播
+@typing_extensions.final
 class MdlDynLive(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-直播"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
@@ -5974,67 +6764,77 @@ class MdlDynLive(google.protobuf.message.Message):
     LIVE_STATE_FIELD_NUMBER: builtins.int
     BADGE_FIELD_NUMBER: builtins.int
     RESERVE_TYPE_FIELD_NUMBER: builtins.int
-    # 房间号
-    id: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 直播间标题
-    title: typing.Text = ...
-    # 直播间封面
-    cover: typing.Text = ...
-    # 标题1 例: 陪伴学习
-    cover_label: typing.Text = ...
-    # 标题2 例: 54.6万人气
-    cover_label2: typing.Text = ...
-    # 直播状态
-    live_state: global___LiveState.V = ...
-    # 直播角标
+    id: builtins.int
+    """房间号"""
+    uri: builtins.str
+    """跳转地址"""
+    title: builtins.str
+    """直播间标题"""
+    cover: builtins.str
+    """直播间封面"""
+    cover_label: builtins.str
+    """标题1 例: 陪伴学习"""
+    cover_label2: builtins.str
+    """标题2 例: 54.6万人气"""
+    live_state: global___LiveState.ValueType
+    """直播状态"""
     @property
-    def badge(self) -> global___VideoBadge: ...
-    # 是否是预约召回
-    reserve_type: global___ReserveType.V = ...
-    def __init__(self,
+    def badge(self) -> global___VideoBadge:
+        """直播角标"""
+    reserve_type: global___ReserveType.ValueType
+    """是否是预约召回"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        uri : typing.Text = ...,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        cover_label : typing.Text = ...,
-        cover_label2 : typing.Text = ...,
-        live_state : global___LiveState.V = ...,
-        badge : typing.Optional[global___VideoBadge] = ...,
-        reserve_type : global___ReserveType.V = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"badge",b"badge"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"badge",b"badge",u"cover",b"cover",u"cover_label",b"cover_label",u"cover_label2",b"cover_label2",u"id",b"id",u"live_state",b"live_state",u"reserve_type",b"reserve_type",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        id: builtins.int = ...,
+        uri: builtins.str = ...,
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        cover_label: builtins.str = ...,
+        cover_label2: builtins.str = ...,
+        live_state: global___LiveState.ValueType = ...,
+        badge: global___VideoBadge | None = ...,
+        reserve_type: global___ReserveType.ValueType = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["badge", b"badge"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["badge", b"badge", "cover", b"cover", "cover_label", b"cover_label", "cover_label2", b"cover_label2", "id", b"id", "live_state", b"live_state", "reserve_type", b"reserve_type", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynLive = MdlDynLive
 
-# 动态列表渲染部分-详情模块-直播推荐
+@typing_extensions.final
 class MdlDynLiveRcmd(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-直播推荐"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CONTENT_FIELD_NUMBER: builtins.int
     RESERVE_TYPE_FIELD_NUMBER: builtins.int
     PENDANT_FIELD_NUMBER: builtins.int
-    # 直播数据
-    content: typing.Text = ...
-    # 是否是预约召回
-    reserve_type: global___ReserveType.V = ...
-    #
+    content: builtins.str
+    """直播数据"""
+    reserve_type: global___ReserveType.ValueType
+    """是否是预约召回"""
     @property
-    def pendant(self) -> global___LivePendant: ...
-    def __init__(self,
+    def pendant(self) -> global___LivePendant:
+        """"""
+    def __init__(
+        self,
         *,
-        content : typing.Text = ...,
-        reserve_type : global___ReserveType.V = ...,
-        pendant : typing.Optional[global___LivePendant] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"pendant",b"pendant"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"content",b"content",u"pendant",b"pendant",u"reserve_type",b"reserve_type"]) -> None: ...
+        content: builtins.str = ...,
+        reserve_type: global___ReserveType.ValueType = ...,
+        pendant: global___LivePendant | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["pendant", b"pendant"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["content", b"content", "pendant", b"pendant", "reserve_type", b"reserve_type"]) -> None: ...
+
 global___MdlDynLiveRcmd = MdlDynLiveRcmd
 
-# 动态列表渲染部分-详情模块-播单
+@typing_extensions.final
 class MdlDynMedialist(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-播单"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
@@ -6042,38 +6842,43 @@ class MdlDynMedialist(google.protobuf.message.Message):
     COVER_FIELD_NUMBER: builtins.int
     COVER_TYPE_FIELD_NUMBER: builtins.int
     BADGE_FIELD_NUMBER: builtins.int
-    # 播单id
-    id: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 主标题
-    title: typing.Text = ...
-    # 副标题
-    sub_title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 封面类型
-    cover_type: builtins.int = ...
-    # 角标
+    id: builtins.int
+    """播单id"""
+    uri: builtins.str
+    """跳转地址"""
+    title: builtins.str
+    """主标题"""
+    sub_title: builtins.str
+    """副标题"""
+    cover: builtins.str
+    """封面图"""
+    cover_type: builtins.int
+    """封面类型"""
     @property
-    def badge(self) -> global___VideoBadge: ...
-    def __init__(self,
+    def badge(self) -> global___VideoBadge:
+        """角标"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        uri : typing.Text = ...,
-        title : typing.Text = ...,
-        sub_title : typing.Text = ...,
-        cover : typing.Text = ...,
-        cover_type : builtins.int = ...,
-        badge : typing.Optional[global___VideoBadge] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"badge",b"badge"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"badge",b"badge",u"cover",b"cover",u"cover_type",b"cover_type",u"id",b"id",u"sub_title",b"sub_title",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        id: builtins.int = ...,
+        uri: builtins.str = ...,
+        title: builtins.str = ...,
+        sub_title: builtins.str = ...,
+        cover: builtins.str = ...,
+        cover_type: builtins.int = ...,
+        badge: global___VideoBadge | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["badge", b"badge"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["badge", b"badge", "cover", b"cover", "cover_type", b"cover_type", "id", b"id", "sub_title", b"sub_title", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynMedialist = MdlDynMedialist
 
-# 动态列表渲染部分-详情模块-音频模块
+@typing_extensions.final
 class MdlDynMusic(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-音频模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     UP_ID_FIELD_NUMBER: builtins.int
@@ -6081,36 +6886,41 @@ class MdlDynMusic(google.protobuf.message.Message):
     COVER_FIELD_NUMBER: builtins.int
     LABEL1_FIELD_NUMBER: builtins.int
     UPPER_FIELD_NUMBER: builtins.int
-    # 音频id
-    id: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # upId
-    up_id: builtins.int = ...
-    # 歌名
-    title: typing.Text = ...
-    # 专辑封面
-    cover: typing.Text = ...
-    # 展示项1
-    label1: typing.Text = ...
-    # upper
-    upper: typing.Text = ...
-    def __init__(self,
+    id: builtins.int
+    """音频id"""
+    uri: builtins.str
+    """跳转地址"""
+    up_id: builtins.int
+    """upId"""
+    title: builtins.str
+    """歌名"""
+    cover: builtins.str
+    """专辑封面"""
+    label1: builtins.str
+    """展示项1"""
+    upper: builtins.str
+    """upper"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        uri : typing.Text = ...,
-        up_id : builtins.int = ...,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        label1 : typing.Text = ...,
-        upper : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cover",b"cover",u"id",b"id",u"label1",b"label1",u"title",b"title",u"up_id",b"up_id",u"upper",b"upper",u"uri",b"uri"]) -> None: ...
+        id: builtins.int = ...,
+        uri: builtins.str = ...,
+        up_id: builtins.int = ...,
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        label1: builtins.str = ...,
+        upper: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cover", b"cover", "id", b"id", "label1", b"label1", "title", b"title", "up_id", b"up_id", "upper", b"upper", "uri", b"uri"]) -> None: ...
+
 global___MdlDynMusic = MdlDynMusic
 
-# 动态-详情模块-pgc
+@typing_extensions.final
 class MdlDynPGC(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-详情模块-pgc"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -6133,86 +6943,91 @@ class MdlDynPGC(google.protobuf.message.Message):
     JUMP_URL_FIELD_NUMBER: builtins.int
     BADGE_CATEGORY_FIELD_NUMBER: builtins.int
     IS_FEATURE_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 秒开地址
-    uri: typing.Text = ...
-    # 视频封面展示项 1
-    cover_left_text_1: typing.Text = ...
-    # 视频封面展示项 2
-    cover_left_text_2: typing.Text = ...
-    # 封面视频展示项 3
-    cover_left_text_3: typing.Text = ...
-    # cid
-    cid: builtins.int = ...
-    # season_id
-    season_id: builtins.int = ...
-    # epid
-    epid: builtins.int = ...
-    # aid
-    aid: builtins.int = ...
-    # 视频源类型
-    media_type: global___MediaType.V = ...
-    # 番剧类型
-    sub_type: global___VideoSubType.V = ...
-    # 番剧是否为预览视频
-    is_preview: builtins.bool = ...
-    # 尺寸信息
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    uri: builtins.str
+    """秒开地址"""
+    cover_left_text_1: builtins.str
+    """视频封面展示项 1"""
+    cover_left_text_2: builtins.str
+    """视频封面展示项 2"""
+    cover_left_text_3: builtins.str
+    """封面视频展示项 3"""
+    cid: builtins.int
+    """cid"""
+    season_id: builtins.int
+    """season_id"""
+    epid: builtins.int
+    """epid"""
+    aid: builtins.int
+    """aid"""
+    media_type: global___MediaType.ValueType
+    """视频源类型"""
+    sub_type: global___VideoSubType.ValueType
+    """番剧类型"""
+    is_preview: builtins.bool
+    """番剧是否为预览视频"""
     @property
-    def dimension(self) -> global___Dimension: ...
-    # 角标，多个角标之前有间距
+    def dimension(self) -> global___Dimension:
+        """尺寸信息"""
     @property
-    def badge(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]: ...
-    # 是否能够自动播放
-    can_play: builtins.bool = ...
-    # season
+    def badge(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]:
+        """角标，多个角标之前有间距"""
+    can_play: builtins.bool
+    """是否能够自动播放"""
     @property
-    def season(self) -> global___PGCSeason: ...
-    # 播放按钮
-    play_icon: typing.Text = ...
-    # 时长
-    duration: builtins.int = ...
-    # 跳转地址
-    jump_url: typing.Text = ...
-    # 新角标，多个角标之前没有间距
+    def season(self) -> global___PGCSeason:
+        """season"""
+    play_icon: builtins.str
+    """播放按钮"""
+    duration: builtins.int
+    """时长"""
+    jump_url: builtins.str
+    """跳转地址"""
     @property
-    def badge_category(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]: ...
-    # 当前是否是pgc正片
-    is_feature: builtins.bool = ...
-    def __init__(self,
+    def badge_category(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___VideoBadge]:
+        """新角标，多个角标之前没有间距"""
+    is_feature: builtins.bool
+    """当前是否是pgc正片"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        uri : typing.Text = ...,
-        cover_left_text_1 : typing.Text = ...,
-        cover_left_text_2 : typing.Text = ...,
-        cover_left_text_3 : typing.Text = ...,
-        cid : builtins.int = ...,
-        season_id : builtins.int = ...,
-        epid : builtins.int = ...,
-        aid : builtins.int = ...,
-        media_type : global___MediaType.V = ...,
-        sub_type : global___VideoSubType.V = ...,
-        is_preview : builtins.bool = ...,
-        dimension : typing.Optional[global___Dimension] = ...,
-        badge : typing.Optional[typing.Iterable[global___VideoBadge]] = ...,
-        can_play : builtins.bool = ...,
-        season : typing.Optional[global___PGCSeason] = ...,
-        play_icon : typing.Text = ...,
-        duration : builtins.int = ...,
-        jump_url : typing.Text = ...,
-        badge_category : typing.Optional[typing.Iterable[global___VideoBadge]] = ...,
-        is_feature : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dimension",b"dimension",u"season",b"season"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"aid",b"aid",u"badge",b"badge",u"badge_category",b"badge_category",u"can_play",b"can_play",u"cid",b"cid",u"cover",b"cover",u"cover_left_text_1",b"cover_left_text_1",u"cover_left_text_2",b"cover_left_text_2",u"cover_left_text_3",b"cover_left_text_3",u"dimension",b"dimension",u"duration",b"duration",u"epid",b"epid",u"is_feature",b"is_feature",u"is_preview",b"is_preview",u"jump_url",b"jump_url",u"media_type",b"media_type",u"play_icon",b"play_icon",u"season",b"season",u"season_id",b"season_id",u"sub_type",b"sub_type",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        uri: builtins.str = ...,
+        cover_left_text_1: builtins.str = ...,
+        cover_left_text_2: builtins.str = ...,
+        cover_left_text_3: builtins.str = ...,
+        cid: builtins.int = ...,
+        season_id: builtins.int = ...,
+        epid: builtins.int = ...,
+        aid: builtins.int = ...,
+        media_type: global___MediaType.ValueType = ...,
+        sub_type: global___VideoSubType.ValueType = ...,
+        is_preview: builtins.bool = ...,
+        dimension: global___Dimension | None = ...,
+        badge: collections.abc.Iterable[global___VideoBadge] | None = ...,
+        can_play: builtins.bool = ...,
+        season: global___PGCSeason | None = ...,
+        play_icon: builtins.str = ...,
+        duration: builtins.int = ...,
+        jump_url: builtins.str = ...,
+        badge_category: collections.abc.Iterable[global___VideoBadge] | None = ...,
+        is_feature: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dimension", b"dimension", "season", b"season"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["aid", b"aid", "badge", b"badge", "badge_category", b"badge_category", "can_play", b"can_play", "cid", b"cid", "cover", b"cover", "cover_left_text_1", b"cover_left_text_1", "cover_left_text_2", b"cover_left_text_2", "cover_left_text_3", b"cover_left_text_3", "dimension", b"dimension", "duration", b"duration", "epid", b"epid", "is_feature", b"is_feature", "is_preview", b"is_preview", "jump_url", b"jump_url", "media_type", b"media_type", "play_icon", b"play_icon", "season", b"season", "season_id", b"season_id", "sub_type", b"sub_type", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynPGC = MdlDynPGC
 
-# 动态列表渲染部分-详情模块-订阅卡
+@typing_extensions.final
 class MdlDynSubscription(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-详情模块-订阅卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     AD_ID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -6221,66 +7036,76 @@ class MdlDynSubscription(google.protobuf.message.Message):
     AD_TITLE_FIELD_NUMBER: builtins.int
     BADGE_FIELD_NUMBER: builtins.int
     TIPS_FIELD_NUMBER: builtins.int
-    # 卡片物料id
-    id: builtins.int = ...
-    # 广告创意id
-    ad_id: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 广告标题
-    ad_title: typing.Text = ...
-    # 角标
+    id: builtins.int
+    """卡片物料id"""
+    ad_id: builtins.int
+    """广告创意id"""
+    uri: builtins.str
+    """跳转地址"""
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    ad_title: builtins.str
+    """广告标题"""
     @property
-    def badge(self) -> global___VideoBadge: ...
-    # 小提示
-    tips: typing.Text = ...
-    def __init__(self,
+    def badge(self) -> global___VideoBadge:
+        """角标"""
+    tips: builtins.str
+    """小提示"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        ad_id : builtins.int = ...,
-        uri : typing.Text = ...,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        ad_title : typing.Text = ...,
-        badge : typing.Optional[global___VideoBadge] = ...,
-        tips : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"badge",b"badge"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad_id",b"ad_id",u"ad_title",b"ad_title",u"badge",b"badge",u"cover",b"cover",u"id",b"id",u"tips",b"tips",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        id: builtins.int = ...,
+        ad_id: builtins.int = ...,
+        uri: builtins.str = ...,
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        ad_title: builtins.str = ...,
+        badge: global___VideoBadge | None = ...,
+        tips: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["badge", b"badge"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad_id", b"ad_id", "ad_title", b"ad_title", "badge", b"badge", "cover", b"cover", "id", b"id", "tips", b"tips", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynSubscription = MdlDynSubscription
 
-# 动态新附加卡
+@typing_extensions.final
 class MdlDynSubscriptionNew(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态新附加卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     STYLE_FIELD_NUMBER: builtins.int
     DYN_SUBSCRIPTION_FIELD_NUMBER: builtins.int
     DYN_LIVE_RCMD_FIELD_NUMBER: builtins.int
-    #样式类型
-    style: global___MdlDynSubscriptionNewStyle.V = ...
-    #
+    style: global___MdlDynSubscriptionNewStyle.ValueType
+    """样式类型"""
     @property
-    def dyn_subscription(self) -> global___MdlDynSubscription: ...
-    # 直播推荐
+    def dyn_subscription(self) -> global___MdlDynSubscription:
+        """"""
     @property
-    def dyn_live_rcmd(self) -> global___MdlDynLiveRcmd: ...
-    def __init__(self,
+    def dyn_live_rcmd(self) -> global___MdlDynLiveRcmd:
+        """直播推荐"""
+    def __init__(
+        self,
         *,
-        style : global___MdlDynSubscriptionNewStyle.V = ...,
-        dyn_subscription : typing.Optional[global___MdlDynSubscription] = ...,
-        dyn_live_rcmd : typing.Optional[global___MdlDynLiveRcmd] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dyn_live_rcmd",b"dyn_live_rcmd",u"dyn_subscription",b"dyn_subscription",u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dyn_live_rcmd",b"dyn_live_rcmd",u"dyn_subscription",b"dyn_subscription",u"item",b"item",u"style",b"style"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"item",b"item"]) -> typing.Optional[typing_extensions.Literal["dyn_subscription","dyn_live_rcmd"]]: ...
+        style: global___MdlDynSubscriptionNewStyle.ValueType = ...,
+        dyn_subscription: global___MdlDynSubscription | None = ...,
+        dyn_live_rcmd: global___MdlDynLiveRcmd | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dyn_live_rcmd", b"dyn_live_rcmd", "dyn_subscription", b"dyn_subscription", "item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dyn_live_rcmd", b"dyn_live_rcmd", "dyn_subscription", b"dyn_subscription", "item", b"item", "style", b"style"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["item", b"item"]) -> typing_extensions.Literal["dyn_subscription", "dyn_live_rcmd"] | None: ...
+
 global___MdlDynSubscriptionNew = MdlDynSubscriptionNew
 
-# 动态列表渲染部分-UGC合集
+@typing_extensions.final
 class MdlDynUGCSeason(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-UGC合集"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
@@ -6296,62 +7121,67 @@ class MdlDynUGCSeason(google.protobuf.message.Message):
     DIMENSION_FIELD_NUMBER: builtins.int
     DURATION_FIELD_NUMBER: builtins.int
     JUMP_URL_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 秒开地址
-    uri: typing.Text = ...
-    # 视频封面展示项 1
-    cover_left_text_1: typing.Text = ...
-    # 视频封面展示项 2
-    cover_left_text_2: typing.Text = ...
-    # 封面视频展示项 3
-    cover_left_text_3: typing.Text = ...
-    # 卡片物料id
-    id: builtins.int = ...
-    # inline播放地址
-    inlineURL: typing.Text = ...
-    # 是否能够自动播放
-    can_play: builtins.bool = ...
-    # 播放按钮
-    play_icon: typing.Text = ...
-    # avid
-    avid: builtins.int = ...
-    # cid
-    cid: builtins.int = ...
-    # 尺寸信息
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    uri: builtins.str
+    """秒开地址"""
+    cover_left_text_1: builtins.str
+    """视频封面展示项 1"""
+    cover_left_text_2: builtins.str
+    """视频封面展示项 2"""
+    cover_left_text_3: builtins.str
+    """封面视频展示项 3"""
+    id: builtins.int
+    """卡片物料id"""
+    inlineURL: builtins.str
+    """inline播放地址"""
+    can_play: builtins.bool
+    """是否能够自动播放"""
+    play_icon: builtins.str
+    """播放按钮"""
+    avid: builtins.int
+    """avid"""
+    cid: builtins.int
+    """cid"""
     @property
-    def dimension(self) -> global___Dimension: ...
-    # 时长
-    duration: builtins.int = ...
-    # 跳转地址
-    jump_url: typing.Text = ...
-    def __init__(self,
+    def dimension(self) -> global___Dimension:
+        """尺寸信息"""
+    duration: builtins.int
+    """时长"""
+    jump_url: builtins.str
+    """跳转地址"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        uri : typing.Text = ...,
-        cover_left_text_1 : typing.Text = ...,
-        cover_left_text_2 : typing.Text = ...,
-        cover_left_text_3 : typing.Text = ...,
-        id : builtins.int = ...,
-        inlineURL : typing.Text = ...,
-        can_play : builtins.bool = ...,
-        play_icon : typing.Text = ...,
-        avid : builtins.int = ...,
-        cid : builtins.int = ...,
-        dimension : typing.Optional[global___Dimension] = ...,
-        duration : builtins.int = ...,
-        jump_url : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dimension",b"dimension"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"avid",b"avid",u"can_play",b"can_play",u"cid",b"cid",u"cover",b"cover",u"cover_left_text_1",b"cover_left_text_1",u"cover_left_text_2",b"cover_left_text_2",u"cover_left_text_3",b"cover_left_text_3",u"dimension",b"dimension",u"duration",b"duration",u"id",b"id",u"inlineURL",b"inlineURL",u"jump_url",b"jump_url",u"play_icon",b"play_icon",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        uri: builtins.str = ...,
+        cover_left_text_1: builtins.str = ...,
+        cover_left_text_2: builtins.str = ...,
+        cover_left_text_3: builtins.str = ...,
+        id: builtins.int = ...,
+        inlineURL: builtins.str = ...,
+        can_play: builtins.bool = ...,
+        play_icon: builtins.str = ...,
+        avid: builtins.int = ...,
+        cid: builtins.int = ...,
+        dimension: global___Dimension | None = ...,
+        duration: builtins.int = ...,
+        jump_url: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dimension", b"dimension"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["avid", b"avid", "can_play", b"can_play", "cid", b"cid", "cover", b"cover", "cover_left_text_1", b"cover_left_text_1", "cover_left_text_2", b"cover_left_text_2", "cover_left_text_3", b"cover_left_text_3", "dimension", b"dimension", "duration", b"duration", "id", b"id", "inlineURL", b"inlineURL", "jump_url", b"jump_url", "play_icon", b"play_icon", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___MdlDynUGCSeason = MdlDynUGCSeason
 
-# 查看更多-列表单条数据
+@typing_extensions.final
 class MixUpListItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """查看更多-列表单条数据"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UID_FIELD_NUMBER: builtins.int
     SPECIAL_ATTENTION_FIELD_NUMBER: builtins.int
     REDDOT_STATE_FIELD_NUMBER: builtins.int
@@ -6363,76 +7193,88 @@ class MixUpListItem(google.protobuf.message.Message):
     RELATION_FIELD_NUMBER: builtins.int
     PERMIRE_STATE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # 用户mid
-    uid: builtins.int = ...
-    # 特别关注
-    # 0:否 1:是
-    special_attention: builtins.int = ...
-    # 小红点状态
-    # 0:没有 1:有
-    reddot_state: builtins.int = ...
-    # 直播信息
+    uid: builtins.int
+    """用户mid"""
+    special_attention: builtins.int
+    """特别关注
+    0:否 1:是
+    """
+    reddot_state: builtins.int
+    """小红点状态
+    0:没有 1:有
+    """
     @property
-    def live_info(self) -> global___MixUpListLiveItem: ...
-    # 昵称
-    name: typing.Text = ...
-    # 头像
-    face: typing.Text = ...
-    # 认证信息
+    def live_info(self) -> global___MixUpListLiveItem:
+        """直播信息"""
+    name: builtins.str
+    """昵称"""
+    face: builtins.str
+    """头像"""
     @property
-    def official(self) -> global___OfficialVerify: ...
-    # 大会员信息
+    def official(self) -> global___OfficialVerify:
+        """认证信息"""
     @property
-    def vip(self) -> global___VipInfo: ...
-    # 关注状态
+    def vip(self) -> global___VipInfo:
+        """大会员信息"""
     @property
-    def relation(self) -> global___Relation: ...
-    #
-    permire_state: builtins.int = ...
-    #
-    uri: typing.Text = ...
-    def __init__(self,
+    def relation(self) -> global___Relation:
+        """关注状态"""
+    permire_state: builtins.int
+    """"""
+    uri: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        uid : builtins.int = ...,
-        special_attention : builtins.int = ...,
-        reddot_state : builtins.int = ...,
-        live_info : typing.Optional[global___MixUpListLiveItem] = ...,
-        name : typing.Text = ...,
-        face : typing.Text = ...,
-        official : typing.Optional[global___OfficialVerify] = ...,
-        vip : typing.Optional[global___VipInfo] = ...,
-        relation : typing.Optional[global___Relation] = ...,
-        permire_state : builtins.int = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"live_info",b"live_info",u"official",b"official",u"relation",b"relation",u"vip",b"vip"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"face",b"face",u"live_info",b"live_info",u"name",b"name",u"official",b"official",u"permire_state",b"permire_state",u"reddot_state",b"reddot_state",u"relation",b"relation",u"special_attention",b"special_attention",u"uid",b"uid",u"uri",b"uri",u"vip",b"vip"]) -> None: ...
+        uid: builtins.int = ...,
+        special_attention: builtins.int = ...,
+        reddot_state: builtins.int = ...,
+        live_info: global___MixUpListLiveItem | None = ...,
+        name: builtins.str = ...,
+        face: builtins.str = ...,
+        official: global___OfficialVerify | None = ...,
+        vip: global___VipInfo | None = ...,
+        relation: global___Relation | None = ...,
+        permire_state: builtins.int = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["live_info", b"live_info", "official", b"official", "relation", b"relation", "vip", b"vip"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["face", b"face", "live_info", b"live_info", "name", b"name", "official", b"official", "permire_state", b"permire_state", "reddot_state", b"reddot_state", "relation", b"relation", "special_attention", b"special_attention", "uid", b"uid", "uri", b"uri", "vip", b"vip"]) -> None: ...
+
 global___MixUpListItem = MixUpListItem
 
+@typing_extensions.final
 class MixUpListLiveItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     STATUS_FIELD_NUMBER: builtins.int
     ROOM_ID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # 直播状态
-    # 0:未直播 1:直播中
-    status: builtins.bool = ...
-    # 房间号
-    room_id: builtins.int = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    def __init__(self,
+    status: builtins.bool
+    """直播状态
+    0:未直播 1:直播中
+    """
+    room_id: builtins.int
+    """房间号"""
+    uri: builtins.str
+    """跳转地址"""
+    def __init__(
+        self,
         *,
-        status : builtins.bool = ...,
-        room_id : builtins.int = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"room_id",b"room_id",u"status",b"status",u"uri",b"uri"]) -> None: ...
+        status: builtins.bool = ...,
+        room_id: builtins.int = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["room_id", b"room_id", "status", b"status", "uri", b"uri"]) -> None: ...
+
 global___MixUpListLiveItem = MixUpListLiveItem
 
-# 动态模块
+@typing_extensions.final
 class Module(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MODULE_TYPE_FIELD_NUMBER: builtins.int
     MODULE_AUTHOR_FIELD_NUMBER: builtins.int
     MODULE_DISPUTE_FIELD_NUMBER: builtins.int
@@ -6460,160 +7302,170 @@ class Module(google.protobuf.message.Message):
     MODULE_TOP_TAG_FIELD_NUMBER: builtins.int
     MODULE_TOPIC_BRIEF_FIELD_NUMBER: builtins.int
     MODULE_TITLE_FIELD_NUMBER: builtins.int
-    # 类型
-    module_type: global___DynModuleType.V = ...
-    # 用户模块 1
+    module_type: global___DynModuleType.ValueType
+    """类型"""
     @property
-    def module_author(self) -> global___ModuleAuthor: ...
-    # 争议黄条模块 2
+    def module_author(self) -> global___ModuleAuthor:
+        """用户模块 1"""
     @property
-    def module_dispute(self) -> global___ModuleDispute: ...
-    # 动态正文模块 3
+    def module_dispute(self) -> global___ModuleDispute:
+        """争议黄条模块 2"""
     @property
-    def module_desc(self) -> global___ModuleDesc: ...
-    # 动态卡模块 4
+    def module_desc(self) -> global___ModuleDesc:
+        """动态正文模块 3"""
     @property
-    def module_dynamic(self) -> global___ModuleDynamic: ...
-    # 点赞外露(废弃)
+    def module_dynamic(self) -> global___ModuleDynamic:
+        """动态卡模块 4"""
     @property
-    def module_likeUser(self) -> global___ModuleLikeUser: ...
-    # 小卡模块 6
+    def module_likeUser(self) -> global___ModuleLikeUser:
+        """点赞外露(废弃)"""
     @property
-    def module_extend(self) -> global___ModuleExtend: ...
-    # 大卡模块 5
+    def module_extend(self) -> global___ModuleExtend:
+        """小卡模块 6"""
     @property
-    def module_additional(self) -> global___ModuleAdditional: ...
-    # 计数模块 8
+    def module_additional(self) -> global___ModuleAdditional:
+        """大卡模块 5"""
     @property
-    def module_stat(self) -> global___ModuleStat: ...
-    # 折叠模块 9
+    def module_stat(self) -> global___ModuleStat:
+        """计数模块 8"""
     @property
-    def module_fold(self) -> global___ModuleFold: ...
-    # 评论外露(废弃)
+    def module_fold(self) -> global___ModuleFold:
+        """折叠模块 9"""
     @property
-    def module_comment(self) -> global___ModuleComment: ...
-    # 外露交互模块(点赞、评论) 7
+    def module_comment(self) -> global___ModuleComment:
+        """评论外露(废弃)"""
     @property
-    def module_interaction(self) -> global___ModuleInteraction: ...
-    # 转发卡-原卡用户模块
+    def module_interaction(self) -> global___ModuleInteraction:
+        """外露交互模块(点赞、评论) 7"""
     @property
-    def module_author_forward(self) -> global___ModuleAuthorForward: ...
-    # 广告卡
+    def module_author_forward(self) -> global___ModuleAuthorForward:
+        """转发卡-原卡用户模块"""
     @property
-    def module_ad(self) -> global___ModuleAd: ...
-    # 通栏
+    def module_ad(self) -> global___ModuleAd:
+        """广告卡"""
     @property
-    def module_banner(self) -> global___ModuleBanner: ...
-    # 获取物料失败
+    def module_banner(self) -> global___ModuleBanner:
+        """通栏"""
     @property
-    def module_item_null(self) -> global___ModuleItemNull: ...
-    # 分享组件
+    def module_item_null(self) -> global___ModuleItemNull:
+        """获取物料失败"""
     @property
-    def module_share_info(self) -> global___ModuleShareInfo: ...
-    # 相关推荐模块
+    def module_share_info(self) -> global___ModuleShareInfo:
+        """分享组件"""
     @property
-    def module_recommend(self) -> global___ModuleRecommend: ...
-    # 顶部模块
+    def module_recommend(self) -> global___ModuleRecommend:
+        """相关推荐模块"""
     @property
-    def module_top(self) -> global___ModuleTop: ...
-    # 底部模块
+    def module_top(self) -> global___ModuleTop:
+        """顶部模块"""
     @property
-    def module_buttom(self) -> global___ModuleButtom: ...
-    # 转发卡计数模块
+    def module_buttom(self) -> global___ModuleButtom:
+        """底部模块"""
     @property
-    def module_stat_forward(self) -> global___ModuleStat: ...
-    #
+    def module_stat_forward(self) -> global___ModuleStat:
+        """转发卡计数模块"""
     @property
-    def module_story(self) -> global___ModuleStory: ...
-    #
+    def module_story(self) -> global___ModuleStory:
+        """"""
     @property
-    def module_topic(self) -> global___ModuleTopic: ...
-    #
+    def module_topic(self) -> global___ModuleTopic:
+        """"""
     @property
-    def module_topic_details_ext(self) -> global___ModuleTopicDetailsExt: ...
-    #
+    def module_topic_details_ext(self) -> global___ModuleTopicDetailsExt:
+        """"""
     @property
-    def module_top_tag(self) -> global___ModuleTopTag: ...
-    #
+    def module_top_tag(self) -> global___ModuleTopTag:
+        """"""
     @property
-    def module_topic_brief(self) -> global___ModuleTopicBrief: ...
-    #
+    def module_topic_brief(self) -> global___ModuleTopicBrief:
+        """"""
     @property
-    def module_title(self) -> global___ModuleTitle: ...
-    def __init__(self,
+    def module_title(self) -> global___ModuleTitle:
+        """"""
+    def __init__(
+        self,
         *,
-        module_type : global___DynModuleType.V = ...,
-        module_author : typing.Optional[global___ModuleAuthor] = ...,
-        module_dispute : typing.Optional[global___ModuleDispute] = ...,
-        module_desc : typing.Optional[global___ModuleDesc] = ...,
-        module_dynamic : typing.Optional[global___ModuleDynamic] = ...,
-        module_likeUser : typing.Optional[global___ModuleLikeUser] = ...,
-        module_extend : typing.Optional[global___ModuleExtend] = ...,
-        module_additional : typing.Optional[global___ModuleAdditional] = ...,
-        module_stat : typing.Optional[global___ModuleStat] = ...,
-        module_fold : typing.Optional[global___ModuleFold] = ...,
-        module_comment : typing.Optional[global___ModuleComment] = ...,
-        module_interaction : typing.Optional[global___ModuleInteraction] = ...,
-        module_author_forward : typing.Optional[global___ModuleAuthorForward] = ...,
-        module_ad : typing.Optional[global___ModuleAd] = ...,
-        module_banner : typing.Optional[global___ModuleBanner] = ...,
-        module_item_null : typing.Optional[global___ModuleItemNull] = ...,
-        module_share_info : typing.Optional[global___ModuleShareInfo] = ...,
-        module_recommend : typing.Optional[global___ModuleRecommend] = ...,
-        module_top : typing.Optional[global___ModuleTop] = ...,
-        module_buttom : typing.Optional[global___ModuleButtom] = ...,
-        module_stat_forward : typing.Optional[global___ModuleStat] = ...,
-        module_story : typing.Optional[global___ModuleStory] = ...,
-        module_topic : typing.Optional[global___ModuleTopic] = ...,
-        module_topic_details_ext : typing.Optional[global___ModuleTopicDetailsExt] = ...,
-        module_top_tag : typing.Optional[global___ModuleTopTag] = ...,
-        module_topic_brief : typing.Optional[global___ModuleTopicBrief] = ...,
-        module_title : typing.Optional[global___ModuleTitle] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"module_ad",b"module_ad",u"module_additional",b"module_additional",u"module_author",b"module_author",u"module_author_forward",b"module_author_forward",u"module_banner",b"module_banner",u"module_buttom",b"module_buttom",u"module_comment",b"module_comment",u"module_desc",b"module_desc",u"module_dispute",b"module_dispute",u"module_dynamic",b"module_dynamic",u"module_extend",b"module_extend",u"module_fold",b"module_fold",u"module_interaction",b"module_interaction",u"module_item",b"module_item",u"module_item_null",b"module_item_null",u"module_likeUser",b"module_likeUser",u"module_recommend",b"module_recommend",u"module_share_info",b"module_share_info",u"module_stat",b"module_stat",u"module_stat_forward",b"module_stat_forward",u"module_story",b"module_story",u"module_title",b"module_title",u"module_top",b"module_top",u"module_top_tag",b"module_top_tag",u"module_topic",b"module_topic",u"module_topic_brief",b"module_topic_brief",u"module_topic_details_ext",b"module_topic_details_ext"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"module_ad",b"module_ad",u"module_additional",b"module_additional",u"module_author",b"module_author",u"module_author_forward",b"module_author_forward",u"module_banner",b"module_banner",u"module_buttom",b"module_buttom",u"module_comment",b"module_comment",u"module_desc",b"module_desc",u"module_dispute",b"module_dispute",u"module_dynamic",b"module_dynamic",u"module_extend",b"module_extend",u"module_fold",b"module_fold",u"module_interaction",b"module_interaction",u"module_item",b"module_item",u"module_item_null",b"module_item_null",u"module_likeUser",b"module_likeUser",u"module_recommend",b"module_recommend",u"module_share_info",b"module_share_info",u"module_stat",b"module_stat",u"module_stat_forward",b"module_stat_forward",u"module_story",b"module_story",u"module_title",b"module_title",u"module_top",b"module_top",u"module_top_tag",b"module_top_tag",u"module_topic",b"module_topic",u"module_topic_brief",b"module_topic_brief",u"module_topic_details_ext",b"module_topic_details_ext",u"module_type",b"module_type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"module_item",b"module_item"]) -> typing.Optional[typing_extensions.Literal["module_author","module_dispute","module_desc","module_dynamic","module_likeUser","module_extend","module_additional","module_stat","module_fold","module_comment","module_interaction","module_author_forward","module_ad","module_banner","module_item_null","module_share_info","module_recommend","module_top","module_buttom","module_stat_forward","module_story","module_topic","module_topic_details_ext","module_top_tag","module_topic_brief","module_title"]]: ...
+        module_type: global___DynModuleType.ValueType = ...,
+        module_author: global___ModuleAuthor | None = ...,
+        module_dispute: global___ModuleDispute | None = ...,
+        module_desc: global___ModuleDesc | None = ...,
+        module_dynamic: global___ModuleDynamic | None = ...,
+        module_likeUser: global___ModuleLikeUser | None = ...,
+        module_extend: global___ModuleExtend | None = ...,
+        module_additional: global___ModuleAdditional | None = ...,
+        module_stat: global___ModuleStat | None = ...,
+        module_fold: global___ModuleFold | None = ...,
+        module_comment: global___ModuleComment | None = ...,
+        module_interaction: global___ModuleInteraction | None = ...,
+        module_author_forward: global___ModuleAuthorForward | None = ...,
+        module_ad: global___ModuleAd | None = ...,
+        module_banner: global___ModuleBanner | None = ...,
+        module_item_null: global___ModuleItemNull | None = ...,
+        module_share_info: global___ModuleShareInfo | None = ...,
+        module_recommend: global___ModuleRecommend | None = ...,
+        module_top: global___ModuleTop | None = ...,
+        module_buttom: global___ModuleButtom | None = ...,
+        module_stat_forward: global___ModuleStat | None = ...,
+        module_story: global___ModuleStory | None = ...,
+        module_topic: global___ModuleTopic | None = ...,
+        module_topic_details_ext: global___ModuleTopicDetailsExt | None = ...,
+        module_top_tag: global___ModuleTopTag | None = ...,
+        module_topic_brief: global___ModuleTopicBrief | None = ...,
+        module_title: global___ModuleTitle | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["module_ad", b"module_ad", "module_additional", b"module_additional", "module_author", b"module_author", "module_author_forward", b"module_author_forward", "module_banner", b"module_banner", "module_buttom", b"module_buttom", "module_comment", b"module_comment", "module_desc", b"module_desc", "module_dispute", b"module_dispute", "module_dynamic", b"module_dynamic", "module_extend", b"module_extend", "module_fold", b"module_fold", "module_interaction", b"module_interaction", "module_item", b"module_item", "module_item_null", b"module_item_null", "module_likeUser", b"module_likeUser", "module_recommend", b"module_recommend", "module_share_info", b"module_share_info", "module_stat", b"module_stat", "module_stat_forward", b"module_stat_forward", "module_story", b"module_story", "module_title", b"module_title", "module_top", b"module_top", "module_top_tag", b"module_top_tag", "module_topic", b"module_topic", "module_topic_brief", b"module_topic_brief", "module_topic_details_ext", b"module_topic_details_ext"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["module_ad", b"module_ad", "module_additional", b"module_additional", "module_author", b"module_author", "module_author_forward", b"module_author_forward", "module_banner", b"module_banner", "module_buttom", b"module_buttom", "module_comment", b"module_comment", "module_desc", b"module_desc", "module_dispute", b"module_dispute", "module_dynamic", b"module_dynamic", "module_extend", b"module_extend", "module_fold", b"module_fold", "module_interaction", b"module_interaction", "module_item", b"module_item", "module_item_null", b"module_item_null", "module_likeUser", b"module_likeUser", "module_recommend", b"module_recommend", "module_share_info", b"module_share_info", "module_stat", b"module_stat", "module_stat_forward", b"module_stat_forward", "module_story", b"module_story", "module_title", b"module_title", "module_top", b"module_top", "module_top_tag", b"module_top_tag", "module_topic", b"module_topic", "module_topic_brief", b"module_topic_brief", "module_topic_details_ext", b"module_topic_details_ext", "module_type", b"module_type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["module_item", b"module_item"]) -> typing_extensions.Literal["module_author", "module_dispute", "module_desc", "module_dynamic", "module_likeUser", "module_extend", "module_additional", "module_stat", "module_fold", "module_comment", "module_interaction", "module_author_forward", "module_ad", "module_banner", "module_item_null", "module_share_info", "module_recommend", "module_top", "module_buttom", "module_stat_forward", "module_story", "module_topic", "module_topic_details_ext", "module_top_tag", "module_topic_brief", "module_title"] | None: ...
+
 global___Module = Module
 
-# 动态列表-用户模块-广告卡
+@typing_extensions.final
 class ModuleAd(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表-用户模块-广告卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SOURCE_CONTENT_FIELD_NUMBER: builtins.int
     MODULE_AUTHOR_FIELD_NUMBER: builtins.int
     AD_CONTENT_TYPE_FIELD_NUMBER: builtins.int
     COVER_LEFT_TEXT1_FIELD_NUMBER: builtins.int
     COVER_LEFT_TEXT2_FIELD_NUMBER: builtins.int
     COVER_LEFT_TEXT3_FIELD_NUMBER: builtins.int
-    # 广告透传信息
     @property
-    def source_content(self) -> google.protobuf.any_pb2.Any: ...
-    # 用户模块
+    def source_content(self) -> google.protobuf.any_pb2.Any:
+        """广告透传信息"""
     @property
-    def module_author(self) -> global___ModuleAuthor: ...
-    #
-    ad_content_type: builtins.int = ...
-    #
-    cover_left_text1: typing.Text = ...
-    #
-    cover_left_text2: typing.Text = ...
-    #
-    cover_left_text3: typing.Text = ...
-    def __init__(self,
+    def module_author(self) -> global___ModuleAuthor:
+        """用户模块"""
+    ad_content_type: builtins.int
+    """"""
+    cover_left_text1: builtins.str
+    """"""
+    cover_left_text2: builtins.str
+    """"""
+    cover_left_text3: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        source_content : typing.Optional[google.protobuf.any_pb2.Any] = ...,
-        module_author : typing.Optional[global___ModuleAuthor] = ...,
-        ad_content_type : builtins.int = ...,
-        cover_left_text1 : typing.Text = ...,
-        cover_left_text2 : typing.Text = ...,
-        cover_left_text3 : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"module_author",b"module_author",u"source_content",b"source_content"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad_content_type",b"ad_content_type",u"cover_left_text1",b"cover_left_text1",u"cover_left_text2",b"cover_left_text2",u"cover_left_text3",b"cover_left_text3",u"module_author",b"module_author",u"source_content",b"source_content"]) -> None: ...
+        source_content: google.protobuf.any_pb2.Any | None = ...,
+        module_author: global___ModuleAuthor | None = ...,
+        ad_content_type: builtins.int = ...,
+        cover_left_text1: builtins.str = ...,
+        cover_left_text2: builtins.str = ...,
+        cover_left_text3: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["module_author", b"module_author", "source_content", b"source_content"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad_content_type", b"ad_content_type", "cover_left_text1", b"cover_left_text1", "cover_left_text2", b"cover_left_text2", "cover_left_text3", b"cover_left_text3", "module_author", b"module_author", "source_content", b"source_content"]) -> None: ...
+
 global___ModuleAd = ModuleAd
 
-# 动态-附加卡模块
+@typing_extensions.final
 class ModuleAdditional(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-附加卡模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     PGC_FIELD_NUMBER: builtins.int
     GOODS_FIELD_NUMBER: builtins.int
@@ -6625,58 +7477,63 @@ class ModuleAdditional(google.protobuf.message.Message):
     UP_FIELD_NUMBER: builtins.int
     RID_FIELD_NUMBER: builtins.int
     NEED_WRITE_CALENDER_FIELD_NUMBER: builtins.int
-    # 类型
-    type: global___AdditionalType.V = ...
-    # 废弃
+    type: global___AdditionalType.ValueType
+    """类型"""
     @property
-    def pgc(self) -> global___AdditionalPGC: ...
-    #
+    def pgc(self) -> global___AdditionalPGC:
+        """废弃"""
     @property
-    def goods(self) -> global___AdditionGoods: ...
-    # 废弃
+    def goods(self) -> global___AdditionGoods:
+        """"""
     @property
-    def vote(self) -> global___AdditionVote: ...
-    #
+    def vote(self) -> global___AdditionVote:
+        """废弃"""
     @property
-    def common(self) -> global___AdditionCommon: ...
-    #
+    def common(self) -> global___AdditionCommon:
+        """"""
     @property
-    def esport(self) -> global___AdditionEsport: ...
-    # 投票
+    def esport(self) -> global___AdditionEsport:
+        """"""
     @property
-    def vote2(self) -> global___AdditionVote2: ...
-    #
+    def vote2(self) -> global___AdditionVote2:
+        """投票"""
     @property
-    def ugc(self) -> global___AdditionUgc: ...
-    # up主预约发布卡
+    def ugc(self) -> global___AdditionUgc:
+        """"""
     @property
-    def up(self) -> global___AdditionUP: ...
-    # 附加卡物料ID
-    rid: builtins.int = ...
-    #
-    need_write_calender: builtins.bool = ...
-    def __init__(self,
+    def up(self) -> global___AdditionUP:
+        """up主预约发布卡"""
+    rid: builtins.int
+    """附加卡物料ID"""
+    need_write_calender: builtins.bool
+    """"""
+    def __init__(
+        self,
         *,
-        type : global___AdditionalType.V = ...,
-        pgc : typing.Optional[global___AdditionalPGC] = ...,
-        goods : typing.Optional[global___AdditionGoods] = ...,
-        vote : typing.Optional[global___AdditionVote] = ...,
-        common : typing.Optional[global___AdditionCommon] = ...,
-        esport : typing.Optional[global___AdditionEsport] = ...,
-        vote2 : typing.Optional[global___AdditionVote2] = ...,
-        ugc : typing.Optional[global___AdditionUgc] = ...,
-        up : typing.Optional[global___AdditionUP] = ...,
-        rid : builtins.int = ...,
-        need_write_calender : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"common",b"common",u"esport",b"esport",u"goods",b"goods",u"item",b"item",u"pgc",b"pgc",u"ugc",b"ugc",u"up",b"up",u"vote",b"vote",u"vote2",b"vote2"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"common",b"common",u"esport",b"esport",u"goods",b"goods",u"item",b"item",u"need_write_calender",b"need_write_calender",u"pgc",b"pgc",u"rid",b"rid",u"type",b"type",u"ugc",b"ugc",u"up",b"up",u"vote",b"vote",u"vote2",b"vote2"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"item",b"item"]) -> typing.Optional[typing_extensions.Literal["pgc","goods","vote","common","esport","vote2","ugc","up"]]: ...
+        type: global___AdditionalType.ValueType = ...,
+        pgc: global___AdditionalPGC | None = ...,
+        goods: global___AdditionGoods | None = ...,
+        vote: global___AdditionVote | None = ...,
+        common: global___AdditionCommon | None = ...,
+        esport: global___AdditionEsport | None = ...,
+        vote2: global___AdditionVote2 | None = ...,
+        ugc: global___AdditionUgc | None = ...,
+        up: global___AdditionUP | None = ...,
+        rid: builtins.int = ...,
+        need_write_calender: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["common", b"common", "esport", b"esport", "goods", b"goods", "item", b"item", "pgc", b"pgc", "ugc", b"ugc", "up", b"up", "vote", b"vote", "vote2", b"vote2"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["common", b"common", "esport", b"esport", "goods", b"goods", "item", b"item", "need_write_calender", b"need_write_calender", "pgc", b"pgc", "rid", b"rid", "type", b"type", "ugc", b"ugc", "up", b"up", "vote", b"vote", "vote2", b"vote2"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["item", b"item"]) -> typing_extensions.Literal["pgc", "goods", "vote", "common", "esport", "vote2", "ugc", "up"] | None: ...
+
 global___ModuleAdditional = ModuleAdditional
 
-# 动态-发布人模块
+@typing_extensions.final
 class ModuleAuthor(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-发布人模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MID_FIELD_NUMBER: builtins.int
     PTIME_LABEL_TEXT_FIELD_NUMBER: builtins.int
     AUTHOR_FIELD_NUMBER: builtins.int
@@ -6692,93 +7549,104 @@ class ModuleAuthor(google.protobuf.message.Message):
     IS_TOP_FIELD_NUMBER: builtins.int
     PTIME_LOCATION_TEXT_FIELD_NUMBER: builtins.int
     SHOW_LEVEL_FIELD_NUMBER: builtins.int
-    # 用户mid
-    mid: builtins.int = ...
-    # 时间标签
-    ptime_label_text: typing.Text = ...
-    # 用户详情
+    mid: builtins.int
+    """用户mid"""
+    ptime_label_text: builtins.str
+    """时间标签"""
     @property
-    def author(self) -> global___UserInfo: ...
-    # 装扮卡片
+    def author(self) -> global___UserInfo:
+        """用户详情"""
     @property
-    def decorate_card(self) -> global___DecorateCard: ...
-    # 点击跳转链接
-    uri: typing.Text = ...
-    # 右侧操作区域 - 三点样式
+    def decorate_card(self) -> global___DecorateCard:
+        """装扮卡片"""
+    uri: builtins.str
+    """点击跳转链接"""
     @property
-    def tp_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointItem]: ...
-    # 右侧操作区域样式枚举
-    badge_type: global___ModuleAuthorBadgeType.V = ...
-    # 右侧操作区域 - 按钮样式
+    def tp_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointItem]:
+        """右侧操作区域 - 三点样式"""
+    badge_type: global___ModuleAuthorBadgeType.ValueType
+    """右侧操作区域样式枚举"""
     @property
-    def badge_button(self) -> global___ModuleAuthorBadgeButton: ...
-    # 是否关注
-    # 1:关注 0:不关注 默认0，注：点赞列表使用，其他场景不使用该字段
-    attend: builtins.int = ...
-    # 关注状态
+    def badge_button(self) -> global___ModuleAuthorBadgeButton:
+        """右侧操作区域 - 按钮样式"""
+    attend: builtins.int
+    """是否关注
+    1:关注 0:不关注 默认0，注：点赞列表使用，其他场景不使用该字段
+    """
     @property
-    def relation(self) -> global___Relation: ...
-    # 右侧操作区域 - 提权样式
+    def relation(self) -> global___Relation:
+        """关注状态"""
     @property
-    def weight(self) -> global___Weight: ...
-    # 是否展示关注
-    show_follow: builtins.bool = ...
-    # 是否置顶
-    is_top: builtins.bool = ...
-    # ip属地
-    ptime_location_text: typing.Text = ...
-    #
-    show_level: builtins.bool = ...
-    def __init__(self,
+    def weight(self) -> global___Weight:
+        """右侧操作区域 - 提权样式"""
+    show_follow: builtins.bool
+    """是否展示关注"""
+    is_top: builtins.bool
+    """是否置顶"""
+    ptime_location_text: builtins.str
+    """ip属地"""
+    show_level: builtins.bool
+    """"""
+    def __init__(
+        self,
         *,
-        mid : builtins.int = ...,
-        ptime_label_text : typing.Text = ...,
-        author : typing.Optional[global___UserInfo] = ...,
-        decorate_card : typing.Optional[global___DecorateCard] = ...,
-        uri : typing.Text = ...,
-        tp_list : typing.Optional[typing.Iterable[global___ThreePointItem]] = ...,
-        badge_type : global___ModuleAuthorBadgeType.V = ...,
-        badge_button : typing.Optional[global___ModuleAuthorBadgeButton] = ...,
-        attend : builtins.int = ...,
-        relation : typing.Optional[global___Relation] = ...,
-        weight : typing.Optional[global___Weight] = ...,
-        show_follow : builtins.bool = ...,
-        is_top : builtins.bool = ...,
-        ptime_location_text : typing.Text = ...,
-        show_level : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"author",b"author",u"badge_button",b"badge_button",u"decorate_card",b"decorate_card",u"relation",b"relation",u"weight",b"weight"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"attend",b"attend",u"author",b"author",u"badge_button",b"badge_button",u"badge_type",b"badge_type",u"decorate_card",b"decorate_card",u"is_top",b"is_top",u"mid",b"mid",u"ptime_label_text",b"ptime_label_text",u"ptime_location_text",b"ptime_location_text",u"relation",b"relation",u"show_follow",b"show_follow",u"show_level",b"show_level",u"tp_list",b"tp_list",u"uri",b"uri",u"weight",b"weight"]) -> None: ...
+        mid: builtins.int = ...,
+        ptime_label_text: builtins.str = ...,
+        author: global___UserInfo | None = ...,
+        decorate_card: global___DecorateCard | None = ...,
+        uri: builtins.str = ...,
+        tp_list: collections.abc.Iterable[global___ThreePointItem] | None = ...,
+        badge_type: global___ModuleAuthorBadgeType.ValueType = ...,
+        badge_button: global___ModuleAuthorBadgeButton | None = ...,
+        attend: builtins.int = ...,
+        relation: global___Relation | None = ...,
+        weight: global___Weight | None = ...,
+        show_follow: builtins.bool = ...,
+        is_top: builtins.bool = ...,
+        ptime_location_text: builtins.str = ...,
+        show_level: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["author", b"author", "badge_button", b"badge_button", "decorate_card", b"decorate_card", "relation", b"relation", "weight", b"weight"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["attend", b"attend", "author", b"author", "badge_button", b"badge_button", "badge_type", b"badge_type", "decorate_card", b"decorate_card", "is_top", b"is_top", "mid", b"mid", "ptime_label_text", b"ptime_label_text", "ptime_location_text", b"ptime_location_text", "relation", b"relation", "show_follow", b"show_follow", "show_level", b"show_level", "tp_list", b"tp_list", "uri", b"uri", "weight", b"weight"]) -> None: ...
+
 global___ModuleAuthor = ModuleAuthor
 
-# 动态列表渲染部分-用户模块-按钮
+@typing_extensions.final
 class ModuleAuthorBadgeButton(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表渲染部分-用户模块-按钮"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     STATE_FIELD_NUMBER: builtins.int
     ID_FIELD_NUMBER: builtins.int
-    # 图标
-    icon: typing.Text = ...
-    # 文案
-    title: typing.Text = ...
-    # 状态
-    state: builtins.int = ...
-    # 物料ID
-    id: builtins.int = ...
-    def __init__(self,
+    icon: builtins.str
+    """图标"""
+    title: builtins.str
+    """文案"""
+    state: builtins.int
+    """状态"""
+    id: builtins.int
+    """物料ID"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        state : builtins.int = ...,
-        id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"id",b"id",u"state",b"state",u"title",b"title"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        state: builtins.int = ...,
+        id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "id", b"id", "state", b"state", "title", b"title"]) -> None: ...
+
 global___ModuleAuthorBadgeButton = ModuleAuthorBadgeButton
 
-# 动态列表-用户模块-转发模板
+@typing_extensions.final
 class ModuleAuthorForward(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表-用户模块-转发模板"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
     UID_FIELD_NUMBER: builtins.int
@@ -6787,105 +7655,125 @@ class ModuleAuthorForward(google.protobuf.message.Message):
     FACE_URL_FIELD_NUMBER: builtins.int
     RELATION_FIELD_NUMBER: builtins.int
     TP_LIST_FIELD_NUMBER: builtins.int
-    # 展示标题
     @property
-    def title(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleAuthorForwardTitle]: ...
-    # 源卡片跳转链接
-    url: typing.Text = ...
-    # 用户uid
-    uid: builtins.int = ...
-    # 时间标签
-    ptime_label_text: typing.Text = ...
-    # 是否展示关注
-    show_follow: builtins.bool = ...
-    # 源up主头像
-    face_url: typing.Text = ...
-    # 双向关系
+    def title(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleAuthorForwardTitle]:
+        """展示标题"""
+    url: builtins.str
+    """源卡片跳转链接"""
+    uid: builtins.int
+    """用户uid"""
+    ptime_label_text: builtins.str
+    """时间标签"""
+    show_follow: builtins.bool
+    """是否展示关注"""
+    face_url: builtins.str
+    """源up主头像"""
     @property
-    def relation(self) -> global___Relation: ...
-    # 右侧操作区域 - 三点样式
+    def relation(self) -> global___Relation:
+        """双向关系"""
     @property
-    def tp_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointItem]: ...
-    def __init__(self,
+    def tp_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointItem]:
+        """右侧操作区域 - 三点样式"""
+    def __init__(
+        self,
         *,
-        title : typing.Optional[typing.Iterable[global___ModuleAuthorForwardTitle]] = ...,
-        url : typing.Text = ...,
-        uid : builtins.int = ...,
-        ptime_label_text : typing.Text = ...,
-        show_follow : builtins.bool = ...,
-        face_url : typing.Text = ...,
-        relation : typing.Optional[global___Relation] = ...,
-        tp_list : typing.Optional[typing.Iterable[global___ThreePointItem]] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"relation",b"relation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"face_url",b"face_url",u"ptime_label_text",b"ptime_label_text",u"relation",b"relation",u"show_follow",b"show_follow",u"title",b"title",u"tp_list",b"tp_list",u"uid",b"uid",u"url",b"url"]) -> None: ...
+        title: collections.abc.Iterable[global___ModuleAuthorForwardTitle] | None = ...,
+        url: builtins.str = ...,
+        uid: builtins.int = ...,
+        ptime_label_text: builtins.str = ...,
+        show_follow: builtins.bool = ...,
+        face_url: builtins.str = ...,
+        relation: global___Relation | None = ...,
+        tp_list: collections.abc.Iterable[global___ThreePointItem] | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["relation", b"relation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["face_url", b"face_url", "ptime_label_text", b"ptime_label_text", "relation", b"relation", "show_follow", b"show_follow", "title", b"title", "tp_list", b"tp_list", "uid", b"uid", "url", b"url"]) -> None: ...
+
 global___ModuleAuthorForward = ModuleAuthorForward
 
-# 动态列表-用户模块-转发模板-title部分
+@typing_extensions.final
 class ModuleAuthorForwardTitle(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表-用户模块-转发模板-title部分"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
-    # 文案
-    text: typing.Text = ...
-    # 跳转链接
-    url: typing.Text = ...
-    def __init__(self,
+    text: builtins.str
+    """文案"""
+    url: builtins.str
+    """跳转链接"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        url : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"text",b"text",u"url",b"url"]) -> None: ...
+        text: builtins.str = ...,
+        url: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["text", b"text", "url", b"url"]) -> None: ...
+
 global___ModuleAuthorForwardTitle = ModuleAuthorForwardTitle
 
-# 动态列表-通栏
+@typing_extensions.final
 class ModuleBanner(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态列表-通栏"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     USER_FIELD_NUMBER: builtins.int
     DISLIKE_TEXT_FIELD_NUMBER: builtins.int
     DISLIKE_ICON_FIELD_NUMBER: builtins.int
-    # 模块标题
-    title: typing.Text = ...
-    # 卡片类型
-    type: global___ModuleBannerType.V = ...
+    title: builtins.str
+    """模块标题"""
+    type: global___ModuleBannerType.ValueType
+    """卡片类型"""
     @property
     def user(self) -> global___ModuleBannerUser: ...
-    # 不感兴趣文案
-    dislike_text: typing.Text = ...
-    # 不感兴趣图标
-    dislike_icon: typing.Text = ...
-    def __init__(self,
+    dislike_text: builtins.str
+    """不感兴趣文案"""
+    dislike_icon: builtins.str
+    """不感兴趣图标"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        type : global___ModuleBannerType.V = ...,
-        user : typing.Optional[global___ModuleBannerUser] = ...,
-        dislike_text : typing.Text = ...,
-        dislike_icon : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"item",b"item",u"user",b"user"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dislike_icon",b"dislike_icon",u"dislike_text",b"dislike_text",u"item",b"item",u"title",b"title",u"type",b"type",u"user",b"user"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"item",b"item"]) -> typing.Optional[typing_extensions.Literal["user"]]: ...
+        title: builtins.str = ...,
+        type: global___ModuleBannerType.ValueType = ...,
+        user: global___ModuleBannerUser | None = ...,
+        dislike_text: builtins.str = ...,
+        dislike_icon: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["item", b"item", "user", b"user"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dislike_icon", b"dislike_icon", "dislike_text", b"dislike_text", "item", b"item", "title", b"title", "type", b"type", "user", b"user"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["item", b"item"]) -> typing_extensions.Literal["user"] | None: ...
+
 global___ModuleBanner = ModuleBanner
 
-# 动态通栏-用户
+@typing_extensions.final
 class ModuleBannerUser(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态通栏-用户"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
-    # 卡片列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleBannerUserItem]: ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleBannerUserItem]:
+        """卡片列表"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___ModuleBannerUserItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"list",b"list"]) -> None: ...
+        list: collections.abc.Iterable[global___ModuleBannerUserItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["list", b"list"]) -> None: ...
+
 global___ModuleBannerUser = ModuleBannerUser
 
-# 动态通栏-推荐用户卡
+@typing_extensions.final
 class ModuleBannerUserItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态通栏-推荐用户卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     FACE_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
     UID_FIELD_NUMBER: builtins.int
@@ -6895,97 +7783,117 @@ class ModuleBannerUserItem(google.protobuf.message.Message):
     LABEL_FIELD_NUMBER: builtins.int
     BUTTON_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # up主头像
-    face: typing.Text = ...
-    # up主昵称
-    name: typing.Text = ...
-    # up主uid
-    uid: builtins.int = ...
-    # 直播状态
-    live_state: global___LiveState.V = ...
-    # 认证信息
+    face: builtins.str
+    """up主头像"""
+    name: builtins.str
+    """up主昵称"""
+    uid: builtins.int
+    """up主uid"""
+    live_state: global___LiveState.ValueType
+    """直播状态"""
     @property
-    def official(self) -> global___OfficialVerify: ...
-    # 大会员信息
+    def official(self) -> global___OfficialVerify:
+        """认证信息"""
     @property
-    def vip(self) -> global___VipInfo: ...
-    # 标签信息
-    label: typing.Text = ...
-    # 按钮
+    def vip(self) -> global___VipInfo:
+        """大会员信息"""
+    label: builtins.str
+    """标签信息"""
     @property
-    def button(self) -> global___AdditionalButton: ...
-    # 跳转地址
-    uri: typing.Text = ...
-    def __init__(self,
+    def button(self) -> global___AdditionalButton:
+        """按钮"""
+    uri: builtins.str
+    """跳转地址"""
+    def __init__(
+        self,
         *,
-        face : typing.Text = ...,
-        name : typing.Text = ...,
-        uid : builtins.int = ...,
-        live_state : global___LiveState.V = ...,
-        official : typing.Optional[global___OfficialVerify] = ...,
-        vip : typing.Optional[global___VipInfo] = ...,
-        label : typing.Text = ...,
-        button : typing.Optional[global___AdditionalButton] = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button",u"official",b"official",u"vip",b"vip"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"face",b"face",u"label",b"label",u"live_state",b"live_state",u"name",b"name",u"official",b"official",u"uid",b"uid",u"uri",b"uri",u"vip",b"vip"]) -> None: ...
+        face: builtins.str = ...,
+        name: builtins.str = ...,
+        uid: builtins.int = ...,
+        live_state: global___LiveState.ValueType = ...,
+        official: global___OfficialVerify | None = ...,
+        vip: global___VipInfo | None = ...,
+        label: builtins.str = ...,
+        button: global___AdditionalButton | None = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button", "official", b"official", "vip", b"vip"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "face", b"face", "label", b"label", "live_state", b"live_state", "name", b"name", "official", b"official", "uid", b"uid", "uri", b"uri", "vip", b"vip"]) -> None: ...
+
 global___ModuleBannerUserItem = ModuleBannerUserItem
 
-# 底部模块
+@typing_extensions.final
 class ModuleButtom(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """底部模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MODULE_STAT_FIELD_NUMBER: builtins.int
-    # 计数模块
     @property
-    def module_stat(self) -> global___ModuleStat: ...
-    def __init__(self,
+    def module_stat(self) -> global___ModuleStat:
+        """计数模块"""
+    def __init__(
+        self,
         *,
-        module_stat : typing.Optional[global___ModuleStat] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"module_stat",b"module_stat"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"module_stat",b"module_stat"]) -> None: ...
+        module_stat: global___ModuleStat | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["module_stat", b"module_stat"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["module_stat", b"module_stat"]) -> None: ...
+
 global___ModuleButtom = ModuleButtom
 
-# 评论外露模块
+@typing_extensions.final
 class ModuleComment(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """评论外露模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CMTSHOWITEM_FIELD_NUMBER: builtins.int
-    # 评论外露展示项
     @property
-    def cmtShowItem(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CmtShowItem]: ...
-    def __init__(self,
+    def cmtShowItem(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CmtShowItem]:
+        """评论外露展示项"""
+    def __init__(
+        self,
         *,
-        cmtShowItem : typing.Optional[typing.Iterable[global___CmtShowItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cmtShowItem",b"cmtShowItem"]) -> None: ...
+        cmtShowItem: collections.abc.Iterable[global___CmtShowItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cmtShowItem", b"cmtShowItem"]) -> None: ...
+
 global___ModuleComment = ModuleComment
 
-# 动态-描述文字模块
+@typing_extensions.final
 class ModuleDesc(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-描述文字模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DESC_FIELD_NUMBER: builtins.int
     JUMP_URI_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
-    # 描述信息(已按高亮拆分)
     @property
-    def desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]: ...
-    # 点击跳转链接
-    jump_uri: typing.Text = ...
-    # 文本原本
-    text: typing.Text = ...
-    def __init__(self,
+    def desc(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___Description]:
+        """描述信息(已按高亮拆分)"""
+    jump_uri: builtins.str
+    """点击跳转链接"""
+    text: builtins.str
+    """文本原本"""
+    def __init__(
+        self,
         *,
-        desc : typing.Optional[typing.Iterable[global___Description]] = ...,
-        jump_uri : typing.Text = ...,
-        text : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"jump_uri",b"jump_uri",u"text",b"text"]) -> None: ...
+        desc: collections.abc.Iterable[global___Description] | None = ...,
+        jump_uri: builtins.str = ...,
+        text: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "jump_uri", b"jump_uri", "text", b"text"]) -> None: ...
+
 global___ModuleDesc = ModuleDesc
 
-# 正文商品卡参数
+@typing_extensions.final
 class ModuleDescGoods(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """正文商品卡参数"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SOURCE_TYPE_FIELD_NUMBER: builtins.int
     JUMP_URL_FIELD_NUMBER: builtins.int
     SCHEMA_URL_FIELD_NUMBER: builtins.int
@@ -6994,62 +7902,73 @@ class ModuleDescGoods(google.protobuf.message.Message):
     USER_WEB_V2_FIELD_NUMBER: builtins.int
     AD_MARK_FIELD_NUMBER: builtins.int
     SCHEMA_PACKAGE_NAME_FIELD_NUMBER: builtins.int
-    # 商品类型
-    # 1:淘宝 2:会员购
-    source_type: builtins.int = ...
-    # 跳转链接
-    jump_url: typing.Text = ...
-    # schema_url
-    schema_url: typing.Text = ...
-    # item_id
-    item_id: builtins.int = ...
-    # open_white_list
+    source_type: builtins.int
+    """商品类型
+    1:淘宝 2:会员购
+    """
+    jump_url: builtins.str
+    """跳转链接"""
+    schema_url: builtins.str
+    """schema_url"""
+    item_id: builtins.int
+    """item_id"""
     @property
-    def open_white_list(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[typing.Text]: ...
-    # use_web_v2
-    user_web_v2: builtins.bool = ...
-    # ad mark
-    ad_mark: typing.Text = ...
-    # schemaPackageName(Android用)
-    schema_package_name: typing.Text = ...
-    def __init__(self,
+    def open_white_list(self) -> google.protobuf.internal.containers.RepeatedScalarFieldContainer[builtins.str]:
+        """open_white_list"""
+    user_web_v2: builtins.bool
+    """use_web_v2"""
+    ad_mark: builtins.str
+    """ad mark"""
+    schema_package_name: builtins.str
+    """schemaPackageName(Android用)"""
+    def __init__(
+        self,
         *,
-        source_type : builtins.int = ...,
-        jump_url : typing.Text = ...,
-        schema_url : typing.Text = ...,
-        item_id : builtins.int = ...,
-        open_white_list : typing.Optional[typing.Iterable[typing.Text]] = ...,
-        user_web_v2 : builtins.bool = ...,
-        ad_mark : typing.Text = ...,
-        schema_package_name : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad_mark",b"ad_mark",u"item_id",b"item_id",u"jump_url",b"jump_url",u"open_white_list",b"open_white_list",u"schema_package_name",b"schema_package_name",u"schema_url",b"schema_url",u"source_type",b"source_type",u"user_web_v2",b"user_web_v2"]) -> None: ...
+        source_type: builtins.int = ...,
+        jump_url: builtins.str = ...,
+        schema_url: builtins.str = ...,
+        item_id: builtins.int = ...,
+        open_white_list: collections.abc.Iterable[builtins.str] | None = ...,
+        user_web_v2: builtins.bool = ...,
+        ad_mark: builtins.str = ...,
+        schema_package_name: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad_mark", b"ad_mark", "item_id", b"item_id", "jump_url", b"jump_url", "open_white_list", b"open_white_list", "schema_package_name", b"schema_package_name", "schema_url", b"schema_url", "source_type", b"source_type", "user_web_v2", b"user_web_v2"]) -> None: ...
+
 global___ModuleDescGoods = ModuleDescGoods
 
-# 动态-争议小黄条模块
+@typing_extensions.final
 class ModuleDispute(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-争议小黄条模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 描述内容
-    desc: typing.Text = ...
-    # 跳转链接
-    uri: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """标题"""
+    desc: builtins.str
+    """描述内容"""
+    uri: builtins.str
+    """跳转链接"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___ModuleDispute = ModuleDispute
 
-# 动态-详情模块
+@typing_extensions.final
 class ModuleDynamic(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-详情模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     DYN_ARCHIVE_FIELD_NUMBER: builtins.int
     DYN_PGC_FIELD_NUMBER: builtins.int
@@ -7067,103 +7986,114 @@ class ModuleDynamic(google.protobuf.message.Message):
     DYN_LIVE_RCMD_FIELD_NUMBER: builtins.int
     DYN_UGC_SEASON_FIELD_NUMBER: builtins.int
     DYN_SUBSCRIPTION_NEW_FIELD_NUMBER: builtins.int
-    # 类型
-    type: global___ModuleDynamicType.V = ...
-    #稿件
+    type: global___ModuleDynamicType.ValueType
+    """类型"""
     @property
-    def dyn_archive(self) -> global___MdlDynArchive: ...
-    #pgc
+    def dyn_archive(self) -> global___MdlDynArchive:
+        """稿件"""
     @property
-    def dyn_pgc(self) -> global___MdlDynPGC: ...
-    #付费课程-系列
+    def dyn_pgc(self) -> global___MdlDynPGC:
+        """pgc"""
     @property
-    def dyn_cour_season(self) -> global___MdlDynCourSeason: ...
-    #付费课程-批次
+    def dyn_cour_season(self) -> global___MdlDynCourSeason:
+        """付费课程-系列"""
     @property
-    def dyn_cour_batch(self) -> global___MdlDynCourBatch: ...
-    #转发卡
+    def dyn_cour_batch(self) -> global___MdlDynCourBatch:
+        """付费课程-批次"""
     @property
-    def dyn_forward(self) -> global___MdlDynForward: ...
-    #图文
+    def dyn_forward(self) -> global___MdlDynForward:
+        """转发卡"""
     @property
-    def dyn_draw(self) -> global___MdlDynDraw: ...
-    #专栏
+    def dyn_draw(self) -> global___MdlDynDraw:
+        """图文"""
     @property
-    def dyn_article(self) -> global___MdlDynArticle: ...
-    #音频
+    def dyn_article(self) -> global___MdlDynArticle:
+        """专栏"""
     @property
-    def dyn_music(self) -> global___MdlDynMusic: ...
-    #通用卡方
+    def dyn_music(self) -> global___MdlDynMusic:
+        """音频"""
     @property
-    def dyn_common(self) -> global___MdlDynCommon: ...
-    #直播卡
+    def dyn_common(self) -> global___MdlDynCommon:
+        """通用卡方"""
     @property
-    def dyn_common_live(self) -> global___MdlDynLive: ...
-    #播单
+    def dyn_common_live(self) -> global___MdlDynLive:
+        """直播卡"""
     @property
-    def dyn_medialist(self) -> global___MdlDynMedialist: ...
-    #小程序卡
+    def dyn_medialist(self) -> global___MdlDynMedialist:
+        """播单"""
     @property
-    def dyn_applet(self) -> global___MdlDynApplet: ...
-    #订阅卡
+    def dyn_applet(self) -> global___MdlDynApplet:
+        """小程序卡"""
     @property
-    def dyn_subscription(self) -> global___MdlDynSubscription: ...
-    #直播推荐卡
+    def dyn_subscription(self) -> global___MdlDynSubscription:
+        """订阅卡"""
     @property
-    def dyn_live_rcmd(self) -> global___MdlDynLiveRcmd: ...
-    #UGC合集
+    def dyn_live_rcmd(self) -> global___MdlDynLiveRcmd:
+        """直播推荐卡"""
     @property
-    def dyn_ugc_season(self) -> global___MdlDynUGCSeason: ...
-    #订阅卡
+    def dyn_ugc_season(self) -> global___MdlDynUGCSeason:
+        """UGC合集"""
     @property
-    def dyn_subscription_new(self) -> global___MdlDynSubscriptionNew: ...
-    def __init__(self,
+    def dyn_subscription_new(self) -> global___MdlDynSubscriptionNew:
+        """订阅卡"""
+    def __init__(
+        self,
         *,
-        type : global___ModuleDynamicType.V = ...,
-        dyn_archive : typing.Optional[global___MdlDynArchive] = ...,
-        dyn_pgc : typing.Optional[global___MdlDynPGC] = ...,
-        dyn_cour_season : typing.Optional[global___MdlDynCourSeason] = ...,
-        dyn_cour_batch : typing.Optional[global___MdlDynCourBatch] = ...,
-        dyn_forward : typing.Optional[global___MdlDynForward] = ...,
-        dyn_draw : typing.Optional[global___MdlDynDraw] = ...,
-        dyn_article : typing.Optional[global___MdlDynArticle] = ...,
-        dyn_music : typing.Optional[global___MdlDynMusic] = ...,
-        dyn_common : typing.Optional[global___MdlDynCommon] = ...,
-        dyn_common_live : typing.Optional[global___MdlDynLive] = ...,
-        dyn_medialist : typing.Optional[global___MdlDynMedialist] = ...,
-        dyn_applet : typing.Optional[global___MdlDynApplet] = ...,
-        dyn_subscription : typing.Optional[global___MdlDynSubscription] = ...,
-        dyn_live_rcmd : typing.Optional[global___MdlDynLiveRcmd] = ...,
-        dyn_ugc_season : typing.Optional[global___MdlDynUGCSeason] = ...,
-        dyn_subscription_new : typing.Optional[global___MdlDynSubscriptionNew] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dyn_applet",b"dyn_applet",u"dyn_archive",b"dyn_archive",u"dyn_article",b"dyn_article",u"dyn_common",b"dyn_common",u"dyn_common_live",b"dyn_common_live",u"dyn_cour_batch",b"dyn_cour_batch",u"dyn_cour_season",b"dyn_cour_season",u"dyn_draw",b"dyn_draw",u"dyn_forward",b"dyn_forward",u"dyn_live_rcmd",b"dyn_live_rcmd",u"dyn_medialist",b"dyn_medialist",u"dyn_music",b"dyn_music",u"dyn_pgc",b"dyn_pgc",u"dyn_subscription",b"dyn_subscription",u"dyn_subscription_new",b"dyn_subscription_new",u"dyn_ugc_season",b"dyn_ugc_season",u"module_item",b"module_item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dyn_applet",b"dyn_applet",u"dyn_archive",b"dyn_archive",u"dyn_article",b"dyn_article",u"dyn_common",b"dyn_common",u"dyn_common_live",b"dyn_common_live",u"dyn_cour_batch",b"dyn_cour_batch",u"dyn_cour_season",b"dyn_cour_season",u"dyn_draw",b"dyn_draw",u"dyn_forward",b"dyn_forward",u"dyn_live_rcmd",b"dyn_live_rcmd",u"dyn_medialist",b"dyn_medialist",u"dyn_music",b"dyn_music",u"dyn_pgc",b"dyn_pgc",u"dyn_subscription",b"dyn_subscription",u"dyn_subscription_new",b"dyn_subscription_new",u"dyn_ugc_season",b"dyn_ugc_season",u"module_item",b"module_item",u"type",b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"module_item",b"module_item"]) -> typing.Optional[typing_extensions.Literal["dyn_archive","dyn_pgc","dyn_cour_season","dyn_cour_batch","dyn_forward","dyn_draw","dyn_article","dyn_music","dyn_common","dyn_common_live","dyn_medialist","dyn_applet","dyn_subscription","dyn_live_rcmd","dyn_ugc_season","dyn_subscription_new"]]: ...
+        type: global___ModuleDynamicType.ValueType = ...,
+        dyn_archive: global___MdlDynArchive | None = ...,
+        dyn_pgc: global___MdlDynPGC | None = ...,
+        dyn_cour_season: global___MdlDynCourSeason | None = ...,
+        dyn_cour_batch: global___MdlDynCourBatch | None = ...,
+        dyn_forward: global___MdlDynForward | None = ...,
+        dyn_draw: global___MdlDynDraw | None = ...,
+        dyn_article: global___MdlDynArticle | None = ...,
+        dyn_music: global___MdlDynMusic | None = ...,
+        dyn_common: global___MdlDynCommon | None = ...,
+        dyn_common_live: global___MdlDynLive | None = ...,
+        dyn_medialist: global___MdlDynMedialist | None = ...,
+        dyn_applet: global___MdlDynApplet | None = ...,
+        dyn_subscription: global___MdlDynSubscription | None = ...,
+        dyn_live_rcmd: global___MdlDynLiveRcmd | None = ...,
+        dyn_ugc_season: global___MdlDynUGCSeason | None = ...,
+        dyn_subscription_new: global___MdlDynSubscriptionNew | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dyn_applet", b"dyn_applet", "dyn_archive", b"dyn_archive", "dyn_article", b"dyn_article", "dyn_common", b"dyn_common", "dyn_common_live", b"dyn_common_live", "dyn_cour_batch", b"dyn_cour_batch", "dyn_cour_season", b"dyn_cour_season", "dyn_draw", b"dyn_draw", "dyn_forward", b"dyn_forward", "dyn_live_rcmd", b"dyn_live_rcmd", "dyn_medialist", b"dyn_medialist", "dyn_music", b"dyn_music", "dyn_pgc", b"dyn_pgc", "dyn_subscription", b"dyn_subscription", "dyn_subscription_new", b"dyn_subscription_new", "dyn_ugc_season", b"dyn_ugc_season", "module_item", b"module_item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dyn_applet", b"dyn_applet", "dyn_archive", b"dyn_archive", "dyn_article", b"dyn_article", "dyn_common", b"dyn_common", "dyn_common_live", b"dyn_common_live", "dyn_cour_batch", b"dyn_cour_batch", "dyn_cour_season", b"dyn_cour_season", "dyn_draw", b"dyn_draw", "dyn_forward", b"dyn_forward", "dyn_live_rcmd", b"dyn_live_rcmd", "dyn_medialist", b"dyn_medialist", "dyn_music", b"dyn_music", "dyn_pgc", b"dyn_pgc", "dyn_subscription", b"dyn_subscription", "dyn_subscription_new", b"dyn_subscription_new", "dyn_ugc_season", b"dyn_ugc_season", "module_item", b"module_item", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["module_item", b"module_item"]) -> typing_extensions.Literal["dyn_archive", "dyn_pgc", "dyn_cour_season", "dyn_cour_batch", "dyn_forward", "dyn_draw", "dyn_article", "dyn_music", "dyn_common", "dyn_common_live", "dyn_medialist", "dyn_applet", "dyn_subscription", "dyn_live_rcmd", "dyn_ugc_season", "dyn_subscription_new"] | None: ...
+
 global___ModuleDynamic = ModuleDynamic
 
-# 动态-小卡模块
+@typing_extensions.final
 class ModuleExtend(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-小卡模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     EXTEND_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # 详情
     @property
-    def extend(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleExtendItem]: ...
-    # 模块整体跳转uri
-    # 废弃
-    uri: typing.Text = ...
-    def __init__(self,
+    def extend(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ModuleExtendItem]:
+        """详情"""
+    uri: builtins.str
+    """模块整体跳转uri
+    废弃
+    """
+    def __init__(
+        self,
         *,
-        extend : typing.Optional[typing.Iterable[global___ModuleExtendItem]] = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"extend",b"extend",u"uri",b"uri"]) -> None: ...
+        extend: collections.abc.Iterable[global___ModuleExtendItem] | None = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["extend", b"extend", "uri", b"uri"]) -> None: ...
+
 global___ModuleExtend = ModuleExtend
 
-# 动态-拓展小卡模块
+@typing_extensions.final
 class ModuleExtendItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-拓展小卡模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     EXT_INFO_TOPIC_FIELD_NUMBER: builtins.int
     EXT_INFO_LBS_FIELD_NUMBER: builtins.int
@@ -7171,207 +8101,247 @@ class ModuleExtendItem(google.protobuf.message.Message):
     EXT_INFO_GAME_FIELD_NUMBER: builtins.int
     EXT_INFO_COMMON_FIELD_NUMBER: builtins.int
     EXT_INFO_OGV_FIELD_NUMBER: builtins.int
-    # 类型
-    type: global___DynExtendType.V = ...
-    # 废弃
+    type: global___DynExtendType.ValueType
+    """类型"""
     @property
-    def ext_info_topic(self) -> global___ExtInfoTopic: ...
-    # 废弃
+    def ext_info_topic(self) -> global___ExtInfoTopic:
+        """废弃"""
     @property
-    def ext_info_lbs(self) -> global___ExtInfoLBS: ...
-    # 废弃
+    def ext_info_lbs(self) -> global___ExtInfoLBS:
+        """废弃"""
     @property
-    def ext_info_hot(self) -> global___ExtInfoHot: ...
-    # 废弃
+    def ext_info_hot(self) -> global___ExtInfoHot:
+        """废弃"""
     @property
-    def ext_info_game(self) -> global___ExtInfoGame: ...
-    #
+    def ext_info_game(self) -> global___ExtInfoGame:
+        """废弃"""
     @property
-    def ext_info_common(self) -> global___ExtInfoCommon: ...
-    #
+    def ext_info_common(self) -> global___ExtInfoCommon:
+        """"""
     @property
-    def ext_info_ogv(self) -> global___ExtInfoOGV: ...
-    def __init__(self,
+    def ext_info_ogv(self) -> global___ExtInfoOGV:
+        """"""
+    def __init__(
+        self,
         *,
-        type : global___DynExtendType.V = ...,
-        ext_info_topic : typing.Optional[global___ExtInfoTopic] = ...,
-        ext_info_lbs : typing.Optional[global___ExtInfoLBS] = ...,
-        ext_info_hot : typing.Optional[global___ExtInfoHot] = ...,
-        ext_info_game : typing.Optional[global___ExtInfoGame] = ...,
-        ext_info_common : typing.Optional[global___ExtInfoCommon] = ...,
-        ext_info_ogv : typing.Optional[global___ExtInfoOGV] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"ext_info_common",b"ext_info_common",u"ext_info_game",b"ext_info_game",u"ext_info_hot",b"ext_info_hot",u"ext_info_lbs",b"ext_info_lbs",u"ext_info_ogv",b"ext_info_ogv",u"ext_info_topic",b"ext_info_topic",u"extend",b"extend"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ext_info_common",b"ext_info_common",u"ext_info_game",b"ext_info_game",u"ext_info_hot",b"ext_info_hot",u"ext_info_lbs",b"ext_info_lbs",u"ext_info_ogv",b"ext_info_ogv",u"ext_info_topic",b"ext_info_topic",u"extend",b"extend",u"type",b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"extend",b"extend"]) -> typing.Optional[typing_extensions.Literal["ext_info_topic","ext_info_lbs","ext_info_hot","ext_info_game","ext_info_common","ext_info_ogv"]]: ...
+        type: global___DynExtendType.ValueType = ...,
+        ext_info_topic: global___ExtInfoTopic | None = ...,
+        ext_info_lbs: global___ExtInfoLBS | None = ...,
+        ext_info_hot: global___ExtInfoHot | None = ...,
+        ext_info_game: global___ExtInfoGame | None = ...,
+        ext_info_common: global___ExtInfoCommon | None = ...,
+        ext_info_ogv: global___ExtInfoOGV | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["ext_info_common", b"ext_info_common", "ext_info_game", b"ext_info_game", "ext_info_hot", b"ext_info_hot", "ext_info_lbs", b"ext_info_lbs", "ext_info_ogv", b"ext_info_ogv", "ext_info_topic", b"ext_info_topic", "extend", b"extend"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ext_info_common", b"ext_info_common", "ext_info_game", b"ext_info_game", "ext_info_hot", b"ext_info_hot", "ext_info_lbs", b"ext_info_lbs", "ext_info_ogv", b"ext_info_ogv", "ext_info_topic", b"ext_info_topic", "extend", b"extend", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["extend", b"extend"]) -> typing_extensions.Literal["ext_info_topic", "ext_info_lbs", "ext_info_hot", "ext_info_game", "ext_info_common", "ext_info_ogv"] | None: ...
+
 global___ModuleExtendItem = ModuleExtendItem
 
-# 动态-折叠模块
+@typing_extensions.final
 class ModuleFold(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-折叠模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     FOLD_TYPE_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
     FOLD_IDS_FIELD_NUMBER: builtins.int
     FOLD_USERS_FIELD_NUMBER: builtins.int
-    # 折叠分类
-    fold_type: global___FoldType.V = ...
-    # 折叠文案
-    text: typing.Text = ...
-    # 被折叠的动态
-    fold_ids: typing.Text = ...
-    # 被折叠的用户信息
+    fold_type: global___FoldType.ValueType
+    """折叠分类"""
+    text: builtins.str
+    """折叠文案"""
+    fold_ids: builtins.str
+    """被折叠的动态"""
     @property
-    def fold_users(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___UserInfo]: ...
-    def __init__(self,
+    def fold_users(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___UserInfo]:
+        """被折叠的用户信息"""
+    def __init__(
+        self,
         *,
-        fold_type : global___FoldType.V = ...,
-        text : typing.Text = ...,
-        fold_ids : typing.Text = ...,
-        fold_users : typing.Optional[typing.Iterable[global___UserInfo]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"fold_ids",b"fold_ids",u"fold_type",b"fold_type",u"fold_users",b"fold_users",u"text",b"text"]) -> None: ...
+        fold_type: global___FoldType.ValueType = ...,
+        text: builtins.str = ...,
+        fold_ids: builtins.str = ...,
+        fold_users: collections.abc.Iterable[global___UserInfo] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fold_ids", b"fold_ids", "fold_type", b"fold_type", "fold_users", b"fold_users", "text", b"text"]) -> None: ...
+
 global___ModuleFold = ModuleFold
 
-# 外露交互模块
+@typing_extensions.final
 class ModuleInteraction(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """外露交互模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     INTERACTION_ITEM_FIELD_NUMBER: builtins.int
-    # 外露交互模块
     @property
-    def interaction_item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___InteractionItem]: ...
-    def __init__(self,
+    def interaction_item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___InteractionItem]:
+        """外露交互模块"""
+    def __init__(
+        self,
         *,
-        interaction_item : typing.Optional[typing.Iterable[global___InteractionItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"interaction_item",b"interaction_item"]) -> None: ...
+        interaction_item: collections.abc.Iterable[global___InteractionItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["interaction_item", b"interaction_item"]) -> None: ...
+
 global___ModuleInteraction = ModuleInteraction
 
-# 获取物料失败模块
+@typing_extensions.final
 class ModuleItemNull(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """获取物料失败模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
-    # 图标
-    icon: typing.Text = ...
-    # 文案
-    text: typing.Text = ...
-    def __init__(self,
+    icon: builtins.str
+    """图标"""
+    text: builtins.str
+    """文案"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        text : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"text",b"text"]) -> None: ...
+        icon: builtins.str = ...,
+        text: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "text", b"text"]) -> None: ...
+
 global___ModuleItemNull = ModuleItemNull
 
-# 动态-点赞用户模块
+@typing_extensions.final
 class ModuleLikeUser(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-点赞用户模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIKE_USERS_FIELD_NUMBER: builtins.int
     DISPLAY_TEXT_FIELD_NUMBER: builtins.int
-    # 点赞用户
     @property
-    def like_users(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___LikeUser]: ...
-    # 文案
-    display_text: typing.Text = ...
-    def __init__(self,
+    def like_users(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___LikeUser]:
+        """点赞用户"""
+    display_text: builtins.str
+    """文案"""
+    def __init__(
+        self,
         *,
-        like_users : typing.Optional[typing.Iterable[global___LikeUser]] = ...,
-        display_text : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"display_text",b"display_text",u"like_users",b"like_users"]) -> None: ...
+        like_users: collections.abc.Iterable[global___LikeUser] | None = ...,
+        display_text: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["display_text", b"display_text", "like_users", b"like_users"]) -> None: ...
+
 global___ModuleLikeUser = ModuleLikeUser
 
-# 推荐模块
+@typing_extensions.final
 class ModuleRcmd(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """推荐模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     AUTHOR_FIELD_NUMBER: builtins.int
     ITEMS_FIELD_NUMBER: builtins.int
     SERVER_INFO_FIELD_NUMBER: builtins.int
-    # 用户头像
     @property
-    def author(self) -> global___RcmdAuthor: ...
-    # 推荐卡片列表
+    def author(self) -> global___RcmdAuthor:
+        """用户头像"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___RcmdItem]: ...
-    # 透传到客户端的埋点字段
-    server_info: typing.Text = ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___RcmdItem]:
+        """推荐卡片列表"""
+    server_info: builtins.str
+    """透传到客户端的埋点字段"""
+    def __init__(
+        self,
         *,
-        author : typing.Optional[global___RcmdAuthor] = ...,
-        items : typing.Optional[typing.Iterable[global___RcmdItem]] = ...,
-        server_info : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"author",b"author"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"author",b"author",u"items",b"items",u"server_info",b"server_info"]) -> None: ...
+        author: global___RcmdAuthor | None = ...,
+        items: collections.abc.Iterable[global___RcmdItem] | None = ...,
+        server_info: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["author", b"author"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["author", b"author", "items", b"items", "server_info", b"server_info"]) -> None: ...
+
 global___ModuleRcmd = ModuleRcmd
 
-# 相关推荐模块
+@typing_extensions.final
 class ModuleRecommend(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """相关推荐模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MODULE_TITLE_FIELD_NUMBER: builtins.int
     IMAGE_FIELD_NUMBER: builtins.int
     TAG_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     JUMP_URL_FIELD_NUMBER: builtins.int
     AD_FIELD_NUMBER: builtins.int
-    # 模块标题
-    module_title: typing.Text = ...
-    # 图片
-    image: typing.Text = ...
-    # 标签
-    tag: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 跳转链接
-    jump_url: typing.Text = ...
-    # 序列化的广告信息
+    module_title: builtins.str
+    """模块标题"""
+    image: builtins.str
+    """图片"""
+    tag: builtins.str
+    """标签"""
+    title: builtins.str
+    """标题"""
+    jump_url: builtins.str
+    """跳转链接"""
     @property
-    def ad(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[google.protobuf.any_pb2.Any]: ...
-    def __init__(self,
+    def ad(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[google.protobuf.any_pb2.Any]:
+        """序列化的广告信息"""
+    def __init__(
+        self,
         *,
-        module_title : typing.Text = ...,
-        image : typing.Text = ...,
-        tag : typing.Text = ...,
-        title : typing.Text = ...,
-        jump_url : typing.Text = ...,
-        ad : typing.Optional[typing.Iterable[google.protobuf.any_pb2.Any]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"ad",b"ad",u"image",b"image",u"jump_url",b"jump_url",u"module_title",b"module_title",u"tag",b"tag",u"title",b"title"]) -> None: ...
+        module_title: builtins.str = ...,
+        image: builtins.str = ...,
+        tag: builtins.str = ...,
+        title: builtins.str = ...,
+        jump_url: builtins.str = ...,
+        ad: collections.abc.Iterable[google.protobuf.any_pb2.Any] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["ad", b"ad", "image", b"image", "jump_url", b"jump_url", "module_title", b"module_title", "tag", b"tag", "title", b"title"]) -> None: ...
+
 global___ModuleRecommend = ModuleRecommend
 
-# 分享模块
+@typing_extensions.final
 class ModuleShareInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """分享模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     SHARE_CHANNELS_FIELD_NUMBER: builtins.int
     SHARE_ORIGIN_FIELD_NUMBER: builtins.int
     OID_FIELD_NUMBER: builtins.int
     SID_FIELD_NUMBER: builtins.int
-    # 展示标题
-    title: typing.Text = ...
-    # 分享组件列表
+    title: builtins.str
+    """展示标题"""
     @property
-    def share_channels(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ShareChannel]: ...
-    # share_origin
-    share_origin: typing.Text = ...
-    # 业务id
-    oid: typing.Text = ...
-    # sid
-    sid: typing.Text = ...
-    def __init__(self,
+    def share_channels(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ShareChannel]:
+        """分享组件列表"""
+    share_origin: builtins.str
+    """share_origin"""
+    oid: builtins.str
+    """业务id"""
+    sid: builtins.str
+    """sid"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        share_channels : typing.Optional[typing.Iterable[global___ShareChannel]] = ...,
-        share_origin : typing.Text = ...,
-        oid : typing.Text = ...,
-        sid : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"oid",b"oid",u"share_channels",b"share_channels",u"share_origin",b"share_origin",u"sid",b"sid",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        share_channels: collections.abc.Iterable[global___ShareChannel] | None = ...,
+        share_origin: builtins.str = ...,
+        oid: builtins.str = ...,
+        sid: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["oid", b"oid", "share_channels", b"share_channels", "share_origin", b"share_origin", "sid", b"sid", "title", b"title"]) -> None: ...
+
 global___ModuleShareInfo = ModuleShareInfo
 
-# 动态-计数模块
+@typing_extensions.final
 class ModuleStat(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态-计数模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     REPOST_FIELD_NUMBER: builtins.int
     LIKE_FIELD_NUMBER: builtins.int
     REPLY_FIELD_NUMBER: builtins.int
@@ -7381,44 +8351,49 @@ class ModuleStat(google.protobuf.message.Message):
     REPLY_URL_FIELD_NUMBER: builtins.int
     NO_COMMENT_TEXT_FIELD_NUMBER: builtins.int
     NO_FORWARD_TEXT_FIELD_NUMBER: builtins.int
-    # 转发数
-    repost: builtins.int = ...
-    # 点赞数
-    like: builtins.int = ...
-    # 评论数
-    reply: builtins.int = ...
-    # 点赞拓展信息
+    repost: builtins.int
+    """转发数"""
+    like: builtins.int
+    """点赞数"""
+    reply: builtins.int
+    """评论数"""
     @property
-    def like_info(self) -> global___LikeInfo: ...
-    # 禁评
-    no_comment: builtins.bool = ...
-    # 禁转
-    no_forward: builtins.bool = ...
-    # 点击评论跳转链接
-    reply_url: typing.Text = ...
-    # 禁评文案
-    no_comment_text: typing.Text = ...
-    # 禁转文案
-    no_forward_text: typing.Text = ...
-    def __init__(self,
+    def like_info(self) -> global___LikeInfo:
+        """点赞拓展信息"""
+    no_comment: builtins.bool
+    """禁评"""
+    no_forward: builtins.bool
+    """禁转"""
+    reply_url: builtins.str
+    """点击评论跳转链接"""
+    no_comment_text: builtins.str
+    """禁评文案"""
+    no_forward_text: builtins.str
+    """禁转文案"""
+    def __init__(
+        self,
         *,
-        repost : builtins.int = ...,
-        like : builtins.int = ...,
-        reply : builtins.int = ...,
-        like_info : typing.Optional[global___LikeInfo] = ...,
-        no_comment : builtins.bool = ...,
-        no_forward : builtins.bool = ...,
-        reply_url : typing.Text = ...,
-        no_comment_text : typing.Text = ...,
-        no_forward_text : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"like_info",b"like_info"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"like",b"like",u"like_info",b"like_info",u"no_comment",b"no_comment",u"no_comment_text",b"no_comment_text",u"no_forward",b"no_forward",u"no_forward_text",b"no_forward_text",u"reply",b"reply",u"reply_url",b"reply_url",u"repost",b"repost"]) -> None: ...
+        repost: builtins.int = ...,
+        like: builtins.int = ...,
+        reply: builtins.int = ...,
+        like_info: global___LikeInfo | None = ...,
+        no_comment: builtins.bool = ...,
+        no_forward: builtins.bool = ...,
+        reply_url: builtins.str = ...,
+        no_comment_text: builtins.str = ...,
+        no_forward_text: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["like_info", b"like_info"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["like", b"like", "like_info", b"like_info", "no_comment", b"no_comment", "no_comment_text", b"no_comment_text", "no_forward", b"no_forward", "no_forward_text", b"no_forward_text", "reply", b"reply", "reply_url", b"reply_url", "repost", b"repost"]) -> None: ...
+
 global___ModuleStat = ModuleStat
 
-#
+@typing_extensions.final
 class ModuleStory(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     ITEMS_FIELD_NUMBER: builtins.int
     SHOW_PUBLISH_ENTRANCE_FIELD_NUMBER: builtins.int
@@ -7426,349 +8401,433 @@ class ModuleStory(google.protobuf.message.Message):
     URI_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     PUBLISH_TEXT_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___StoryItem]: ...
-    #
-    show_publish_entrance: builtins.bool = ...
-    #
-    fold_state: builtins.int = ...
-    #
-    uri: typing.Text = ...
-    #
-    cover: typing.Text = ...
-    #
-    publish_text: typing.Text = ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___StoryItem]:
+        """"""
+    show_publish_entrance: builtins.bool
+    """"""
+    fold_state: builtins.int
+    """"""
+    uri: builtins.str
+    """"""
+    cover: builtins.str
+    """"""
+    publish_text: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        items : typing.Optional[typing.Iterable[global___StoryItem]] = ...,
-        show_publish_entrance : builtins.bool = ...,
-        fold_state : builtins.int = ...,
-        uri : typing.Text = ...,
-        cover : typing.Text = ...,
-        publish_text : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cover",b"cover",u"fold_state",b"fold_state",u"items",b"items",u"publish_text",b"publish_text",u"show_publish_entrance",b"show_publish_entrance",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        items: collections.abc.Iterable[global___StoryItem] | None = ...,
+        show_publish_entrance: builtins.bool = ...,
+        fold_state: builtins.int = ...,
+        uri: builtins.str = ...,
+        cover: builtins.str = ...,
+        publish_text: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cover", b"cover", "fold_state", b"fold_state", "items", b"items", "publish_text", b"publish_text", "show_publish_entrance", b"show_publish_entrance", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___ModuleStory = ModuleStory
 
-#
+@typing_extensions.final
 class ModuleTitle(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     RIGHT_BTN_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def right_btn(self) -> global___IconButton: ...
-    def __init__(self,
+    def right_btn(self) -> global___IconButton:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        right_btn : typing.Optional[global___IconButton] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"right_btn",b"right_btn"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"right_btn",b"right_btn",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        right_btn: global___IconButton | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["right_btn", b"right_btn"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["right_btn", b"right_btn", "title", b"title"]) -> None: ...
+
 global___ModuleTitle = ModuleTitle
 
-# 顶部模块
+@typing_extensions.final
 class ModuleTop(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """顶部模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TP_LIST_FIELD_NUMBER: builtins.int
-    # 三点模块
     @property
-    def tp_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointItem]: ...
-    def __init__(self,
+    def tp_list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointItem]:
+        """三点模块"""
+    def __init__(
+        self,
         *,
-        tp_list : typing.Optional[typing.Iterable[global___ThreePointItem]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"tp_list",b"tp_list"]) -> None: ...
+        tp_list: collections.abc.Iterable[global___ThreePointItem] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["tp_list", b"tp_list"]) -> None: ...
+
 global___ModuleTop = ModuleTop
 
-#
+@typing_extensions.final
 class ModuleTopTag(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TAG_NAME_FIELD_NUMBER: builtins.int
-    #
-    tag_name: typing.Text = ...
-    def __init__(self,
+    tag_name: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        tag_name : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"tag_name",b"tag_name"]) -> None: ...
+        tag_name: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["tag_name", b"tag_name"]) -> None: ...
+
 global___ModuleTopTag = ModuleTopTag
 
-#
+@typing_extensions.final
 class ModuleTopic(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
-    #
-    id: builtins.int = ...
-    #
-    name: typing.Text = ...
-    #
-    url: typing.Text = ...
-    def __init__(self,
+    id: builtins.int
+    """"""
+    name: builtins.str
+    """"""
+    url: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        name : typing.Text = ...,
-        url : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"id",b"id",u"name",b"name",u"url",b"url"]) -> None: ...
+        id: builtins.int = ...,
+        name: builtins.str = ...,
+        url: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["id", b"id", "name", b"name", "url", b"url"]) -> None: ...
+
 global___ModuleTopic = ModuleTopic
 
-#
+@typing_extensions.final
 class ModuleTopicBrief(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TOPIC_FIELD_NUMBER: builtins.int
-    #
     @property
-    def topic(self) -> global___TopicItem: ...
-    def __init__(self,
+    def topic(self) -> global___TopicItem:
+        """"""
+    def __init__(
+        self,
         *,
-        topic : typing.Optional[global___TopicItem] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"topic",b"topic"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"topic",b"topic"]) -> None: ...
+        topic: global___TopicItem | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["topic", b"topic"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["topic", b"topic"]) -> None: ...
+
 global___ModuleTopicBrief = ModuleTopicBrief
 
-#
+@typing_extensions.final
 class ModuleTopicDetailsExt(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     COMMENT_GUIDE_FIELD_NUMBER: builtins.int
-    #
-    comment_guide: typing.Text = ...
-    def __init__(self,
+    comment_guide: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        comment_guide : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"comment_guide",b"comment_guide"]) -> None: ...
+        comment_guide: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["comment_guide", b"comment_guide"]) -> None: ...
+
 global___ModuleTopicDetailsExt = ModuleTopicDetailsExt
 
-# 认证名牌
+@typing_extensions.final
 class Nameplate(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """认证名牌"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     NID_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
     IMAGE_FIELD_NUMBER: builtins.int
     IMAGE_SMALL_FIELD_NUMBER: builtins.int
     LEVEL_FIELD_NUMBER: builtins.int
     CONDITION_FIELD_NUMBER: builtins.int
-    # nid
-    nid: builtins.int = ...
-    # 名称
-    name: typing.Text = ...
-    # 图片地址
-    image: typing.Text = ...
-    # 小图地址
-    image_small: typing.Text = ...
-    # 等级
-    level: typing.Text = ...
-    # 获取条件
-    condition: typing.Text = ...
-    def __init__(self,
+    nid: builtins.int
+    """nid"""
+    name: builtins.str
+    """名称"""
+    image: builtins.str
+    """图片地址"""
+    image_small: builtins.str
+    """小图地址"""
+    level: builtins.str
+    """等级"""
+    condition: builtins.str
+    """获取条件"""
+    def __init__(
+        self,
         *,
-        nid : builtins.int = ...,
-        name : typing.Text = ...,
-        image : typing.Text = ...,
-        image_small : typing.Text = ...,
-        level : typing.Text = ...,
-        condition : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"condition",b"condition",u"image",b"image",u"image_small",b"image_small",u"level",b"level",u"name",b"name",u"nid",b"nid"]) -> None: ...
+        nid: builtins.int = ...,
+        name: builtins.str = ...,
+        image: builtins.str = ...,
+        image_small: builtins.str = ...,
+        level: builtins.str = ...,
+        condition: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["condition", b"condition", "image", b"image", "image_small", b"image_small", "level", b"level", "name", b"name", "nid", b"nid"]) -> None: ...
+
 global___Nameplate = Nameplate
 
-# 最新ep
+@typing_extensions.final
 class NewEP(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最新ep"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ID_FIELD_NUMBER: builtins.int
     INDEX_SHOW_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
-    # 最新话epid
-    id: builtins.int = ...
-    # 更新至XX话
-    index_show: typing.Text = ...
-    # 更新剧集的封面
-    cover: typing.Text = ...
-    def __init__(self,
+    id: builtins.int
+    """最新话epid"""
+    index_show: builtins.str
+    """更新至XX话"""
+    cover: builtins.str
+    """更新剧集的封面"""
+    def __init__(
+        self,
         *,
-        id : builtins.int = ...,
-        index_show : typing.Text = ...,
-        cover : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cover",b"cover",u"id",b"id",u"index_show",b"index_show"]) -> None: ...
+        id: builtins.int = ...,
+        index_show: builtins.str = ...,
+        cover: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cover", b"cover", "id", b"id", "index_show", b"index_show"]) -> None: ...
+
 global___NewEP = NewEP
 
-# 空响应
+@typing_extensions.final
 class NoReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    def __init__(self,
-        ) -> None: ...
+    """空响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
 global___NoReply = NoReply
 
-# 空请求
+@typing_extensions.final
 class NoReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    def __init__(self,
-        ) -> None: ...
+    """空请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    def __init__(
+        self,
+    ) -> None: ...
+
 global___NoReq = NoReq
 
-#
+@typing_extensions.final
 class OfficialAccountInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     AUTHOR_FIELD_NUMBER: builtins.int
     MID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     RELATION_FIELD_NUMBER: builtins.int
     DESC_TEXT1_FIELD_NUMBER: builtins.int
     DESC_TEXT2_FIELD_NUMBER: builtins.int
-    #
     @property
-    def author(self) -> global___UserInfo: ...
-    #
-    mid: builtins.int = ...
-    #
-    uri: typing.Text = ...
-    #
+    def author(self) -> global___UserInfo:
+        """"""
+    mid: builtins.int
+    """"""
+    uri: builtins.str
+    """"""
     @property
-    def relation(self) -> global___Relation: ...
-    #
-    desc_text1: typing.Text = ...
-    #
-    desc_text2: typing.Text = ...
-    def __init__(self,
+    def relation(self) -> global___Relation:
+        """"""
+    desc_text1: builtins.str
+    """"""
+    desc_text2: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        author : typing.Optional[global___UserInfo] = ...,
-        mid : builtins.int = ...,
-        uri : typing.Text = ...,
-        relation : typing.Optional[global___Relation] = ...,
-        desc_text1 : typing.Text = ...,
-        desc_text2 : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"author",b"author",u"relation",b"relation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"author",b"author",u"desc_text1",b"desc_text1",u"desc_text2",b"desc_text2",u"mid",b"mid",u"relation",b"relation",u"uri",b"uri"]) -> None: ...
+        author: global___UserInfo | None = ...,
+        mid: builtins.int = ...,
+        uri: builtins.str = ...,
+        relation: global___Relation | None = ...,
+        desc_text1: builtins.str = ...,
+        desc_text2: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["author", b"author", "relation", b"relation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["author", b"author", "desc_text1", b"desc_text1", "desc_text2", b"desc_text2", "mid", b"mid", "relation", b"relation", "uri", b"uri"]) -> None: ...
+
 global___OfficialAccountInfo = OfficialAccountInfo
 
-#
+@typing_extensions.final
 class OfficialAccountsReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEMS_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
-    #
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___OfficialAccountInfo]: ...
-    #
-    has_more: builtins.bool = ...
-    #
-    offset: builtins.int = ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___OfficialAccountInfo]:
+        """"""
+    has_more: builtins.bool
+    """"""
+    offset: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___OfficialAccountInfo]] = ...,
-        has_more : builtins.bool = ...,
-        offset : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"items",b"items",u"offset",b"offset"]) -> None: ...
+        items: collections.abc.Iterable[global___OfficialAccountInfo] | None = ...,
+        has_more: builtins.bool = ...,
+        offset: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "items", b"items", "offset", b"offset"]) -> None: ...
+
 global___OfficialAccountsReply = OfficialAccountsReply
 
-#
+@typing_extensions.final
 class OfficialAccountsReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    #
-    offset: builtins.int = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
+    offset: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        offset : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"campus_name",b"campus_name",u"offset",b"offset"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+        offset: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "campus_name", b"campus_name", "offset", b"offset"]) -> None: ...
+
 global___OfficialAccountsReq = OfficialAccountsReq
 
-#
+@typing_extensions.final
 class OfficialDynamicsReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEMS_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     PLAYER_ARGS_FIELD_NUMBER: builtins.int
-    #
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___OfficialItem]: ...
-    #
-    offset: builtins.int = ...
-    #
-    has_more: builtins.bool = ...
-    #
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___OfficialItem]:
+        """"""
+    offset: builtins.int
+    """"""
+    has_more: builtins.bool
+    """"""
     @property
-    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs: ...
-    def __init__(self,
+    def player_args(self) -> bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs:
+        """"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___OfficialItem]] = ...,
-        offset : builtins.int = ...,
-        has_more : builtins.bool = ...,
-        player_args : typing.Optional[bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"player_args",b"player_args"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"items",b"items",u"offset",b"offset",u"player_args",b"player_args"]) -> None: ...
+        items: collections.abc.Iterable[global___OfficialItem] | None = ...,
+        offset: builtins.int = ...,
+        has_more: builtins.bool = ...,
+        player_args: bilibili.app.archive.middleware.v1.preload_pb2.PlayerArgs | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["player_args", b"player_args"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "items", b"items", "offset", b"offset", "player_args", b"player_args"]) -> None: ...
+
 global___OfficialDynamicsReply = OfficialDynamicsReply
 
-#
+@typing_extensions.final
 class OfficialDynamicsReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    #
-    offset: builtins.int = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
+    offset: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        offset : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"campus_name",b"campus_name",u"offset",b"offset"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+        offset: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "campus_name", b"campus_name", "offset", b"offset"]) -> None: ...
+
 global___OfficialDynamicsReq = OfficialDynamicsReq
 
+@typing_extensions.final
 class OfficialItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     RCMD_ARCHIVE_FIELD_NUMBER: builtins.int
     RCMD_DYNAMIC_FIELD_NUMBER: builtins.int
-    type: builtins.int = ...
+    type: builtins.int
     @property
     def rcmd_archive(self) -> global___OfficialRcmdArchive: ...
     @property
     def rcmd_dynamic(self) -> global___OfficialRcmdDynamic: ...
-    def __init__(self,
+    def __init__(
+        self,
         *,
-        type : builtins.int = ...,
-        rcmd_archive : typing.Optional[global___OfficialRcmdArchive] = ...,
-        rcmd_dynamic : typing.Optional[global___OfficialRcmdDynamic] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"rcmd_archive",b"rcmd_archive",u"rcmd_dynamic",b"rcmd_dynamic",u"rcmd_item",b"rcmd_item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"rcmd_archive",b"rcmd_archive",u"rcmd_dynamic",b"rcmd_dynamic",u"rcmd_item",b"rcmd_item",u"type",b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"rcmd_item",b"rcmd_item"]) -> typing.Optional[typing_extensions.Literal["rcmd_archive","rcmd_dynamic"]]: ...
+        type: builtins.int = ...,
+        rcmd_archive: global___OfficialRcmdArchive | None = ...,
+        rcmd_dynamic: global___OfficialRcmdDynamic | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["rcmd_archive", b"rcmd_archive", "rcmd_dynamic", b"rcmd_dynamic", "rcmd_item", b"rcmd_item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["rcmd_archive", b"rcmd_archive", "rcmd_dynamic", b"rcmd_dynamic", "rcmd_item", b"rcmd_item", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["rcmd_item", b"rcmd_item"]) -> typing_extensions.Literal["rcmd_archive", "rcmd_dynamic"] | None: ...
+
 global___OfficialItem = OfficialItem
 
-#
+@typing_extensions.final
 class OfficialRcmdArchive(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     COVER_RIGHT_TEXT_FIELD_NUMBER: builtins.int
@@ -7784,60 +8843,65 @@ class OfficialRcmdArchive(google.protobuf.message.Message):
     NAME_FIELD_NUMBER: builtins.int
     DYNAMIC_ID_FIELD_NUMBER: builtins.int
     CID_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    cover: typing.Text = ...
-    #
-    cover_right_text: typing.Text = ...
-    #
-    desc_icon1: builtins.int = ...
-    #
-    desc_text1: typing.Text = ...
-    #
-    desc_icon2: builtins.int = ...
-    #
-    desc_text2: typing.Text = ...
-    #
-    reason: typing.Text = ...
-    #
-    show_three_point: builtins.bool = ...
-    #
-    uri: typing.Text = ...
-    #
-    aid: builtins.int = ...
-    #
-    mid: builtins.int = ...
-    #
-    name: typing.Text = ...
-    #
-    dynamic_id: builtins.int = ...
-    #
-    cid: builtins.int = ...
-    def __init__(self,
+    title: builtins.str
+    """"""
+    cover: builtins.str
+    """"""
+    cover_right_text: builtins.str
+    """"""
+    desc_icon1: builtins.int
+    """"""
+    desc_text1: builtins.str
+    """"""
+    desc_icon2: builtins.int
+    """"""
+    desc_text2: builtins.str
+    """"""
+    reason: builtins.str
+    """"""
+    show_three_point: builtins.bool
+    """"""
+    uri: builtins.str
+    """"""
+    aid: builtins.int
+    """"""
+    mid: builtins.int
+    """"""
+    name: builtins.str
+    """"""
+    dynamic_id: builtins.int
+    """"""
+    cid: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        cover_right_text : typing.Text = ...,
-        desc_icon1 : builtins.int = ...,
-        desc_text1 : typing.Text = ...,
-        desc_icon2 : builtins.int = ...,
-        desc_text2 : typing.Text = ...,
-        reason : typing.Text = ...,
-        show_three_point : builtins.bool = ...,
-        uri : typing.Text = ...,
-        aid : builtins.int = ...,
-        mid : builtins.int = ...,
-        name : typing.Text = ...,
-        dynamic_id : builtins.int = ...,
-        cid : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"aid",b"aid",u"cid",b"cid",u"cover",b"cover",u"cover_right_text",b"cover_right_text",u"desc_icon1",b"desc_icon1",u"desc_icon2",b"desc_icon2",u"desc_text1",b"desc_text1",u"desc_text2",b"desc_text2",u"dynamic_id",b"dynamic_id",u"mid",b"mid",u"name",b"name",u"reason",b"reason",u"show_three_point",b"show_three_point",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        cover_right_text: builtins.str = ...,
+        desc_icon1: builtins.int = ...,
+        desc_text1: builtins.str = ...,
+        desc_icon2: builtins.int = ...,
+        desc_text2: builtins.str = ...,
+        reason: builtins.str = ...,
+        show_three_point: builtins.bool = ...,
+        uri: builtins.str = ...,
+        aid: builtins.int = ...,
+        mid: builtins.int = ...,
+        name: builtins.str = ...,
+        dynamic_id: builtins.int = ...,
+        cid: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["aid", b"aid", "cid", b"cid", "cover", b"cover", "cover_right_text", b"cover_right_text", "desc_icon1", b"desc_icon1", "desc_icon2", b"desc_icon2", "desc_text1", b"desc_text1", "desc_text2", b"desc_text2", "dynamic_id", b"dynamic_id", "mid", b"mid", "name", b"name", "reason", b"reason", "show_three_point", b"show_three_point", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___OfficialRcmdArchive = OfficialRcmdArchive
 
-#
+@typing_extensions.final
 class OfficialRcmdDynamic(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     COVER_RIGHT_TOP_TEXT_FIELD_NUMBER: builtins.int
@@ -7851,146 +8915,171 @@ class OfficialRcmdDynamic(google.protobuf.message.Message):
     MID_FIELD_NUMBER: builtins.int
     USER_NAME_FIELD_NUMBER: builtins.int
     RID_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    cover: typing.Text = ...
-    #
-    cover_right_top_text: typing.Text = ...
-    #
-    desc_icon1: builtins.int = ...
-    #
-    desc_text1: typing.Text = ...
-    #
-    desc_icon2: builtins.int = ...
-    #
-    desc_text2: typing.Text = ...
-    #
-    reason: typing.Text = ...
-    #
-    uri: typing.Text = ...
-    #
-    dynamic_id: builtins.int = ...
-    #
-    mid: builtins.int = ...
-    #
-    user_name: typing.Text = ...
-    #
-    rid: builtins.int = ...
-    def __init__(self,
+    title: builtins.str
+    """"""
+    cover: builtins.str
+    """"""
+    cover_right_top_text: builtins.str
+    """"""
+    desc_icon1: builtins.int
+    """"""
+    desc_text1: builtins.str
+    """"""
+    desc_icon2: builtins.int
+    """"""
+    desc_text2: builtins.str
+    """"""
+    reason: builtins.str
+    """"""
+    uri: builtins.str
+    """"""
+    dynamic_id: builtins.int
+    """"""
+    mid: builtins.int
+    """"""
+    user_name: builtins.str
+    """"""
+    rid: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        cover_right_top_text : typing.Text = ...,
-        desc_icon1 : builtins.int = ...,
-        desc_text1 : typing.Text = ...,
-        desc_icon2 : builtins.int = ...,
-        desc_text2 : typing.Text = ...,
-        reason : typing.Text = ...,
-        uri : typing.Text = ...,
-        dynamic_id : builtins.int = ...,
-        mid : builtins.int = ...,
-        user_name : typing.Text = ...,
-        rid : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cover",b"cover",u"cover_right_top_text",b"cover_right_top_text",u"desc_icon1",b"desc_icon1",u"desc_icon2",b"desc_icon2",u"desc_text1",b"desc_text1",u"desc_text2",b"desc_text2",u"dynamic_id",b"dynamic_id",u"mid",b"mid",u"reason",b"reason",u"rid",b"rid",u"title",b"title",u"uri",b"uri",u"user_name",b"user_name"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        cover_right_top_text: builtins.str = ...,
+        desc_icon1: builtins.int = ...,
+        desc_text1: builtins.str = ...,
+        desc_icon2: builtins.int = ...,
+        desc_text2: builtins.str = ...,
+        reason: builtins.str = ...,
+        uri: builtins.str = ...,
+        dynamic_id: builtins.int = ...,
+        mid: builtins.int = ...,
+        user_name: builtins.str = ...,
+        rid: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cover", b"cover", "cover_right_top_text", b"cover_right_top_text", "desc_icon1", b"desc_icon1", "desc_icon2", b"desc_icon2", "desc_text1", b"desc_text1", "desc_text2", b"desc_text2", "dynamic_id", b"dynamic_id", "mid", b"mid", "reason", b"reason", "rid", b"rid", "title", b"title", "uri", b"uri", "user_name", b"user_name"]) -> None: ...
+
 global___OfficialRcmdDynamic = OfficialRcmdDynamic
 
-# 认证信息
+@typing_extensions.final
 class OfficialVerify(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """认证信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     IS_ATTEN_FIELD_NUMBER: builtins.int
-    # 127:未认证 0:个人 1:机构
-    type: builtins.int = ...
-    # 认证描述
-    desc: typing.Text = ...
-    # 是否关注
-    is_atten: builtins.int = ...
-    def __init__(self,
+    type: builtins.int
+    """127:未认证 0:个人 1:机构"""
+    desc: builtins.str
+    """认证描述"""
+    is_atten: builtins.int
+    """是否关注"""
+    def __init__(
+        self,
         *,
-        type : builtins.int = ...,
-        desc : typing.Text = ...,
-        is_atten : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"is_atten",b"is_atten",u"type",b"type"]) -> None: ...
+        type: builtins.int = ...,
+        desc: builtins.str = ...,
+        is_atten: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "is_atten", b"is_atten", "type", b"type"]) -> None: ...
+
 global___OfficialVerify = OfficialVerify
 
-# PGC单季信息
+@typing_extensions.final
 class PGCSeason(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """PGC单季信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     IS_FINISH_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
-    # 是否完结
-    is_finish: builtins.int = ...
-    # 标题
-    title: typing.Text = ...
-    # 类型
-    type: builtins.int = ...
-    def __init__(self,
+    is_finish: builtins.int
+    """是否完结"""
+    title: builtins.str
+    """标题"""
+    type: builtins.int
+    """类型"""
+    def __init__(
+        self,
         *,
-        is_finish : builtins.int = ...,
-        title : typing.Text = ...,
-        type : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"is_finish",b"is_finish",u"title",b"title",u"type",b"type"]) -> None: ...
+        is_finish: builtins.int = ...,
+        title: builtins.str = ...,
+        type: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["is_finish", b"is_finish", "title", b"title", "type", b"type"]) -> None: ...
+
 global___PGCSeason = PGCSeason
 
-# 秒开通用参数
+@typing_extensions.final
 class PlayurlParam(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """秒开通用参数"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     QN_FIELD_NUMBER: builtins.int
     FNVER_FIELD_NUMBER: builtins.int
     FNVAL_FIELD_NUMBER: builtins.int
     FORCE_HOST_FIELD_NUMBER: builtins.int
     FOURK_FIELD_NUMBER: builtins.int
-    # 清晰度
-    qn: builtins.int = ...
-    # 流版本
-    fnver: builtins.int = ...
-    # 流类型
-    fnval: builtins.int = ...
-    # 是否强制使用域名
-    force_host: builtins.int = ...
-    # 是否4k
-    fourk: builtins.int = ...
-    def __init__(self,
+    qn: builtins.int
+    """清晰度"""
+    fnver: builtins.int
+    """流版本"""
+    fnval: builtins.int
+    """流类型"""
+    force_host: builtins.int
+    """是否强制使用域名"""
+    fourk: builtins.int
+    """是否4k"""
+    def __init__(
+        self,
         *,
-        qn : builtins.int = ...,
-        fnver : builtins.int = ...,
-        fnval : builtins.int = ...,
-        force_host : builtins.int = ...,
-        fourk : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"fnval",b"fnval",u"fnver",b"fnver",u"force_host",b"force_host",u"fourk",b"fourk",u"qn",b"qn"]) -> None: ...
+        qn: builtins.int = ...,
+        fnver: builtins.int = ...,
+        fnval: builtins.int = ...,
+        force_host: builtins.int = ...,
+        fourk: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["fnval", b"fnval", "fnver", b"fnver", "force_host", b"force_host", "fourk", b"fourk", "qn", b"qn"]) -> None: ...
+
 global___PlayurlParam = PlayurlParam
 
-#
+@typing_extensions.final
 class Popup(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    #
-    uri: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    uri: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___Popup = Popup
 
-#
+@typing_extensions.final
 class RcmdArchive(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     COVER_FIELD_NUMBER: builtins.int
     COVER_LEFT_ICON_1_FIELD_NUMBER: builtins.int
@@ -8003,649 +9092,885 @@ class RcmdArchive(google.protobuf.message.Message):
     COVER_LEFT_TEXT2_FIELD_NUMBER: builtins.int
     COVER_LEFT_ICON3_FIELD_NUMBER: builtins.int
     COVER_LEFT_TEXT3_FIELD_NUMBER: builtins.int
-    # 标题
-    title: typing.Text = ...
-    # 封面图
-    cover: typing.Text = ...
-    # 视频封面展示项 1
-    cover_left_icon_1: global___CoverIcon.V = ...
-    # 视频封面展示项 1
-    cover_left_text_1: typing.Text = ...
-    # 秒开地址
-    uri: typing.Text = ...
-    # 是否PGC
-    is_pgc: builtins.bool = ...
-    # aid
-    aid: builtins.int = ...
-    #
+    title: builtins.str
+    """标题"""
+    cover: builtins.str
+    """封面图"""
+    cover_left_icon_1: global___CoverIcon.ValueType
+    """视频封面展示项 1"""
+    cover_left_text_1: builtins.str
+    """视频封面展示项 1"""
+    uri: builtins.str
+    """秒开地址"""
+    is_pgc: builtins.bool
+    """是否PGC"""
+    aid: builtins.int
+    """aid"""
     @property
-    def badge(self) -> global___IconBadge: ...
-    #
-    cover_left_icon2: builtins.int = ...
-    #
-    cover_left_text2: typing.Text = ...
-    #
-    cover_left_icon3: builtins.int = ...
-    #
-    cover_left_text3: typing.Text = ...
-    def __init__(self,
+    def badge(self) -> global___IconBadge:
+        """"""
+    cover_left_icon2: builtins.int
+    """"""
+    cover_left_text2: builtins.str
+    """"""
+    cover_left_icon3: builtins.int
+    """"""
+    cover_left_text3: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        cover : typing.Text = ...,
-        cover_left_icon_1 : global___CoverIcon.V = ...,
-        cover_left_text_1 : typing.Text = ...,
-        uri : typing.Text = ...,
-        is_pgc : builtins.bool = ...,
-        aid : builtins.int = ...,
-        badge : typing.Optional[global___IconBadge] = ...,
-        cover_left_icon2 : builtins.int = ...,
-        cover_left_text2 : typing.Text = ...,
-        cover_left_icon3 : builtins.int = ...,
-        cover_left_text3 : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"badge",b"badge"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"aid",b"aid",u"badge",b"badge",u"cover",b"cover",u"cover_left_icon2",b"cover_left_icon2",u"cover_left_icon3",b"cover_left_icon3",u"cover_left_icon_1",b"cover_left_icon_1",u"cover_left_text2",b"cover_left_text2",u"cover_left_text3",b"cover_left_text3",u"cover_left_text_1",b"cover_left_text_1",u"is_pgc",b"is_pgc",u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        cover: builtins.str = ...,
+        cover_left_icon_1: global___CoverIcon.ValueType = ...,
+        cover_left_text_1: builtins.str = ...,
+        uri: builtins.str = ...,
+        is_pgc: builtins.bool = ...,
+        aid: builtins.int = ...,
+        badge: global___IconBadge | None = ...,
+        cover_left_icon2: builtins.int = ...,
+        cover_left_text2: builtins.str = ...,
+        cover_left_icon3: builtins.int = ...,
+        cover_left_text3: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["badge", b"badge"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["aid", b"aid", "badge", b"badge", "cover", b"cover", "cover_left_icon2", b"cover_left_icon2", "cover_left_icon3", b"cover_left_icon3", "cover_left_icon_1", b"cover_left_icon_1", "cover_left_text2", b"cover_left_text2", "cover_left_text3", b"cover_left_text3", "cover_left_text_1", b"cover_left_text_1", "is_pgc", b"is_pgc", "title", b"title", "uri", b"uri"]) -> None: ...
+
 global___RcmdArchive = RcmdArchive
 
-# 推荐UP主用户模块
+@typing_extensions.final
 class RcmdAuthor(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """推荐UP主用户模块"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     AUTHOR_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     RELATION_FIELD_NUMBER: builtins.int
-    # 用户详情
     @property
-    def author(self) -> global___UserInfo: ...
-    # 描述：粉丝数、推荐理由
-    desc: typing.Text = ...
-    # 关注状态
+    def author(self) -> global___UserInfo:
+        """用户详情"""
+    desc: builtins.str
+    """描述：粉丝数、推荐理由"""
     @property
-    def relation(self) -> global___Relation: ...
-    def __init__(self,
+    def relation(self) -> global___Relation:
+        """关注状态"""
+    def __init__(
+        self,
         *,
-        author : typing.Optional[global___UserInfo] = ...,
-        desc : typing.Text = ...,
-        relation : typing.Optional[global___Relation] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"author",b"author",u"relation",b"relation"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"author",b"author",u"desc",b"desc",u"relation",b"relation"]) -> None: ...
+        author: global___UserInfo | None = ...,
+        desc: builtins.str = ...,
+        relation: global___Relation | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["author", b"author", "relation", b"relation"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["author", b"author", "desc", b"desc", "relation", b"relation"]) -> None: ...
+
 global___RcmdAuthor = RcmdAuthor
 
-# 推荐卡片列表
+@typing_extensions.final
 class RcmdItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """推荐卡片列表"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     RCMD_ARCHIVE_FIELD_NUMBER: builtins.int
-    # 卡片类型
-    type: global___RcmdType.V = ...
-    #
+    type: global___RcmdType.ValueType
+    """卡片类型"""
     @property
-    def rcmd_archive(self) -> global___RcmdArchive: ...
-    def __init__(self,
+    def rcmd_archive(self) -> global___RcmdArchive:
+        """"""
+    def __init__(
+        self,
         *,
-        type : global___RcmdType.V = ...,
-        rcmd_archive : typing.Optional[global___RcmdArchive] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"rcmd_archive",b"rcmd_archive",u"rcmd_item",b"rcmd_item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"rcmd_archive",b"rcmd_archive",u"rcmd_item",b"rcmd_item",u"type",b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"rcmd_item",b"rcmd_item"]) -> typing.Optional[typing_extensions.Literal["rcmd_archive"]]: ...
+        type: global___RcmdType.ValueType = ...,
+        rcmd_archive: global___RcmdArchive | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["rcmd_archive", b"rcmd_archive", "rcmd_item", b"rcmd_item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["rcmd_archive", b"rcmd_archive", "rcmd_item", b"rcmd_item", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["rcmd_item", b"rcmd_item"]) -> typing_extensions.Literal["rcmd_archive"] | None: ...
+
 global___RcmdItem = RcmdItem
 
-# 分区聚类推荐选项
+@typing_extensions.final
 class RcmdOption(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """分区聚类推荐选项"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SHOW_TITLE_FIELD_NUMBER: builtins.int
-    # 视频是否展示标题
-    show_title: builtins.bool = ...
-    def __init__(self,
+    show_title: builtins.bool
+    """视频是否展示标题"""
+    def __init__(
+        self,
         *,
-        show_title : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"show_title",b"show_title"]) -> None: ...
+        show_title: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["show_title", b"show_title"]) -> None: ...
+
 global___RcmdOption = RcmdOption
 
-#
+@typing_extensions.final
 class RcmdTopButton(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
-    #
-    text: typing.Text = ...
-    #
-    url: typing.Text = ...
-    def __init__(self,
+    text: builtins.str
+    """"""
+    url: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        url : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"text",b"text",u"url",b"url"]) -> None: ...
+        text: builtins.str = ...,
+        url: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["text", b"text", "url", b"url"]) -> None: ...
+
 global___RcmdTopButton = RcmdTopButton
 
-# 推荐up主入参
+@typing_extensions.final
 class RcmdUPsParam(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """推荐up主入参"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DISLIKE_TS_FIELD_NUMBER: builtins.int
-    dislike_ts: builtins.int = ...
-    def __init__(self,
+    dislike_ts: builtins.int
+    def __init__(
+        self,
         *,
-        dislike_ts : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dislike_ts",b"dislike_ts"]) -> None: ...
+        dislike_ts: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dislike_ts", b"dislike_ts"]) -> None: ...
+
 global___RcmdUPsParam = RcmdUPsParam
 
-# 关注关系
+@typing_extensions.final
 class Relation(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """关注关系"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     STATUS_FIELD_NUMBER: builtins.int
     IS_FOLLOW_FIELD_NUMBER: builtins.int
     IS_FOLLOWED_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
-    # 关注状态
-    status: global___RelationStatus.V = ...
-    # 关注
-    is_follow: builtins.int = ...
-    # 被关注
-    is_followed: builtins.int = ...
-    # 文案
-    title: typing.Text = ...
-    def __init__(self,
+    status: global___RelationStatus.ValueType
+    """关注状态"""
+    is_follow: builtins.int
+    """关注"""
+    is_followed: builtins.int
+    """被关注"""
+    title: builtins.str
+    """文案"""
+    def __init__(
+        self,
         *,
-        status : global___RelationStatus.V = ...,
-        is_follow : builtins.int = ...,
-        is_followed : builtins.int = ...,
-        title : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"is_follow",b"is_follow",u"is_followed",b"is_followed",u"status",b"status",u"title",b"title"]) -> None: ...
+        status: global___RelationStatus.ValueType = ...,
+        is_follow: builtins.int = ...,
+        is_followed: builtins.int = ...,
+        title: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["is_follow", b"is_follow", "is_followed", b"is_followed", "status", b"status", "title", b"title"]) -> None: ...
+
 global___Relation = Relation
 
-# 转发列表-请求
+@typing_extensions.final
 class RepostListReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """转发列表-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DYNAMIC_ID_FIELD_NUMBER: builtins.int
     DYN_TYPE_FIELD_NUMBER: builtins.int
     RID_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     FROM_FIELD_NUMBER: builtins.int
     REPOST_TYPE_FIELD_NUMBER: builtins.int
-    # 动态ID
-    dynamic_id: typing.Text = ...
-    # 动态类型
-    dyn_type: builtins.int = ...
-    # 业务方资源id
-    rid: builtins.int = ...
-    # 偏移,使用上一页回包中的offset字段；第一页不传。
-    offset: typing.Text = ...
-    # 评论类型
-    repost_type: global___RepostType.V = ...
-    def __init__(self,
+    dynamic_id: builtins.str
+    """动态ID"""
+    dyn_type: builtins.int
+    """动态类型"""
+    rid: builtins.int
+    """业务方资源id"""
+    offset: builtins.str
+    """偏移,使用上一页回包中的offset字段；第一页不传。"""
+    repost_type: global___RepostType.ValueType
+    """评论类型"""
+    def __init__(
+        self,
         *,
-        dynamic_id : typing.Text = ...,
-        dyn_type : builtins.int = ...,
-        rid : builtins.int = ...,
-        offset : typing.Text = ...,
-        repost_type : global___RepostType.V = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"dyn_type",b"dyn_type",u"dynamic_id",b"dynamic_id",u"from",b"from",u"offset",b"offset",u"repost_type",b"repost_type",u"rid",b"rid"]) -> None: ...
+        dynamic_id: builtins.str = ...,
+        dyn_type: builtins.int = ...,
+        rid: builtins.int = ...,
+        offset: builtins.str = ...,
+        repost_type: global___RepostType.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dyn_type", b"dyn_type", "dynamic_id", b"dynamic_id", "from", b"from", "offset", b"offset", "repost_type", b"repost_type", "rid", b"rid"]) -> None: ...
+
 global___RepostListReq = RepostListReq
 
-# 转发列表-响应
+@typing_extensions.final
 class RepostListRsp(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """转发列表-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LIST_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     TOTAL_COUNT_FIELD_NUMBER: builtins.int
     REPOST_TYPE_FIELD_NUMBER: builtins.int
-    # 列表
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    # 偏移
-    offset: typing.Text = ...
-    # 是否还有更多
-    has_more: builtins.bool = ...
-    # 转发总数
-    total_count: builtins.int = ...
-    # 评论类型
-    repost_type: global___RepostType.V = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """列表"""
+    offset: builtins.str
+    """偏移"""
+    has_more: builtins.bool
+    """是否还有更多"""
+    total_count: builtins.int
+    """转发总数"""
+    repost_type: global___RepostType.ValueType
+    """评论类型"""
+    def __init__(
+        self,
         *,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        offset : typing.Text = ...,
-        has_more : builtins.bool = ...,
-        total_count : builtins.int = ...,
-        repost_type : global___RepostType.V = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"list",b"list",u"offset",b"offset",u"repost_type",b"repost_type",u"total_count",b"total_count"]) -> None: ...
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        offset: builtins.str = ...,
+        has_more: builtins.bool = ...,
+        total_count: builtins.int = ...,
+        repost_type: global___RepostType.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "list", b"list", "offset", b"offset", "repost_type", b"repost_type", "total_count", b"total_count"]) -> None: ...
+
 global___RepostListRsp = RepostListRsp
 
-#
-class SchoolRecommendReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
-    ITEMS_FIELD_NUMBER: builtins.int
-    #
-    @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusInfo]: ...
-    def __init__(self,
+@typing_extensions.final
+class ReactionListReq(google.protobuf.message.Message):
+    """新版动态转发点赞列表-请求"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    DYNAMIC_ID_FIELD_NUMBER: builtins.int
+    DYN_TYPE_FIELD_NUMBER: builtins.int
+    RID_FIELD_NUMBER: builtins.int
+    OFFSET_FIELD_NUMBER: builtins.int
+    dynamic_id: builtins.int
+    """动态ID"""
+    dyn_type: builtins.int
+    """动态类型"""
+    rid: builtins.int
+    """业务方资源id"""
+    offset: builtins.str
+    """偏移,使用上一页回包中的offset字段；第一页不传。"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___CampusInfo]] = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items"]) -> None: ...
+        dynamic_id: builtins.int = ...,
+        dyn_type: builtins.int = ...,
+        rid: builtins.int = ...,
+        offset: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["dyn_type", b"dyn_type", "dynamic_id", b"dynamic_id", "offset", b"offset", "rid", b"rid"]) -> None: ...
+
+global___ReactionListReq = ReactionListReq
+
+@typing_extensions.final
+class ReactionListReply(google.protobuf.message.Message):
+    """新版动态转发点赞列表-响应"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    TITLE_FIELD_NUMBER: builtins.int
+    LIST_FIELD_NUMBER: builtins.int
+    OFFSET_FIELD_NUMBER: builtins.int
+    HAS_MORE_FIELD_NUMBER: builtins.int
+    title: builtins.str
+    """标题"""
+    @property
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ReactionListItem]:
+        """列表"""
+    offset: builtins.str
+    """偏移"""
+    has_more: builtins.bool
+    """是否还有更多"""
+    def __init__(
+        self,
+        *,
+        title: builtins.str = ...,
+        list: collections.abc.Iterable[global___ReactionListItem] | None = ...,
+        offset: builtins.str = ...,
+        has_more: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "list", b"list", "offset", b"offset", "title", b"title"]) -> None: ...
+
+global___ReactionListReply = ReactionListReply
+
+@typing_extensions.final
+class ReactionListItem(google.protobuf.message.Message):
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    USER_FIELD_NUMBER: builtins.int
+    RELATION_FIELD_NUMBER: builtins.int
+    ACT_TEXT_FIELD_NUMBER: builtins.int
+    RCMD_REASON_FIELD_NUMBER: builtins.int
+    @property
+    def user(self) -> global___UserInfo:
+        """用户信息"""
+    @property
+    def relation(self) -> global___Relation:
+        """关注关系"""
+    act_text: builtins.str
+    """显示文字"""
+    rcmd_reason: builtins.str
+    """
+    bool has_relation = 5;
+    bool has_user = 6;
+    """
+    def __init__(
+        self,
+        *,
+        user: global___UserInfo | None = ...,
+        relation: global___Relation | None = ...,
+        act_text: builtins.str = ...,
+        rcmd_reason: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["relation", b"relation", "user", b"user"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["act_text", b"act_text", "rcmd_reason", b"rcmd_reason", "relation", b"relation", "user", b"user"]) -> None: ...
+
+global___ReactionListItem = ReactionListItem
+
+@typing_extensions.final
+class SchoolRecommendReply(google.protobuf.message.Message):
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
+    ITEMS_FIELD_NUMBER: builtins.int
+    @property
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusInfo]:
+        """"""
+    def __init__(
+        self,
+        *,
+        items: collections.abc.Iterable[global___CampusInfo] | None = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items"]) -> None: ...
+
 global___SchoolRecommendReply = SchoolRecommendReply
 
-#
+@typing_extensions.final
 class SchoolRecommendReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     LAT_FIELD_NUMBER: builtins.int
     LNG_FIELD_NUMBER: builtins.int
-    #
-    lat: builtins.float = ...
-    #
-    lng: builtins.float = ...
-    def __init__(self,
+    lat: builtins.float
+    """"""
+    lng: builtins.float
+    """"""
+    def __init__(
+        self,
         *,
-        lat : builtins.float = ...,
-        lng : builtins.float = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"lat",b"lat",u"lng",b"lng"]) -> None: ...
+        lat: builtins.float = ...,
+        lng: builtins.float = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["lat", b"lat", "lng", b"lng"]) -> None: ...
+
 global___SchoolRecommendReq = SchoolRecommendReq
 
-#
+@typing_extensions.final
 class SchoolSearchReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEMS_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
-    #
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusInfo]: ...
-    #
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___CampusInfo]:
+        """"""
     @property
-    def toast(self) -> global___SearchToast: ...
-    def __init__(self,
+    def toast(self) -> global___SearchToast:
+        """"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___CampusInfo]] = ...,
-        toast : typing.Optional[global___SearchToast] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"toast",b"toast"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items",u"toast",b"toast"]) -> None: ...
+        items: collections.abc.Iterable[global___CampusInfo] | None = ...,
+        toast: global___SearchToast | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["toast", b"toast"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items", "toast", b"toast"]) -> None: ...
+
 global___SchoolSearchReply = SchoolSearchReply
 
-#
+@typing_extensions.final
 class SchoolSearchReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     KEYWORD_FIELD_NUMBER: builtins.int
-    #
-    keyword: typing.Text = ...
-    def __init__(self,
+    keyword: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        keyword : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"keyword",b"keyword"]) -> None: ...
+        keyword: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["keyword", b"keyword"]) -> None: ...
+
 global___SchoolSearchReq = SchoolSearchReq
 
-#
+@typing_extensions.final
 class SearchChannel(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     MORE_BUTTON_FIELD_NUMBER: builtins.int
     CHANNELS_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def more_button(self) -> global___SearchTopicButton: ...
-    #
+    def more_button(self) -> global___SearchTopicButton:
+        """"""
     @property
-    def channels(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ChannelInfo]: ...
-    def __init__(self,
+    def channels(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ChannelInfo]:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        more_button : typing.Optional[global___SearchTopicButton] = ...,
-        channels : typing.Optional[typing.Iterable[global___ChannelInfo]] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"more_button",b"more_button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"channels",b"channels",u"more_button",b"more_button",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        more_button: global___SearchTopicButton | None = ...,
+        channels: collections.abc.Iterable[global___ChannelInfo] | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["more_button", b"more_button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["channels", b"channels", "more_button", b"more_button", "title", b"title"]) -> None: ...
+
 global___SearchChannel = SearchChannel
 
-#
+@typing_extensions.final
 class SearchInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     LIST_FIELD_NUMBER: builtins.int
     TRACK_ID_FIELD_NUMBER: builtins.int
     TOTAL_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     VERSION_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]: ...
-    #
-    track_id: typing.Text = ...
-    #
-    total: builtins.int = ...
-    #
-    has_more: builtins.bool = ...
-    #
-    version: typing.Text = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___DynamicItem]:
+        """"""
+    track_id: builtins.str
+    """"""
+    total: builtins.int
+    """"""
+    has_more: builtins.bool
+    """"""
+    version: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        list : typing.Optional[typing.Iterable[global___DynamicItem]] = ...,
-        track_id : typing.Text = ...,
-        total : builtins.int = ...,
-        has_more : builtins.bool = ...,
-        version : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"list",b"list",u"title",b"title",u"total",b"total",u"track_id",b"track_id",u"version",b"version"]) -> None: ...
+        title: builtins.str = ...,
+        list: collections.abc.Iterable[global___DynamicItem] | None = ...,
+        track_id: builtins.str = ...,
+        total: builtins.int = ...,
+        has_more: builtins.bool = ...,
+        version: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "list", b"list", "title", b"title", "total", b"total", "track_id", b"track_id", "version", b"version"]) -> None: ...
+
 global___SearchInfo = SearchInfo
 
-#
+@typing_extensions.final
 class SearchToast(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     DESC_TEXT1_FIELD_NUMBER: builtins.int
     DESC_TEXT2_FIELD_NUMBER: builtins.int
-    #
-    desc_text1: typing.Text = ...
-    #
-    desc_text2: typing.Text = ...
-    def __init__(self,
+    desc_text1: builtins.str
+    """"""
+    desc_text2: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        desc_text1 : typing.Text = ...,
-        desc_text2 : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc_text1",b"desc_text1",u"desc_text2",b"desc_text2"]) -> None: ...
+        desc_text1: builtins.str = ...,
+        desc_text2: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc_text1", b"desc_text1", "desc_text2", b"desc_text2"]) -> None: ...
+
 global___SearchToast = SearchToast
 
-#
+@typing_extensions.final
 class SearchTopic(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     MORE_BUTTON_FIELD_NUMBER: builtins.int
     ITEMS_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def more_button(self) -> global___SearchTopicButton: ...
-    #
+    def more_button(self) -> global___SearchTopicButton:
+        """"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___SearchTopicItem]: ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___SearchTopicItem]:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        more_button : typing.Optional[global___SearchTopicButton] = ...,
-        items : typing.Optional[typing.Iterable[global___SearchTopicItem]] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"more_button",b"more_button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"items",b"items",u"more_button",b"more_button",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        more_button: global___SearchTopicButton | None = ...,
+        items: collections.abc.Iterable[global___SearchTopicItem] | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["more_button", b"more_button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["items", b"items", "more_button", b"more_button", "title", b"title"]) -> None: ...
+
 global___SearchTopic = SearchTopic
 
-#
+@typing_extensions.final
 class SearchTopicButton(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     JUMP_URI_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    jump_uri: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """"""
+    jump_uri: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        jump_uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"jump_uri",b"jump_uri",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        jump_uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["jump_uri", b"jump_uri", "title", b"title"]) -> None: ...
+
 global___SearchTopicButton = SearchTopicButton
 
-#
+@typing_extensions.final
 class SearchTopicItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TOPIC_ID_FIELD_NUMBER: builtins.int
     TOPIC_NAME_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
     IS_ACTIVITY_FIELD_NUMBER: builtins.int
-    #
-    topic_id: builtins.int = ...
-    #
-    topic_name: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    #
-    url: typing.Text = ...
-    #
-    is_activity: builtins.bool = ...
-    def __init__(self,
+    topic_id: builtins.int
+    """"""
+    topic_name: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    url: builtins.str
+    """"""
+    is_activity: builtins.bool
+    """"""
+    def __init__(
+        self,
         *,
-        topic_id : builtins.int = ...,
-        topic_name : typing.Text = ...,
-        desc : typing.Text = ...,
-        url : typing.Text = ...,
-        is_activity : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"is_activity",b"is_activity",u"topic_id",b"topic_id",u"topic_name",b"topic_name",u"url",b"url"]) -> None: ...
+        topic_id: builtins.int = ...,
+        topic_name: builtins.str = ...,
+        desc: builtins.str = ...,
+        url: builtins.str = ...,
+        is_activity: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "is_activity", b"is_activity", "topic_id", b"topic_id", "topic_name", b"topic_name", "url", b"url"]) -> None: ...
+
 global___SearchTopicItem = SearchTopicItem
 
-#
+@typing_extensions.final
 class SetDecisionReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     RESULT_FIELD_NUMBER: builtins.int
-    #
-    result: builtins.int = ...
-    def __init__(self,
+    result: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        result : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"result",b"result"]) -> None: ...
+        result: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["result", b"result"]) -> None: ...
+
 global___SetDecisionReq = SetDecisionReq
 
-#
+@typing_extensions.final
 class SetRecentCampusReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"campus_name",b"campus_name"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "campus_name", b"campus_name"]) -> None: ...
+
 global___SetRecentCampusReq = SetRecentCampusReq
 
-# 分享渠道组件
+@typing_extensions.final
 class ShareChannel(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """分享渠道组件"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     NAME_FIELD_NUMBER: builtins.int
     IMAGE_FIELD_NUMBER: builtins.int
     CHANNEL_FIELD_NUMBER: builtins.int
     RESERVE_FIELD_NUMBER: builtins.int
-    # 分享名称
-    name: typing.Text = ...
-    # 分享按钮图片
-    image: typing.Text = ...
-    # 分享渠道
-    channel: typing.Text = ...
-    # 预约卡分享图信息，仅分享有预约信息的动态时存在
+    name: builtins.str
+    """分享名称"""
+    image: builtins.str
+    """分享按钮图片"""
+    channel: builtins.str
+    """分享渠道"""
     @property
-    def reserve(self) -> global___ShareReserve: ...
-    def __init__(self,
+    def reserve(self) -> global___ShareReserve:
+        """预约卡分享图信息，仅分享有预约信息的动态时存在"""
+    def __init__(
+        self,
         *,
-        name : typing.Text = ...,
-        image : typing.Text = ...,
-        channel : typing.Text = ...,
-        reserve : typing.Optional[global___ShareReserve] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"reserve",b"reserve"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"channel",b"channel",u"image",b"image",u"name",b"name",u"reserve",b"reserve"]) -> None: ...
+        name: builtins.str = ...,
+        image: builtins.str = ...,
+        channel: builtins.str = ...,
+        reserve: global___ShareReserve | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["reserve", b"reserve"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["channel", b"channel", "image", b"image", "name", b"name", "reserve", b"reserve"]) -> None: ...
+
 global___ShareChannel = ShareChannel
 
-# 预约卡分享图信息
+@typing_extensions.final
 class ShareReserve(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """预约卡分享图信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     QR_CODE_ICON_FIELD_NUMBER: builtins.int
     QR_CODE_TEXT_FIELD_NUMBER: builtins.int
     QR_CODE_URL_FIELD_NUMBER: builtins.int
     USER_INFO_FIELD_NUMBER: builtins.int
-    # 展示标题
-    title: typing.Text = ...
-    # 描述(时间+类型)
-    desc: typing.Text = ...
-    # 二维码附带icon
-    qr_code_icon: typing.Text = ...
-    # 二维码附带文本
-    qr_code_text: typing.Text = ...
-    # 二维码url
-    qr_code_url: typing.Text = ...
-    #
+    title: builtins.str
+    """展示标题"""
+    desc: builtins.str
+    """描述(时间+类型)"""
+    qr_code_icon: builtins.str
+    """二维码附带icon"""
+    qr_code_text: builtins.str
+    """二维码附带文本"""
+    qr_code_url: builtins.str
+    """二维码url"""
     @property
-    def user_info(self) -> global___AdditionUserInfo: ...
-    def __init__(self,
+    def user_info(self) -> global___AdditionUserInfo:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        qr_code_icon : typing.Text = ...,
-        qr_code_text : typing.Text = ...,
-        qr_code_url : typing.Text = ...,
-        user_info : typing.Optional[global___AdditionUserInfo] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"user_info",b"user_info"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"qr_code_icon",b"qr_code_icon",u"qr_code_text",b"qr_code_text",u"qr_code_url",b"qr_code_url",u"title",b"title",u"user_info",b"user_info"]) -> None: ...
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+        qr_code_icon: builtins.str = ...,
+        qr_code_text: builtins.str = ...,
+        qr_code_url: builtins.str = ...,
+        user_info: global___AdditionUserInfo | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["user_info", b"user_info"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "qr_code_icon", b"qr_code_icon", "qr_code_text", b"qr_code_text", "qr_code_url", b"qr_code_url", "title", b"title", "user_info", b"user_info"]) -> None: ...
+
 global___ShareReserve = ShareReserve
 
-# 排序类型
+@typing_extensions.final
 class SortType(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """排序类型"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     SORT_TYPE_FIELD_NUMBER: builtins.int
     SORT_TYPE_NAME_FIELD_NUMBER: builtins.int
-    # 排序策略
-    # 1:推荐排序 2:最常访问 3:最近关注
-    sort_type: builtins.int = ...
-    # 排序策略名称
-    sort_type_name: typing.Text = ...
-    def __init__(self,
+    sort_type: builtins.int
+    """排序策略
+    1:推荐排序 2:最常访问 3:最近关注
+    """
+    sort_type_name: builtins.str
+    """排序策略名称"""
+    def __init__(
+        self,
         *,
-        sort_type : builtins.int = ...,
-        sort_type_name : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"sort_type",b"sort_type",u"sort_type_name",b"sort_type_name"]) -> None: ...
+        sort_type: builtins.int = ...,
+        sort_type_name: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["sort_type", b"sort_type", "sort_type_name", b"sort_type_name"]) -> None: ...
+
 global___SortType = SortType
 
-#
+@typing_extensions.final
 class StoryArchive(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     COVER_FIELD_NUMBER: builtins.int
     AID_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     DIMENSION_FIELD_NUMBER: builtins.int
-    #
-    cover: typing.Text = ...
-    #
-    aid: builtins.int = ...
-    #
-    uri: typing.Text = ...
-    #
+    cover: builtins.str
+    """"""
+    aid: builtins.int
+    """"""
+    uri: builtins.str
+    """"""
     @property
-    def dimension(self) -> global___Dimension: ...
-    def __init__(self,
+    def dimension(self) -> global___Dimension:
+        """"""
+    def __init__(
+        self,
         *,
-        cover : typing.Text = ...,
-        aid : builtins.int = ...,
-        uri : typing.Text = ...,
-        dimension : typing.Optional[global___Dimension] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"dimension",b"dimension"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"aid",b"aid",u"cover",b"cover",u"dimension",b"dimension",u"uri",b"uri"]) -> None: ...
+        cover: builtins.str = ...,
+        aid: builtins.int = ...,
+        uri: builtins.str = ...,
+        dimension: global___Dimension | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["dimension", b"dimension"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["aid", b"aid", "cover", b"cover", "dimension", b"dimension", "uri", b"uri"]) -> None: ...
+
 global___StoryArchive = StoryArchive
 
-#
+@typing_extensions.final
 class StoryItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     AUTHOR_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
     STORY_ARCHIVE_FIELD_NUMBER: builtins.int
-    #
     @property
-    def author(self) -> global___UserInfo: ...
-    #
-    desc: typing.Text = ...
-    #
-    status: builtins.int = ...
-    #
-    type: builtins.int = ...
-    #
+    def author(self) -> global___UserInfo:
+        """"""
+    desc: builtins.str
+    """"""
+    status: builtins.int
+    """"""
+    type: builtins.int
+    """"""
     @property
-    def story_archive(self) -> global___StoryArchive: ...
-    def __init__(self,
+    def story_archive(self) -> global___StoryArchive:
+        """"""
+    def __init__(
+        self,
         *,
-        author : typing.Optional[global___UserInfo] = ...,
-        desc : typing.Text = ...,
-        status : builtins.int = ...,
-        type : builtins.int = ...,
-        story_archive : typing.Optional[global___StoryArchive] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"author",b"author",u"rcmd_item",b"rcmd_item",u"story_archive",b"story_archive"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"author",b"author",u"desc",b"desc",u"rcmd_item",b"rcmd_item",u"status",b"status",u"story_archive",b"story_archive",u"type",b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"rcmd_item",b"rcmd_item"]) -> typing.Optional[typing_extensions.Literal["story_archive"]]: ...
+        author: global___UserInfo | None = ...,
+        desc: builtins.str = ...,
+        status: builtins.int = ...,
+        type: builtins.int = ...,
+        story_archive: global___StoryArchive | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["author", b"author", "rcmd_item", b"rcmd_item", "story_archive", b"story_archive"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["author", b"author", "desc", b"desc", "rcmd_item", b"rcmd_item", "status", b"status", "story_archive", b"story_archive", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["rcmd_item", b"rcmd_item"]) -> typing_extensions.Literal["story_archive"] | None: ...
+
 global___StoryItem = StoryItem
 
-#
+@typing_extensions.final
 class SubscribeCampusReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     CAMPUS_NAME_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    campus_name: typing.Text = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    campus_name: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        campus_name : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"campus_name",b"campus_name"]) -> None: ...
+        campus_id: builtins.int = ...,
+        campus_name: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "campus_name", b"campus_name"]) -> None: ...
+
 global___SubscribeCampusReq = SubscribeCampusReq
 
-# 三点-关注
+@typing_extensions.final
 class ThreePointAttention(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-关注"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ATTENTION_ICON_FIELD_NUMBER: builtins.int
     ATTENTION_TEXT_FIELD_NUMBER: builtins.int
     NOT_ATTENTION_ICON_FIELD_NUMBER: builtins.int
     NOT_ATTENTION_TEXT_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
-    # attention icon
-    attention_icon: typing.Text = ...
-    # 关注时显示的文案
-    attention_text: typing.Text = ...
-    # not attention icon
-    not_attention_icon: typing.Text = ...
-    # 未关注时显示的文案
-    not_attention_text: typing.Text = ...
-    # 当前关注状态
-    status: global___ThreePointAttentionStatus.V = ...
-    def __init__(self,
+    attention_icon: builtins.str
+    """attention icon"""
+    attention_text: builtins.str
+    """关注时显示的文案"""
+    not_attention_icon: builtins.str
+    """not attention icon"""
+    not_attention_text: builtins.str
+    """未关注时显示的文案"""
+    status: global___ThreePointAttentionStatus.ValueType
+    """当前关注状态"""
+    def __init__(
+        self,
         *,
-        attention_icon : typing.Text = ...,
-        attention_text : typing.Text = ...,
-        not_attention_icon : typing.Text = ...,
-        not_attention_text : typing.Text = ...,
-        status : global___ThreePointAttentionStatus.V = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"attention_icon",b"attention_icon",u"attention_text",b"attention_text",u"not_attention_icon",b"not_attention_icon",u"not_attention_text",b"not_attention_text",u"status",b"status"]) -> None: ...
+        attention_icon: builtins.str = ...,
+        attention_text: builtins.str = ...,
+        not_attention_icon: builtins.str = ...,
+        not_attention_text: builtins.str = ...,
+        status: global___ThreePointAttentionStatus.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["attention_icon", b"attention_icon", "attention_text", b"attention_text", "not_attention_icon", b"not_attention_icon", "not_attention_text", b"not_attention_text", "status", b"status"]) -> None: ...
+
 global___ThreePointAttention = ThreePointAttention
 
-# 三点-自动播放 旧版不维护
+@typing_extensions.final
 class ThreePointAutoPlay(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-自动播放 旧版不维护"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     OPEN_ICON_FIELD_NUMBER: builtins.int
     OPEN_TEXT_FIELD_NUMBER: builtins.int
     CLOSE_ICON_FIELD_NUMBER: builtins.int
@@ -8656,227 +9981,267 @@ class ThreePointAutoPlay(google.protobuf.message.Message):
     ONLY_TEXT_FIELD_NUMBER: builtins.int
     OPEN_ICON_V2_FIELD_NUMBER: builtins.int
     CLOSE_ICON_V2_FIELD_NUMBER: builtins.int
-    # open icon
-    open_icon: typing.Text = ...
-    # 开启时显示文案
-    open_text: typing.Text = ...
-    # close icon
-    close_icon: typing.Text = ...
-    # 关闭时显示文案
-    close_text: typing.Text = ...
-    # 开启时显示文案v2
-    open_text_v2: typing.Text = ...
-    # 关闭时显示文案v2
-    close_text_v2: typing.Text = ...
-    # 仅wifi/免流 icon
-    only_icon: typing.Text = ...
-    # 仅wifi/免流 文案
-    only_text: typing.Text = ...
-    # open icon v2
-    open_icon_v2: typing.Text = ...
-    # close icon v2
-    close_icon_v2: typing.Text = ...
-    def __init__(self,
+    open_icon: builtins.str
+    """open icon"""
+    open_text: builtins.str
+    """开启时显示文案"""
+    close_icon: builtins.str
+    """close icon"""
+    close_text: builtins.str
+    """关闭时显示文案"""
+    open_text_v2: builtins.str
+    """开启时显示文案v2"""
+    close_text_v2: builtins.str
+    """关闭时显示文案v2"""
+    only_icon: builtins.str
+    """仅wifi/免流 icon"""
+    only_text: builtins.str
+    """仅wifi/免流 文案"""
+    open_icon_v2: builtins.str
+    """open icon v2"""
+    close_icon_v2: builtins.str
+    """close icon v2"""
+    def __init__(
+        self,
         *,
-        open_icon : typing.Text = ...,
-        open_text : typing.Text = ...,
-        close_icon : typing.Text = ...,
-        close_text : typing.Text = ...,
-        open_text_v2 : typing.Text = ...,
-        close_text_v2 : typing.Text = ...,
-        only_icon : typing.Text = ...,
-        only_text : typing.Text = ...,
-        open_icon_v2 : typing.Text = ...,
-        close_icon_v2 : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"close_icon",b"close_icon",u"close_icon_v2",b"close_icon_v2",u"close_text",b"close_text",u"close_text_v2",b"close_text_v2",u"only_icon",b"only_icon",u"only_text",b"only_text",u"open_icon",b"open_icon",u"open_icon_v2",b"open_icon_v2",u"open_text",b"open_text",u"open_text_v2",b"open_text_v2"]) -> None: ...
+        open_icon: builtins.str = ...,
+        open_text: builtins.str = ...,
+        close_icon: builtins.str = ...,
+        close_text: builtins.str = ...,
+        open_text_v2: builtins.str = ...,
+        close_text_v2: builtins.str = ...,
+        only_icon: builtins.str = ...,
+        only_text: builtins.str = ...,
+        open_icon_v2: builtins.str = ...,
+        close_icon_v2: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["close_icon", b"close_icon", "close_icon_v2", b"close_icon_v2", "close_text", b"close_text", "close_text_v2", b"close_text_v2", "only_icon", b"only_icon", "only_text", b"only_text", "open_icon", b"open_icon", "open_icon_v2", b"open_icon_v2", "open_text", b"open_text", "open_text_v2", b"open_text_v2"]) -> None: ...
+
 global___ThreePointAutoPlay = ThreePointAutoPlay
 
-# 三点-评论
+@typing_extensions.final
 class ThreePointComment(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-评论"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UP_SELECTION_FIELD_NUMBER: builtins.int
     UP_CLOSE_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
-    # 精选评论区功能
     @property
-    def up_selection(self) -> global___CommentDetail: ...
-    # up关闭评论区功能
+    def up_selection(self) -> global___CommentDetail:
+        """精选评论区功能"""
     @property
-    def up_close(self) -> global___CommentDetail: ...
-    # icon
-    icon: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    def __init__(self,
+    def up_close(self) -> global___CommentDetail:
+        """up关闭评论区功能"""
+    icon: builtins.str
+    """icon"""
+    title: builtins.str
+    """标题"""
+    def __init__(
+        self,
         *,
-        up_selection : typing.Optional[global___CommentDetail] = ...,
-        up_close : typing.Optional[global___CommentDetail] = ...,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"up_close",b"up_close",u"up_selection",b"up_selection"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"title",b"title",u"up_close",b"up_close",u"up_selection",b"up_selection"]) -> None: ...
+        up_selection: global___CommentDetail | None = ...,
+        up_close: global___CommentDetail | None = ...,
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["up_close", b"up_close", "up_selection", b"up_selection"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "title", b"title", "up_close", b"up_close", "up_selection", b"up_selection"]) -> None: ...
+
 global___ThreePointComment = ThreePointComment
 
-# 三点-默认结构(使用此背景、举报、删除)
+@typing_extensions.final
 class ThreePointDefault(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-默认结构(使用此背景、举报、删除)"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     ID_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
-    # icon
-    icon: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 跳转链接
-    uri: typing.Text = ...
-    # id
-    id: typing.Text = ...
-    #
+    icon: builtins.str
+    """icon"""
+    title: builtins.str
+    """标题"""
+    uri: builtins.str
+    """跳转链接"""
+    id: builtins.str
+    """id"""
     @property
-    def toast(self) -> global___ThreePointDefaultToast: ...
-    def __init__(self,
+    def toast(self) -> global___ThreePointDefaultToast:
+        """"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        id : typing.Text = ...,
-        toast : typing.Optional[global___ThreePointDefaultToast] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"toast",b"toast"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"id",b"id",u"title",b"title",u"toast",b"toast",u"uri",b"uri"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+        id: builtins.str = ...,
+        toast: global___ThreePointDefaultToast | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["toast", b"toast"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "id", b"id", "title", b"title", "toast", b"toast", "uri", b"uri"]) -> None: ...
+
 global___ThreePointDefault = ThreePointDefault
 
-#
+@typing_extensions.final
 class ThreePointDefaultToast(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        desc : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        desc: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "title", b"title"]) -> None: ...
+
 global___ThreePointDefaultToast = ThreePointDefaultToast
 
-# 三点-不感兴趣
+@typing_extensions.final
 class ThreePointDislike(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-不感兴趣"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
-    # icon
-    icon: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    def __init__(self,
+    icon: builtins.str
+    """icon"""
+    title: builtins.str
+    """标题"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"title",b"title"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "title", b"title"]) -> None: ...
+
 global___ThreePointDislike = ThreePointDislike
 
-# 三点-收藏
+@typing_extensions.final
 class ThreePointFavorite(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-收藏"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     ID_FIELD_NUMBER: builtins.int
     IS_FAVOURITE_FIELD_NUMBER: builtins.int
     CANCEL_ICON_FIELD_NUMBER: builtins.int
     CANCEL_TITLE_FIELD_NUMBER: builtins.int
-    # icon
-    icon: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 物料ID
-    id: builtins.int = ...
-    # 是否订阅
-    is_favourite: builtins.bool = ...
-    # 取消收藏图标
-    cancel_icon: typing.Text = ...
-    # 取消收藏文案
-    cancel_title: typing.Text = ...
-    def __init__(self,
+    icon: builtins.str
+    """icon"""
+    title: builtins.str
+    """标题"""
+    id: builtins.int
+    """物料ID"""
+    is_favourite: builtins.bool
+    """是否订阅"""
+    cancel_icon: builtins.str
+    """取消收藏图标"""
+    cancel_title: builtins.str
+    """取消收藏文案"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        id : builtins.int = ...,
-        is_favourite : builtins.bool = ...,
-        cancel_icon : typing.Text = ...,
-        cancel_title : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cancel_icon",b"cancel_icon",u"cancel_title",b"cancel_title",u"icon",b"icon",u"id",b"id",u"is_favourite",b"is_favourite",u"title",b"title"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        id: builtins.int = ...,
+        is_favourite: builtins.bool = ...,
+        cancel_icon: builtins.str = ...,
+        cancel_title: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cancel_icon", b"cancel_icon", "cancel_title", b"cancel_title", "icon", b"icon", "id", b"id", "is_favourite", b"is_favourite", "title", b"title"]) -> None: ...
+
 global___ThreePointFavorite = ThreePointFavorite
 
-#
+@typing_extensions.final
 class ThreePointHide(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     INTERACTIVE_FIELD_NUMBER: builtins.int
     BLOOK_FID_FIELD_NUMBER: builtins.int
     BLOOK_TYPE_FIELD_NUMBER: builtins.int
-    #
-    icon: typing.Text = ...
-    #
-    title: typing.Text = ...
-    #
+    icon: builtins.str
+    """"""
+    title: builtins.str
+    """"""
     @property
-    def interactive(self) -> global___ThreePointHideInteractive: ...
-    #
-    blook_fid: builtins.int = ...
-    #
-    blook_type: typing.Text = ...
-    def __init__(self,
+    def interactive(self) -> global___ThreePointHideInteractive:
+        """"""
+    blook_fid: builtins.int
+    """"""
+    blook_type: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        interactive : typing.Optional[global___ThreePointHideInteractive] = ...,
-        blook_fid : builtins.int = ...,
-        blook_type : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"interactive",b"interactive"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"blook_fid",b"blook_fid",u"blook_type",b"blook_type",u"icon",b"icon",u"interactive",b"interactive",u"title",b"title"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        interactive: global___ThreePointHideInteractive | None = ...,
+        blook_fid: builtins.int = ...,
+        blook_type: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["interactive", b"interactive"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["blook_fid", b"blook_fid", "blook_type", b"blook_type", "icon", b"icon", "interactive", b"interactive", "title", b"title"]) -> None: ...
+
 global___ThreePointHide = ThreePointHide
 
-#
+@typing_extensions.final
 class ThreePointHideInteractive(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     CONFIRM_FIELD_NUMBER: builtins.int
     CANCEL_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
-    confirm: typing.Text = ...
-    #
-    cancel: typing.Text = ...
-    #
-    toast: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """"""
+    confirm: builtins.str
+    """"""
+    cancel: builtins.str
+    """"""
+    toast: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        confirm : typing.Text = ...,
-        cancel : typing.Text = ...,
-        toast : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"cancel",b"cancel",u"confirm",b"confirm",u"title",b"title",u"toast",b"toast"]) -> None: ...
+        title: builtins.str = ...,
+        confirm: builtins.str = ...,
+        cancel: builtins.str = ...,
+        toast: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["cancel", b"cancel", "confirm", b"confirm", "title", b"title", "toast", b"toast"]) -> None: ...
+
 global___ThreePointHideInteractive = ThreePointHideInteractive
 
-# 三点Item
+@typing_extensions.final
 class ThreePointItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点Item"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     DEFAULT_FIELD_NUMBER: builtins.int
     AUTO_PLAYER_FIELD_NUMBER: builtins.int
@@ -8889,134 +10254,154 @@ class ThreePointItem(google.protobuf.message.Message):
     COMMENT_FIELD_NUMBER: builtins.int
     HIDE_FIELD_NUMBER: builtins.int
     TOPIC_IRRELEVANT_FIELD_NUMBER: builtins.int
-    #类型
-    type: global___ThreePointType.V = ...
-    # 默认结构
+    type: global___ThreePointType.ValueType
+    """类型"""
     @property
-    def default(self) -> global___ThreePointDefault: ...
-    # 自动播放
+    def default(self) -> global___ThreePointDefault:
+        """默认结构"""
     @property
-    def auto_player(self) -> global___ThreePointAutoPlay: ...
-    # 分享
+    def auto_player(self) -> global___ThreePointAutoPlay:
+        """自动播放"""
     @property
-    def share(self) -> global___ThreePointShare: ...
-    # 关注
+    def share(self) -> global___ThreePointShare:
+        """分享"""
     @property
-    def attention(self) -> global___ThreePointAttention: ...
-    # 稍后在看
+    def attention(self) -> global___ThreePointAttention:
+        """关注"""
     @property
-    def wait(self) -> global___ThreePointWait: ...
-    # 不感兴趣
+    def wait(self) -> global___ThreePointWait:
+        """稍后在看"""
     @property
-    def dislike(self) -> global___ThreePointDislike: ...
-    # 收藏
+    def dislike(self) -> global___ThreePointDislike:
+        """不感兴趣"""
     @property
-    def favorite(self) -> global___ThreePointFavorite: ...
-    # 置顶
+    def favorite(self) -> global___ThreePointFavorite:
+        """收藏"""
     @property
-    def top(self) -> global___ThreePointTop: ...
-    # 评论
+    def top(self) -> global___ThreePointTop:
+        """置顶"""
     @property
-    def comment(self) -> global___ThreePointComment: ...
-    #
+    def comment(self) -> global___ThreePointComment:
+        """评论"""
     @property
-    def hide(self) -> global___ThreePointHide: ...
-    #
+    def hide(self) -> global___ThreePointHide:
+        """"""
     @property
-    def topic_irrelevant(self) -> global___ThreePointTopicIrrelevant: ...
-    def __init__(self,
+    def topic_irrelevant(self) -> global___ThreePointTopicIrrelevant:
+        """"""
+    def __init__(
+        self,
         *,
-        type : global___ThreePointType.V = ...,
-        default : typing.Optional[global___ThreePointDefault] = ...,
-        auto_player : typing.Optional[global___ThreePointAutoPlay] = ...,
-        share : typing.Optional[global___ThreePointShare] = ...,
-        attention : typing.Optional[global___ThreePointAttention] = ...,
-        wait : typing.Optional[global___ThreePointWait] = ...,
-        dislike : typing.Optional[global___ThreePointDislike] = ...,
-        favorite : typing.Optional[global___ThreePointFavorite] = ...,
-        top : typing.Optional[global___ThreePointTop] = ...,
-        comment : typing.Optional[global___ThreePointComment] = ...,
-        hide : typing.Optional[global___ThreePointHide] = ...,
-        topic_irrelevant : typing.Optional[global___ThreePointTopicIrrelevant] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"attention",b"attention",u"auto_player",b"auto_player",u"comment",b"comment",u"default",b"default",u"dislike",b"dislike",u"favorite",b"favorite",u"hide",b"hide",u"item",b"item",u"share",b"share",u"top",b"top",u"topic_irrelevant",b"topic_irrelevant",u"wait",b"wait"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"attention",b"attention",u"auto_player",b"auto_player",u"comment",b"comment",u"default",b"default",u"dislike",b"dislike",u"favorite",b"favorite",u"hide",b"hide",u"item",b"item",u"share",b"share",u"top",b"top",u"topic_irrelevant",b"topic_irrelevant",u"type",b"type",u"wait",b"wait"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"item",b"item"]) -> typing.Optional[typing_extensions.Literal["default","auto_player","share","attention","wait","dislike","favorite","top","comment","hide","topic_irrelevant"]]: ...
+        type: global___ThreePointType.ValueType = ...,
+        default: global___ThreePointDefault | None = ...,
+        auto_player: global___ThreePointAutoPlay | None = ...,
+        share: global___ThreePointShare | None = ...,
+        attention: global___ThreePointAttention | None = ...,
+        wait: global___ThreePointWait | None = ...,
+        dislike: global___ThreePointDislike | None = ...,
+        favorite: global___ThreePointFavorite | None = ...,
+        top: global___ThreePointTop | None = ...,
+        comment: global___ThreePointComment | None = ...,
+        hide: global___ThreePointHide | None = ...,
+        topic_irrelevant: global___ThreePointTopicIrrelevant | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["attention", b"attention", "auto_player", b"auto_player", "comment", b"comment", "default", b"default", "dislike", b"dislike", "favorite", b"favorite", "hide", b"hide", "item", b"item", "share", b"share", "top", b"top", "topic_irrelevant", b"topic_irrelevant", "wait", b"wait"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["attention", b"attention", "auto_player", b"auto_player", "comment", b"comment", "default", b"default", "dislike", b"dislike", "favorite", b"favorite", "hide", b"hide", "item", b"item", "share", b"share", "top", b"top", "topic_irrelevant", b"topic_irrelevant", "type", b"type", "wait", b"wait"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["item", b"item"]) -> typing_extensions.Literal["default", "auto_player", "share", "attention", "wait", "dislike", "favorite", "top", "comment", "hide", "topic_irrelevant"] | None: ...
+
 global___ThreePointItem = ThreePointItem
 
-# 三点-分享
+@typing_extensions.final
 class ThreePointShare(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-分享"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     CHANNEL_FIELD_NUMBER: builtins.int
     CHANNEL_NAME_FIELD_NUMBER: builtins.int
     RESERVE_FIELD_NUMBER: builtins.int
-    # icon
-    icon: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 分享渠道
+    icon: builtins.str
+    """icon"""
+    title: builtins.str
+    """标题"""
     @property
-    def channel(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointShareChannel]: ...
-    # 分享渠道名
-    channel_name: typing.Text = ...
-    # 预约卡分享图信息，仅分享有预约信息的动态时存在
+    def channel(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___ThreePointShareChannel]:
+        """分享渠道"""
+    channel_name: builtins.str
+    """分享渠道名"""
     @property
-    def reserve(self) -> global___ShareReserve: ...
-    def __init__(self,
+    def reserve(self) -> global___ShareReserve:
+        """预约卡分享图信息，仅分享有预约信息的动态时存在"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        channel : typing.Optional[typing.Iterable[global___ThreePointShareChannel]] = ...,
-        channel_name : typing.Text = ...,
-        reserve : typing.Optional[global___ShareReserve] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"reserve",b"reserve"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"channel",b"channel",u"channel_name",b"channel_name",u"icon",b"icon",u"reserve",b"reserve",u"title",b"title"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        channel: collections.abc.Iterable[global___ThreePointShareChannel] | None = ...,
+        channel_name: builtins.str = ...,
+        reserve: global___ShareReserve | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["reserve", b"reserve"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["channel", b"channel", "channel_name", b"channel_name", "icon", b"icon", "reserve", b"reserve", "title", b"title"]) -> None: ...
+
 global___ThreePointShare = ThreePointShare
 
-# 三点-分享渠道
+@typing_extensions.final
 class ThreePointShareChannel(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-分享渠道"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
-    # icon
-    icon: typing.Text = ...
-    # 名称
-    title: typing.Text = ...
-    def __init__(self,
+    icon: builtins.str
+    """icon"""
+    title: builtins.str
+    """名称"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"title",b"title"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "title", b"title"]) -> None: ...
+
 global___ThreePointShareChannel = ThreePointShareChannel
 
-# 三点-置顶
+@typing_extensions.final
 class ThreePointTop(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-置顶"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     TYPE_FIELD_NUMBER: builtins.int
-    # icon
-    icon: typing.Text = ...
-    # 标题
-    title: typing.Text = ...
-    # 状态
-    type: global___TopType.V = ...
-    def __init__(self,
+    icon: builtins.str
+    """icon"""
+    title: builtins.str
+    """标题"""
+    type: global___TopType.ValueType
+    """状态"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        type : global___TopType.V = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"title",b"title",u"type",b"type"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        type: global___TopType.ValueType = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "title", b"title", "type", b"type"]) -> None: ...
+
 global___ThreePointTop = ThreePointTop
 
-#
+@typing_extensions.final
 class ThreePointTopicIrrelevant(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     TOAST_FIELD_NUMBER: builtins.int
@@ -9024,174 +10409,204 @@ class ThreePointTopicIrrelevant(google.protobuf.message.Message):
     RES_ID_FIELD_NUMBER: builtins.int
     RES_TYPE_FIELD_NUMBER: builtins.int
     REASON_FIELD_NUMBER: builtins.int
-    #
-    icon: typing.Text = ...
-    #
-    title: typing.Text = ...
-    #
-    toast: typing.Text = ...
-    #
-    topic_id: builtins.int = ...
-    #
-    res_id: builtins.int = ...
-    #
-    res_type: builtins.int = ...
-    #
-    reason: typing.Text = ...
-    def __init__(self,
+    icon: builtins.str
+    """"""
+    title: builtins.str
+    """"""
+    toast: builtins.str
+    """"""
+    topic_id: builtins.int
+    """"""
+    res_id: builtins.int
+    """"""
+    res_type: builtins.int
+    """"""
+    reason: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        toast : typing.Text = ...,
-        topic_id : builtins.int = ...,
-        res_id : builtins.int = ...,
-        res_type : builtins.int = ...,
-        reason : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"reason",b"reason",u"res_id",b"res_id",u"res_type",b"res_type",u"title",b"title",u"toast",b"toast",u"topic_id",b"topic_id"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        toast: builtins.str = ...,
+        topic_id: builtins.int = ...,
+        res_id: builtins.int = ...,
+        res_type: builtins.int = ...,
+        reason: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "reason", b"reason", "res_id", b"res_id", "res_type", b"res_type", "title", b"title", "toast", b"toast", "topic_id", b"topic_id"]) -> None: ...
+
 global___ThreePointTopicIrrelevant = ThreePointTopicIrrelevant
 
-# 三点-稍后在看
+@typing_extensions.final
 class ThreePointWait(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """三点-稍后在看"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ADDITION_ICON_FIELD_NUMBER: builtins.int
     ADDITION_TEXT_FIELD_NUMBER: builtins.int
     NO_ADDITION_ICON_FIELD_NUMBER: builtins.int
     NO_ADDITION_TEXT_FIELD_NUMBER: builtins.int
     ID_FIELD_NUMBER: builtins.int
-    # addition icon
-    addition_icon: typing.Text = ...
-    # 已添加时的文案
-    addition_text: typing.Text = ...
-    # no addition icon
-    no_addition_icon: typing.Text = ...
-    # 未添加时的文案
-    no_addition_text: typing.Text = ...
-    # avid
-    id: builtins.int = ...
-    def __init__(self,
+    addition_icon: builtins.str
+    """addition icon"""
+    addition_text: builtins.str
+    """已添加时的文案"""
+    no_addition_icon: builtins.str
+    """no addition icon"""
+    no_addition_text: builtins.str
+    """未添加时的文案"""
+    id: builtins.int
+    """avid"""
+    def __init__(
+        self,
         *,
-        addition_icon : typing.Text = ...,
-        addition_text : typing.Text = ...,
-        no_addition_icon : typing.Text = ...,
-        no_addition_text : typing.Text = ...,
-        id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"addition_icon",b"addition_icon",u"addition_text",b"addition_text",u"id",b"id",u"no_addition_icon",b"no_addition_icon",u"no_addition_text",b"no_addition_text"]) -> None: ...
+        addition_icon: builtins.str = ...,
+        addition_text: builtins.str = ...,
+        no_addition_icon: builtins.str = ...,
+        no_addition_text: builtins.str = ...,
+        id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["addition_icon", b"addition_icon", "addition_text", b"addition_text", "id", b"id", "no_addition_icon", b"no_addition_icon", "no_addition_text", b"no_addition_text"]) -> None: ...
+
 global___ThreePointWait = ThreePointWait
 
-# 顶部预约卡
+@typing_extensions.final
 class TopAdditionUP(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """顶部预约卡"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     UP_FIELD_NUMBER: builtins.int
     HAS_FOLD_FIELD_NUMBER: builtins.int
-    # 预约卡
     @property
-    def up(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionUP]: ...
-    # 折叠数量，大于多少个进行折叠
-    has_fold: builtins.int = ...
-    def __init__(self,
+    def up(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___AdditionUP]:
+        """预约卡"""
+    has_fold: builtins.int
+    """折叠数量，大于多少个进行折叠"""
+    def __init__(
+        self,
         *,
-        up : typing.Optional[typing.Iterable[global___AdditionUP]] = ...,
-        has_fold : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_fold",b"has_fold",u"up",b"up"]) -> None: ...
+        up: collections.abc.Iterable[global___AdditionUP] | None = ...,
+        has_fold: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_fold", b"has_fold", "up", b"up"]) -> None: ...
+
 global___TopAdditionUP = TopAdditionUP
 
-# 话题广场操作按钮
+@typing_extensions.final
 class TopicButton(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """话题广场操作按钮"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
     JUMP_URI_FIELD_NUMBER: builtins.int
     RED_DOT_FIELD_NUMBER: builtins.int
-    # 按钮图标
-    icon: typing.Text = ...
-    # 按钮文案
-    title: typing.Text = ...
-    # 跳转
-    jump_uri: typing.Text = ...
-    #
-    red_dot: builtins.bool = ...
-    def __init__(self,
+    icon: builtins.str
+    """按钮图标"""
+    title: builtins.str
+    """按钮文案"""
+    jump_uri: builtins.str
+    """跳转"""
+    red_dot: builtins.bool
+    """"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        title : typing.Text = ...,
-        jump_uri : typing.Text = ...,
-        red_dot : builtins.bool = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"jump_uri",b"jump_uri",u"red_dot",b"red_dot",u"title",b"title"]) -> None: ...
+        icon: builtins.str = ...,
+        title: builtins.str = ...,
+        jump_uri: builtins.str = ...,
+        red_dot: builtins.bool = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "jump_uri", b"jump_uri", "red_dot", b"red_dot", "title", b"title"]) -> None: ...
+
 global___TopicButton = TopicButton
 
-#
+@typing_extensions.final
 class TopicItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TOPIC_ID_FIELD_NUMBER: builtins.int
     TOPIC_NAME_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
     DESC_FIELD_NUMBER: builtins.int
     DESC2_FIELD_NUMBER: builtins.int
     RCMD_DESC_FIELD_NUMBER: builtins.int
-    #
-    topic_id: builtins.int = ...
-    #
-    topic_name: typing.Text = ...
-    #
-    url: typing.Text = ...
-    #
-    desc: typing.Text = ...
-    #
-    desc2: typing.Text = ...
-    #
-    rcmd_desc: typing.Text = ...
-    def __init__(self,
+    topic_id: builtins.int
+    """"""
+    topic_name: builtins.str
+    """"""
+    url: builtins.str
+    """"""
+    desc: builtins.str
+    """"""
+    desc2: builtins.str
+    """"""
+    rcmd_desc: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        topic_id : builtins.int = ...,
-        topic_name : typing.Text = ...,
-        url : typing.Text = ...,
-        desc : typing.Text = ...,
-        desc2 : typing.Text = ...,
-        rcmd_desc : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"desc",b"desc",u"desc2",b"desc2",u"rcmd_desc",b"rcmd_desc",u"topic_id",b"topic_id",u"topic_name",b"topic_name",u"url",b"url"]) -> None: ...
+        topic_id: builtins.int = ...,
+        topic_name: builtins.str = ...,
+        url: builtins.str = ...,
+        desc: builtins.str = ...,
+        desc2: builtins.str = ...,
+        rcmd_desc: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["desc", b"desc", "desc2", b"desc2", "rcmd_desc", b"rcmd_desc", "topic_id", b"topic_id", "topic_name", b"topic_name", "url", b"url"]) -> None: ...
+
 global___TopicItem = TopicItem
 
-# 综合页-话题广场
+@typing_extensions.final
 class TopicList(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """综合页-话题广场"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     TOPIC_LIST_ITEM_FIELD_NUMBER: builtins.int
     ACT_BUTTON_FIELD_NUMBER: builtins.int
     MORE_BUTTON_FIELD_NUMBER: builtins.int
     SERVER_INFO_FIELD_NUMBER: builtins.int
-    # 模块标题
-    title: typing.Text = ...
-    # 话题列表
+    title: builtins.str
+    """模块标题"""
     @property
-    def topic_list_item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___TopicListItem]: ...
-    # 发起活动
+    def topic_list_item(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___TopicListItem]:
+        """话题列表"""
     @property
-    def act_button(self) -> global___TopicButton: ...
-    # 查看更多
+    def act_button(self) -> global___TopicButton:
+        """发起活动"""
     @property
-    def more_button(self) -> global___TopicButton: ...
-    # 透传服务端上报
-    server_info: typing.Text = ...
-    def __init__(self,
+    def more_button(self) -> global___TopicButton:
+        """查看更多"""
+    server_info: builtins.str
+    """透传服务端上报"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        topic_list_item : typing.Optional[typing.Iterable[global___TopicListItem]] = ...,
-        act_button : typing.Optional[global___TopicButton] = ...,
-        more_button : typing.Optional[global___TopicButton] = ...,
-        server_info : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"act_button",b"act_button",u"more_button",b"more_button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"act_button",b"act_button",u"more_button",b"more_button",u"server_info",b"server_info",u"title",b"title",u"topic_list_item",b"topic_list_item"]) -> None: ...
+        title: builtins.str = ...,
+        topic_list_item: collections.abc.Iterable[global___TopicListItem] | None = ...,
+        act_button: global___TopicButton | None = ...,
+        more_button: global___TopicButton | None = ...,
+        server_info: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["act_button", b"act_button", "more_button", b"more_button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["act_button", b"act_button", "more_button", b"more_button", "server_info", b"server_info", "title", b"title", "topic_list_item", b"topic_list_item"]) -> None: ...
+
 global___TopicList = TopicList
 
-# 综合页-话题广场-话题
+@typing_extensions.final
 class TopicListItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """综合页-话题广场-话题"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ICON_FIELD_NUMBER: builtins.int
     ICON_TITLE_FIELD_NUMBER: builtins.int
     TOPIC_ID_FIELD_NUMBER: builtins.int
@@ -9203,87 +10618,102 @@ class TopicListItem(google.protobuf.message.Message):
     UP_MID_FIELD_NUMBER: builtins.int
     TAIL_ICON_URL_FIELD_NUMBER: builtins.int
     EXTENSION_FIELD_NUMBER: builtins.int
-    # 前置图标
-    icon: typing.Text = ...
-    # 前置图标文案
-    icon_title: typing.Text = ...
-    # 话题id
-    topic_id: builtins.int = ...
-    # 话题名
-    topic_name: typing.Text = ...
-    # 跳转链接
-    url: typing.Text = ...
-    # 卡片位次
-    pos: builtins.int = ...
-    # 透传服务端上报
-    server_info: typing.Text = ...
-    #
-    head_icon_url: typing.Text = ...
-    #
-    up_mid: builtins.int = ...
-    #
-    tail_icon_url: typing.Text = ...
-    #
-    extension: typing.Text = ...
-    def __init__(self,
+    icon: builtins.str
+    """前置图标"""
+    icon_title: builtins.str
+    """前置图标文案"""
+    topic_id: builtins.int
+    """话题id"""
+    topic_name: builtins.str
+    """话题名"""
+    url: builtins.str
+    """跳转链接"""
+    pos: builtins.int
+    """卡片位次"""
+    server_info: builtins.str
+    """透传服务端上报"""
+    head_icon_url: builtins.str
+    """"""
+    up_mid: builtins.int
+    """"""
+    tail_icon_url: builtins.str
+    """"""
+    extension: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        icon : typing.Text = ...,
-        icon_title : typing.Text = ...,
-        topic_id : builtins.int = ...,
-        topic_name : typing.Text = ...,
-        url : typing.Text = ...,
-        pos : builtins.int = ...,
-        server_info : typing.Text = ...,
-        head_icon_url : typing.Text = ...,
-        up_mid : builtins.int = ...,
-        tail_icon_url : typing.Text = ...,
-        extension : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"extension",b"extension",u"head_icon_url",b"head_icon_url",u"icon",b"icon",u"icon_title",b"icon_title",u"pos",b"pos",u"server_info",b"server_info",u"tail_icon_url",b"tail_icon_url",u"topic_id",b"topic_id",u"topic_name",b"topic_name",u"up_mid",b"up_mid",u"url",b"url"]) -> None: ...
+        icon: builtins.str = ...,
+        icon_title: builtins.str = ...,
+        topic_id: builtins.int = ...,
+        topic_name: builtins.str = ...,
+        url: builtins.str = ...,
+        pos: builtins.int = ...,
+        server_info: builtins.str = ...,
+        head_icon_url: builtins.str = ...,
+        up_mid: builtins.int = ...,
+        tail_icon_url: builtins.str = ...,
+        extension: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["extension", b"extension", "head_icon_url", b"head_icon_url", "icon", b"icon", "icon_title", b"icon_title", "pos", b"pos", "server_info", b"server_info", "tail_icon_url", b"tail_icon_url", "topic_id", b"topic_id", "topic_name", b"topic_name", "up_mid", b"up_mid", "url", b"url"]) -> None: ...
+
 global___TopicListItem = TopicListItem
 
-#
+@typing_extensions.final
 class TopicListReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     ITEMS_FIELD_NUMBER: builtins.int
     HAS_MORE_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
-    #
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___TopicItem]: ...
-    #
-    has_more: builtins.bool = ...
-    #
-    offset: typing.Text = ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___TopicItem]:
+        """"""
+    has_more: builtins.bool
+    """"""
+    offset: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        items : typing.Optional[typing.Iterable[global___TopicItem]] = ...,
-        has_more : builtins.bool = ...,
-        offset : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"has_more",b"has_more",u"items",b"items",u"offset",b"offset"]) -> None: ...
+        items: collections.abc.Iterable[global___TopicItem] | None = ...,
+        has_more: builtins.bool = ...,
+        offset: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["has_more", b"has_more", "items", b"items", "offset", b"offset"]) -> None: ...
+
 global___TopicListReply = TopicListReply
 
-#
+@typing_extensions.final
 class TopicListReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
     OFFSET_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    #
-    offset: typing.Text = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    offset: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        offset : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id",u"offset",b"offset"]) -> None: ...
+        campus_id: builtins.int = ...,
+        offset: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id", "offset", b"offset"]) -> None: ...
+
 global___TopicListReq = TopicListReq
 
-#
+@typing_extensions.final
 class TopicRcmdCard(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TOPIC_ID_FIELD_NUMBER: builtins.int
     TOPIC_NAME_FIELD_NUMBER: builtins.int
     URL_FIELD_NUMBER: builtins.int
@@ -9291,112 +10721,137 @@ class TopicRcmdCard(google.protobuf.message.Message):
     DESC1_FIELD_NUMBER: builtins.int
     DESC2_FIELD_NUMBER: builtins.int
     UPDATE_DESC_FIELD_NUMBER: builtins.int
-    #
-    topic_id: builtins.int = ...
-    #
-    topic_name: typing.Text = ...
-    #
-    url: typing.Text = ...
-    #
+    topic_id: builtins.int
+    """"""
+    topic_name: builtins.str
+    """"""
+    url: builtins.str
+    """"""
     @property
-    def button(self) -> global___CampusLabel: ...
-    #
-    desc1: typing.Text = ...
-    #
-    desc2: typing.Text = ...
-    #
-    update_desc: typing.Text = ...
-    def __init__(self,
+    def button(self) -> global___CampusLabel:
+        """"""
+    desc1: builtins.str
+    """"""
+    desc2: builtins.str
+    """"""
+    update_desc: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        topic_id : builtins.int = ...,
-        topic_name : typing.Text = ...,
-        url : typing.Text = ...,
-        button : typing.Optional[global___CampusLabel] = ...,
-        desc1 : typing.Text = ...,
-        desc2 : typing.Text = ...,
-        update_desc : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"desc1",b"desc1",u"desc2",b"desc2",u"topic_id",b"topic_id",u"topic_name",b"topic_name",u"update_desc",b"update_desc",u"url",b"url"]) -> None: ...
+        topic_id: builtins.int = ...,
+        topic_name: builtins.str = ...,
+        url: builtins.str = ...,
+        button: global___CampusLabel | None = ...,
+        desc1: builtins.str = ...,
+        desc2: builtins.str = ...,
+        update_desc: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "desc1", b"desc1", "desc2", b"desc2", "topic_id", b"topic_id", "topic_name", b"topic_name", "update_desc", b"update_desc", "url", b"url"]) -> None: ...
+
 global___TopicRcmdCard = TopicRcmdCard
 
-#
+@typing_extensions.final
 class TopicSquareInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     BUTTON_FIELD_NUMBER: builtins.int
     RCMD_FIELD_NUMBER: builtins.int
-    #
-    title: typing.Text = ...
-    #
+    title: builtins.str
+    """"""
     @property
-    def button(self) -> global___CampusLabel: ...
-    #
+    def button(self) -> global___CampusLabel:
+        """"""
     @property
-    def rcmd(self) -> global___TopicRcmdCard: ...
-    def __init__(self,
+    def rcmd(self) -> global___TopicRcmdCard:
+        """"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        button : typing.Optional[global___CampusLabel] = ...,
-        rcmd : typing.Optional[global___TopicRcmdCard] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button",u"rcmd",b"rcmd"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"rcmd",b"rcmd",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        button: global___CampusLabel | None = ...,
+        rcmd: global___TopicRcmdCard | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button", "rcmd", b"rcmd"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "rcmd", b"rcmd", "title", b"title"]) -> None: ...
+
 global___TopicSquareInfo = TopicSquareInfo
 
-#
+@typing_extensions.final
 class TopicSquareReply(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     INFO_FIELD_NUMBER: builtins.int
-    #
     @property
-    def info(self) -> global___TopicSquareInfo: ...
-    def __init__(self,
+    def info(self) -> global___TopicSquareInfo:
+        """"""
+    def __init__(
+        self,
         *,
-        info : typing.Optional[global___TopicSquareInfo] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"info",b"info"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"info",b"info"]) -> None: ...
+        info: global___TopicSquareInfo | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["info", b"info"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["info", b"info"]) -> None: ...
+
 global___TopicSquareReply = TopicSquareReply
 
-#
+@typing_extensions.final
 class TopicSquareReq(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     CAMPUS_ID_FIELD_NUMBER: builtins.int
-    #
-    campus_id: builtins.int = ...
-    def __init__(self,
+    campus_id: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        campus_id : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"campus_id",b"campus_id"]) -> None: ...
+        campus_id: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["campus_id", b"campus_id"]) -> None: ...
+
 global___TopicSquareReq = TopicSquareReq
 
-# 综合页-无关注列表
+@typing_extensions.final
 class Unfollow(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """综合页-无关注列表"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     LIST_FIELD_NUMBER: builtins.int
     TRACKID_FIELD_NUMBER: builtins.int
-    # 标题展示文案
-    title: typing.Text = ...
-    # 无关注列表
+    title: builtins.str
+    """标题展示文案"""
     @property
-    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___UnfollowUserItem]: ...
-    # trackID
-    TrackId: typing.Text = ...
-    def __init__(self,
+    def list(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___UnfollowUserItem]:
+        """无关注列表"""
+    TrackId: builtins.str
+    """trackID"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        list : typing.Optional[typing.Iterable[global___UnfollowUserItem]] = ...,
-        TrackId : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"TrackId",b"TrackId",u"list",b"list",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        list: collections.abc.Iterable[global___UnfollowUserItem] | None = ...,
+        TrackId: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["TrackId", b"TrackId", "list", b"list", "title", b"title"]) -> None: ...
+
 global___Unfollow = Unfollow
 
-# 综合页-无关注列表
+@typing_extensions.final
 class UnfollowUserItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """综合页-无关注列表"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HAS_UPDATE_FIELD_NUMBER: builtins.int
     FACE_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
@@ -9409,55 +10864,60 @@ class UnfollowUserItem(google.protobuf.message.Message):
     LABEL_FIELD_NUMBER: builtins.int
     BUTTON_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # 是否有更新
-    has_update: builtins.bool = ...
-    # up主头像
-    face: typing.Text = ...
-    # up主昵称
-    name: typing.Text = ...
-    # up主uid
-    uid: builtins.int = ...
-    # 排序字段 从1开始
-    pos: builtins.int = ...
-    # 直播状态
-    live_state: global___LiveState.V = ...
-    # 认证信息
+    has_update: builtins.bool
+    """是否有更新"""
+    face: builtins.str
+    """up主头像"""
+    name: builtins.str
+    """up主昵称"""
+    uid: builtins.int
+    """up主uid"""
+    pos: builtins.int
+    """排序字段 从1开始"""
+    live_state: global___LiveState.ValueType
+    """直播状态"""
     @property
-    def official(self) -> global___OfficialVerify: ...
-    # 大会员信息
+    def official(self) -> global___OfficialVerify:
+        """认证信息"""
     @property
-    def vip(self) -> global___VipInfo: ...
-    # up介绍
-    sign: typing.Text = ...
-    # 标签信息
-    label: typing.Text = ...
-    # 按钮
+    def vip(self) -> global___VipInfo:
+        """大会员信息"""
+    sign: builtins.str
+    """up介绍"""
+    label: builtins.str
+    """标签信息"""
     @property
-    def button(self) -> global___AdditionalButton: ...
-    # 跳转地址
-    uri: typing.Text = ...
-    def __init__(self,
+    def button(self) -> global___AdditionalButton:
+        """按钮"""
+    uri: builtins.str
+    """跳转地址"""
+    def __init__(
+        self,
         *,
-        has_update : builtins.bool = ...,
-        face : typing.Text = ...,
-        name : typing.Text = ...,
-        uid : builtins.int = ...,
-        pos : builtins.int = ...,
-        live_state : global___LiveState.V = ...,
-        official : typing.Optional[global___OfficialVerify] = ...,
-        vip : typing.Optional[global___VipInfo] = ...,
-        sign : typing.Text = ...,
-        label : typing.Text = ...,
-        button : typing.Optional[global___AdditionalButton] = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button",u"official",b"official",u"vip",b"vip"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"face",b"face",u"has_update",b"has_update",u"label",b"label",u"live_state",b"live_state",u"name",b"name",u"official",b"official",u"pos",b"pos",u"sign",b"sign",u"uid",b"uid",u"uri",b"uri",u"vip",b"vip"]) -> None: ...
+        has_update: builtins.bool = ...,
+        face: builtins.str = ...,
+        name: builtins.str = ...,
+        uid: builtins.int = ...,
+        pos: builtins.int = ...,
+        live_state: global___LiveState.ValueType = ...,
+        official: global___OfficialVerify | None = ...,
+        vip: global___VipInfo | None = ...,
+        sign: builtins.str = ...,
+        label: builtins.str = ...,
+        button: global___AdditionalButton | None = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button", "official", b"official", "vip", b"vip"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "face", b"face", "has_update", b"has_update", "label", b"label", "live_state", b"live_state", "name", b"name", "official", b"official", "pos", b"pos", "sign", b"sign", "uid", b"uid", "uri", b"uri", "vip", b"vip"]) -> None: ...
+
 global___UnfollowUserItem = UnfollowUserItem
 
-# 动态顶部up列表-up主信息
+@typing_extensions.final
 class UpListItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """动态顶部up列表-up主信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     HAS_UPDATE_FIELD_NUMBER: builtins.int
     FACE_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
@@ -9471,74 +10931,84 @@ class UpListItem(google.protobuf.message.Message):
     SEPARATOR_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
     IS_RECALL_FIELD_NUMBER: builtins.int
-    # 是否有更新
-    has_update: builtins.bool = ...
-    # up主头像
-    face: typing.Text = ...
-    # up主昵称
-    name: typing.Text = ...
-    # up主uid
-    uid: builtins.int = ...
-    # 排序字段 从1开始
-    pos: builtins.int = ...
-    # 用户类型
-    user_item_type: global___UserItemType.V = ...
-    # 直播头像样式-日
+    has_update: builtins.bool
+    """是否有更新"""
+    face: builtins.str
+    """up主头像"""
+    name: builtins.str
+    """up主昵称"""
+    uid: builtins.int
+    """up主uid"""
+    pos: builtins.int
+    """排序字段 从1开始"""
+    user_item_type: global___UserItemType.ValueType
+    """用户类型"""
     @property
-    def display_style_day(self) -> global___UserItemStyle: ...
-    # 直播头像样式-夜
+    def display_style_day(self) -> global___UserItemStyle:
+        """直播头像样式-日"""
     @property
-    def display_style_night(self) -> global___UserItemStyle: ...
-    # 直播埋点
-    style_id: builtins.int = ...
-    # 直播状态
-    live_state: global___LiveState.V = ...
-    # 分割线
-    separator: builtins.bool = ...
-    # 跳转
-    uri: typing.Text = ...
-    # UP主预约上报使用
-    is_recall: builtins.bool = ...
-    def __init__(self,
+    def display_style_night(self) -> global___UserItemStyle:
+        """直播头像样式-夜"""
+    style_id: builtins.int
+    """直播埋点"""
+    live_state: global___LiveState.ValueType
+    """直播状态"""
+    separator: builtins.bool
+    """分割线"""
+    uri: builtins.str
+    """跳转"""
+    is_recall: builtins.bool
+    """UP主预约上报使用"""
+    def __init__(
+        self,
         *,
-        has_update : builtins.bool = ...,
-        face : typing.Text = ...,
-        name : typing.Text = ...,
-        uid : builtins.int = ...,
-        pos : builtins.int = ...,
-        user_item_type : global___UserItemType.V = ...,
-        display_style_day : typing.Optional[global___UserItemStyle] = ...,
-        display_style_night : typing.Optional[global___UserItemStyle] = ...,
-        style_id : builtins.int = ...,
-        live_state : global___LiveState.V = ...,
-        separator : builtins.bool = ...,
-        uri : typing.Text = ...,
-        is_recall : builtins.bool = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"display_style_day",b"display_style_day",u"display_style_night",b"display_style_night"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"display_style_day",b"display_style_day",u"display_style_night",b"display_style_night",u"face",b"face",u"has_update",b"has_update",u"is_recall",b"is_recall",u"live_state",b"live_state",u"name",b"name",u"pos",b"pos",u"separator",b"separator",u"style_id",b"style_id",u"uid",b"uid",u"uri",b"uri",u"user_item_type",b"user_item_type"]) -> None: ...
+        has_update: builtins.bool = ...,
+        face: builtins.str = ...,
+        name: builtins.str = ...,
+        uid: builtins.int = ...,
+        pos: builtins.int = ...,
+        user_item_type: global___UserItemType.ValueType = ...,
+        display_style_day: global___UserItemStyle | None = ...,
+        display_style_night: global___UserItemStyle | None = ...,
+        style_id: builtins.int = ...,
+        live_state: global___LiveState.ValueType = ...,
+        separator: builtins.bool = ...,
+        uri: builtins.str = ...,
+        is_recall: builtins.bool = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["display_style_day", b"display_style_day", "display_style_night", b"display_style_night"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["display_style_day", b"display_style_day", "display_style_night", b"display_style_night", "face", b"face", "has_update", b"has_update", "is_recall", b"is_recall", "live_state", b"live_state", "name", b"name", "pos", b"pos", "separator", b"separator", "style_id", b"style_id", "uid", b"uid", "uri", b"uri", "user_item_type", b"user_item_type"]) -> None: ...
+
 global___UpListItem = UpListItem
 
-# 最常访问-查看更多
+@typing_extensions.final
 class UpListMoreLabel(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """最常访问-查看更多"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     URI_FIELD_NUMBER: builtins.int
-    # 文案
-    title: typing.Text = ...
-    # 跳转地址
-    uri: typing.Text = ...
-    def __init__(self,
+    title: builtins.str
+    """文案"""
+    uri: builtins.str
+    """跳转地址"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        uri : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"title",b"title",u"uri",b"uri"]) -> None: ...
+        title: builtins.str = ...,
+        uri: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["title", b"title", "uri", b"uri"]) -> None: ...
+
 global___UpListMoreLabel = UpListMoreLabel
 
-# 用户信息
+@typing_extensions.final
 class UserInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """用户信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     MID_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
     FACE_FIELD_NUMBER: builtins.int
@@ -9552,114 +11022,129 @@ class UserInfo(google.protobuf.message.Message):
     SIGN_FIELD_NUMBER: builtins.int
     FACE_NFT_FIELD_NUMBER: builtins.int
     FACE_NFT_NEW_FIELD_NUMBER: builtins.int
-    # 用户mid
-    mid: builtins.int = ...
-    # 用户昵称
-    name: typing.Text = ...
-    # 用户头像
-    face: typing.Text = ...
-    # 认证信息
+    mid: builtins.int
+    """用户mid"""
+    name: builtins.str
+    """用户昵称"""
+    face: builtins.str
+    """用户头像"""
     @property
-    def official(self) -> global___OfficialVerify: ...
-    # 大会员信息
+    def official(self) -> global___OfficialVerify:
+        """认证信息"""
     @property
-    def vip(self) -> global___VipInfo: ...
-    # 直播信息
+    def vip(self) -> global___VipInfo:
+        """大会员信息"""
     @property
-    def live(self) -> global___LiveInfo: ...
-    # 空间页跳转链接
-    uri: typing.Text = ...
-    # 挂件信息
+    def live(self) -> global___LiveInfo:
+        """直播信息"""
+    uri: builtins.str
+    """空间页跳转链接"""
     @property
-    def pendant(self) -> global___UserPendant: ...
-    # 认证名牌
+    def pendant(self) -> global___UserPendant:
+        """挂件信息"""
     @property
-    def nameplate(self) -> global___Nameplate: ...
-    # 用户等级
-    level: builtins.int = ...
-    # 用户简介
-    sign: typing.Text = ...
-    #
-    face_nft: builtins.int = ...
-    #
-    face_nft_new: builtins.int = ...
-    def __init__(self,
+    def nameplate(self) -> global___Nameplate:
+        """认证名牌"""
+    level: builtins.int
+    """用户等级"""
+    sign: builtins.str
+    """用户简介"""
+    face_nft: builtins.int
+    """"""
+    face_nft_new: builtins.int
+    """"""
+    def __init__(
+        self,
         *,
-        mid : builtins.int = ...,
-        name : typing.Text = ...,
-        face : typing.Text = ...,
-        official : typing.Optional[global___OfficialVerify] = ...,
-        vip : typing.Optional[global___VipInfo] = ...,
-        live : typing.Optional[global___LiveInfo] = ...,
-        uri : typing.Text = ...,
-        pendant : typing.Optional[global___UserPendant] = ...,
-        nameplate : typing.Optional[global___Nameplate] = ...,
-        level : builtins.int = ...,
-        sign : typing.Text = ...,
-        face_nft : builtins.int = ...,
-        face_nft_new : builtins.int = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"live",b"live",u"nameplate",b"nameplate",u"official",b"official",u"pendant",b"pendant",u"vip",b"vip"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"face",b"face",u"face_nft",b"face_nft",u"face_nft_new",b"face_nft_new",u"level",b"level",u"live",b"live",u"mid",b"mid",u"name",b"name",u"nameplate",b"nameplate",u"official",b"official",u"pendant",b"pendant",u"sign",b"sign",u"uri",b"uri",u"vip",b"vip"]) -> None: ...
+        mid: builtins.int = ...,
+        name: builtins.str = ...,
+        face: builtins.str = ...,
+        official: global___OfficialVerify | None = ...,
+        vip: global___VipInfo | None = ...,
+        live: global___LiveInfo | None = ...,
+        uri: builtins.str = ...,
+        pendant: global___UserPendant | None = ...,
+        nameplate: global___Nameplate | None = ...,
+        level: builtins.int = ...,
+        sign: builtins.str = ...,
+        face_nft: builtins.int = ...,
+        face_nft_new: builtins.int = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["live", b"live", "nameplate", b"nameplate", "official", b"official", "pendant", b"pendant", "vip", b"vip"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["face", b"face", "face_nft", b"face_nft", "face_nft_new", b"face_nft_new", "level", b"level", "live", b"live", "mid", b"mid", "name", b"name", "nameplate", b"nameplate", "official", b"official", "pendant", b"pendant", "sign", b"sign", "uri", b"uri", "vip", b"vip"]) -> None: ...
+
 global___UserInfo = UserInfo
 
-# 直播头像样式
+@typing_extensions.final
 class UserItemStyle(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """直播头像样式"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     RECT_TEXT_FIELD_NUMBER: builtins.int
     RECT_TEXT_COLOR_FIELD_NUMBER: builtins.int
     RECT_ICON_FIELD_NUMBER: builtins.int
     RECT_BG_COLOR_FIELD_NUMBER: builtins.int
     OUTER_ANIMATION_FIELD_NUMBER: builtins.int
-    #
-    rect_text: typing.Text = ...
-    #
-    rect_text_color: typing.Text = ...
-    #
-    rect_icon: typing.Text = ...
-    #
-    rect_bg_color: typing.Text = ...
-    #
-    outer_animation: typing.Text = ...
-    def __init__(self,
+    rect_text: builtins.str
+    """"""
+    rect_text_color: builtins.str
+    """"""
+    rect_icon: builtins.str
+    """"""
+    rect_bg_color: builtins.str
+    """"""
+    outer_animation: builtins.str
+    """"""
+    def __init__(
+        self,
         *,
-        rect_text : typing.Text = ...,
-        rect_text_color : typing.Text = ...,
-        rect_icon : typing.Text = ...,
-        rect_bg_color : typing.Text = ...,
-        outer_animation : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"outer_animation",b"outer_animation",u"rect_bg_color",b"rect_bg_color",u"rect_icon",b"rect_icon",u"rect_text",b"rect_text",u"rect_text_color",b"rect_text_color"]) -> None: ...
+        rect_text: builtins.str = ...,
+        rect_text_color: builtins.str = ...,
+        rect_icon: builtins.str = ...,
+        rect_bg_color: builtins.str = ...,
+        outer_animation: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["outer_animation", b"outer_animation", "rect_bg_color", b"rect_bg_color", "rect_icon", b"rect_icon", "rect_text", b"rect_text", "rect_text_color", b"rect_text_color"]) -> None: ...
+
 global___UserItemStyle = UserItemStyle
 
-# 头像挂件信息
+@typing_extensions.final
 class UserPendant(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """头像挂件信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     PID_FIELD_NUMBER: builtins.int
     NAME_FIELD_NUMBER: builtins.int
     IMAGE_FIELD_NUMBER: builtins.int
     EXPIRE_FIELD_NUMBER: builtins.int
-    # pid
-    pid: builtins.int = ...
-    # 名称
-    name: typing.Text = ...
-    # 图片链接
-    image: typing.Text = ...
-    # 有效期
-    expire: builtins.int = ...
-    def __init__(self,
+    pid: builtins.int
+    """pid"""
+    name: builtins.str
+    """名称"""
+    image: builtins.str
+    """图片链接"""
+    expire: builtins.int
+    """有效期"""
+    def __init__(
+        self,
         *,
-        pid : builtins.int = ...,
-        name : typing.Text = ...,
-        image : typing.Text = ...,
-        expire : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"expire",b"expire",u"image",b"image",u"name",b"name",u"pid",b"pid"]) -> None: ...
+        pid: builtins.int = ...,
+        name: builtins.str = ...,
+        image: builtins.str = ...,
+        expire: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["expire", b"expire", "image", b"image", "name", b"name", "pid", b"pid"]) -> None: ...
+
 global___UserPendant = UserPendant
 
-# 角标信息
+@typing_extensions.final
 class VideoBadge(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """角标信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TEXT_FIELD_NUMBER: builtins.int
     TEXT_COLOR_FIELD_NUMBER: builtins.int
     TEXT_COLOR_NIGHT_FIELD_NUMBER: builtins.int
@@ -9670,45 +11155,50 @@ class VideoBadge(google.protobuf.message.Message):
     BG_STYLE_FIELD_NUMBER: builtins.int
     BG_ALPHA_FIELD_NUMBER: builtins.int
     BG_ALPHA_NIGHT_FIELD_NUMBER: builtins.int
-    # 文案
-    text: typing.Text = ...
-    # 文案颜色-日间
-    text_color: typing.Text = ...
-    # 文案颜色-夜间
-    text_color_night: typing.Text = ...
-    # 背景颜色-日间
-    bg_color: typing.Text = ...
-    # 背景颜色-夜间
-    bg_color_night: typing.Text = ...
-    # 边框颜色-日间
-    border_color: typing.Text = ...
-    # 边框颜色-夜间
-    border_color_night: typing.Text = ...
-    # 样式
-    bg_style: builtins.int = ...
-    # 背景透明度-日间
-    bg_alpha: builtins.int = ...
-    # 背景透明度-夜间
-    bg_alpha_night: builtins.int = ...
-    def __init__(self,
+    text: builtins.str
+    """文案"""
+    text_color: builtins.str
+    """文案颜色-日间"""
+    text_color_night: builtins.str
+    """文案颜色-夜间"""
+    bg_color: builtins.str
+    """背景颜色-日间"""
+    bg_color_night: builtins.str
+    """背景颜色-夜间"""
+    border_color: builtins.str
+    """边框颜色-日间"""
+    border_color_night: builtins.str
+    """边框颜色-夜间"""
+    bg_style: builtins.int
+    """样式"""
+    bg_alpha: builtins.int
+    """背景透明度-日间"""
+    bg_alpha_night: builtins.int
+    """背景透明度-夜间"""
+    def __init__(
+        self,
         *,
-        text : typing.Text = ...,
-        text_color : typing.Text = ...,
-        text_color_night : typing.Text = ...,
-        bg_color : typing.Text = ...,
-        bg_color_night : typing.Text = ...,
-        border_color : typing.Text = ...,
-        border_color_night : typing.Text = ...,
-        bg_style : builtins.int = ...,
-        bg_alpha : builtins.int = ...,
-        bg_alpha_night : builtins.int = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"bg_alpha",b"bg_alpha",u"bg_alpha_night",b"bg_alpha_night",u"bg_color",b"bg_color",u"bg_color_night",b"bg_color_night",u"bg_style",b"bg_style",u"border_color",b"border_color",u"border_color_night",b"border_color_night",u"text",b"text",u"text_color",b"text_color",u"text_color_night",b"text_color_night"]) -> None: ...
+        text: builtins.str = ...,
+        text_color: builtins.str = ...,
+        text_color_night: builtins.str = ...,
+        bg_color: builtins.str = ...,
+        bg_color_night: builtins.str = ...,
+        border_color: builtins.str = ...,
+        border_color_night: builtins.str = ...,
+        bg_style: builtins.int = ...,
+        bg_alpha: builtins.int = ...,
+        bg_alpha_night: builtins.int = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["bg_alpha", b"bg_alpha", "bg_alpha_night", b"bg_alpha_night", "bg_color", b"bg_color", "bg_color_night", b"bg_color_night", "bg_style", b"bg_style", "border_color", b"border_color", "border_color_night", b"border_color_night", "text", b"text", "text_color", b"text_color", "text_color_night", b"text_color_night"]) -> None: ...
+
 global___VideoBadge = VideoBadge
 
-# 大会员信息
+@typing_extensions.final
 class VipInfo(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """大会员信息"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     STATUS_FIELD_NUMBER: builtins.int
     DUE_DATE_FIELD_NUMBER: builtins.int
@@ -9716,133 +11206,161 @@ class VipInfo(google.protobuf.message.Message):
     THEME_TYPE_FIELD_NUMBER: builtins.int
     AVATAR_SUBSCRIPT_FIELD_NUMBER: builtins.int
     NICKNAME_COLOR_FIELD_NUMBER: builtins.int
-    # 大会员类型
-    Type: builtins.int = ...
-    # 大会员状态
-    status: builtins.int = ...
-    # 到期时间
-    due_date: builtins.int = ...
-    # 标签
+    Type: builtins.int
+    """大会员类型"""
+    status: builtins.int
+    """大会员状态"""
+    due_date: builtins.int
+    """到期时间"""
     @property
-    def label(self) -> global___VipLabel: ...
-    # 主题
-    theme_type: builtins.int = ...
-    # 大会员角标
-    # 0:无角标 1:粉色大会员角标 2:绿色小会员角标
-    avatar_subscript: builtins.int = ...
-    # 昵称色值，可能为空，色值示例：#FFFB9E60
-    nickname_color: typing.Text = ...
-    def __init__(self,
+    def label(self) -> global___VipLabel:
+        """标签"""
+    theme_type: builtins.int
+    """主题"""
+    avatar_subscript: builtins.int
+    """大会员角标
+    0:无角标 1:粉色大会员角标 2:绿色小会员角标
+    """
+    nickname_color: builtins.str
+    """昵称色值，可能为空，色值示例：#FFFB9E60"""
+    def __init__(
+        self,
         *,
-        Type : builtins.int = ...,
-        status : builtins.int = ...,
-        due_date : builtins.int = ...,
-        label : typing.Optional[global___VipLabel] = ...,
-        theme_type : builtins.int = ...,
-        avatar_subscript : builtins.int = ...,
-        nickname_color : typing.Text = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"label",b"label"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"Type",b"Type",u"avatar_subscript",b"avatar_subscript",u"due_date",b"due_date",u"label",b"label",u"nickname_color",b"nickname_color",u"status",b"status",u"theme_type",b"theme_type"]) -> None: ...
+        Type: builtins.int = ...,
+        status: builtins.int = ...,
+        due_date: builtins.int = ...,
+        label: global___VipLabel | None = ...,
+        theme_type: builtins.int = ...,
+        avatar_subscript: builtins.int = ...,
+        nickname_color: builtins.str = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["label", b"label"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["Type", b"Type", "avatar_subscript", b"avatar_subscript", "due_date", b"due_date", "label", b"label", "nickname_color", b"nickname_color", "status", b"status", "theme_type", b"theme_type"]) -> None: ...
+
 global___VipInfo = VipInfo
 
-# 大会员标签
+@typing_extensions.final
 class VipLabel(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """大会员标签"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     PATH_FIELD_NUMBER: builtins.int
     TEXT_FIELD_NUMBER: builtins.int
     LABEL_THEME_FIELD_NUMBER: builtins.int
-    # 图片地址
-    path: typing.Text = ...
-    # 文本值
-    text: typing.Text = ...
-    # 对应颜色类型
-    label_theme: typing.Text = ...
-    def __init__(self,
+    path: builtins.str
+    """图片地址"""
+    text: builtins.str
+    """文本值"""
+    label_theme: builtins.str
+    """对应颜色类型"""
+    def __init__(
+        self,
         *,
-        path : typing.Text = ...,
-        text : typing.Text = ...,
-        label_theme : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"label_theme",b"label_theme",u"path",b"path",u"text",b"text"]) -> None: ...
+        path: builtins.str = ...,
+        text: builtins.str = ...,
+        label_theme: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["label_theme", b"label_theme", "path", b"path", "text", b"text"]) -> None: ...
+
 global___VipLabel = VipLabel
 
-# 提权样式
+@typing_extensions.final
 class Weight(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """提权样式"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TITLE_FIELD_NUMBER: builtins.int
     ITEMS_FIELD_NUMBER: builtins.int
     ICON_FIELD_NUMBER: builtins.int
-    # 提权展示标题
-    title: typing.Text = ...
-    # 下拉框内容
+    title: builtins.str
+    """提权展示标题"""
     @property
-    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___WeightItem]: ...
-    # icon
-    icon: typing.Text = ...
-    def __init__(self,
+    def items(self) -> google.protobuf.internal.containers.RepeatedCompositeFieldContainer[global___WeightItem]:
+        """下拉框内容"""
+    icon: builtins.str
+    """icon"""
+    def __init__(
+        self,
         *,
-        title : typing.Text = ...,
-        items : typing.Optional[typing.Iterable[global___WeightItem]] = ...,
-        icon : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"icon",b"icon",u"items",b"items",u"title",b"title"]) -> None: ...
+        title: builtins.str = ...,
+        items: collections.abc.Iterable[global___WeightItem] | None = ...,
+        icon: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["icon", b"icon", "items", b"items", "title", b"title"]) -> None: ...
+
 global___Weight = Weight
 
-# 热门默认跳转按钮
+@typing_extensions.final
 class WeightButton(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """热门默认跳转按钮"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     JUMP_URL_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
-    jump_url: typing.Text = ...
-    # 展示文案
-    title: typing.Text = ...
-    def __init__(self,
+    jump_url: builtins.str
+    title: builtins.str
+    """展示文案"""
+    def __init__(
+        self,
         *,
-        jump_url : typing.Text = ...,
-        title : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"jump_url",b"jump_url",u"title",b"title"]) -> None: ...
+        jump_url: builtins.str = ...,
+        title: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["jump_url", b"jump_url", "title", b"title"]) -> None: ...
+
 global___WeightButton = WeightButton
 
-# 提权不感兴趣
+@typing_extensions.final
 class WeightDislike(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """提权不感兴趣"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     FEED_BACK_TYPE_FIELD_NUMBER: builtins.int
     TITLE_FIELD_NUMBER: builtins.int
-    # 负反馈业务类型 作为客户端调用负反馈接口的参数
-    feed_back_type: typing.Text = ...
-    # 展示文案
-    title: typing.Text = ...
-    def __init__(self,
+    feed_back_type: builtins.str
+    """负反馈业务类型 作为客户端调用负反馈接口的参数"""
+    title: builtins.str
+    """展示文案"""
+    def __init__(
+        self,
         *,
-        feed_back_type : typing.Text = ...,
-        title : typing.Text = ...,
-        ) -> None: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"feed_back_type",b"feed_back_type",u"title",b"title"]) -> None: ...
+        feed_back_type: builtins.str = ...,
+        title: builtins.str = ...,
+    ) -> None: ...
+    def ClearField(self, field_name: typing_extensions.Literal["feed_back_type", b"feed_back_type", "title", b"title"]) -> None: ...
+
 global___WeightDislike = WeightDislike
 
-# 提权样式
+@typing_extensions.final
 class WeightItem(google.protobuf.message.Message):
-    DESCRIPTOR: google.protobuf.descriptor.Descriptor = ...
+    """提权样式"""
+
+    DESCRIPTOR: google.protobuf.descriptor.Descriptor
+
     TYPE_FIELD_NUMBER: builtins.int
     BUTTON_FIELD_NUMBER: builtins.int
     DISLIKE_FIELD_NUMBER: builtins.int
-    # 类型
-    type: global___WeightType.V = ...
-    # 热门默认跳转按钮
+    type: global___WeightType.ValueType
+    """类型"""
     @property
-    def button(self) -> global___WeightButton: ...
-    # 提权不感兴趣
+    def button(self) -> global___WeightButton:
+        """热门默认跳转按钮"""
     @property
-    def dislike(self) -> global___WeightDislike: ...
-    def __init__(self,
+    def dislike(self) -> global___WeightDislike:
+        """提权不感兴趣"""
+    def __init__(
+        self,
         *,
-        type : global___WeightType.V = ...,
-        button : typing.Optional[global___WeightButton] = ...,
-        dislike : typing.Optional[global___WeightDislike] = ...,
-        ) -> None: ...
-    def HasField(self, field_name: typing_extensions.Literal[u"button",b"button",u"dislike",b"dislike",u"item",b"item"]) -> builtins.bool: ...
-    def ClearField(self, field_name: typing_extensions.Literal[u"button",b"button",u"dislike",b"dislike",u"item",b"item",u"type",b"type"]) -> None: ...
-    def WhichOneof(self, oneof_group: typing_extensions.Literal[u"item",b"item"]) -> typing.Optional[typing_extensions.Literal["button","dislike"]]: ...
+        type: global___WeightType.ValueType = ...,
+        button: global___WeightButton | None = ...,
+        dislike: global___WeightDislike | None = ...,
+    ) -> None: ...
+    def HasField(self, field_name: typing_extensions.Literal["button", b"button", "dislike", b"dislike", "item", b"item"]) -> builtins.bool: ...
+    def ClearField(self, field_name: typing_extensions.Literal["button", b"button", "dislike", b"dislike", "item", b"item", "type", b"type"]) -> None: ...
+    def WhichOneof(self, oneof_group: typing_extensions.Literal["item", b"item"]) -> typing_extensions.Literal["button", "dislike"] | None: ...
+
 global___WeightItem = WeightItem

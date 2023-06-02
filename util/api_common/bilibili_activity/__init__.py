@@ -1,25 +1,28 @@
+# pyright: strict
+import json
 from dataclasses import dataclass
 from typing import (
-  TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Optional, Protocol, Sequence, Tuple, Type,
-  TypeVar, Union, overload
+  TYPE_CHECKING, Any, Awaitable, Dict, Generic, Iterable, List, Optional, Protocol, Sequence,
+  Tuple, Type, TypeVar, Union, cast, overload, Literal
 )
-import json
 from urllib.parse import urlparse
 
 from util import misc
 
 try:
-  import grpc
+  import grpc.aio
 
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
-    AdditionalType, Description, DescType, DynamicItem, DynamicType, DynDetailReply, DynDetailReq,
-    DynDetailsReply, DynDetailsReq, DynModuleType, DynSpaceReq, DynSpaceRsp, ModuleAdditional,
-    VideoSubType
+    AddButtonType, AdditionalType, Description, DescType, DisableState, DynamicItem, DynamicType,
+    DynDetailReply, DynDetailReq, DynDetailsReply, DynDetailsReq, DynModuleType, DynSpaceReq,
+    DynSpaceRsp, ModuleAdditional, VideoSubType
   )
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
-  GRPC_AVAILABLE = True
 except ImportError:
-  GRPC_AVAILABLE = False
+  GRPC_AVAILABLE = False  # type: ignore
+else:
+  GRPC_AVAILABLE = True
+
 
 if TYPE_CHECKING:
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (  # noqa
@@ -51,7 +54,7 @@ async def grpc_fetch(uid: int, offset: str = "") -> Tuple[Sequence["DynamicItem"
   async with grpc.aio.secure_channel(GRPC_API, grpc.ssl_channel_credentials()) as channel:
     stub = DynamicStub(channel)
     req = DynSpaceReq(host_uid=uid, history_offset=offset)
-    res: DynSpaceRsp = await stub.DynSpace(req, metadata=GRPC_METADATA)
+    res = await cast(Awaitable[DynSpaceRsp], stub.DynSpace(req, metadata=GRPC_METADATA))
   next_offset = res.history_offset if res.has_more else None
   return res.list, next_offset
 
@@ -73,10 +76,10 @@ async def grpc_get(id: Union[str, List[str]]) -> Union["DynamicItem", List["Dyna
     stub = DynamicStub(channel)
     if isinstance(id, list):
       req = DynDetailsReq(dynamic_ids=",".join(id))
-      res: DynDetailsReply = await stub.DynDetails(req, metadata=GRPC_METADATA)
+      res = await cast(Awaitable[DynDetailsReply], stub.DynDetails(req, metadata=GRPC_METADATA))
       return list(res.list)
     req2 = DynDetailReq(dynamic_id=id)
-    res2: DynDetailReply = await stub.DynDetail(req2, metadata=GRPC_METADATA)
+    res2 = await cast(Awaitable[DynDetailReply], stub.DynDetail(req2, metadata=GRPC_METADATA))
     return res2.item
 
 
@@ -353,8 +356,8 @@ class ContentAudio(ContentParser["ContentAudio"]):
 @dataclass
 class ContentPGC(ContentParser["ContentPGC"]):
   '''
-  番剧、电视剧、电影、纪录片等PGC（Professional Generated Content，专业生产内容，与之相对的是
-  User Generated Content，用户生产内容，就是UP主上传的视频、专栏等）
+  番剧、电视剧、电影、纪录片等 PGC（Professional Generated Content，专业生产内容，与之相对的是
+  User Generated Content，用户生产内容，就是 UP 主上传的视频、专栏等）
   https://www.bilibili.com/bangumi/media/md<SSID> # 介绍页
   https://www.bilibili.com/bangumi/play/ss<SSID> # 播放第一集
   https://www.bilibili.com/bangumi/play/ep<EPID> # 播放指定集
@@ -688,7 +691,7 @@ JSON_CONTENT_TYPES: Dict[str, Type[ContentParser[object]]] = {
   "COURSES_SEASON": ContentCourse,
   "LIVE": ContentLive,
   "LIVE_RCMD": ContentLiveRcmd,
-  # JSON API获取不到转发合集
+  # JSON API 获取不到转发合集
   "FORWARD": ContentForward,
 }
 
@@ -727,7 +730,7 @@ class ExtraVote(ExtraParser["ExtraVote"]):
       item["vote"]["vote_id"],
       item["vote"]["uid"],
       item["vote"]["desc"],
-      item["vote"]["join_num"] or 0,  # 0人时是null
+      item["vote"]["join_num"] or 0,  # 0 人时是 null
       item["vote"]["end_time"],
     )
 
@@ -768,32 +771,60 @@ class ExtraReserve(ExtraParser["ExtraReserve"]):
   uid: int
   title: str
   desc: str
+  desc2: str
   count: int
   link_text: str
   link_url: str
+  type: Literal["video", "live"]
+  status: Literal["reserving", "streaming", "expired"]
+  content_url: str
 
   @staticmethod
   def grpc_parse(item: "ModuleAdditional") -> "ExtraReserve":
+    type = "live" if "直播" in item.up.desc_text_1.text else "video"
+    if type == "live":
+      if item.up.button.type == AddButtonType.bt_jump:
+        status = "streaming"
+      else:
+        status = "expired" if item.up.button.check.disable == DisableState.gary else "reserving"
+    else:
+      status = "expired" if item.up.button.type == AddButtonType.bt_jump else "reserving"
     return ExtraReserve(
       item.rid,
       item.up.up_mid,
       item.up.title,
       item.up.desc_text_1.text,
+      item.up.desc_text_2,
       item.up.reserve_total,
       item.up.desc_text3.text,
       item.up.desc_text3.jump_url,
+      type,
+      status,
+      item.up.url,
     )
 
   @staticmethod
   def json_parse(item: Dict[Any, Any]) -> "ExtraReserve":
+    type = "video" if item["reserve"]["stype"] == 1 else "live"
+    if type == "live":
+      if item["reserve"]["button"]["type"] == 1:
+        status = "streaming"
+      else:
+        status = "expired" if "disable" in item["reserve"]["button"]["uncheck"] else "reserving"
+    else:
+      status = "expired" if item["reserve"]["button"]["type"] == 1 else "reserving"
     return ExtraReserve(
       item["reserve"]["rid"],
       item["reserve"]["up_mid"],
       item["reserve"]["title"],
       item["reserve"]["desc1"]["text"],
+      item["reserve"]["desc2"]["text"],
       item["reserve"]["reserve_total"],
       item["reserve"]["desc3"]["text"],
       item["reserve"]["desc3"]["jump_url"],
+      type,
+      status,
+      item["reserve"]["jump_url"],
     )
 
 
@@ -900,7 +931,7 @@ class Activity(Generic[TContent, TExtra]):
       avatar = author_module.author.face
       top = author_module.is_top
     if DynModuleType.module_bottom in modules:
-      # buttom的u是B站拼错了，不是我（甩锅）
+      # buttom 的 u 是 B 站拼错了，不是我（甩锅）
       stat_module = modules[DynModuleType.module_bottom].module_buttom.module_stat
     elif DynModuleType.module_stat_forward in modules:
       stat_module = modules[DynModuleType.module_stat_forward].module_stat_forward
