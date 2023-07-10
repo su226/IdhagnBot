@@ -2,9 +2,10 @@ import json
 import re
 import time
 from io import BytesIO
+from typing import Dict, Tuple
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Message, MessageSegment
+from nonebot.adapters.onebot.v11 import Message, MessageSegment, MessageEvent, GroupMessageEvent
 from nonebot.params import EventMessage
 from nonebot.typing import T_State
 from PIL import Image
@@ -17,6 +18,18 @@ LINK_RE = re.compile(
   r"bilibili\.com/video/(av\d{1,9}|(BV|bv)[A-Za-z0-9]{10})"
   r"|b23\.tv/(av\d{1,9}|BV[A-Za-z0-9]{10}|[A-Za-z0-9]{7})")
 INFO_API = "https://api.bilibili.com/x/web-interface/view/detail"
+ParseRequest = Tuple[str, str, int]
+last_videos: Dict[int, ParseRequest] = {}
+
+
+def is_link_alike(last: ParseRequest, link: str) -> bool:
+  '''
+  检查两次解析请求是否相似
+  当本次解析的链接与上一次相同或包含上一次解析出的 BV 号 / AV 号时
+  判定为解析请求相似，避免再次发送结果
+  '''
+  last_link, last_bvid, last_aid = last
+  return last_link == link or last_bvid in link or str(last_aid) in link
 
 
 async def check_bilibili_link(state: T_State, msg: Message = EventMessage()) -> bool:
@@ -37,12 +50,14 @@ async def check_bilibili_link(state: T_State, msg: Message = EventMessage()) -> 
     state["link"] = match[0]
     return True
   return False
+
 bilibili_link = nonebot.on_message(
   check_bilibili_link,
   context.build_permission(("bilibili_link",), permission.Level.MEMBER),
 )
+
 @bilibili_link.handle()
-async def handle_bilibili_link(state: T_State) -> None:
+async def handle_bilibili_link(event: MessageEvent, state: T_State) -> None:
   http = misc.http()
 
   # 1. 获取真实链接（如果是b23.tv短链接）
@@ -68,6 +83,15 @@ async def handle_bilibili_link(state: T_State) -> None:
   data_view = data["data"]["View"]
   data_card = data["data"]["Card"]["card"]
   data_stat = data_view["stat"]
+  bvid = misc.removeprefix(data_view["bvid"], "BV")
+  aid: int = data_view["aid"]
+
+  if isinstance(event, GroupMessageEvent):
+    # 如果上一次解析的链接相似，放弃发送，防止群内有多个机器人时刷屏
+    last_video = last_videos.get(event.group_id, None)
+    if last_video and is_link_alike(last_video, link):
+      await bilibili_link.finish()
+    last_videos[event.group_id] = (link, bvid, aid)
 
   async with http.get(data_card["face"]) as response:
     avatar_data = await response.read()
@@ -112,5 +136,5 @@ async def handle_bilibili_link(state: T_State) -> None:
     card.render(im, 0, 0)
     return imutil.to_segment(im)
 
-  url = "https://www.bilibili.com/video/" + data_view["bvid"]
-  await bilibili_link.finish(await misc.to_thread(make) + url)
+  info = f"https://www.bilibili.com/video/BV{bvid} (av{aid})"
+  await bilibili_link.finish(info + await misc.to_thread(make), reply_message=True)
