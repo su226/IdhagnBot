@@ -21,6 +21,8 @@ class Config(BaseModel):
   # 从网页查询有上黑等级、上黑时间、上黑原因和登记人，但使用 API 查询只有上黑原因
   # 并且没有批量查询，没法写查询全群
   # 对不起绮梦老师了
+  host: str = "https://yunhei.furrynet.top"
+  api: str = "https://yunhei.qimeng.fun/OpenAPI.php"
   token: SecretStr = SecretStr("")
   check_join: misc.EnableSet = misc.EnableSet.false()
   check_request: misc.EnableSet = misc.EnableSet.false()
@@ -55,6 +57,9 @@ class SingleParser(HTMLParser):
   def handle_endtag(self, tag: str) -> None:
     if self.level and tag != "br":
       self.level -= 1
+    # center 是块级元素
+    if self.level and tag == "center":
+      self.text.write("\n")
 
 
 class BatchParser(HTMLParser):
@@ -73,9 +78,6 @@ class BatchParser(HTMLParser):
       self.lines.append(data)
 
 
-API = "https://yunhei.qimeng.fun/OpenAPI.php?key={}&id={}"
-URL = "https://yunhei.qimeng.fun/"
-BATCH_URL = "https://yunhei.qimeng.fun/Piliang.php"
 CHUNK_SIZE = 200
 INT_RE = re.compile(r"\d+")
 CONFIG = configs.SharedConfig("qimeng", Config)
@@ -84,7 +86,8 @@ CONFIG = configs.SharedConfig("qimeng", Config)
 async def query_openapi(uid: int) -> Optional[str]:
   config = CONFIG()
   http = misc.http()
-  async with http.get(API.format(config.token.get_secret_value(), uid)) as response:
+  url = config.api.format(host=config.host, token=config.token.get_secret_value(), uid=uid)
+  async with http.get(url) as response:
     data = await response.json(content_type=None)  # text/html
   data = data["info"][0]
   if data["yh"] == "false":
@@ -93,9 +96,10 @@ async def query_openapi(uid: int) -> Optional[str]:
 
 
 async def query_spider(uid: int) -> Tuple[int, str]:
+  config = CONFIG()
   http = misc.http()
   data = {"qq": uid}
-  async with http.post(URL, data=data) as response:
+  async with http.post(config.host, data=data) as response:
     parser = SingleParser()
     parser.feed(await response.text())
     parser.close()
@@ -110,9 +114,10 @@ async def query_spider(uid: int) -> Tuple[int, str]:
 
 
 async def query_spider_batch(uids: List[int]) -> List[Tuple[int, int]]:
+  config = CONFIG()
   http = misc.http()
   data = {"qq": "\n".join(str(x) for x in uids)}
-  async with http.post(BATCH_URL, data=data) as response:
+  async with http.post(config.host + "/Piliang.php", data=data) as response:
     parser = BatchParser()
     parser.feed(await response.text())
     parser.close()
@@ -128,21 +133,26 @@ async def query_spider_batch(uids: List[int]) -> List[Tuple[int, int]]:
   return result
 
 
+def query_usage() -> str:
+  config = CONFIG()
+  return f'''\
+/查云黑 <QQ号> [<QQ号>...]
+可以批量查询多个，最多 {CHUNK_SIZE} 个
+数据来自 {config.host}'''
+
 query = (
   command.CommandBuilder("qimeng.query", "查云黑")
   .brief("查询趣绮梦Furry云黑")
-  .usage(f'''\
-/查云黑 <QQ号> [<QQ号>...]
-可以批量查询多个，最多 {CHUNK_SIZE} 个
-数据来自 {URL}''')
+  .usage(query_usage)
   .throttle(5, 1)
   .help_condition(lambda _: bool(CONFIG().token))
   .rule(lambda: bool(CONFIG().token))
   .build()
 )
+
 @query.handle()
 async def handle_query(args: Message = CommandArg()) -> None:
-  uids = []
+  uids: List[int] = []
   for seg in args:
     if seg.type == "text":
       for i in seg.data["text"].split():
@@ -187,19 +197,24 @@ async def handle_query(args: Message = CommandArg()) -> None:
     await query.finish(f"查询账号：{uid}\n该用户已上黑，原因为：" + reason)
 
 
+def query_all_usage() -> str:
+  config = CONFIG()
+  return f'''\
+/查群云黑
+10 秒内只能查询一次
+数据来自 {config.host}'''
+
 query_all = (
   command.CommandBuilder("qimeng.query_all", "查群云黑")
   .brief("批量查询本群群员云黑")
-  .usage(f'''\
-/查群云黑
-10 秒内只能查询一次
-数据来自 {URL}''')
+  .usage(query_all_usage)
   .throttle(1, 10)
   .in_group()
   .help_condition(lambda _: CONFIG().use_spider)
   .rule(lambda: CONFIG().use_spider)
   .build()
 )
+
 @query_all.handle()
 async def handle_query_all(bot: Bot, event: Event) -> None:
   config = CONFIG()
@@ -228,14 +243,18 @@ async def handle_query_all(bot: Bot, event: Event) -> None:
   await query_all.finish("\n".join(lines))
 
 
-kick_all = (
-  command.CommandBuilder("qimeng.kick_all", "踢群云黑")
-  .brief("批量踢出云黑成员")
-  .usage(f'''\
+def kick_all_usage() -> str:
+  config = CONFIG()
+  return f'''\
 /踢群云黑 - 踢出所有云黑成员
 /踢群云黑 避雷 - 踢出所有云黑和避雷成员
 10 秒内只能使用一次
-数据来自 {URL}''')
+数据来自 {config.host}'''
+
+kick_all = (
+  command.CommandBuilder("qimeng.kick_all", "踢群云黑")
+  .brief("批量踢出云黑成员")
+  .usage(kick_all_usage)
   .throttle(1, 10)
   .in_group()
   .level("admin")
@@ -243,6 +262,7 @@ kick_all = (
   .rule(lambda: CONFIG().use_spider)
   .build()
 )
+
 @kick_all.handle()
 async def handle_kick_all(
   bot: Bot, event: Event, state: T_State, arg: Message = CommandArg()
@@ -285,7 +305,6 @@ async def handle_kick_all(
   lines.append("是否全部踢出？请发送“是”或“否”")
   await kick_all.send("\n".join(lines))
 
-
 @kick_all.got("confirm")
 async def got_confirm(bot: Bot, event: Event, state: T_State, confirm: str = ArgStr()) -> None:
   if confirm != "是":
@@ -310,10 +329,13 @@ async def check_member_join(event: GroupIncreaseNoticeEvent) -> bool:
     and event.user_id not in config.ignore
     and config.check_join[event.group_id]
   )
+
 on_member_join = nonebot.on_notice(check_member_join)
+
 @on_member_join.handle()
 async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
-  if CONFIG().use_spider:
+  config = CONFIG()
+  if config.use_spider:
     type, detail = await query_spider(event.user_id)
     if type == 0:
       return
@@ -321,7 +343,7 @@ async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
     reason = await query_openapi(event.user_id)
     if reason is None:
       return
-    detail = f"原因：{reason}\n详情请参考 {URL}"
+    detail = f"原因：{reason}\n详情请参考 {config.host}"
   name = await context.get_card_or_name(bot, event, event.user_id)
   await on_member_join.finish(f'''⚠️ 警告 ⚠️
 刚刚加群的用户 {name}({event.user_id}) 已上黑，请注意。
@@ -336,7 +358,9 @@ async def check_group_request(event: GroupRequestEvent) -> bool:
     and event.user_id not in config.ignore
     and config.check_request[event.group_id]
   )
+
 on_group_request = nonebot.on_notice(check_group_request)
+
 @on_group_request.handle()
 async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
   config = CONFIG()
@@ -348,7 +372,7 @@ async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
     reason = await query_openapi(event.user_id)
     if reason is None:
       return
-    detail = f"原因：{reason}\n详情请参考 {URL}"
+    detail = f"原因：{reason}\n详情请参考 {config.host}"
   if config.reject_request[event.group_id]:
     await bot.set_group_add_request(
       flag=event.flag, sub_type=event.sub_type, approve=False, reason="云黑用户，机器人自动拒绝"
