@@ -54,6 +54,7 @@ dev = [
 
 [tool.pdm.scripts]
 start = "python bot.py"
+bilibili_activity_compile = "tools/bilibili_activity_compile.sh"
 
 [tool.isort]
 multi_line_output = 5

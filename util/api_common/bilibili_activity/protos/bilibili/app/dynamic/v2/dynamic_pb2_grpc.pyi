@@ -3,69 +3,98 @@
 isort:skip_file
 """
 import abc
-import bilibili.app.dynamic.v2.dynamic_pb2
-import collections.abc
+import util.api_common.bilibili_activity.protos.bilibili.app.dynamic.v2.dynamic_pb2
 import grpc
-import grpc.aio
-import typing
-
-_T = typing.TypeVar('_T')
-
-class _MaybeAsyncIterator(collections.abc.AsyncIterator[_T], collections.abc.Iterator[_T], metaclass=abc.ABCMeta):
-    ...
-
-class _ServicerContext(grpc.ServicerContext, grpc.aio.ServicerContext):  # type: ignore
-    ...
 
 class DynamicStub:
-    """v2动态"""
+    """v2动态, rpc 按字母顺序排列"""
 
-    def __init__(self, channel: typing.Union[grpc.Channel, grpc.aio.Channel]) -> None: ...
-    DynVideo: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReply,
+    def __init__(self, channel: grpc.Channel) -> None: ...
+    AlumniDynamics: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReply,
     ]
-    """动态视频页"""
-    DynAll: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAllReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAllReply,
+    """"""
+    CampusBillBoard: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply,
     ]
-    """动态综合页"""
-    DynDetails: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReply,
+    """"""
+    CampusEntryTab: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusEntryTabReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusEntryTabResp,
     ]
-    """批量动态id获取动态详情"""
-    DynVideoPersonal: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReply,
+    """"""
+    CampusFeedback: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReply,
     ]
-    """视频页最近访问 - 个人feed流"""
-    DynVideoUpdOffset: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoUpdOffsetReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    """"""
+    CampusHomePages: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusHomePagesReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusHomePagesReply,
     ]
-    """视频页最近访问 - 标记已读"""
+    """"""
+    CampusMateLikeList: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReply,
+    ]
+    """"""
+    CampusMngDetail: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMngDetailReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMngDetailReply,
+    ]
+    """"""
+    CampusMngQuizOperate: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMngQuizOperateReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMngQuizOperateReply,
+    ]
+    """"""
+    CampusMngSubmit: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMngSubmitReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusMngSubmitReply,
+    ]
+    """"""
+    CampusRcmd: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReply,
+    ]
+    """"""
+    CampusRcmdFeed: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReply,
+    ]
+    """"""
+    CampusRecommend: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRecommendReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRecommendReply,
+    ]
+    """"""
+    CampusRedDot: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReply,
+    ]
+    """"""
+    CampusSquare: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusSquareReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusSquareReply,
+    ]
+    """"""
+    CampusTopicRcmdFeed: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReply,
+    ]
+    """"""
     DynAdditionCommonFollow: grpc.UnaryUnaryMultiCallable[
         bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReq,
         bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReply,
     ]
     """动态通用附加卡-follow/取消follow"""
-    DynThumb: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynThumbReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    DynAll: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynAllReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynAllReply,
     ]
-    """动态点赞"""
-    DynFakeCard: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReply,
-    ]
-    """动态发布生成临时卡"""
-    DynRcmdUpExchange: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReply,
-    ]
-    """关注推荐up主换一换"""
+    """动态综合页"""
     DynAllPersonal: grpc.UnaryUnaryMultiCallable[
         bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReq,
         bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReply,
@@ -76,84 +105,59 @@ class DynamicStub:
         bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
     ]
     """综合页最近访问 - 标记已读"""
-    DynVote: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReply,
-    ]
-    """投票操作接口"""
-    DynMixUpListViewMore: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReply,
-    ]
-    """网关调用 - 查看更多-列表"""
-    DynLight: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynLightReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynLightReply,
-    ]
-    """轻浏览"""
     DynDetail: grpc.UnaryUnaryMultiCallable[
         bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReq,
         bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReply,
     ]
     """动态详情页"""
-    LikeList: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.LikeListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.LikeListReply,
+    DynDetails: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReply,
     ]
-    """点赞列表"""
-    RepostList: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.RepostListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.RepostListRsp,
+    """批量动态id获取动态详情"""
+    DynFakeCard: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReply,
     ]
-    """转发列表"""
-    ReactionList: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReply,
-    ]
-    """新版动态转发点赞列表 需要登录"""
-    DynSpace: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceRsp,
-    ]
-    """空间页动态"""
-    DynUnLoginRcmd: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReply,
-    ]
-    """未登录页分区UP主推荐"""
-    DynServerDetails: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReply,
+    """动态发布生成临时卡"""
+    DynFriend: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynFriendReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynFriendReply,
     ]
     """"""
+    DynLight: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynLightReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynLightReply,
+    ]
+    """轻浏览"""
+    DynMixUpListViewMore: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReply,
+    ]
+    """网关调用 - 查看更多-列表"""
+    DynRcmdUpExchange: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReply,
+    ]
+    """关注推荐up主换一换"""
     DynSearch: grpc.UnaryUnaryMultiCallable[
         bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReq,
         bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReply,
     ]
     """"""
-    SetDecision: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SetDecisionReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    DynServerDetails: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReply,
     ]
     """"""
-    AlumniDynamics: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReply,
+    DynSpace: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceRsp,
     ]
-    """"""
-    CampusRcmd: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReply,
-    ]
-    """"""
-    SubscribeCampus: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SubscribeCampusReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
-    ]
-    """"""
-    SetRecentCampus: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SetRecentCampusReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    """空间页动态"""
+    DynSpaceSearchDetails: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReply,
     ]
     """"""
     DynTab: grpc.UnaryUnaryMultiCallable[
@@ -161,21 +165,66 @@ class DynamicStub:
         bilibili.app.dynamic.v2.dynamic_pb2.DynTabReply,
     ]
     """"""
-    SchoolSearch: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReply,
+    DynThumb: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynThumbReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    ]
+    """动态点赞"""
+    DynUnLoginRcmd: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReply,
+    ]
+    """未登录页分区UP主推荐"""
+    DynVideo: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReply,
+    ]
+    """动态视频页"""
+    DynVideoPersonal: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReply,
+    ]
+    """视频页最近访问 - 个人feed流"""
+    DynVideoUpdOffset: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoUpdOffsetReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    ]
+    """视频页最近访问 - 标记已读"""
+    DynVote: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReply,
     ]
     """"""
-    SchoolRecommend: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReply,
+    FeedFilter: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.FeedFilterReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.FeedFilterReply,
     ]
     """"""
-    DynSpaceSearchDetails: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReply,
+    FetchTabSetting: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.FetchTabSettingReply,
     ]
     """"""
+    HomeSubscribe: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.HomeSubscribeReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.HomeSubscribeReply,
+    ]
+    """"""
+    LbsPoi: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.LbsPoiReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.LbsPoiReply,
+    ]
+    """"""
+    LegacyTopicFeed: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.LegacyTopicFeedReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.LegacyTopicFeedReply,
+    ]
+    """"""
+    LikeList: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.LikeListReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.LikeListReply,
+    ]
+    """点赞列表"""
     OfficialAccounts: grpc.UnaryUnaryMultiCallable[
         bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReq,
         bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReply,
@@ -186,19 +235,39 @@ class DynamicStub:
         bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReply,
     ]
     """"""
-    CampusRedDot: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReply,
+    ReactionList: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReply,
+    ]
+    """新版动态转发点赞列表 需要登录"""
+    RepostList: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.RepostListReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.RepostListRsp,
+    ]
+    """转发列表"""
+    SchoolRecommend: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReply,
     ]
     """"""
-    CampusRcmdFeed: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReply,
+    SchoolSearch: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReply,
     ]
     """"""
-    TopicSquare: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReply,
+    SetDecision: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.SetDecisionReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    ]
+    """"""
+    SetRecentCampus: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.SetRecentCampusReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
+    ]
+    """"""
+    SubscribeCampus: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.SubscribeCampusReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
     ]
     """"""
     TopicList: grpc.UnaryUnaryMultiCallable[
@@ -206,542 +275,416 @@ class DynamicStub:
         bilibili.app.dynamic.v2.dynamic_pb2.TopicListReply,
     ]
     """"""
-    CampusMateLikeList: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReply,
-    ]
-    """"""
-    CampusFeedback: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReply,
-    ]
-    """"""
-    CampusBillboard: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply,
-    ]
-    """"""
-    CampusBillboardInternal: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillboardInternalReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply,
-    ]
-    """"""
-    CampusTopicRcmdFeed: grpc.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReply,
-    ]
-    """"""
-
-class DynamicAsyncStub:
-    """v2动态"""
-
-    DynVideo: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReply,
-    ]
-    """动态视频页"""
-    DynAll: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAllReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAllReply,
-    ]
-    """动态综合页"""
-    DynDetails: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReply,
-    ]
-    """批量动态id获取动态详情"""
-    DynVideoPersonal: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReply,
-    ]
-    """视频页最近访问 - 个人feed流"""
-    DynVideoUpdOffset: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVideoUpdOffsetReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
-    ]
-    """视频页最近访问 - 标记已读"""
-    DynAdditionCommonFollow: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReply,
-    ]
-    """动态通用附加卡-follow/取消follow"""
-    DynThumb: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynThumbReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
-    ]
-    """动态点赞"""
-    DynFakeCard: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReply,
-    ]
-    """动态发布生成临时卡"""
-    DynRcmdUpExchange: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReply,
-    ]
-    """关注推荐up主换一换"""
-    DynAllPersonal: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReply,
-    ]
-    """综合页最近访问 - 个人feed流"""
-    DynAllUpdOffset: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynAllUpdOffsetReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
-    ]
-    """综合页最近访问 - 标记已读"""
-    DynVote: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReply,
-    ]
-    """投票操作接口"""
-    DynMixUpListViewMore: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReply,
-    ]
-    """网关调用 - 查看更多-列表"""
-    DynLight: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynLightReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynLightReply,
-    ]
-    """轻浏览"""
-    DynDetail: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReply,
-    ]
-    """动态详情页"""
-    LikeList: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.LikeListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.LikeListReply,
-    ]
-    """点赞列表"""
-    RepostList: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.RepostListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.RepostListRsp,
-    ]
-    """转发列表"""
-    ReactionList: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReply,
-    ]
-    """新版动态转发点赞列表 需要登录"""
-    DynSpace: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceRsp,
-    ]
-    """空间页动态"""
-    DynUnLoginRcmd: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReply,
-    ]
-    """未登录页分区UP主推荐"""
-    DynServerDetails: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReply,
-    ]
-    """"""
-    DynSearch: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReply,
-    ]
-    """"""
-    SetDecision: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SetDecisionReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
-    ]
-    """"""
-    AlumniDynamics: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReply,
-    ]
-    """"""
-    CampusRcmd: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReply,
-    ]
-    """"""
-    SubscribeCampus: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SubscribeCampusReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
-    ]
-    """"""
-    SetRecentCampus: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SetRecentCampusReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
-    ]
-    """"""
-    DynTab: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynTabReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynTabReply,
-    ]
-    """"""
-    SchoolSearch: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReply,
-    ]
-    """"""
-    SchoolRecommend: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReply,
-    ]
-    """"""
-    DynSpaceSearchDetails: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReply,
-    ]
-    """"""
-    OfficialAccounts: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReply,
-    ]
-    """"""
-    OfficialDynamics: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReply,
-    ]
-    """"""
-    CampusRedDot: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReply,
-    ]
-    """"""
-    CampusRcmdFeed: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReply,
-    ]
-    """"""
-    TopicSquare: grpc.aio.UnaryUnaryMultiCallable[
+    TopicSquare: grpc.UnaryUnaryMultiCallable[
         bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReq,
         bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReply,
     ]
     """"""
-    TopicList: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.TopicListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.TopicListReply,
+    UnfollowMatch: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.UnfollowMatchReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
     ]
     """"""
-    CampusMateLikeList: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReply,
-    ]
-    """"""
-    CampusFeedback: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReply,
-    ]
-    """"""
-    CampusBillboard: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply,
-    ]
-    """"""
-    CampusBillboardInternal: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillboardInternalReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply,
-    ]
-    """"""
-    CampusTopicRcmdFeed: grpc.aio.UnaryUnaryMultiCallable[
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReq,
-        bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReply,
+    UpdateTabSetting: grpc.UnaryUnaryMultiCallable[
+        bilibili.app.dynamic.v2.dynamic_pb2.UpdateTabSettingReq,
+        bilibili.app.dynamic.v2.dynamic_pb2.NoReply,
     ]
     """"""
 
 class DynamicServicer(metaclass=abc.ABCMeta):
-    """v2动态"""
+    """v2动态, rpc 按字母顺序排列"""
 
-    @abc.abstractmethod
-    def DynVideo(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReply]]:
-        """动态视频页"""
-    @abc.abstractmethod
-    def DynAll(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAllReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynAllReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynAllReply]]:
-        """动态综合页"""
-    @abc.abstractmethod
-    def DynDetails(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReply]]:
-        """批量动态id获取动态详情"""
-    @abc.abstractmethod
-    def DynVideoPersonal(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReply]]:
-        """视频页最近访问 - 个人feed流"""
-    @abc.abstractmethod
-    def DynVideoUpdOffset(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVideoUpdOffsetReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.NoReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.NoReply]]:
-        """视频页最近访问 - 标记已读"""
-    @abc.abstractmethod
-    def DynAdditionCommonFollow(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReply]]:
-        """动态通用附加卡-follow/取消follow"""
-    @abc.abstractmethod
-    def DynThumb(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynThumbReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.NoReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.NoReply]]:
-        """动态点赞"""
-    @abc.abstractmethod
-    def DynFakeCard(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReply]]:
-        """动态发布生成临时卡"""
-    @abc.abstractmethod
-    def DynRcmdUpExchange(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReply]]:
-        """关注推荐up主换一换"""
-    @abc.abstractmethod
-    def DynAllPersonal(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReply]]:
-        """综合页最近访问 - 个人feed流"""
-    @abc.abstractmethod
-    def DynAllUpdOffset(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAllUpdOffsetReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.NoReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.NoReply]]:
-        """综合页最近访问 - 标记已读"""
-    @abc.abstractmethod
-    def DynVote(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReply]]:
-        """投票操作接口"""
-    @abc.abstractmethod
-    def DynMixUpListViewMore(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReply]]:
-        """网关调用 - 查看更多-列表"""
-    @abc.abstractmethod
-    def DynLight(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynLightReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynLightReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynLightReply]]:
-        """轻浏览"""
-    @abc.abstractmethod
-    def DynDetail(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReply]]:
-        """动态详情页"""
-    @abc.abstractmethod
-    def LikeList(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.LikeListReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.LikeListReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.LikeListReply]]:
-        """点赞列表"""
-    @abc.abstractmethod
-    def RepostList(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.RepostListReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.RepostListRsp, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.RepostListRsp]]:
-        """转发列表"""
-    @abc.abstractmethod
-    def ReactionList(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReply]]:
-        """新版动态转发点赞列表 需要登录"""
-    @abc.abstractmethod
-    def DynSpace(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceRsp, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceRsp]]:
-        """空间页动态"""
-    @abc.abstractmethod
-    def DynUnLoginRcmd(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReply]]:
-        """未登录页分区UP主推荐"""
-    @abc.abstractmethod
-    def DynServerDetails(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReply]]:
-        """"""
-    @abc.abstractmethod
-    def DynSearch(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReply]]:
-        """"""
-    @abc.abstractmethod
-    def SetDecision(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.SetDecisionReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.NoReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.NoReply]]:
-        """"""
     @abc.abstractmethod
     def AlumniDynamics(
         self,
         request: bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReply]]:
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.AlumniDynamicsReply:
         """"""
     @abc.abstractmethod
-    def CampusRcmd(
+    def CampusBillBoard(
         self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReply]]:
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply:
         """"""
     @abc.abstractmethod
-    def SubscribeCampus(
+    def CampusEntryTab(
         self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.SubscribeCampusReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.NoReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.NoReply]]:
-        """"""
-    @abc.abstractmethod
-    def SetRecentCampus(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.SetRecentCampusReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.NoReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.NoReply]]:
-        """"""
-    @abc.abstractmethod
-    def DynTab(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynTabReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynTabReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynTabReply]]:
-        """"""
-    @abc.abstractmethod
-    def SchoolSearch(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReply]]:
-        """"""
-    @abc.abstractmethod
-    def SchoolRecommend(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReply]]:
-        """"""
-    @abc.abstractmethod
-    def DynSpaceSearchDetails(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReply]]:
-        """"""
-    @abc.abstractmethod
-    def OfficialAccounts(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReply]]:
-        """"""
-    @abc.abstractmethod
-    def OfficialDynamics(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReply]]:
-        """"""
-    @abc.abstractmethod
-    def CampusRedDot(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReply]]:
-        """"""
-    @abc.abstractmethod
-    def CampusRcmdFeed(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReply]]:
-        """"""
-    @abc.abstractmethod
-    def TopicSquare(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReply]]:
-        """"""
-    @abc.abstractmethod
-    def TopicList(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.TopicListReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.TopicListReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.TopicListReply]]:
-        """"""
-    @abc.abstractmethod
-    def CampusMateLikeList(
-        self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReply]]:
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusEntryTabReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusEntryTabResp:
         """"""
     @abc.abstractmethod
     def CampusFeedback(
         self,
         request: bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReply]]:
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusFeedbackReply:
         """"""
     @abc.abstractmethod
-    def CampusBillboard(
+    def CampusHomePages(
         self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply]]:
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusHomePagesReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusHomePagesReply:
         """"""
     @abc.abstractmethod
-    def CampusBillboardInternal(
+    def CampusMateLikeList(
         self,
-        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusBillboardInternalReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusBillBoardReply]]:
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusMateLikeListReply:
+        """"""
+    @abc.abstractmethod
+    def CampusMngDetail(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusMngDetailReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusMngDetailReply:
+        """"""
+    @abc.abstractmethod
+    def CampusMngQuizOperate(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusMngQuizOperateReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusMngQuizOperateReply:
+        """"""
+    @abc.abstractmethod
+    def CampusMngSubmit(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusMngSubmitReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusMngSubmitReply:
+        """"""
+    @abc.abstractmethod
+    def CampusRcmd(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdReply:
+        """"""
+    @abc.abstractmethod
+    def CampusRcmdFeed(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusRcmdFeedReply:
+        """"""
+    @abc.abstractmethod
+    def CampusRecommend(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusRecommendReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusRecommendReply:
+        """"""
+    @abc.abstractmethod
+    def CampusRedDot(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusRedDotReply:
+        """"""
+    @abc.abstractmethod
+    def CampusSquare(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.CampusSquareReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusSquareReply:
         """"""
     @abc.abstractmethod
     def CampusTopicRcmdFeed(
         self,
         request: bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReq,
-        context: _ServicerContext,
-    ) -> typing.Union[bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReply, collections.abc.Awaitable[bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReply]]:
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.CampusTopicRcmdFeedReply:
+        """"""
+    @abc.abstractmethod
+    def DynAdditionCommonFollow(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynAdditionCommonFollowReply:
+        """动态通用附加卡-follow/取消follow"""
+    @abc.abstractmethod
+    def DynAll(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAllReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynAllReply:
+        """动态综合页"""
+    @abc.abstractmethod
+    def DynAllPersonal(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynAllPersonalReply:
+        """综合页最近访问 - 个人feed流"""
+    @abc.abstractmethod
+    def DynAllUpdOffset(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynAllUpdOffsetReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
+        """综合页最近访问 - 标记已读"""
+    @abc.abstractmethod
+    def DynDetail(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynDetailReply:
+        """动态详情页"""
+    @abc.abstractmethod
+    def DynDetails(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynDetailsReply:
+        """批量动态id获取动态详情"""
+    @abc.abstractmethod
+    def DynFakeCard(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynFakeCardReply:
+        """动态发布生成临时卡"""
+    @abc.abstractmethod
+    def DynFriend(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynFriendReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynFriendReply:
+        """"""
+    @abc.abstractmethod
+    def DynLight(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynLightReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynLightReply:
+        """轻浏览"""
+    @abc.abstractmethod
+    def DynMixUpListViewMore(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynMixUpListViewMoreReply:
+        """网关调用 - 查看更多-列表"""
+    @abc.abstractmethod
+    def DynRcmdUpExchange(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdUpExchangeReply:
+        """关注推荐up主换一换"""
+    @abc.abstractmethod
+    def DynSearch(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynSearchReply:
+        """"""
+    @abc.abstractmethod
+    def DynServerDetails(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynServerDetailsReply:
+        """"""
+    @abc.abstractmethod
+    def DynSpace(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceRsp:
+        """空间页动态"""
+    @abc.abstractmethod
+    def DynSpaceSearchDetails(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynSpaceSearchDetailsReply:
+        """"""
+    @abc.abstractmethod
+    def DynTab(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynTabReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynTabReply:
+        """"""
+    @abc.abstractmethod
+    def DynThumb(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynThumbReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
+        """动态点赞"""
+    @abc.abstractmethod
+    def DynUnLoginRcmd(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynRcmdReply:
+        """未登录页分区UP主推荐"""
+    @abc.abstractmethod
+    def DynVideo(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynVideoReply:
+        """动态视频页"""
+    @abc.abstractmethod
+    def DynVideoPersonal(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynVideoPersonalReply:
+        """视频页最近访问 - 个人feed流"""
+    @abc.abstractmethod
+    def DynVideoUpdOffset(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVideoUpdOffsetReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
+        """视频页最近访问 - 标记已读"""
+    @abc.abstractmethod
+    def DynVote(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.DynVoteReply:
+        """"""
+    @abc.abstractmethod
+    def FeedFilter(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.FeedFilterReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.FeedFilterReply:
+        """"""
+    @abc.abstractmethod
+    def FetchTabSetting(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.NoReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.FetchTabSettingReply:
+        """"""
+    @abc.abstractmethod
+    def HomeSubscribe(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.HomeSubscribeReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.HomeSubscribeReply:
+        """"""
+    @abc.abstractmethod
+    def LbsPoi(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.LbsPoiReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.LbsPoiReply:
+        """"""
+    @abc.abstractmethod
+    def LegacyTopicFeed(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.LegacyTopicFeedReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.LegacyTopicFeedReply:
+        """"""
+    @abc.abstractmethod
+    def LikeList(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.LikeListReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.LikeListReply:
+        """点赞列表"""
+    @abc.abstractmethod
+    def OfficialAccounts(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.OfficialAccountsReply:
+        """"""
+    @abc.abstractmethod
+    def OfficialDynamics(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.OfficialDynamicsReply:
+        """"""
+    @abc.abstractmethod
+    def ReactionList(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.ReactionListReply:
+        """新版动态转发点赞列表 需要登录"""
+    @abc.abstractmethod
+    def RepostList(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.RepostListReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.RepostListRsp:
+        """转发列表"""
+    @abc.abstractmethod
+    def SchoolRecommend(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.SchoolRecommendReply:
+        """"""
+    @abc.abstractmethod
+    def SchoolSearch(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.SchoolSearchReply:
+        """"""
+    @abc.abstractmethod
+    def SetDecision(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.SetDecisionReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
+        """"""
+    @abc.abstractmethod
+    def SetRecentCampus(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.SetRecentCampusReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
+        """"""
+    @abc.abstractmethod
+    def SubscribeCampus(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.SubscribeCampusReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
+        """"""
+    @abc.abstractmethod
+    def TopicList(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.TopicListReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.TopicListReply:
+        """"""
+    @abc.abstractmethod
+    def TopicSquare(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.TopicSquareReply:
+        """"""
+    @abc.abstractmethod
+    def UnfollowMatch(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.UnfollowMatchReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
+        """"""
+    @abc.abstractmethod
+    def UpdateTabSetting(
+        self,
+        request: bilibili.app.dynamic.v2.dynamic_pb2.UpdateTabSettingReq,
+        context: grpc.ServicerContext,
+    ) -> bilibili.app.dynamic.v2.dynamic_pb2.NoReply:
         """"""
 
-def add_DynamicServicer_to_server(servicer: DynamicServicer, server: typing.Union[grpc.Server, grpc.aio.Server]) -> None: ...
+def add_DynamicServicer_to_server(servicer: DynamicServicer, server: grpc.Server) -> None: ...
