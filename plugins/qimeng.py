@@ -22,7 +22,7 @@ class Config(BaseModel):
   # 并且没有批量查询，没法写查询全群
   # 对不起绮梦老师了
   host: str = "https://yunhei.furrynet.top"
-  api: str = "https://yunhei.qimeng.fun/OpenAPI.php"
+  api: str = "http://yunhei.qimeng.fun:12301/OpenAPI.php"
   token: SecretStr = SecretStr("")
   check_join: misc.EnableSet = misc.EnableSet.false()
   check_request: misc.EnableSet = misc.EnableSet.false()
@@ -86,8 +86,8 @@ CONFIG = configs.SharedConfig("qimeng", Config)
 async def query_openapi(uid: int) -> Optional[str]:
   config = CONFIG()
   http = misc.http()
-  url = config.api.format(host=config.host, token=config.token.get_secret_value(), uid=uid)
-  async with http.get(url) as response:
+  params = {"key": config.token.get_secret_value(), "id": uid}
+  async with http.get(config.api, params=params) as response:
     data = await response.json(content_type=None)  # text/html
   data = data["info"][0]
   if data["yh"] == "false":
