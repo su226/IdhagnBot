@@ -48,7 +48,7 @@ def children(parent: str) -> Tuple[List[str], List[Missing]]:
     meta_name = misc.removeprefix(f"{parent}.{child.name}", "plugins.")
     if (
       child.name.startswith("_")
-      or (meta_name in config.blacklist != config.invert_blacklist)
+      or (meta_name in config.blacklist) != config.invert_blacklist
     ):
       continue
     requirements = METADATA.requirements.get(meta_name, None)
