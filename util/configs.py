@@ -63,7 +63,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
   def __call__(self, *args: Unpack[TParam]) -> TModel:
     if args not in self.cache or self.cache[args].need_reload:
       with self.lock:  # Nonebot 的 run_sync 不在主线程
-        if args not in self.cache or not self.cache[args].need_reload:
+        if args not in self.cache or self.cache[args].need_reload:
           self.load(*args)
     return self.cache[args].item
 
