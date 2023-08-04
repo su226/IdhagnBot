@@ -146,8 +146,9 @@ async def handle_bilibili_link(event: MessageEvent, state: T_State) -> None:
 
     block = Card()
     infos = CardInfo()
-    date = time.strftime("%Y-%m-%d", time.localtime(data_view["pubdate"]))
+    date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(data_view["pubdate"]))
     infos.add(InfoText(date))
+    infos.add(InfoText("转载" if data_view["copyright"] == 2 else "自制"))
     if (parts := data_view["videos"]) > 1:
       infos.add(InfoText(f"{parts}P"))
     infos.add(InfoCount("play", data_stat["view"]))
@@ -157,11 +158,15 @@ async def handle_bilibili_link(event: MessageEvent, state: T_State) -> None:
     infos.add(InfoCount("coin", data_stat["coin"]))
     infos.add(InfoCount("collect", data_stat["favorite"]))
     infos.add(InfoCount("share", data_stat["share"]))
-    infos.finish_last_line()
     block.add(infos)
     desc = data_view["desc"]
     if desc and desc != "-":
-      block.add(CardText(desc, 32, 3))
+      block.add(CardText(desc, 28, 3, color=(102, 102, 102)))
+    if tags := data["Tags"]:
+      infos = CardInfo(8)
+      for tag in tags:
+        infos.add(InfoText("#" + tag["tag_name"], 26))
+      block.add(infos)
     card.add(block)
 
     # 3. 渲染卡片并发送

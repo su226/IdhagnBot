@@ -1,11 +1,14 @@
 from pathlib import Path
 from typing import List, Optional, Tuple
+import math
 
 from PIL import Image, ImageOps
 from typing_extensions import Self
+import cairo
 
 from util import imutil, textutil
 
+Color = Tuple[int, int, int]
 PLUGIN_DIR = Path(__file__).resolve().parent
 WIDTH = 640
 PADDING = 16
@@ -36,11 +39,14 @@ class Render:
 
 
 class CardText(Render):
-  def __init__(self, content: str, size: int, lines: int) -> None:
+  def __init__(
+    self, content: str, size: int = 32, lines: int = 0, color: Color = (0, 0, 0)
+  ) -> None:
     self.layout = textutil.layout(
       content, "sans", size, box=CONTENT_WIDTH, ellipsize="end" if lines else None, lines=lines
     )
     self.height = self.layout.get_pixel_size().height
+    self.color = color
 
   def get_width(self) -> int:
     return WIDTH
@@ -49,7 +55,7 @@ class CardText(Render):
     return self.height
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
-    textutil.paste(dst, (x + PADDING, y), self.layout)
+    textutil.paste(dst, (x + PADDING, y), self.layout, color=self.color)
 
 
 class CardLine(Render):
@@ -116,8 +122,8 @@ class CardAuthor(Render):
 
 
 class InfoText(Render):
-  def __init__(self, content: str) -> None:
-    self.layout = textutil.layout(content, "sans", 32)
+  def __init__(self, content: str, size: int = 32) -> None:
+    self.layout = textutil.layout(content, "sans", size)
     self.width, self.height = self.layout.get_pixel_size()
 
   def get_width(self) -> int:
@@ -148,31 +154,34 @@ class InfoCount(Render):
     icon_im = Image.open(PLUGIN_DIR / (self.icon + ".png"))
     dst.paste(icon_im, (x, y), icon_im)
     textutil.paste(
-      dst, (x + INFO_ICON_SIZE + INFO_ICON_MARGIN, y + self.height // 2), self.layout, anchor="lm")
+      dst, (x + INFO_ICON_SIZE + INFO_ICON_MARGIN, y + self.height // 2), self.layout, anchor="lm"
+    )
 
 
 class CardInfo(Render):
-  def __init__(self) -> None:
+  def __init__(self, gap_x: int = INFO_MARGIN, gap_y: int = 0) -> None:
     self.lines: List[Tuple[List[Render], int]] = []
     self.height = 0
     self.last_line: List[Render] = []
     self.last_line_width = 0
     self.last_line_height = 0
+    self.gap_x = gap_x
+    self.gap_y = gap_y
 
   def add(self, item: Render) -> None:
     width = item.get_width()
     height = item.get_height()
     if self.last_line:
-      self.last_line_width += INFO_MARGIN
+      self.last_line_width += self.gap_x
     if self.last_line_width + width > CONTENT_WIDTH:
-      self.finish_last_line()
+      self._push_line()
     self.last_line.append(item)
     self.last_line_width += width
     self.last_line_height = max(self.last_line_height, height)
 
-  def finish_last_line(self) -> None:
-    if not self.last_line:
-      return
+  def _push_line(self) -> None:
+    if self.lines:
+      self.height += self.gap_y
     self.lines.append((self.last_line, self.last_line_height))
     self.height += self.last_line_height
     self.last_line = []
@@ -183,15 +192,22 @@ class CardInfo(Render):
     return WIDTH
 
   def get_height(self) -> int:
-    return self.height
+    height = self.height + self.last_line_height
+    if self.lines and self.last_line:
+      height += self.gap_y
+    return height
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
     for items, height in self.lines:
       x1 = x + PADDING
       for item in items:
         item.render(dst, x1, y + (height - item.get_height()) // 2)
-        x1 += item.get_width() + INFO_MARGIN
-      y += height
+        x1 += item.get_width() + self.gap_x
+      y += height + self.gap_y
+    x1 = x + PADDING
+    for item in self.last_line:
+      item.render(dst, x1, y + (self.last_line_height - item.get_height()) // 2)
+      x1 += item.get_width() + self.gap_x
 
 
 class CardMargin(Render):
@@ -251,9 +267,10 @@ class CardTab(Render):
 
 
 class Card(Render):
-  def __init__(self, padding: int = PADDING) -> None:
+  def __init__(self, padding: int = PADDING, gap: int = 0) -> None:
     self.items: List[Render] = []
     self.padding = padding
+    self.gap = gap
     self.height = padding * 2
 
   def get_width(self) -> int:
@@ -263,6 +280,8 @@ class Card(Render):
     return self.height
 
   def add(self, item: Render) -> Self:
+    if self.items:
+      self.height += self.gap
     self.items.append(item)
     self.height += item.get_height()
     return self
@@ -271,4 +290,4 @@ class Card(Render):
     y += self.padding
     for item in self.items:
       item.render(dst, x, y)
-      y += item.get_height()
+      y += item.get_height() + self.gap
