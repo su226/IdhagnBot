@@ -2,7 +2,7 @@ import html
 import itertools
 import random
 from argparse import Namespace
-from typing import Awaitable, Callable, Dict, Iterable, List, Optional, Tuple, Union, cast
+from typing import Awaitable, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -214,13 +214,15 @@ async def handle_classic(bot: Bot, event: MessageEvent, args: Namespace) -> None
         await liferestart.send(f"只能选择恰好 {game.config.talent.limit} 个天赋")
         continue
       talents = [cast(Talent, inherited) if i == 0 else choices[i - 1] for i in selected]
+      talent_errors: Set[str] = set()
       for i, j in itertools.combinations(talents, 2):
         if i.is_imcompatible_with(j):
-          await liferestart.send(f"不能同时选择 {i.name} 和 {j.name}")
-          continue
+          talent_errors.add(f"不能同时选择 {i.name} 和 {j.name}")
         elif i is j:
-          await liferestart.send("每个天赋只能选择一次")
-          continue
+          talent_errors.add("每个天赋只能选择一次")
+      if talent_errors:
+        await liferestart.send("\n".join(talent_errors))
+        continue
       break
     if choice == "退":
       await liferestart.finish("已退出游戏")
