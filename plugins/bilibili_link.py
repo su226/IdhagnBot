@@ -56,7 +56,15 @@ def extract_bilibili_links(msg: Message) -> Generator[str, Any, Any]:
       if match := LINK_RE.search(url):
         yield match[0]
     elif seg.type == "text":
-      yield from (match[0] for match in LINK_RE.finditer(msg.extract_plain_text()))
+      yield from (match[0] for match in LINK_RE.finditer(seg.data["text"]))
+
+
+def format_duration(seconds: int) -> str:
+  minutes, seconds = divmod(seconds, 60)
+  hours, minutes = divmod(minutes, 24)
+  if hours:
+    return f"{hours}:{minutes:02}:{seconds:02}"
+  return f"{minutes:02}:{seconds:02}"
 
 
 async def check_bilibili_link(
@@ -136,7 +144,7 @@ async def handle_bilibili_link(event: MessageEvent, state: T_State) -> None:
     card = Card(0)
 
     block = Card()
-    block.add(CardText(data_view["title"], 40, 2))
+    block.add(CardText(data_view["title"], size=40, lines=2))
     avatar = Image.open(BytesIO(avatar_data))
     block.add(CardAuthor(avatar, data_card["name"], data_card["fans"]))
     card.add(block)
@@ -149,8 +157,10 @@ async def handle_bilibili_link(event: MessageEvent, state: T_State) -> None:
     date = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(data_view["pubdate"]))
     infos.add(InfoText(date))
     infos.add(InfoText("转载" if data_view["copyright"] == 2 else "自制"))
+    duration = format_duration(data_view["duration"])
     if (parts := data_view["videos"]) > 1:
-      infos.add(InfoText(f"{parts}P"))
+      duration = f"{parts}P共{duration}"
+    infos.add(InfoText(duration))
     infos.add(InfoCount("play", data_stat["view"]))
     infos.add(InfoCount("danmaku", data_stat["danmaku"]))
     infos.add(InfoCount("comment", data_stat["reply"]))
@@ -161,7 +171,7 @@ async def handle_bilibili_link(event: MessageEvent, state: T_State) -> None:
     block.add(infos)
     desc = data_view["desc"]
     if desc and desc != "-":
-      block.add(CardText(desc, 28, 3, color=(102, 102, 102)))
+      block.add(CardText(desc, size=28, lines=3, color=(102, 102, 102)))
     if tags := data["Tags"]:
       infos = CardInfo(8)
       for tag in tags:

@@ -24,13 +24,13 @@ async def get_appender(activity: ActivityAudio[object]) -> Callable[[Card], None
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
     block.add(CardTopic(activity.topic))
-    block.add(CardText(activity.content.title, 40, 2))
-    block.add(CardText(activity.content.label, 32, 1))
+    block.add(CardText(activity.content.title, size=40, lines=2))
+    block.add(CardText(activity.content.label, size=32, lines=1))
     card.add(block)
     card.add(CardCover(cover))
     if activity.content.desc and activity.content.desc != "-":
       block = Card()
-      block.add(CardText(activity.content.desc, 32, 3))
+      block.add(CardText(activity.content.desc, size=32, lines=3))
       append_extra(block, False)
       card.add(block)
     else:

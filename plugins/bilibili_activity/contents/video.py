@@ -29,12 +29,12 @@ async def get_appender(activity: ActivityVideo[object]) -> Callable[[Card], None
     else:
       block.add(CardTopic(activity.topic))
     if activity.content.title:  # 动态视频没有标题
-      block.add(CardText(activity.content.title, 40, 2))
+      block.add(CardText(activity.content.title, size=40, lines=2))
     card.add(block)
     card.add(CardCover(cover))
     if activity.content.desc and activity.content.desc != "-":
       block = Card()
-      block.add(CardText(activity.content.desc, 32, 3))
+      block.add(CardText(activity.content.desc, size=32, lines=3))
       append_extra(block, False)
       card.add(block)
     else:

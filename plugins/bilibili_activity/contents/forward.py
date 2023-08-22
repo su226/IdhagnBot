@@ -1,9 +1,9 @@
 import asyncio
+import time
 from typing import Any, Awaitable, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
 from nonebot.adapters.onebot.v11 import Message
 from PIL import Image
-import time
 
 from util import imutil, misc
 from util.api_common.bilibili_activity import (
@@ -38,7 +38,7 @@ def pgc_title(activity: ActivityPGC[object]) -> str:
   return prefix + " " + activity.content.season_name
 
 
-def checker(activity: Union[text.ActivityText, image.ActivityImage]) -> None:
+def checker(activity: Union[text.ActivityText[object], image.ActivityImage[object]]) -> None:
   check_ignore(True, activity.content.text)
 
 
@@ -61,9 +61,9 @@ async def get_pgc_appender(activity: ActivityPGC[object]) -> Callable[[Card], No
     if season_cover:
       block.add(CardAuthor(season_cover, activity.content.season_name))
     else:
-      block.add(CardText(activity.content.season_name, 32, 1))
+      block.add(CardText(activity.content.season_name, size=32, lines=1))
     block.add(CardTopic(activity.topic))
-    block.add(CardText(activity.content.episode_name, 40, 2))
+    block.add(CardText(activity.content.episode_name, size=40, lines=2))
     card.add(block)
     card.add(CardCover(episode_cover))
     append_extra(card, True)
@@ -82,9 +82,9 @@ async def get_live_appender(activity: ActivityLive[object]) -> Callable[[Card], 
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
     block.add(CardTopic(activity.topic))
-    block.add(CardText(activity.content.title, 40, 2))
+    block.add(CardText(activity.content.title, size=40, lines=2))
     streaming = "直播中" if activity.content.streaming else "已下播"
-    block.add(CardText(f"{activity.content.category} {streaming}", 32, 0))
+    block.add(CardText(f"{activity.content.category} {streaming}", size=32, lines=0))
     card.add(block)
     card.add(CardCover(cover))
     append_extra(card, True)
@@ -103,13 +103,13 @@ async def get_live_rcmd_appender(activity: ActivityLiveRcmd[object]) -> Callable
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
     block.add(CardTopic(activity.topic))
-    block.add(CardText(activity.content.title, 40, 2))
+    block.add(CardText(activity.content.title, size=40, lines=2))
     start_time = time.strftime("%m-%d %H:%M", time.localtime(activity.content.start_time))
     block.add(CardText((
       f"{activity.content.parent_category}/{activity.content.category} "
       f"{activity.content.watching} 人看过\n"
       f"{start_time} 开播"
-    ), 32, 0))
+    ), size=32, lines=0))
     card.add(block)
     card.add(CardCover(cover))
     append_extra(card, True)
@@ -134,14 +134,14 @@ async def get_course_appender(activity: ActivityCourse[object]) -> Callable[[Car
     if avatar:
       block.add(CardAuthor(avatar, activity.name))
     else:
-      block.add(CardText("@" + activity.name, 32, 1))
+      block.add(CardText("@" + activity.name, size=32, lines=1))
     block.add(CardTopic(activity.topic))
-    block.add(CardText(activity.content.title, 40, 2))
-    block.add(CardText(activity.content.stat, 32, 0))
+    block.add(CardText(activity.content.title, size=40, lines=2))
+    block.add(CardText(activity.content.stat, size=32, lines=0))
     card.add(block)
     card.add(CardCover(cover))
     block = Card()
-    block.add(CardText(activity.content.desc, 32, 3))
+    block.add(CardText(activity.content.desc, size=32, lines=3))
     append_extra(block, False)
     card.add(block)
 
@@ -159,8 +159,8 @@ async def get_playlist_appender(activity: ActivityPlaylist[object]) -> Callable[
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
     block.add(CardTopic(activity.topic))
-    block.add(CardText(activity.content.title, 40, 2))
-    block.add(CardText(activity.content.stat, 32, 0))
+    block.add(CardText(activity.content.title, size=40, lines=2))
+    block.add(CardText(activity.content.stat, size=32, lines=0))
     card.add(block)
     card.add(CardCover(cover))
     append_extra(card, True)
@@ -174,7 +174,7 @@ async def get_deleted_appender(reason: str) -> Callable[[Card], None]:
     message = "源动态已失效"
     if reason:
       message += f"（{reason}）"
-    block.add(CardText(message, 32, 0))
+    block.add(CardText(message, size=32, lines=0))
     card.add(block)
   return appender
 
@@ -182,7 +182,7 @@ async def get_deleted_appender(reason: str) -> Callable[[Card], None]:
 async def get_unknown_appender(activity: Activity[object, object]) -> Callable[[Card], None]:
   def appender(card: Card) -> None:
     block = Card()
-    block.add(CardText(f"IdhagnBot 暂不支持解析此类动态（{activity.type}）", 32, 0))
+    block.add(CardText(f"IdhagnBot 暂不支持解析此类动态（{activity.type}）", size=32, lines=0))
     card.add(block)
   return appender
 

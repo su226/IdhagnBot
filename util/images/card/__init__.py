@@ -1,10 +1,8 @@
 from pathlib import Path
-from typing import List, Optional, Tuple
-import math
+from typing import Any, List, Optional, Tuple, Union, cast, overload
 
 from PIL import Image, ImageOps
 from typing_extensions import Self
-import cairo
 
 from util import imutil, textutil
 
@@ -39,14 +37,33 @@ class Render:
 
 
 class CardText(Render):
+  @overload
   def __init__(
-    self, content: str, size: int = 32, lines: int = 0, color: Color = (0, 0, 0)
+    self, content: textutil.Layout, *, color: imutil.Color = ..., stroke: float = ...,
+    stroke_color: imutil.Color = ...
+  ) -> None: ...
+
+  @overload
+  def __init__(
+    self, content: str, font: str = ..., size: float = ..., *, color: imutil.Color = ...,
+    stroke: float = ..., stroke_color: imutil.Color = ..., wrap: textutil.Wrap = ...,
+    ellipsize: textutil.Ellipsize = ..., markup: bool = ..., align: textutil.Align = ...,
+    spacing: int = ..., lines: int = ...
+  ) -> None: ...
+
+  def __init__(
+    self, content: Union[textutil.Layout, str], font: str = "sans-serif", size: float = 32,
+    *args: Any, color: imutil.Color = (0, 0, 0), stroke: float = 0,
+    ellipsize: textutil.Ellipsize = "end", stroke_color: imutil.Color = (255, 255, 255), **kw: Any
   ) -> None:
-    self.layout = textutil.layout(
-      content, "sans", size, box=CONTENT_WIDTH, ellipsize="end" if lines else None, lines=lines
+    self.layout = (
+      cast(textutil.Layout, content) if isinstance(content, textutil.Layout) else
+      textutil.layout(content, font, size, *args, box=CONTENT_WIDTH, ellipsize=ellipsize, **kw)
     )
-    self.height = self.layout.get_pixel_size().height
+    self.width, self.height = self.layout.get_pixel_size()
     self.color = color
+    self.stroke = stroke
+    self.stroke_color = stroke_color
 
   def get_width(self) -> int:
     return WIDTH
@@ -55,7 +72,10 @@ class CardText(Render):
     return self.height
 
   def render(self, dst: Image.Image, x: int, y: int) -> None:
-    textutil.paste(dst, (x + PADDING, y), self.layout, color=self.color)
+    textutil.paste(
+      dst, (x + PADDING, y), self.layout, color=self.color, stroke=self.stroke,
+      stroke_color=self.stroke_color
+    )
 
 
 class CardLine(Render):

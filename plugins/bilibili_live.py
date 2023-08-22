@@ -2,7 +2,7 @@ import asyncio
 import time
 from collections import defaultdict
 from io import BytesIO
-from typing import Awaitable, Dict, List, Optional, Union, cast
+from typing import Any, Awaitable, Dict, List, Optional, Union, cast
 
 import nonebot
 from apscheduler.schedulers.base import JobLookupError
@@ -130,7 +130,7 @@ async def on_startup() -> None:
   CONFIG()
 
 
-async def get_message(data: dict) -> Message:
+async def get_message(data: Dict[str, Any]) -> Message:
   http = misc.http()
   async with http.get(f"{INFO_API_URL}?uid={data['uid']}") as response:
     info = await response.json()
@@ -148,8 +148,8 @@ async def get_message(data: dict) -> Message:
   def make() -> MessageSegment:
     card = Card(0)
     block = Card()
-    block.add(CardText(data["title"], 40, 2))
-    block.add(CardText(category, 32, 1))
+    block.add(CardText(data["title"], size=40, lines=2))
+    block.add(CardText(category, size=32, lines=1))
     avatar = Image.open(BytesIO(avatar_data))
     block.add(CardAuthor(avatar, data["uname"], fans))
     card.add(block)
@@ -160,7 +160,7 @@ async def get_message(data: dict) -> Message:
     card.add(CardCover(cover))
     if desc:
       block = Card()
-      block.add(CardText(desc, 32, 3))
+      block.add(CardText(desc, size=32, lines=3))
       card.add(block)
 
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
@@ -171,7 +171,7 @@ async def get_message(data: dict) -> Message:
   return f"{data['uname']} 开播了 {category}" + await misc.to_thread(make) + url
 
 
-async def push_all(bot: Bot, data: dict, targets: List[Target]) -> None:
+async def push_all(bot: Bot, data: Dict[str, Any], targets: List[Target]) -> None:
   logger.info(f"推送 {data['uname']} 的直播间")
   try:
     message = await get_message(data)

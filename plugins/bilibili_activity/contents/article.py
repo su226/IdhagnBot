@@ -34,11 +34,11 @@ async def get_appender(activity: ActivityArticle[object]) -> Callable[[Card], No
     block = Card()
     block.add(CardAuthor(avatar, activity.name))
     block.add(CardTopic(activity.topic))
-    block.add(CardText(activity.content.title, 40, 2))
+    block.add(CardText(activity.content.title, size=40, lines=2))
     card.add(block)
     card.add(CardCover(cover, False))
     block = Card()
-    block.add(CardText(activity.content.desc, 32, 3))
+    block.add(CardText(activity.content.desc, size=32, lines=3))
     append_extra(block, False)
     card.add(block)
 
