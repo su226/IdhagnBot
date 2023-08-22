@@ -1,43 +1,53 @@
 from datetime import datetime, timedelta
-from typing import AsyncGenerator, Dict, Optional, Set
+from typing import AsyncGenerator, Optional, Set
 
-import nonebot
 from nonebot.adapters.onebot.v11 import Event, GroupMessageEvent, GroupRecallNoticeEvent, Message
 from nonebot.typing import T_State
 
 from util import hook
 
-nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from .common import AutoDeleteDict
 
 
 class Record:
   def __init__(self) -> None:
-    hook.on_message_sent(self.on_message_sent)
-    self.messages: Dict[int, Set[int]] = {}
+    hook.on_message_sent(self._on_message_sent)
+    self._results = AutoDeleteDict[int, Set[int]](120)
+    self._caused_by = AutoDeleteDict[int, int](120)
 
-  async def on_message_sent(
+  async def _on_message_sent(
     self, event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int
   ) -> None:
-    if (
-      isinstance(event, GroupMessageEvent) and is_group and event.group_id == target_id
-      and event.message_id and message_id
+    if not (
+      message_id
+      and isinstance(event, GroupMessageEvent)
+      and is_group
+      and event.group_id == target_id
     ):
+      return
+    self._caused_by[message_id] = event.user_id
+    if event.message_id:
       recall_time = datetime.fromtimestamp(event.time) + timedelta(seconds=120)
-      if event.message_id not in self.messages and recall_time > datetime.now():
-        self.messages[event.message_id] = set()
-        scheduler.add_job(self.remove_message, "date", (event.message_id,), run_date=recall_time)
-      if event.message_id in self.messages:
-        self.messages[event.message_id].add(message_id)
+      if event.message_id not in self._results and recall_time > datetime.now():
+        self._results[event.message_id] = set()
+      if event.message_id in self._results:
+        self._results[event.message_id].add(message_id)
 
-  def remove_message(self, id: int) -> None:
-    if id in self.messages:
-      del self.messages[id]
+  def _remove_result(self, id: int) -> None:
+    if id in self._results:
+      del self._results[id]
+
+  def _remove_caused_by(self, id: int) -> None:
+    if id in self._caused_by:
+      del self._caused_by[id]
 
   async def has(self, event: GroupRecallNoticeEvent, state: T_State) -> bool:
-    return event.message_id in self.messages
+    return event.message_id in self._results
 
   async def get(self, event: GroupRecallNoticeEvent, state: T_State) -> AsyncGenerator[int, None]:
-    for i in self.messages[event.message_id]:
+    for i in self._results[event.message_id]:
       yield i  # 异步函数不能yield from
-    self.remove_message(event.message_id)
+    self._remove_result(event.message_id)
+
+  async def is_caused_by(self, message_id: int, user_id: int) -> bool:
+    return self._caused_by.get(message_id) == user_id
