@@ -10,7 +10,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
 from util import colorutil, command, context, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 COLORS = [
@@ -97,7 +97,7 @@ async def handle_orly(bot: Bot, event: MessageEvent, args: Namespace = ShellComm
       cover_task = IMAGES[int(args.image)]
     except (ValueError, KeyError):
       async with AvatarGetter(bot, event) as g:
-        cover_task = g(args.image, event.self_id)
+        cover_task = g(args.image, DefaultType.TARGET)
 
   def make() -> MessageSegment:
     if isinstance(cover_task, str):

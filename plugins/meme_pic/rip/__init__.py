@@ -1,5 +1,6 @@
 from argparse import Namespace
 from pathlib import Path
+from typing import Any
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -7,7 +8,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image
 
 from util import command, imutil, misc
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 
@@ -28,9 +29,10 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, "目标")
+    target_task = g(args.target, DefaultType.TARGET, "目标")
+    source_task = Any
     if args.source not in ("huaji", "滑稽", "panda", "熊猫", "熊猫头"):
-      source_task = g(args.source, event.user_id, "源")
+      source_task = g(args.source, DefaultType.SOURCE, "源")
 
   def make() -> MessageSegment:
     if args.source in ("huaji", "滑稽"):

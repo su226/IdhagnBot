@@ -9,7 +9,7 @@ from PIL import Image
 
 from util import command, imutil, misc
 from util.misc import range_int
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 
@@ -29,7 +29,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id)
+    target_task = g(args.target, DefaultType.TARGET)
 
   def make() -> MessageSegment:
     target, _ = target_task.result()

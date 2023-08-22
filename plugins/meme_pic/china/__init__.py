@@ -7,7 +7,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image
 
 from util import command, imutil, misc
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 
@@ -25,7 +25,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, bg=(226, 2, 18))
+    target_task = g(args.target, DefaultType.TARGET, bg=(226, 2, 18))
 
   def make() -> MessageSegment:
     target, _ = target_task.result()

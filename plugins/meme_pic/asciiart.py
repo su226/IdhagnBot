@@ -1,14 +1,14 @@
 from argparse import Namespace
 from io import StringIO
-from typing import List, cast
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, PyAccess
+from PIL import Image
 
 from util import command, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 PALETTE = {
   255: " ", 226: "`", 222: ".", 214: "-", 213: "'", 203: "^", 199: ",", 190: ":", 189: "~",
@@ -50,7 +50,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, raw=True)
+    target_task = g(args.target, DefaultType.TARGET, raw=True)
 
   def make() -> MessageSegment:
     w, h = textutil.layout("A", "monospace", SIZE).get_size()
@@ -60,10 +60,10 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     for raw in imutil.frames(target):
       columns = int(raw.width * SCALE)
       rows = int(raw.height * aspect_ratio * SCALE)
-      mapped = imutil.background(raw).resize((columns, rows), imutil.scale_resample()).quantize(
-        256, Image.Dither.FLOYDSTEINBERG, palette=PALETTE_IM  # type: ignore
+      mapped = imutil.quantize(
+        imutil.background(raw).resize((columns, rows), imutil.scale_resample()), PALETTE_IM
       )
-      px = cast(PyAccess.PyAccess, mapped.load())
+      px = mapped.load()
       lines = []
       for y in range(mapped.height):
         buf = StringIO()

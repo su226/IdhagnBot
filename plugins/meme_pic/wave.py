@@ -1,15 +1,15 @@
 import math
 from argparse import Namespace
 from concurrent.futures import Future, ProcessPoolExecutor
-from typing import List, cast
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, ImageOps, PyAccess
+from PIL import Image, ImageOps
 
 from util import command, imutil, misc
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 FRAMES = 8
 FRAMETIME = 50
@@ -23,8 +23,8 @@ def wave(
 ) -> Image.Image:
   im = ImageOps.contain(im.convert("RGBA"), (MAX_SIZE, MAX_SIZE), resample)
   out = Image.new("RGBA", im.size)
-  px = cast(PyAccess.PyAccess, im.load())
-  out_px = cast(PyAccess.PyAccess, out.load())
+  px = im.load()
+  out_px = out.load()
   phase = math.tau / FRAMES * i
 
   for x in range(im.width):
@@ -61,7 +61,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, raw=True)
+    target_task = g(args.target, DefaultType.TARGET, raw=True)
 
   def make() -> MessageSegment:
     target, _ = target_task.result()

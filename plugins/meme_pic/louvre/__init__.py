@@ -1,6 +1,6 @@
 from argparse import Namespace
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List
 
 import cairo
 import cv2
@@ -12,15 +12,15 @@ from PIL import Image, ImageChops, ImageFilter, ImageOps
 
 from util import command, imutil, misc
 from util.misc import range_int
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 
-def kernel_average(size: int) -> np.ndarray:
+def kernel_average(size: int) -> np.ndarray[Any, Any]:
   return np.full((size, size), 1 / size ** 2)
 
 
 DIR = Path(__file__).resolve().parent
-KERNELS: Dict[str, np.ndarray] = {
+KERNELS: Dict[str, np.ndarray[Any, Any]] = {
   "thin": kernel_average(5),
   "normal": kernel_average(7),
   "semibold": kernel_average(9),
@@ -114,7 +114,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, raw=True)
+    target_task = g(args.target, DefaultType.TARGET, raw=True)
 
   def make() -> MessageSegment:
     target, _ = target_task.result()

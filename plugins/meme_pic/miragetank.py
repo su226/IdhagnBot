@@ -6,7 +6,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image, ImageChops, ImageEnhance, ImageMath, ImageOps
 
 from util import command, imutil, misc
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument("target", nargs="?", default="", metavar="里图", help=(
@@ -25,8 +25,8 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    black_task = g(args.target, event.self_id, "里图", raw=True)
-    white_task = g(args.source, event.user_id, "表图", raw=True)
+    black_task = g(args.target, DefaultType.TARGET, "里图", raw=True)
+    white_task = g(args.source, DefaultType.SOURCE, "表图", raw=True)
 
   def make() -> MessageSegment:
     black, _ = black_task.result()

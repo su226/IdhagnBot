@@ -10,7 +10,7 @@ from PIL import Image, ImageChops, ImageEnhance, ImageFilter, ImageOps
 
 from util import command, context, imutil, misc, textutil
 from util.misc import range_float, range_int
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 
 def apply_yuv_loss(im: Image.Image, purple: bool = False) -> Image.Image:
@@ -113,7 +113,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, raw=True)
+    target_task = g(args.target, DefaultType.TARGET, raw=True)
   watermarks = args.watermark.copy()
   ctx = context.get_event_context(event)
   if args.member_name and ctx != -1:

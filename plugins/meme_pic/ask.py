@@ -1,14 +1,14 @@
 from argparse import Namespace
-from typing import Tuple, Union, cast, overload
+from typing import Tuple, Union, overload
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.exception import ActionFailed
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import Image, PyAccess
+from PIL import Image
 
 from util import command, context, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 GENDERS = {
   "male": "他",
@@ -23,25 +23,29 @@ GENDERS = {
 def vertical_gradient(
   mode: str, top: int, bottom: int, width: int, height: int
 ) -> Image.Image: ...
+
 @overload
 def vertical_gradient(
-  mode: str, top: Tuple[int], bottom: Tuple[int], width: int, height: int
+  mode: str, top: Tuple[int, ...], bottom: Tuple[int, ...], width: int, height: int
 ) -> Image.Image: ...
+
 def vertical_gradient(
-  mode: str, top: Union[int, Tuple[int]], bottom: Union[int, Tuple[int]], width: int, height: int
+  mode: str, top: Union[int, Tuple[int, ...]], bottom: Union[int, Tuple[int, ...]], width: int,
+  height: int
 ) -> Image.Image:
   gradient = Image.new(mode, (1, height))
-  px = cast(PyAccess.PyAccess, gradient.load())
-  is_tuple = isinstance(top, tuple)
-  if is_tuple:
-    delta = tuple(x - y for x, y in zip(cast(Tuple[int], bottom), top))
+  px = gradient.load()
+  if isinstance(bottom, tuple) and isinstance(top, tuple):
+    delta = tuple(x - y for x, y in zip(bottom, top))
     for i in range(height):
       ratio = i / (height - 1)
-      px[0, i] = tuple(int(ratio * x + y) for x, y in zip(cast(Tuple[int], delta), top))
-  else:
-    delta = cast(int, bottom) - top
+      px[0, i] = tuple(int(ratio * x + y) for x, y in zip(delta, top))
+  elif isinstance(bottom, int) and isinstance(top, int):
+    delta = bottom - top
     for i in range(height):
       px[0, i] = int(delta * (i / (height - 1))) + top
+  else:
+    raise TypeError
   return gradient.resize((width, height))
 
 
@@ -65,7 +69,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id)
+    target_task = g(args.target, DefaultType.TARGET)
   target, target_id = target_task.result()
   name = args.name
   gender = args.gender

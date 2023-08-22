@@ -1,7 +1,7 @@
 import re
 from argparse import Namespace
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 import gi
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
@@ -13,7 +13,7 @@ gi.require_version("Pango", "1.0")
 from gi.repository import Pango  # type: ignore
 
 from util import command, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 CHINESE_RE = re.compile(r"[\u4e00-\u9fa5]+")
@@ -26,7 +26,7 @@ TRANSFORM = (
 )
 
 
-def render_vertical_text(content: str, font: str, size: int, **kw) -> Image.Image:
+def render_vertical_text(content: str, font: str, size: int, **kw: Any) -> Image.Image:
   lines: List[Tuple[int, List[Image.Image]]] = []
   total_width = 0
   total_height = 0
@@ -89,7 +89,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id)
+    target_task = g(args.target, DefaultType.TARGET)
 
   def make() -> MessageSegment:
     target, _ = target_task.result()

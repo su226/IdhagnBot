@@ -8,7 +8,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image
 
 from util import command, imutil, misc
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIRECTIONS = ["top", "bottom", "left", "right", "t", "b", "l", "r"]
 
@@ -27,7 +27,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, crop=False)
+    target_task = g(args.target, DefaultType.TARGET, crop=False)
 
   direction = args.direction
   if not direction:

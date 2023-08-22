@@ -1,4 +1,5 @@
 from argparse import Namespace
+from typing import cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -6,7 +7,7 @@ from nonebot.rule import ArgumentParser
 from PIL import ImageOps
 
 from util import command, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 COLOR = (78, 114, 184)
 
@@ -24,12 +25,12 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id, bg=(191, 191, 191))
+    target_task = g(args.target, DefaultType.TARGET, bg=(191, 191, 191))
 
   def make() -> MessageSegment:
     target, _ = target_task.result()
     im = target.resize((500, 500), imutil.scale_resample()).convert("L")
-    im = ImageOps.colorize(im, (0, 0, 0), (255, 255, 255), COLOR)  # type: ignore
+    im = ImageOps.colorize(im, "black", "white", cast(str, COLOR))
     textutil.paste(
       im, (400, 50), "群", "sans bold", 80,
       color=(255, 255, 255), stroke=2, stroke_color=COLOR

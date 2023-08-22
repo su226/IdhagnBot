@@ -7,7 +7,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
 from util import command, context, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 AVATAR_TRANSFORM = (1.0116, -0.0598, 0, -0.0453, 1.0905, 0, 0, 0.0004)
@@ -31,7 +31,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id)
+    target_task = g(args.target, DefaultType.TARGET)
   target, user = target_task.result()
   if args.name is not None:
     name = args.name

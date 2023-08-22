@@ -14,7 +14,7 @@ from PIL import Image
 
 from util import command, context, imutil, misc, textutil
 from util.misc import range_int
-from util.user_aliases import AvatarGetter, get_avatar
+from util.user_aliases import AvatarGetter, DefaultType, get_avatar
 
 
 @dataclass
@@ -94,7 +94,7 @@ def parse_message(
     return ParsedMessage(avatar, name, " ".join(args.content), args.repeat)
 
   return [
-    g.submit(parse_one(g(args.user, event.self_id, f"头像{i}"), args))
+    g.submit(parse_one(g(args.user, DefaultType.TARGET, f"头像{i}"), args))
     for i, args in enumerate(all_args, 1)
   ]
 

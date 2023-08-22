@@ -9,7 +9,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image
 
 from util import command, imutil, misc
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 COEFFICENTS = [0.01, 0.03, 0.05, 0.08, 0.12, 0.17, 0.23, 0.3, 0.4, 0.6]
 BORDERS = [25, 52, 67, 83, 97, 108, 118, 128, 138, 148]
@@ -47,7 +47,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id)
+    target_task = g(args.target, DefaultType.TARGET)
 
   def make() -> MessageSegment:
     target, _ = target_task.result()

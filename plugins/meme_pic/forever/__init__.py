@@ -10,7 +10,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image
 
 from util import command, context, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 PREFIX = "我永远喜欢"
@@ -56,7 +56,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   default_names: Dict[int, str] = {i: name for i, name in args.name}
   async with AvatarGetter(bot, event) as g:
     tasks: List[asyncio.Task[Tuple[Image.Image, str]]] = [
-      g.submit(get_one(g.get(pattern, event.self_id, f"目标{i}"), i))
+      g.submit(get_one(g.get(pattern, DefaultType.TARGET, f"目标{i}"), i))
       for i, pattern in enumerate(args.targets, 1)
     ]
 

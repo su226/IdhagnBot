@@ -8,7 +8,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image
 
 from util import command, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 
 def transposes(l: List[Image.Image]) -> Generator[Image.Image, None, None]:
@@ -54,7 +54,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   target_tasks: List[asyncio.Task[Tuple[Image.Image, Optional[int]]]] = []
   async with AvatarGetter(bot, event) as g:
     for i, pattern in enumerate(args.targets, 1):
-      target_tasks.append(g(pattern, event.self_id, f"目标{i}"))
+      target_tasks.append(g(pattern, DefaultType.TARGET, f"目标{i}"))
 
   def make() -> MessageSegment:
     targets = [

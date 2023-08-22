@@ -10,7 +10,7 @@ from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
 from util import command, imutil, misc, textutil
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 BRACKETS = [  # 所有形式的大括号、中括号、小括号、尖括号，来自unicode-table.com（）
@@ -66,10 +66,10 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     await matcher.finish("最多只能有 10 个目标")
   async with AvatarGetter(bot, event) as g:
     target_tasks = [
-      get_image(g, pattern, event.self_id, 90, f"目标{i}")
+      get_image(g, pattern, DefaultType.TARGET, 90, f"目标{i}")
       for i, pattern in enumerate(args.targets, 1)
     ]
-    source_task = get_image(g, args.source, event.user_id, 125, "源")
+    source_task = get_image(g, args.source, DefaultType.SOURCE, 125, "源")
 
   def make() -> MessageSegment:
     targets = [task.result() for task in target_tasks]

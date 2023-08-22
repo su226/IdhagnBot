@@ -7,7 +7,7 @@ from PIL import Image
 
 from util import command, imutil, misc, textutil
 from util.misc import range_float
-from util.user_aliases import AvatarGetter
+from util.user_aliases import AvatarGetter, DefaultType
 
 WIDTH = 500
 TEXT_WIDTH = WIDTH - 20
@@ -33,7 +33,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
-    target_task = g(args.target, event.self_id)
+    target_task = g(args.target, DefaultType.TARGET)
 
   def make() -> MessageSegment:
     target, _ = target_task.result()
