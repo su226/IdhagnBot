@@ -1,8 +1,9 @@
 import asyncio
-from typing import Awaitable, Dict, List, Set, Tuple, cast
+from typing import Dict, List, Set, Tuple, cast
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
+from nonebot.permission import SUPERUSER
 
 from util import command, context, misc, user_aliases
 
@@ -20,20 +21,22 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
     uids.add(uid)
 
   messages: List[Tuple[str, str]] = []
-  match_coros: List[Awaitable[None]] = []
+  match_tasks: List[asyncio.Task[None]] = []
   match_to_uid: Dict[str, int] = {}
-  uids: Set[int] = {event.self_id}
+  uids: Set[int] = set()
+  is_superuser = await SUPERUSER(bot, event)
+  if not is_superuser:
+    uids.add(event.self_id)
   for x in str(msg).split("--"):
     message = x.split(None, 1)
     if len(message) != 2:
       await fake_forward.finish(fake_forward.__doc__)
-    match_coros.append(match(message[0]))
+    match_tasks.append(asyncio.create_task(match(message[0])))
     messages.append(tuple(message))
   if not messages:
     await fake_forward.finish(fake_forward.__doc__)
-  done, _ = await asyncio.wait(match_coros)
-  errors = []
-  for i in done:
+  errors: List[str] = []
+  for i in (await asyncio.wait(match_tasks))[0]:
     if (e := i.exception()):
       errors.extend(cast(misc.AggregateError, e))
   if errors:
@@ -45,12 +48,15 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
   uid_to_name: Dict[int, str] = {}
   await asyncio.gather(*[fetch_name(uid) for uid in uids])
 
-  await misc.send_forward_msg(bot, event, MessageSegment("node", {
-    "name": uid_to_name[event.self_id],
-    "uin": event.self_id,
-    "content": "免责声明：本消息由机器人发送，仅供娱乐，切勿当真！"
-  }), *(MessageSegment("node", {
-    "name": uid_to_name[match_to_uid[match]],
-    "uin": match_to_uid[match],
-    "content": content
-  }) for match, content in messages))
+  nodes: List[MessageSegment] = []
+  if not is_superuser:
+    nodes.append(misc.forward_node(
+      event.self_id, uid_to_name[event.self_id],
+      "免责声明：本消息由机器人发送，仅供娱乐，切勿当真！"
+    ))
+  nodes.extend(
+    misc.forward_node(match_to_uid[match], uid_to_name[match_to_uid[match]], content)
+    for match, content in messages
+  )
+
+  await misc.send_forward_msg(bot, event, *nodes)
