@@ -1,5 +1,5 @@
 import html
-from typing import Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pydantic import BaseModel, Field
@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 from util import configs, context, misc, permission
 
 
-def NOOP_CONDITION(_): return True
+def NOOP_CONDITION(_: Any): return True
 
 
 class CommonData(BaseModel):

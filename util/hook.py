@@ -33,7 +33,7 @@ def normalize_message(raw: Any) -> Message:
 async def on_called_api(
   _, e: Optional[Exception], api: str, params: Dict[str, Any], result: Any
 ) -> None:
-  if e is not None:
+  if not message_sent_hook or e is not None:
     return
   if api in ("send_private_msg", "send_group_msg", "send_msg"):
     message = params["message"]
@@ -54,7 +54,7 @@ async def on_called_api(
     logger.exception("执行 on_message_sent 失败！")
 
 
-async def bot_send(self: Bot, event: Event, message: misc.AnyMessage, **kw) -> Any:
+async def bot_send(self: Bot, event: Event, message: misc.AnyMessage, **kw: Any) -> Any:
   token = send_event.set(event)
   try:
     return await bot_send_original(self, event, message, **kw)

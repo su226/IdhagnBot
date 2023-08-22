@@ -7,9 +7,9 @@ from typing import Dict, List, Tuple
 
 import cairo
 import nonebot
-from nonebot.adapters.onebot.v11 import MessageEvent, MessageSegment, Message
-from nonebot.typing import T_State
+from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
+from nonebot.typing import T_State
 from pydantic import BaseModel, Field, PrivateAttr
 
 from util import command, configs, context, imutil, misc

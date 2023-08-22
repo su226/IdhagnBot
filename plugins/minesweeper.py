@@ -2,11 +2,11 @@ import itertools
 import random
 import re
 import time
-from typing import Dict, Generator, List, Tuple
+from typing import Any, Dict, Generator, List, Tuple
 
 import cairo
 import nonebot
-from nonebot.adapters.onebot.v11 import MessageEvent, MessageSegment, Message
+from nonebot.adapters.onebot.v11 import Message, MessageEvent, MessageSegment
 from nonebot.params import CommandArg
 from nonebot.typing import T_State
 from pydantic import BaseModel, Field, PrivateAttr
@@ -262,7 +262,8 @@ def neighbors(board: List[List[int]], y0: int, x0: int) -> Generator[Tuple[int, 
 
 
 def draw_border(
-  cr: cairo.Context, x: float, y: float, w: float, h: float, b: float, reverse: bool = False
+  cr: "cairo.Context[Any]", x: float, y: float, w: float, h: float, b: float,
+  reverse: bool = False
 ) -> None:
   cr.move_to(x, y)
   cr.line_to(x + w, y)
@@ -288,7 +289,7 @@ def draw_border(
   cr.fill()
 
 
-def draw_flag(cr: cairo.Context, x: float, y: float) -> None:
+def draw_flag(cr: "cairo.Context[Any]", x: float, y: float) -> None:
   def coord(x1: float, y1: float) -> Tuple[float, float]:
     return x + x1 * CELL_SIZE, y + y1 * CELL_SIZE
   cr.move_to(*coord(.6, .5))
@@ -306,7 +307,7 @@ def draw_flag(cr: cairo.Context, x: float, y: float) -> None:
   cr.fill()
 
 
-def draw_cross(cr: cairo.Context, x: float, y: float) -> None:
+def draw_cross(cr: "cairo.Context[Any]", x: float, y: float) -> None:
   line = round(.1 * CELL_SIZE)
   cr.move_to(x + CELL_BORDER, y + CELL_BORDER)
   cr.line_to(x + CELL_BORDER + line, y + CELL_BORDER)
@@ -324,7 +325,7 @@ def draw_cross(cr: cairo.Context, x: float, y: float) -> None:
   cr.fill()
 
 
-def draw_mine(cr: cairo.Context, x: float, y: float) -> None:
+def draw_mine(cr: "cairo.Context[Any]", x: float, y: float) -> None:
   cx = x + 0.5 + CELL_SIZE / 2
   cy = y + 0.5 + CELL_SIZE / 2
   r = CELL_SIZE / 2 - 3
@@ -344,7 +345,7 @@ def draw_mine(cr: cairo.Context, x: float, y: float) -> None:
 
 
 def draw_pos(
-  cr: cairo.Context, font: cairo.FontFace, y: int, x: int, cell_y: int, cell_x: int
+  cr: "cairo.Context[Any]", font: cairo.FontFace, y: int, x: int, cell_y: int, cell_x: int
 ) -> None:
   xy_str = f"{to_base26(y + 1)}{x + 1}"
   cr.set_font_face(font)

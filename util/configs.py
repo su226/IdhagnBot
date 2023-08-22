@@ -47,7 +47,7 @@ class CacheItem(Generic[TModel]):
 
 class BaseConfig(Generic[TModel, Unpack[TParam]]):
   category: ClassVar = "配置"
-  all: ClassVar[List["BaseConfig"]] = []
+  all: ClassVar[List["BaseConfig[Any]"]] = []
 
   def __init__(self, model: Type[TModel], reloadable: Reloadable = "lazy") -> None:
     self.model = model
@@ -55,7 +55,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     self.reloadable: Reloadable = reloadable
     self.handlers: List[LoadHandler[TModel, Unpack[TParam]]] = []
     self.lock = Lock()
-    self.all.append(self)
+    self.all.append(cast(BaseConfig[Any], self))
 
   def get_file(self, *args: Unpack[TParam]) -> str:
     raise NotImplementedError
@@ -69,7 +69,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
 
   def load(self, *args: Unpack[TParam]) -> None:
     if args not in self.cache:
-      self.cache[args] = CacheItem(cast(Any, None))
+      self.cache[args] = CacheItem(Any)
     cache_item = self.cache[args]
     old_config = cache_item.item
     file = self.get_file(*args)

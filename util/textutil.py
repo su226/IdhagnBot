@@ -1,19 +1,19 @@
 import math
-from typing import Dict, Literal, Optional, Tuple, Union, overload
+from typing import Any, Dict, Literal, Optional, Tuple, Union, cast, overload
 
 import cairo
 import gi
 from PIL import Image
-from typing_extensions import Self
+from typing_extensions import Self, TypeAlias
 
-from util import imutil, misc
-from util.colorutil import RGB, split_rgb
+from util import colorutil, imutil, misc
 
 gi.require_version("GLib", "2.0")
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
 from gi.repository import GLib, Pango, PangoCairo  # type: ignore
 
+Layout: TypeAlias = Pango.Layout
 Wrap = Literal["word", "char", "word_char"]
 Ellipsize = Literal[None, "start", "middle", "end"]
 Align = Literal["l", "m", "r"]
@@ -75,10 +75,10 @@ class RichText:
     self._utf8 = bytearray()
     self._attrs = Pango.AttrList()
     self._images: Dict[int, cairo.ImageSurface] = {}
-    self._layout = Pango.Layout(self._context)
+    self._layout = Layout(self._context)
     self._frozen = False
 
-  def _render_images(self, cr: cairo.Context, attr: Pango.AttrShape, do_path: bool) -> None:
+  def _render_images(self, cr: "cairo.Context[Any]", attr: Pango.AttrShape, do_path: bool) -> None:
     if do_path:
       return
     x, y = cr.get_current_point()
@@ -167,21 +167,21 @@ class RichText:
     _, rect = self._layout.get_pixel_extents()
     return rect
 
-  def unwrap(self) -> Pango.Layout:
+  def unwrap(self) -> Layout:
     self._layout.set_text(self._utf8.decode())
     self._layout.set_attributes(self._attrs)
     return self._layout
 
   def render(
-    self, color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
-    stroke_color: Union[RGB, int] = (255, 255, 255)
+    self, color: imutil.Color = (0, 0, 0), stroke: float = 0,
+    stroke_color: imutil.Color = (255, 255, 255)
   ) -> Image.Image:
     return render(self.unwrap(), color=color, stroke=stroke, stroke_color=stroke_color)
 
   def paste(
     self, im: Image.Image, xy: Tuple[float, float], anchor: imutil.Anchor = "lt",
-    color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
-    stroke_color: Union[RGB, int] = (255, 255, 255)
+    color: imutil.Color = (0, 0, 0), stroke: float = 0,
+    stroke_color: imutil.Color = (255, 255, 255)
   ) -> Image.Image:
     src = render(self.unwrap(), color=color, stroke=stroke, stroke_color=stroke_color)
     imutil.paste(im, src, xy, anchor=anchor)
@@ -198,7 +198,9 @@ def special_font(name: str, fallback: str) -> str:
   return fallback
 
 
-def font_options(context: Union[None, Pango.Context, cairo.Context] = None) -> cairo.FontOptions:
+def font_options(
+  context: Union[None, Pango.Context, "cairo.Context[Any]"] = None
+) -> cairo.FontOptions:
   config = misc.CONFIG()
   options = cairo.FontOptions()
   options.set_antialias(ANTIALIASES[config.text_antialias])
@@ -216,16 +218,12 @@ def layout(
   content: str, font: str, size: float, *, box: Optional[int] = None, wrap: Wrap = "word",
   ellipsize: Ellipsize = None, markup: bool = False, align: Align = "l", spacing: int = 0,
   lines: int = 0
-) -> Pango.Layout:
-  render = (
-    RichText().set_font(font, size).set_wrap(wrap).set_ellipsize(ellipsize)
-    .set_align(align)
-    .set_spacing(spacing)
-  )
+) -> Layout:
+  render = RichText().set_font(font, size).set_wrap(wrap).set_align(align).set_spacing(spacing)
   if box:
     render.set_width(box)
   if lines:
-    render.set_height(-lines)
+    render.set_height(-lines).set_ellipsize(ellipsize)
   if markup:
     try:
       render.append_markup(content)
@@ -238,25 +236,25 @@ def layout(
 
 @overload
 def render(
-  content: Pango.Layout, *, color: Union[RGB, int] = ..., stroke: float = ...,
-  stroke_color: Union[RGB, int] = ...
+  content: Layout, *, color: imutil.Color = ..., stroke: float = ...,
+  stroke_color: imutil.Color = ...
 ) -> Image.Image: ...
 @overload
 def render(
-  content: str, font: str, size: float, *, color: Union[RGB, int] = ..., stroke: float = ...,
-  stroke_color: Union[RGB, int] = ..., box: Optional[int] = ..., wrap: Wrap = ...,
+  content: str, font: str, size: float, *, color: imutil.Color = ..., stroke: float = ...,
+  stroke_color: imutil.Color = ..., box: Optional[int] = ..., wrap: Wrap = ...,
   ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
   lines: int = ...
 ) -> Image.Image: ...
 def render(
-  content: Union[str, Pango.Layout], *args, color: Union[RGB, int] = (0, 0, 0), stroke: float = 0,
-  stroke_color: Union[RGB, int] = (255, 255, 255), **kw
+  content: Union[str, Layout], *args: Any, color: imutil.Color = (0, 0, 0), stroke: float = 0,
+  stroke_color: imutil.Color = (255, 255, 255), **kw: Any
 ) -> Image.Image:
-  if isinstance(content, Pango.Layout):
+  if isinstance(content, Layout):
     l = content
   else:
     l = layout(content, *args, **kw)
-  _, rect = l.get_pixel_extents()  # type: ignore
+  _, rect = cast(Any, l).get_pixel_extents()
   margin = math.ceil(stroke)
   x = -rect.x + margin
   y = -rect.y + margin
@@ -266,14 +264,14 @@ def render(
     cr = cairo.Context(surface)
     if stroke:
       if isinstance(stroke_color, int):
-        stroke_color = split_rgb(stroke_color)
+        stroke_color = colorutil.split_rgb(stroke_color)
       cr.move_to(x, y)
       PangoCairo.layout_path(cr, l)
       cr.set_line_width(stroke * 2)
       cr.set_source_rgb(stroke_color[0] / 255, stroke_color[1] / 255, stroke_color[2] / 255)
       cr.stroke()
     if isinstance(color, int):
-      color = split_rgb(color)
+      color = colorutil.split_rgb(color)
     cr.move_to(x, y)
     cr.set_source_rgb(color[0] / 255, color[1] / 255, color[2] / 255)
     PangoCairo.show_layout(cr, l)
@@ -282,19 +280,19 @@ def render(
 
 @overload
 def paste(
-  im: Image.Image, xy: Tuple[float, float], content: Pango.Layout, *, anchor: imutil.Anchor = ...,
-  color: Union[RGB, int] = ..., stroke: float = ..., stroke_color: Union[RGB, int] = ...
+  im: Image.Image, xy: Tuple[float, float], content: Layout, *, anchor: imutil.Anchor = ...,
+  color: imutil.Color = ..., stroke: float = ..., stroke_color: imutil.Color = ...
 ) -> Image.Image: ...
 @overload
 def paste(
   im: Image.Image, xy: Tuple[float, float], content: str, font: str, size: float, *,
-  anchor: imutil.Anchor = ..., color: Union[RGB, int] = ..., stroke: float = ...,
-  stroke_color: Union[RGB, int] = ..., box: Optional[int] = ..., wrap: Wrap = ...,
+  anchor: imutil.Anchor = ..., color: imutil.Color = ..., stroke: float = ...,
+  stroke_color: imutil.Color = ..., box: Optional[int] = ..., wrap: Wrap = ...,
   ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
   lines: int = ...
 ) -> Image.Image: ...
 def paste(
-  im: Image.Image, xy: Tuple[float, float], *args, anchor: imutil.Anchor = "lt", **kw
+  im: Image.Image, xy: Tuple[float, float], *args: Any, anchor: imutil.Anchor = "lt", **kw: Any
 ) -> Image.Image:
   text = render(*args, **kw)
   imutil.paste(im, text, xy, anchor=anchor)

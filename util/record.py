@@ -65,7 +65,7 @@ async def on_startup():
 
 
 def process_segment(segment: MessageSegment) -> List[CacheEntry]:
-  caches = []
+  caches: List[CacheEntry] = []
   if segment.type in ("image", "record", "video"):
     file = segment.data.get("file", "")
     if file.startswith("base64://"):

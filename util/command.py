@@ -223,7 +223,7 @@ class CommandBuilder:
     self.help_data.condition = condition
     return self
 
-  def state(self, **kw) -> Self:
+  def state(self, **kw: Any) -> Self:
     self._state.update(kw)
     return self
 

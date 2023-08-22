@@ -1,9 +1,10 @@
 from typing import Callable
 
-from util import textutil, imutil
+from PIL import Image
+
+from util import imutil, textutil
 from util.api_common.bilibili_activity import ExtraGoods
 from util.images.card import Card, CardTab
-from PIL import Image
 
 from ..common import fetch_images
 

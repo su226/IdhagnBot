@@ -1,7 +1,7 @@
 import math
 import re
 from dataclasses import dataclass
-from typing import AsyncGenerator, Optional, Tuple
+from typing import Any, AsyncGenerator, Dict, Optional, Tuple
 from urllib.parse import quote as encodeuri, urlparse, urlunparse
 
 from nonebot.adapters.onebot.v11 import MessageSegment
@@ -40,7 +40,7 @@ class MiguMusic(Music):
     return urlunparse(urlparse(url)._replace(scheme="https", netloc="freetyst.nf.migu.cn"))
 
   @staticmethod
-  def _get_best_url(data) -> Tuple[Optional[str], str]:
+  def _get_best_url(data: Dict[str, Any]) -> Tuple[Optional[str], str]:
     formats = data["newRateFormats"] or data["rateFormats"]
     if formats[-1]["formatType"] == "SQ":
       lossless_format = formats[-1]

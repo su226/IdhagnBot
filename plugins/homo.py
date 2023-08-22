@@ -2,6 +2,7 @@ import bisect
 import math
 import re
 import sys
+from typing import Any
 
 from nonebot.adapters import Message
 from nonebot.params import CommandArg
@@ -581,7 +582,7 @@ homo_number = (
   .build()
 )
 @homo_number.handle()
-async def handle_homo_number(arg: Message = CommandArg()) -> None:
+async def handle_homo_number(arg: Message[Any] = CommandArg()) -> None:
   text = arg.extract_plain_text().rstrip()
   if not text:
     await homo_number.finish(homo_number.__doc__)

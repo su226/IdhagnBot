@@ -1,9 +1,9 @@
 # 修改自 https://github.com/avanisubbiah/material-color-utilities-python
 # 移除了不必要的 import，增加类型注解
 # pyright: strict
-from typing import List, Tuple, cast
+from typing import List
 
-from PIL import Image, PyAccess
+from PIL import Image
 
 from . import score
 from .color_utils import argb_from_rgb
@@ -17,11 +17,11 @@ def source_color_from_image(image: Image.Image) -> int:
   :return: Source color - the color most suitable for creating a UI theme
   '''
   image = image.convert("RGBA")
-  px = cast(PyAccess.PyAccess, image.load())
+  px = image.load()
   pixels: List[int] = []
   for x in range(image.width):
     for y in range(image.height):
-      r, g, b, a = cast(Tuple[int, int, int, int], px[x, y])
+      r, g, b, a = px[x, y]
       if a < 255:
         continue
       argb = argb_from_rgb(r, g, b)

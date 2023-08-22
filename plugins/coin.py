@@ -38,7 +38,7 @@ def flip() -> FlipResult:
   return cast(FlipResult, result)
 
 
-def flip_multiple(count) -> Tuple[int, int, int]:
+def flip_multiple(count: int) -> Tuple[int, int, int]:
   front = 0
   back = 0
   stand = 0

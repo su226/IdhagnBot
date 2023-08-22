@@ -2,7 +2,7 @@ import asyncio
 from contextlib import AsyncExitStack
 from contextvars import ContextVar
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Type, Union
+from typing import Any, Dict, List, Optional, Set, Type, Union
 
 import nonebot
 import nonebot.message
@@ -36,7 +36,7 @@ class Config(BaseModel):
 
   _names: Dict[str, int] = PrivateAttr(default_factory=dict)
 
-  def __init__(self, **kw) -> None:
+  def __init__(self, **kw: Any) -> None:
     super().__init__(**kw)
     for id, info in self.groups.items():
       for alias in info.__root__:
@@ -101,7 +101,7 @@ class State(BaseModel):
 
   _has_group_cache: Dict[int, HasGroupCache] = PrivateAttr(default_factory=dict)
 
-  def __init__(self, **kw) -> None:
+  def __init__(self, **kw: Any) -> None:
     super().__init__(**kw)
     now = datetime.now()
     expired = [id for id, context in self.contexts.items() if context.expire <= now]
@@ -250,8 +250,8 @@ async def get_event_level(bot: Bot, event: Event) -> permission.Level:
 _check_matcher_orig = nonebot.message._check_matcher
 _current_state: ContextVar[T_State] = ContextVar("_current_state")
 _current_stack: ContextVar[Optional[AsyncExitStack]] = ContextVar("_current_stack", default=None)
-_current_dependency_cache: ContextVar[Optional[T_DependencyCache]] = (
-  ContextVar("_current_dependency_cache", default=None)
+_current_dependency_cache: ContextVar[Optional[T_DependencyCache]] = ContextVar(
+  "_current_dependency_cache", default=None
 )
 async def _check_matcher(
   Matcher: Type[Matcher],
@@ -278,7 +278,8 @@ def build_permission(node: permission.Node, default: permission.Level) -> BotPer
     if (user_id := getattr(event, "user_id", None)) is None:
       return False
     event_level = await get_event_level(bot, event)
-    prefix = _current_state.get()["_prefix"]["command_start"]
+    state = _current_state.get(None)
+    prefix = state["_prefix"]["command_start"] if state else None
     if (result := permission.check(
       node, user_id, get_event_context(event), event_level, prefix
     )) is not None:

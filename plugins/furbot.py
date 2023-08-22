@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import nonebot
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
@@ -43,7 +44,7 @@ async def fetch_submit_image() -> MessageSegment:
 
 class Source:
   name = "绒狸"
-  node = ("furbot", "picture", "keyword")
+  node: Tuple[str, ...] = ("furbot", "picture", "keyword")
 
   @staticmethod
   def keyword() -> str:

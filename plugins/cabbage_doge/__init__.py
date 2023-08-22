@@ -1,6 +1,6 @@
 import random
 from pathlib import Path
-from typing import List
+from typing import List, cast
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
@@ -43,7 +43,7 @@ async def handle_cabbage(args: Message = CommandArg()):
       else:
         value = colorutil.blend(colors[index + 1], colors[index], ratio)
       im = Image.open(DIR / f"{i}.png")
-      im = ImageOps.colorize(im, (0, 0, 0), (255, 255, 255), value)  # type: ignore
+      im = ImageOps.colorize(im, "black", "white", cast(str, value))
       frames.append(im)
     return imutil.to_segment(frames, DURATION)
 

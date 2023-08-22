@@ -1,5 +1,6 @@
 import argparse
 import os
+from typing import Any, Dict
 
 import nonebot
 import yaml
@@ -11,7 +12,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--export-html")
 args = parser.parse_args()
 
-bot_config = {}
+bot_config: Dict[str, Any] = {}
 if os.path.exists("configs/nonebot.yaml"):
   with open("configs/nonebot.yaml") as f:
     bot_config = yaml.load(f, configs.SafeLoader)

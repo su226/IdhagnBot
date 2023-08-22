@@ -1,9 +1,8 @@
-# pyright: strict
 import json
 from dataclasses import dataclass
 from typing import (
-  TYPE_CHECKING, Any, Awaitable, Dict, Generic, Iterable, List, Optional, Protocol, Sequence,
-  Tuple, Type, TypeVar, Union, cast, overload, Literal
+  TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Protocol, Sequence, Tuple,
+  Type, TypeVar, Union, cast, overload
 )
 from urllib.parse import urlparse
 
@@ -14,19 +13,23 @@ try:
 
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     AddButtonType, AdditionalType, Description, DescType, DisableState, DynamicItem, DynamicType,
-    DynDetailReply, DynDetailReq, DynDetailsReply, DynDetailsReq, DynModuleType, DynSpaceReq,
-    DynSpaceRsp, ModuleAdditional, VideoSubType
+    DynDetailReq, DynDetailsReq, DynModuleType, DynSpaceReq, ModuleAdditional, VideoSubType
   )
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
 except ImportError:
-  GRPC_AVAILABLE = False  # type: ignore
+  GRPC_AVAILABLE = False
 else:
   GRPC_AVAILABLE = True
 
 
 if TYPE_CHECKING:
+  import grpc.aio  # noqa
+
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (  # noqa
-    AdditionalType, DynamicType, Module
+    AdditionalType, DescType, DynamicType, DynDetailReq, DynDetailsReq, DynSpaceReq, Module
+  )
+  from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import (  # noqa
+    DynamicAsyncStub, DynamicStub
   )
 
 Modules = Dict["DynModuleType.V", "Module"]
@@ -52,9 +55,9 @@ GRPC_METADATA = (
 
 async def grpc_fetch(uid: int, offset: str = "") -> Tuple[Sequence["DynamicItem"], Optional[str]]:
   async with grpc.aio.secure_channel(GRPC_API, grpc.ssl_channel_credentials()) as channel:
-    stub = DynamicStub(channel)
+    stub = cast("DynamicAsyncStub", DynamicStub(channel))
     req = DynSpaceReq(host_uid=uid, history_offset=offset)
-    res = await cast(Awaitable[DynSpaceRsp], stub.DynSpace(req, metadata=GRPC_METADATA))
+    res = await stub.DynSpace(req, metadata=GRPC_METADATA)
   next_offset = res.history_offset if res.has_more else None
   return res.list, next_offset
 
@@ -73,13 +76,13 @@ async def grpc_get(id: str) -> "DynamicItem": ...
 async def grpc_get(id: List[str]) -> List["DynamicItem"]: ...
 async def grpc_get(id: Union[str, List[str]]) -> Union["DynamicItem", List["DynamicItem"]]:
   async with grpc.aio.secure_channel(GRPC_API, grpc.ssl_channel_credentials()) as channel:
-    stub = DynamicStub(channel)
+    stub = cast("DynamicAsyncStub", DynamicStub(channel))
     if isinstance(id, list):
       req = DynDetailsReq(dynamic_ids=",".join(id))
-      res = await cast(Awaitable[DynDetailsReply], stub.DynDetails(req, metadata=GRPC_METADATA))
+      res = await stub.DynDetails(req, metadata=GRPC_METADATA)
       return list(res.list)
     req2 = DynDetailReq(dynamic_id=id)
-    res2 = await cast(Awaitable[DynDetailReply], stub.DynDetail(req2, metadata=GRPC_METADATA))
+    res2 = await stub.DynDetail(req2, metadata=GRPC_METADATA)
     return res2.item
 
 

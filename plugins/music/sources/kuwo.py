@@ -1,7 +1,7 @@
+import html
 import math
 from dataclasses import dataclass
 from typing import AsyncGenerator
-import html
 from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import MessageSegment
@@ -49,7 +49,7 @@ class KuwoMusic(Music):
     id_int = int(id)
     http = misc.http()
     async with http.get(
-      INFO_API.format(id=id_int),headers={"csrf": TOKEN}, cookies={"kw_token": TOKEN}
+      INFO_API.format(id=id_int), headers={"csrf": TOKEN}, cookies={"kw_token": TOKEN}
     ) as response:
       data = await response.json()
     if "data" not in data:

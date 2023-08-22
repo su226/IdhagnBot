@@ -141,8 +141,6 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
   exc_typename = exc_type.__qualname__
   exc_mod = exc_type.__module__
   if exc_mod not in ("__main__", "builtins"):
-    if not isinstance(exc_mod, str):
-      exc_mod = "<unknown>"
     exc_typename = exc_mod + '.' + exc_typename
   try:
     exc_info = str(e)

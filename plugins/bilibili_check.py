@@ -2,7 +2,7 @@ import asyncio
 import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -78,10 +78,9 @@ def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
   margin = 12
   uid_width = uid_im.width + padding * 2
   im_width = name_im.width + margin + uid_width
-  _bound: Any = None  # HACK
-  medal_name_layout = _bound
-  medal_level_layout = _bound
-  medal_width = _bound
+  medal_name_layout = Any
+  medal_level_layout = Any
+  medal_width = Any
   if medal:
     medal_name_layout = textutil.layout(medal.name, "sans", 28)
     medal_level_layout = textutil.layout(str(medal.level), "sans", 28)
@@ -119,8 +118,8 @@ def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
   ratio = medal_name_bg_width / medal_name_im.height
   gradient = ImageOps.colorize(
     Image.linear_gradient("L"),
-    colorutil.split_rgb(medal.color_start),  # type: ignore
-    colorutil.split_rgb(medal.color_end)  # type: ignore
+    cast(str, colorutil.split_rgb(medal.color_start)),
+    cast(str, colorutil.split_rgb(medal.color_end))
   ).rotate(45, imutil.resample(), True)
   grad_h = int(GRADIENT_45DEG_WH / (1 + ratio))
   grad_w = int(ratio * grad_h)

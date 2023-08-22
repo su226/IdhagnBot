@@ -10,7 +10,7 @@ from nonebot.rule import ArgumentParser
 
 from util import command, context, currency, misc, user_aliases
 
-from . import leaderboard  # noqa
+from . import leaderboard as _  # noqa
 from .config import CONFIG, STATE, FormatData
 from .formatters.legacy import format as formatter_legacy
 from .formatters.ring import format as formatter_ring

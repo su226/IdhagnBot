@@ -103,22 +103,18 @@ color_img = (
 async def handle_color_img(arg: Message = CommandArg()):
   config = CONFIG()
   color_str = arg.extract_plain_text().rstrip()
-  value = None
-  if config.brand_enable:
-    state = STATE()
-    now = datetime.now()
-    if now - state.last_update > config.brand_cache_duration:
-      await update_brand()
-    slug = title_to_slug(color_str)
-    if slug in state.brand_to_color:
-      value = state.brand_to_color[slug]
-  if value is None:
-    if color_str:
-      value = colorutil.parse(color_str)
-      if value is None:
-        await color_img.finish(f"未知颜色：{color_str}")
-    else:
-      value = random.randint(0, 0xffffff)
+  if color_str:
+    value = colorutil.parse(color_str)
+    if value is None and config.brand_enable:
+      state = STATE()
+      if datetime.now() - state.last_update > config.brand_cache_duration:
+        await update_brand()
+      if (slug := title_to_slug(color_str)) in state.brand_to_color:
+        value = state.brand_to_color[slug]
+    if value is None:
+      await color_img.finish(f"未知颜色：{color_str}")
+  else:
+    value = random.randint(0, 0xffffff)
   r, g, b = colorutil.split_rgb(value)
   h, s, l = colorutil.rgb2hsl(r, g, b)
 
@@ -130,11 +126,13 @@ rgb({r}, {g}, {b})
 hsl({h:.1f}deg, {s * 100:.1f}%, {l * 100:.1f}%)'''
     if value in colorutil.NAMES:
       markup += f"\n{colorutil.NAMES[value]}"
-    if config.brand_enable and value in state.color_to_brands:
-      if len(state.color_to_brands[value]) > 1:
-        markup += f"\n品牌色: {len(state.color_to_brands[value])} 个品牌"
-      else:
-        markup += f"\n品牌色: {state.color_to_brands[value][0]}"
+    if config.brand_enable:
+      state = STATE()
+      if value in state.color_to_brands:
+        if len(state.color_to_brands[value]) > 1:
+          markup += f"\n品牌色: {len(state.color_to_brands[value])} 个品牌"
+        else:
+          markup += f"\n品牌色: {state.color_to_brands[value][0]}"
     fg = (255, 255, 255) if colorutil.luminance(r, g, b) < 0.5 else (0, 0, 0)
     textutil.paste(
       im, (im.width // 2, im.height // 2), markup, "sans", 64,

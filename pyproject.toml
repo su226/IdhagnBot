@@ -9,25 +9,25 @@ keywords = ["nonebot", "nonebot2", "bot", "qq", "chatbot", "qqbot"]
 license = {text = "MIT"}
 requires-python = ">=3.8,<4.0"
 dependencies = [
-  "nonebot2[aiohttp]<3.0.0.0,>=2.0.0-beta.3",
-  "nonebot-adapter-onebot<3.0.0.0,>=2.0.0-beta.1",
-  "nonebot-plugin-apscheduler<1.0.0,>=0.1.2",
-  "PyYAML<7.0,>=6.0",
-  "Pillow<10.0.0,>=9.1.0",
-  "pycairo<2.0.0,>=1.21.0",
-  "PyGObject<4.0.0,>=3.42.1",
+  "nonebot2[aiohttp]<3,>=2.0.0-beta.3",
+  "nonebot-adapter-onebot<3,>=2.0.0-beta.1",
+  "nonebot-plugin-apscheduler<2,>=0.1.2",
+  "PyYAML<7,>=6.0",
+  "Pillow>=10.0.0",
+  "pycairo<2,>=1.21.0",
+  "PyGObject<4,>=3.42.1", # PDM 无法安装 3.44.0 和 3.44.1
 ]
 
 [project.optional-dependencies]
-jieba = ["jieba<1.0.0,>=0.42.1"]
-libzim = ["libzim<3.0.0,>=2.0.0; python_version < '3.12'"] # 维基百科也需要 pyppeteer
-mctools = ["mctools<2.0.0,>=1.1.2"]
-psutil = ["psutil<6.0.0,>=5.9.0"]
-opencv = ["opencv-python-headless>=4.6.0.66"]
-sql = ["sqlmodel>=0.0.8", "aiosqlite>=0.17.0"]
-wordcloud = ["wordcloud>=1.9.1.1"] # 词云也需要 sql 和 jieba
-grpc = ["protobuf>=4.21.6", "grpcio>=1.49.1"]
-playwright = ["playwright>=1.27.1"]
+jieba = ["jieba<2,>=0.42.1"]
+libzim = ["libzim<3,>=2.0.0; python_version < '3.12'"] # 维基百科也需要 pyppeteer
+mctools = ["mctools<2,>=1.1.2"]
+psutil = ["psutil<6,>=5.9.0"]
+opencv = ["opencv-python-headless<5,>=4.6.0.66"]
+sql = ["sqlmodel<2,>=0.0.8", "aiosqlite<2,>=0.17.0"]
+wordcloud = ["wordcloud<2,>=1.9.2", "emoji>=2.8.0"] # 词云也需要 sql 和 jieba
+grpc = ["protobuf<5,>=4.21.6", "grpcio<2,>=1.49.1"]
+playwright = ["playwright<2,>=1.27.1"]
 
 [project.urls]
 Homepage = "https://idhagnbot.su226.tk"
@@ -35,7 +35,7 @@ Repository = "https://github.com/su226/IdhagnBot"
 Documentation = "https://idhagnbot.su226.tk"
 
 [build-system]
-requires = ["pdm-pep517>=0.12.0"]
+requires = ["pdm-pep517<2,>=0.12.0"]
 build-backend = "pdm.pep517.api"
 
 [tool.pdm]
@@ -43,13 +43,14 @@ includes = []
 
 [tool.pdm.dev-dependencies]
 lint = [
-  "pylama[eradicate,toml]>=8.4.1",
-  "isort>=5.10.1",
+  "pylama[eradicate,toml]<9,>=8.4.1",
+  "isort<6,>=5.10.1",
 ]
 dev = [
-  "grpc-stubs>=1.53.0.2",
-  "mypy-protobuf>=3.4.0",
-  "grpcio-tools>=1.54.2",
+  "grpc-stubs<2,>=1.53.0.2",
+  "mypy-protobuf<4,>=3.4.0",
+  "grpcio-tools<2,>=1.54.2",
+  "opencv-stubs<2,>=0.0.8",
 ]
 
 [tool.pdm.scripts]
@@ -63,10 +64,18 @@ line_length = 99
 indent = "  "
 
 [tool.pyright]
-typeCheckingMode = "basic"
+typeCheckingMode = "strict"
 strict = ["plugins/liferestart/game"]
 ignore = ["util/api_common/*/protos", "archived"]
 pythonVersion = "3.8"
+reportMissingTypeStubs = false
+reportConstantRedefinition = false
+reportPrivateUsage = false
+reportUnknownArgumentType = false
+reportUnknownLambdaType = false
+reportUnknownMemberType = false
+reportUnknownParameterType = false
+reportUnknownVariableType = false
 
 [tool.pylama]
 linters = "eradicate,pycodestyle,pyflakes,isort"

@@ -16,11 +16,10 @@ class HTMLStripper(HTMLParser):
     super().__init__()
     self.f = StringIO()
 
-  def handle_data(self, data):
+  def handle_data(self, data: str) -> None:
     self.f.write(data)
 
-  def close(self) -> str:
-    super().close()
+  def getvalue(self) -> str:
     return self.f.getvalue()
 
 
@@ -29,4 +28,4 @@ def strip_html(*text: str):
   for i in text:
     stripper.feed(i)
   stripper.close()
-  return stripper.close()
+  return stripper.getvalue()

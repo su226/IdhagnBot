@@ -226,7 +226,7 @@ class ResourceSource(google.protobuf.message.Message):
         ValueType = typing.NewType("ValueType", builtins.int)
         V: typing_extensions.TypeAlias = ValueType
 
-    class _LocalResEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ResourceSource._LocalRes.ValueType], builtins.type):  # noqa: F821
+    class _LocalResEnumTypeWrapper(google.protobuf.internal.enum_type_wrapper._EnumTypeWrapper[ResourceSource._LocalRes.ValueType], builtins.type):
         DESCRIPTOR: google.protobuf.descriptor.EnumDescriptor
         LOCAL_RES_INVALID: ResourceSource._LocalRes.ValueType  # 0
         LOCAL_RES_ICON_VIP: ResourceSource._LocalRes.ValueType  # 1

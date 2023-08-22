@@ -750,7 +750,7 @@ CHARSET_RE = re.compile(r";\s*charset=([^;]*)")
 
 
 async def handler(request: BaseRequest):
-  def got_charset(match: re.Match) -> str:
+  def got_charset(match: re.Match[str]) -> str:
     nonlocal charset
     charset = match[1]
     return ""

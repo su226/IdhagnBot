@@ -4,13 +4,12 @@ import sys
 import warnings
 from datetime import time, timedelta
 from io import StringIO
-from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Union
+from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from loguru import logger
 from pydantic import BaseModel, Field
 
 from util import configs
-
 
 Level = Literal["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
 
@@ -94,7 +93,7 @@ def config_onload(_: Optional[Config], cur: Config) -> None:
       kw = {}
     else:
       real_sink = sink.file
-      kw = {
+      kw: Dict[str, Any] = {
         "rotation": sink.rotation,
         "retention": sink.retention,
         "compression": sink.compression,

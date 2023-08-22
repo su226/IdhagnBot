@@ -71,7 +71,7 @@ class QQOvooaMusic(Music):
     count = len(data["data"])
 
     async def _musics() -> AsyncGenerator[QQOvooaMusic, None]:
-      for i, song in enumerate(data["data"], 1):
+      for song in data["data"]:
         yield QQOvooaMusic(
           song["song"],
           "/".join(song["singers"]),

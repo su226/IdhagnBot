@@ -2,7 +2,7 @@ import asyncio
 import time
 from collections import deque
 from datetime import datetime, timedelta
-from typing import Any, AsyncGenerator, Deque, List, Optional, Tuple, cast
+from typing import Any, AsyncGenerator, Deque, Dict, List, Optional, Tuple, cast
 
 import nonebot
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_MISSED, JobEvent
@@ -62,7 +62,9 @@ async def on_bot_connect() -> None:
   common.CONFIG()
 
 
-async def new_activities(user: common.User) -> AsyncGenerator[bilibili_activity.Activity, None]:
+async def new_activities(
+  user: common.User
+) -> AsyncGenerator[bilibili_activity.Activity[object, object], None]:
   offset = ""
   use_grpc = common.CONFIG().grpc
   while offset is not None:
@@ -88,8 +90,10 @@ async def new_activities(user: common.User) -> AsyncGenerator[bilibili_activity.
 
 async def try_check(bot: Bot, user: common.User) -> int:
   async def try_send(
-    activity: bilibili_activity.Activity, message: Message, target: common.AnyTarget
+    activity: bilibili_activity.Activity[object, object], message: Message,
+    target: common.AnyTarget
   ) -> None:
+    kw: Dict[str, Any]
     if isinstance(target, common.GroupTarget):
       kw = {"group_id": target.group}
     else:
@@ -109,7 +113,7 @@ async def try_check(bot: Bot, user: common.User) -> int:
       except ActionFailed:
         pass
 
-  async def try_send_all(activity: bilibili_activity.Activity) -> None:
+  async def try_send_all(activity: bilibili_activity.Activity[object, object]) -> None:
     logger.info(f"推送 {user._name}({user.uid}) 的动态 {activity.id}")
     try:
       message = await contents.format(activity)
@@ -145,7 +149,7 @@ async def try_check(bot: Bot, user: common.User) -> int:
     return 0
 
   try:
-    activities: List[bilibili_activity.Activity] = []
+    activities: List[bilibili_activity.Activity[object, object]] = []
     async for activity in new_activities(user):
       activities.append(activity)
     activities.reverse()

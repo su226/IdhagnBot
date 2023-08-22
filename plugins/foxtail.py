@@ -5,7 +5,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from http.cookies import SimpleCookie
-from typing import Dict, List, Literal
+from typing import Any, Dict, List, Literal, Tuple
 from urllib.parse import quote as encodeuri
 
 import aiohttp
@@ -115,7 +115,9 @@ async def ensure_login() -> SimpleCookie[str]:
   return response.cookies
 
 
-async def send_pic(bot: Bot, event: Event, data: dict, cookies: SimpleCookie[str]) -> None:
+async def send_pic(
+  bot: Bot, event: Event, data: Dict[str, Any], cookies: SimpleCookie[str]
+) -> None:
   status = int(data.get("examine", 1))  # 随机接口没有审核参数
   if status == 1:
     http = misc.http()
@@ -155,7 +157,7 @@ UID: {data["picture"]}
 
 class Source:
   name = "兽云祭"
-  node = ("foxtail", "picture", "keyword")
+  node: Tuple[str, ...] = ("foxtail", "picture", "keyword")
 
   @staticmethod
   def keyword() -> str:

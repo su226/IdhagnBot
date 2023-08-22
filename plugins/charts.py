@@ -1,6 +1,7 @@
 import asyncio
 import math
 from datetime import date, timedelta
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.matcher import Matcher
@@ -90,20 +91,21 @@ async def handle_statistics(
     result = result.all()
 
   title = f"{'月' if style == 'month' else '年'}发言数"
-  if is_user and group_id != -1:
-    name, group, avatar = await asyncio.gather(
-      context.get_card_or_name(bot, group_id, user_id),
-      bot.get_group_info(group_id=group_id),
-      imutil.get_avatar(user_id)
-    )
-    title = f"{name} 在 {group['group_name']} 群内的{title}"
-  elif is_user:
-    name, avatar = await asyncio.gather(
-      context.get_card_or_name(bot, group_id, user_id),
-      imutil.get_avatar(user_id)
-    )
-    title = f"{name} 的{title}"
-  elif group_id != -1:
+  if is_user:
+    if group_id != -1:
+      name, group, avatar = await asyncio.gather(
+        context.get_card_or_name(bot, group_id, user_id),
+        bot.get_group_info(group_id=group_id),
+        imutil.get_avatar(user_id)
+      )
+      title = f"{name} 在 {group['group_name']} 群内的{title}"
+    else:
+      name, avatar = await asyncio.gather(
+        context.get_card_or_name(bot, group_id, user_id),
+        imutil.get_avatar(user_id)
+      )
+      title = f"{name} 的{title}"
+  else:
     group, avatar = await asyncio.gather(
       bot.get_group_info(group_id=group_id),
       imutil.get_avatar(gid=group_id)
@@ -172,8 +174,8 @@ async def handle_statistics(
 
   def make() -> MessageSegment:
     palette = BarPalette(avatar)
-    labels_im = []
-    counts = []
+    labels_im: List[Image.Image] = []
+    counts: List[int] = []
     i = 0
     curtime = begin_time
     while curtime <= today:

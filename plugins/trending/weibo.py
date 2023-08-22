@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Dict, List
 
 from util import misc
 
@@ -9,7 +9,7 @@ IMG = "https://wx4.sinaimg.cn/large/{}.jpg"
 SEARCH = "https://s.weibo.com/weibo?q=%23{}%23"
 
 
-def get_image(data: Any) -> str:
+def get_image(data: Dict[str, Any]) -> str:
   try:
     return IMG.format(data["mblog"]["pic_ids"][0])
   except KeyError:

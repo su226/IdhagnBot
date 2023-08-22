@@ -103,7 +103,7 @@ config = CONFIG()
 presets.update(config.presets)
 
 
-def get_by_path(root: dict, path: str) -> Any:
+def get_by_path(root: Dict[str, Any], path: str) -> Any:
   nodes = path.split("/")
   for i in filter(len, nodes):
     root = root[i]

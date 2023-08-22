@@ -9,7 +9,7 @@ import sys
 from datetime import timedelta
 from typing import (
   TYPE_CHECKING, Any, Callable, Coroutine, Dict, Generator, Iterable, List, Literal, Optional,
-  Sequence, Set, Tuple, TypeVar, Union
+  Sequence, Set, Tuple, TypeVar, Union, overload
 )
 
 import aiohttp
@@ -60,7 +60,13 @@ class AggregateError(Exception, Sequence[str]):
   def __len__(self) -> int:
     return len(self.args)
 
-  def __getitem__(self, index: int) -> str:
+  @overload
+  def __getitem__(self, index: int) -> str: ...
+
+  @overload
+  def __getitem__(self, index: slice) -> Tuple[str, ...]: ...
+
+  def __getitem__(self, index: Union[int, slice]) -> Union[str, Tuple[str, ...]]:
     return self.args[index]
 
 
@@ -215,7 +221,9 @@ def forward_node(id: int, name: str = "", content: AnyMessage = "") -> MessageSe
   return MessageSegment("node", {"uin": id, "name": name, "content": content})
 
 
-async def send_forward_msg(bot: Bot, event: Event, *nodes: Union[MessageSegment, dict]) -> Any:
+async def send_forward_msg(
+  bot: Bot, event: Event, *nodes: Union[MessageSegment, Dict[str, Any]]
+) -> Any:
   if gid := getattr(event, "group_id", None):
     return await bot.call_api("send_group_forward_msg", group_id=gid, messages=nodes)
   elif uid := getattr(event, "user_id", None):
@@ -235,7 +243,7 @@ def chunked(iterable: Iterable[T], n: int) -> Generator[List[T], None, None]:
     yield result
 
 
-def local(type: str, path: str, **kw) -> MessageSegment:
+def local(type: str, path: str, **kw: Any) -> MessageSegment:
   config = CONFIG()
   if config.backend_local:
     url = "file://" + os.path.abspath(path)

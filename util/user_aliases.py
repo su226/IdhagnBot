@@ -3,16 +3,18 @@ import itertools
 import re
 import time
 from dataclasses import dataclass
+from enum import Enum
 from io import BytesIO
+from types import TracebackType
 from typing import (
-  Any, Awaitable, Coroutine, Dict, List, Literal, Optional, Tuple, TypeVar, Union, overload
+  Any, Awaitable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, TypeVar, Union, overload
 )
 
 import aiohttp
-from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent
+from nonebot.adapters.onebot.v11 import ActionFailed, Bot, Event, Message, MessageEvent
 from nonebot.exception import FinishedException
 from PIL import Image
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError, parse_obj_as
 from typing_extensions import Self
 
 from util import configs, context, imutil, misc, user_aliases
@@ -192,7 +194,7 @@ async def download_image(
   return await misc.to_thread(process)
 
 
-async def get_image_from_link(url: str, **kw) -> Image.Image:
+async def get_image_from_link(url: str, **kw: Any) -> Image.Image:
   try:
     return await asyncio.wait_for(download_image(url, **kw), 10)
   except asyncio.TimeoutError as e:
@@ -203,7 +205,7 @@ async def get_image_from_link(url: str, **kw) -> Image.Image:
     raise misc.AggregateError(f"无效图片：{url}") from e
 
 
-async def get_avatar(uid: int, *, crop: bool = True, **kw) -> Image.Image:
+async def get_avatar(uid: int, *, crop: bool = True, **kw: Any) -> Image.Image:
   try:
     return await asyncio.wait_for(imutil.get_avatar(uid, **kw), 10)
   except asyncio.TimeoutError:
@@ -213,8 +215,13 @@ async def get_avatar(uid: int, *, crop: bool = True, **kw) -> Image.Image:
     raise misc.AggregateError(f"下载头像失败：{uid}")
 
 
+class DefaultType(Enum):
+  TARGET = "TARGET"
+  SOURCE = "SOURCE"
+
+
 async def _get_image_and_user(
-  bot: Bot, event: MessageEvent, pattern: str, default: int, **kw
+  bot: Bot, event: MessageEvent, pattern: str, default: DefaultType, **kw: Any
 ) -> Tuple[Image.Image, Optional[int]]:
   if pattern in {"?", "那个", "它"}:
     if not event.reply:
@@ -229,7 +236,21 @@ async def _get_image_and_user(
       raise misc.AggregateError("回复的消息没有图片")
     return await download_image(url, **kw), None
   if not pattern:
-    uid = default
+    if default == DefaultType.TARGET:
+      if event.reply:
+        try:
+          reply_msg = await bot.get_msg(message_id=event.reply.message_id)
+          reply_sender = reply_msg["sender"]["user_id"]
+          for seg in parse_obj_as(Message, reply_msg["message"]):
+            if seg.type == "image":
+              return await get_image_from_link(seg.data["url"], **kw), None
+        except (ActionFailed, ValidationError):
+          reply_sender = event.reply.sender.user_id
+        uid = reply_sender or event.self_id
+      else:
+        uid = event.self_id
+    else:
+      uid = event.user_id
   elif match := AT_RE.match(pattern):
     if match[1] == "all":
       raise misc.AggregateError("不支持@全体成员，恭喜你浪费了一次")
@@ -253,7 +274,7 @@ async def _get_image_and_user(
   return await get_avatar(uid, **kw), uid
 
 
-class Prompter:
+class _Prompter:
   def __init__(self, bot: Bot, event: MessageEvent, prompt: str) -> None:
     self.bot = bot
     self.event = event
@@ -284,7 +305,7 @@ class Prompter:
     return url
 
 
-async def _get_from_prompter(task: "asyncio.Task[str]", **kw) -> Tuple[Image.Image, None]:
+async def _get_from_prompter(task: "asyncio.Task[str]", **kw: Any) -> Tuple[Image.Image, None]:
   return await download_image(await task, **kw), None
 
 
@@ -293,15 +314,15 @@ class AvatarGetter:
     self.bot = bot
     self.event = event
     self.tasks: List[asyncio.Task[Any]] = []
-    self.prompter_tasks: List[asyncio.Task[Any]] = []
-    self.last_prompter: Optional[Prompter] = None
+    self.prompter_tasks: List[asyncio.Task[str]] = []
+    self.last_prompter: Optional[_Prompter] = None
 
   def get(
-    self, pattern: str, default: int, prompt: str = "",
+    self, pattern: str, default: DefaultType, prompt: str = "",
     crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
   ) -> Coroutine[Any, Any, Tuple[Image.Image, Optional[int]]]:
     if pattern in {"-", "这个"}:
-      prompter = Prompter(self.bot, self.event, prompt)
+      prompter = _Prompter(self.bot, self.event, prompt)
       if self.last_prompter:
         future = asyncio.get_running_loop().create_future()
         self.last_prompter.next_future = prompter.prev_future = future
@@ -317,7 +338,7 @@ class AvatarGetter:
     return task
 
   def __call__(
-    self, pattern: str, default: int, prompt: str = "",
+    self, pattern: str, default: DefaultType, prompt: str = "",
     crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
   ) -> "asyncio.Task[Tuple[Image.Image, Optional[int]]]":
     return self.submit(self.get(pattern, default, prompt, crop, raw, bg))
@@ -325,7 +346,9 @@ class AvatarGetter:
   async def __aenter__(self) -> Self:
     return self
 
-  async def __aexit__(self, exc_type, exc, tb) -> None:
+  async def __aexit__(
+    self, exc_type: Type[BaseException], exc: BaseException, tb: TracebackType
+  ) -> None:
     errors: List[str] = []
     for i in asyncio.as_completed(self.tasks):
       try:

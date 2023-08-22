@@ -1,13 +1,13 @@
 import math
 from io import BytesIO
-from typing import Generator, List, Literal, Optional, Tuple, Union, cast, overload
+from typing import Any, Generator, List, Literal, Optional, Sequence, Tuple, Union, cast, overload
 
 import cairo
 from loguru import logger
 from nonebot.adapters.onebot.v11 import MessageSegment
-from PIL import Image, ImageChops, ImageDraw, ImageOps, features as PILFeatures
+from PIL import Image, ImageChops, ImageDraw, ImageOps, ImageSequence, features as PILFeatures
 
-from util import misc
+from util import colorutil, misc
 
 __all__ = [
   "Anchor", "background", "from_cairo", "center_pad", "circle", "contain_down", "frames",
@@ -18,9 +18,11 @@ __all__ = [
 Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
 Size = Tuple[int, int]
 Point = Tuple[float, float]
+Color = Union[colorutil.RGB, int]
 Plane = Tuple[Point, Point, Point, Point]
 PerspectiveData = Tuple[float, float, float, float, float, float, float, float]
-PasteColor = Tuple[Tuple[int, int, int], Tuple[int, int]]
+PasteColor = Tuple[Color, Size]
+AnyImage = Union[Image.Image, cairo.ImageSurface]
 _LIBIMAGEQUANT_AVAILABLE: Optional[bool] = None
 _LIBIMAGEQUANT_WARNED: bool = False
 
@@ -33,28 +35,36 @@ def scale_resample() -> Image.Resampling:
   return Image.Resampling[misc.CONFIG().scale_resample.upper()]
 
 
-def circle(im: Image.Image, antialias: bool = True):
-  if antialias:
-    mask = Image.new("L", (im.width * 2, im.height * 2))
-  else:
-    mask = Image.new("L", im.size)
-  draw = ImageDraw.Draw(mask)
-  draw.ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
-  if antialias:
-    mask = mask.resize(im.size, scale_resample())
-  if "A" in im.getbands():
-    mask = ImageChops.multiply(im.getchannel("A"), mask)
-  im.putalpha(mask)
-
-
 def from_cairo(surface: cairo.ImageSurface) -> Image.Image:
   w = surface.get_width()
   h = surface.get_height()
   data = surface.get_data()
-  if not data:  # 大小为0，data为None
-    return Image.new("RGBA", (w, h))
-  b, g, r, a = Image.frombytes("RGBa", (w, h), bytes(data)).convert("RGBA").split()
-  return Image.merge("RGBA", (r, g, b, a))  # BGRa -> BGRA -> RGBA
+  format = surface.get_format()
+  if format == cairo.Format.A1:
+    if not data:
+      return Image.new("1", (w, h))
+    data_w = math.ceil(w / 32) * 32
+    im = Image.frombytes("1", (data_w, h), bytes(data))
+    for x in range(0, w, 8):
+      im.paste(im.crop((x, 0, x + 8, h)).transpose(Image.Transpose.FLIP_LEFT_RIGHT), (x, 0))
+    return im.crop((0, 0, w, h))
+  elif format == cairo.Format.A8:
+    if not data:
+      return Image.new("L", (w, h))
+    data_w = math.ceil(w / 4) * 4
+    return Image.frombytes("L", (data_w, h), bytes(data)).crop((0, 0, w, h))
+  elif format == cairo.Format.RGB24:
+    if not data:
+      return Image.new("RGB", (w, h))
+    b, g, r, _ = Image.frombytes("RGBX", (w, h), bytes(data)).split()
+    return Image.merge("RGB", (r, g, b))
+  elif format == cairo.Format.ARGB32:
+    if not data:
+      return Image.new("RGBA", (w, h))
+    b, g, r, a = Image.frombytes("RGBa", (w, h), bytes(data)).convert("RGBA").split()
+    return Image.merge("RGBA", (r, g, b, a))  # BGRa -> BGRA -> RGBA
+  else:
+    raise NotImplementedError(f"Unsupported format: {format}")
 
 
 def to_cairo(im: Image.Image) -> cairo.ImageSurface:
@@ -64,7 +74,28 @@ def to_cairo(im: Image.Image) -> cairo.ImageSurface:
   return cairo.ImageSurface.create_for_data(data, cairo.FORMAT_ARGB32, im.width, im.height)
 
 
-def center_pad(im: Image.Image, width: int, height: int) -> Image.Image:
+def circle(im: AnyImage, antialias: Union[bool, int, float] = True):
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
+  if isinstance(antialias, bool):
+    ratio = 2 if antialias else 1
+  else:
+    ratio = round(antialias)
+  if ratio > 1:
+    mask = Image.new("L", (round(im.width * ratio), round(im.height * ratio)))
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
+    mask = mask.resize(im.size, scale_resample())
+  else:
+    mask = Image.new("L", im.size)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
+  if "A" in im.getbands():
+    mask = ImageChops.multiply(im.getchannel("A"), mask)
+  im.putalpha(mask)
+
+
+def center_pad(im: AnyImage, width: int, height: int) -> Image.Image:
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   if im.width > width or im.height > height:
     padded_im = ImageOps.pad(im, (width, height), scale_resample())
   else:
@@ -73,9 +104,8 @@ def center_pad(im: Image.Image, width: int, height: int) -> Image.Image:
   return padded_im
 
 
-def resize_canvas(
-  im: Image.Image, size: Tuple[int, int], center: Tuple[float, float] = (0.5, 0.5)
-) -> Image.Image:
+def resize_canvas(im: AnyImage, size: Size, center: Point = (0.5, 0.5)) -> Image.Image:
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   x = size[0] - im.width
   y = size[1] - im.height
   l = int(center[0] * x)
@@ -85,31 +115,37 @@ def resize_canvas(
   return ImageOps.expand(im, (t, l, r, b))
 
 
-def square(im: Image.Image) -> Image.Image:
+def square(im: AnyImage) -> Image.Image:
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   length = min(im.width, im.height)
   x = (im.width - length) // 2
   y = (im.height - length) // 2
   return im.crop((x, y, x + length, y + length))
 
 
-def contain_down(im: Image.Image, width: int, height: int) -> Image.Image:
+def contain_down(im: AnyImage, width: int, height: int) -> Image.Image:
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   if im.width > width or im.height > height:
     return ImageOps.contain(im, (width, height), scale_resample())
   return im
 
 
-def resize_width(im: Image.Image, width: int) -> Image.Image:
+def resize_width(im: AnyImage, width: int) -> Image.Image:
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   return ImageOps.contain(im, (width, 99999), scale_resample())
 
 
-def resize_height(im: Image.Image, height: int) -> Image.Image:
+def resize_height(im: AnyImage, height: int) -> Image.Image:
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   return ImageOps.contain(im, (99999, height), scale_resample())
 
 
-def background(im: Image.Image, bg: Tuple[int, int, int] = (255, 255, 255)) -> Image.Image:
+def background(im: AnyImage, bg: Color = (255, 255, 255)) -> Image.Image:
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   if im.mode == "P" and "A" in im.palette.mode:
     im = im.convert(im.palette.mode)
   if "A" in im.getbands():
+    bg = colorutil.split_rgb(bg) if isinstance(bg, int) else bg
     result = Image.new("RGB", im.size, bg)
     result.paste(im, mask=im.getchannel("A"))
     return result
@@ -117,8 +153,8 @@ def background(im: Image.Image, bg: Tuple[int, int, int] = (255, 255, 255)) -> I
 
 
 async def get_avatar(
-  uid: Optional[int] = None, gid: Optional[int] = None, *,
-  raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
+  uid: Optional[int] = None, gid: Optional[int] = None, *, raw: bool = False,
+  bg: Union[Color, bool] = False
 ) -> Image.Image:
   # s 有 100, 160, 640, 1080 分别对应 4 个最大尺寸（可以小）和 0 对应原图（不能不填或者自定义）
   if uid is not None and gid is None:
@@ -144,9 +180,7 @@ def frames(im: Image.Image) -> Generator[Image.Image, None, None]:
   if not getattr(im, "is_animated", False):
     yield im
     return
-  for i in range(im.n_frames):
-    im.seek(i)
-    yield im
+  yield from ImageSequence.Iterator(im)
 
 
 def sample_frames(im: Image.Image, frametime: int) -> Generator[Image.Image, None, None]:
@@ -169,9 +203,13 @@ def sample_frames(im: Image.Image, frametime: int) -> Generator[Image.Image, Non
 
 
 def paste(
-  dst: Image.Image, src: Union[Image.Image, PasteColor], xy: Tuple[float, float] = (0, 0),
-  mask: Optional[Image.Image] = None, anchor: Anchor = "lt"
+  dst: Image.Image, src: Union[AnyImage, PasteColor], xy: Point = (0, 0),
+  mask: Union[AnyImage, None] = None, anchor: Anchor = "lt"
 ) -> None:
+  if isinstance(mask, cairo.ImageSurface):
+    mask = from_cairo(mask)
+  if isinstance(src, cairo.ImageSurface):
+    src = from_cairo(src)
   if isinstance(src, Image.Image):
     if src.mode == "P" and "A" in src.palette.mode:
       src = src.convert(src.palette.mode)  # RGBA (也可能是LA？)
@@ -184,6 +222,7 @@ def paste(
     width, height = src.size
   else:
     paste_src, (width, height) = src
+    paste_src = colorutil.split_rgb(paste_src) if isinstance(paste_src, int) else paste_src
   x1, y1 = xy
   xa, ya = anchor
   if xa == "m":
@@ -223,15 +262,16 @@ def _add_transparency(im: Image.Image) -> None:
       break
 
 
-def quantize(im: Image.Image) -> Image.Image:
+def quantize(im: AnyImage, palette: Optional[Image.Image] = None) -> Image.Image:
   config = misc.CONFIG()
+  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
   if config.libimagequant is True and _check_libimagequant():
     # Image.new 在 RGB 模式下不带 color 参数会给隐藏的 Alpha 通道填充 0 而非 255
     # 也就是颜色实际上是 (0, 0, 0, 0) 而非 (0, 0, 0, 255)
     # 这会导致 libimagequant 产生的图片变绿
     # 所以要么给所有的 Image.new 都显式加上 (0, 0, 0) 作为 color 参数
     # 要么 quantize 前先转换成 RGBA
-    im = im.convert("RGBA").quantize(method=Image.Quantize.LIBIMAGEQUANT)  # type: ignore
+    im = im.convert("RGBA").quantize(method=Image.Quantize.LIBIMAGEQUANT, palette=palette)
     _add_transparency(im)
     return im
   if im.mode == "RGBA":
@@ -240,53 +280,56 @@ def quantize(im: Image.Image) -> Image.Image:
     method = Image.Quantize[config.quantize.upper()]
   # 必须要量化两次才有抖动仿色（除非用 libimagequant）
   # 参见 https://github.com/python-pillow/Pillow/issues/5836
-  palette = im.quantize(method=method)  # type: ignore
-  if not config.dither:
-    _add_transparency(palette)
-    return palette
+  if not palette:
+    palette = im.quantize(method=method)
+    if not config.dither:
+      _add_transparency(palette)
+      return palette
   # HACK: RGBA 图片的 quantize 方法不能用 palette 参数，因此只能使用 Pillow 的内部 API
-  im = im._new(im.im.convert("P", Image.Dither.FLOYDSTEINBERG, palette.im))  # type: ignore
+  im = cast(
+    Image.Image, cast(Any, im)._new(im.im.convert("P", Image.Dither.FLOYDSTEINBERG, palette.im))
+  )
   im.palette = palette.palette.copy()
   _add_transparency(im)
   return im
 
 
 @overload
-def to_segment(
-  im: Union[Image.Image, cairo.ImageSurface], *, fmt: str = ..., **kw
-) -> MessageSegment: ...
+def to_segment(im: AnyImage, *, fmt: str = ..., **kw: Any) -> MessageSegment: ...
+
 @overload
 def to_segment(
-  im: List[Image.Image], duration: Union[List[int], int, Image.Image], *, afmt: str = ..., **kw
+  im: Sequence[AnyImage], duration: Union[List[int], int, Image.Image], *, afmt: str = ...,
+  **kw: Any
 ) -> MessageSegment: ...
+
 def to_segment(
-  im: Union[Image.Image, List[Image.Image], cairo.ImageSurface],
-  duration: Union[List[int], int, Image.Image] = 0, *, fmt: str = "png", afmt: str = "gif", **kw
+  im: Union[AnyImage, Sequence[AnyImage]], duration: Union[List[int], int, Image.Image] = 0, *,
+  fmt: str = "png", afmt: str = "gif", **kw: Any
 ) -> MessageSegment:
   f = BytesIO()
   if isinstance(im, cairo.ImageSurface):
-    im.write_to_png(f)
-    return MessageSegment.image(f)
-  if isinstance(im, list):
-    if len(im) > 1:
+    if fmt == "png":
+      im.write_to_png(f)
+      return MessageSegment.image(f)
+    im = from_cairo(im)
+  if isinstance(im, Sequence):
+    frames = [from_cairo(x) if isinstance(x, cairo.ImageSurface) else x for x in im]
+    if len(frames) > 1:
       if isinstance(duration, Image.Image):
-        d_im = duration
-        duration = []
-        for i in range(d_im.n_frames):
-          d_im.seek(i)
-          duration.append(d_im.info["duration"])
+        duration = [im.info["duration"] for im in ImageSequence.Iterator(duration)]
       if isinstance(duration, list) and len(duration) != len(im):
-        raise ValueError
+        raise ValueError("Duration list length doesn't match frames count.")
       if afmt.lower() == "gif":
-        im = [x if x.mode == "P" else quantize(x) for x in im]
+        frames = [x if x.mode == "P" else quantize(x) for x in frames]
         # 只对透明图片使用 disposal，防止不透明图片有鬼影
-        disposal = 2 if any("transparency" in x.info for x in im) else 0
-        im[0].save(
+        disposal = 2 if any("transparency" in x.info for x in frames) else 0
+        frames[0].save(
           f, "GIF", append_images=im[1:], save_all=True, loop=0, disposal=disposal,
           duration=duration, **kw
         )
       return MessageSegment.image(f)
-    im = im[0]
+    im = frames[0]
   im.save(f, fmt, **kw)
   return MessageSegment.image(f)
 
@@ -307,7 +350,7 @@ class RemapTransform:
   @staticmethod
   def _find_coefficients(old_plane: Plane, new_plane: Plane) -> PerspectiveData:
     import numpy as np
-    matrix = []
+    matrix: List[List[float]] = []
     for p1, p2 in zip(old_plane, new_plane):
       matrix.append([p2[0], p2[1], 1, 0, 0, 0, -p1[0] * p2[0], -p1[0] * p2[1]])
       matrix.append([0, 0, 0, p2[0], p2[1], 1, -p1[1] * p2[0], -p1[1] * p2[1]])

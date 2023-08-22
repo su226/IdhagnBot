@@ -1,4 +1,5 @@
 from io import BytesIO
+from typing import Any, cast
 
 import cairo
 import gi
@@ -18,7 +19,7 @@ BOTTOM_Y = 130
 GRAD_OFFSET = 15
 
 
-def render_top(cr: cairo.Context, layout: Pango.Layout) -> None:
+def render_top(cr: "cairo.Context[Any]", layout: Pango.Layout) -> None:
   cr.set_matrix(cairo.Matrix(1, 0, -0.45, 1, 0, 0))
 
   cr.set_source_rgb(0, 0, 0)
@@ -94,7 +95,7 @@ def render_top(cr: cairo.Context, layout: Pango.Layout) -> None:
   PangoCairo.show_layout(cr, layout)
 
 
-def render_bottom(cr: cairo.Context, layout: Pango.Layout):
+def render_bottom(cr: "cairo.Context[Any]", layout: Pango.Layout):
   cr.set_matrix(cairo.Matrix(1, 0, -0.45, 1, 0, 0))
 
   cr.set_source_rgb(0, 0, 0)
@@ -158,8 +159,8 @@ def render_bottom(cr: cairo.Context, layout: Pango.Layout):
 def render(top: str, bottom: str) -> MessageSegment:
   top_layout = textutil.layout(top, "sans bold", 100)
   bottom_layout = textutil.layout(bottom, "serif bold", 100)
-  top_width, _ = top_layout.get_pixel_size()
-  bottom_width, _ = bottom_layout.get_pixel_size()
+  top_width = cast(int, top_layout.get_pixel_size()[0])
+  bottom_width = cast(int, bottom_layout.get_pixel_size()[0])
   width = max(top_width + TOP_X, bottom_width + BOTTOM_X - 60)
   if bottom:
     height = 290

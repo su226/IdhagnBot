@@ -1,13 +1,13 @@
 import math
-from typing import AsyncGenerator, List, NoReturn, Type, TypedDict, TypeVar, cast, Literal
+from typing import AsyncGenerator, List, Literal, NoReturn, Type, TypedDict, TypeVar, cast
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.matcher import Matcher
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 
-from util.command import CommandBuilder
 from util import misc
+from util.command import CommandBuilder
 from util.help import CategoryItem
 
 from .sources.base import Music, SearchResult

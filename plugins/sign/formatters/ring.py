@@ -2,6 +2,7 @@ import asyncio
 import calendar
 import math
 from datetime import date
+from typing import Any
 
 import cairo
 from nonebot.adapters.onebot.v11 import Bot, Message
@@ -12,7 +13,9 @@ from util import context, currency, imutil, misc, textutil
 from ..config import STATE, FormatData
 
 
-def rounded_rect(cr: cairo.Context, x1: float, y1: float, x2: float, y2: float, r: float) -> None:
+def rounded_rect(
+  cr: "cairo.Context[Any]", x1: float, y1: float, x2: float, y2: float, r: float
+) -> None:
   cr.move_to(x1 + r, y1)
   cr.line_to(x2 - r, y1)
   cr.arc(x2 - r, y1 + r, r, math.pi / 4 * 3, math.pi * 2)

@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Literal, Set, Union, cast
+from typing import Literal, Set, Union
 
 from ..condition import Condition
 from ..typing.talent import GradeReplacementDict, TalentDict, TalentReplacementDict
@@ -43,10 +43,10 @@ class Talent:
     condition = data.get("condition", "")
     if "grade" in replacement:
       replacement_type = "rarity"
-      replacement_weights = parse_weights(cast(GradeReplacementDict, replacement)["grade"])
+      replacement_weights = parse_weights(replacement["grade"])
     elif "talent" in replacement:
       replacement_type = "talent"
-      replacement_weights = parse_weights(cast(TalentReplacementDict, replacement)["talent"])
+      replacement_weights = parse_weights(replacement["talent"])
     else:
       replacement_type = None
       replacement_weights = {}

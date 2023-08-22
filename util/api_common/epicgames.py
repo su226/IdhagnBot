@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Iterable, List
+from typing import Any, Dict, Iterable, List
 
 from pydantic import BaseModel
 
@@ -21,7 +21,7 @@ class Game(BaseModel):
   slug: str
 
 
-def promotions(promotions: dict) -> Iterable[dict]:
+def promotions(promotions: Dict[str, Any]) -> Iterable[Dict[str, Any]]:
   if not promotions:
     return
   for i in promotions["promotionalOffers"]:
@@ -30,7 +30,7 @@ def promotions(promotions: dict) -> Iterable[dict]:
     yield from i["promotionalOffers"]
 
 
-def getslug(game: dict) -> str:
+def getslug(game: Dict[str, Any]) -> str:
   slug = game["productSlug"]
   if slug and slug != "[]":
     return slug.removesuffix("/home")
@@ -40,7 +40,7 @@ def getslug(game: dict) -> str:
   return ""
 
 
-def getimage(game: dict) -> str:
+def getimage(game: Dict[str, Any]) -> str:
   for i in game["keyImages"]:
     if i["type"] in ("DieselStoreFrontWide", "OfferImageWide"):
       return i["url"]

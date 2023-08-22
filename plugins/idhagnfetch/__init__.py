@@ -3,7 +3,9 @@ import html
 import platform
 import re
 import time
-from typing import Any, Awaitable, Callable, Dict, List, Literal, Set, Tuple, TypeVar
+from typing import (
+  Any, Awaitable, Callable, Iterable, List, Literal, Mapping, Sequence, Set, Tuple, TypeVar
+)
 
 import nonebot
 import psutil
@@ -76,7 +78,7 @@ class Config(BaseModel):
 
 
 def _get_distro() -> str:
-  def _parse_os_release(lines):
+  def _parse_os_release(lines: Iterable[str]):
     info = {}
     for line in lines:
       if match := _os_release_line.match(line):
@@ -292,7 +294,7 @@ async def get_network():
   return [("网络", f"↓ {human_size(recv)}/s ↑ {human_size(sent)}/s")]
 
 
-ITEMS: Dict[Items, Callable[[], Awaitable[List[Tuple[str, str]]]]] = {
+ITEMS: Mapping[Items, Callable[[], Awaitable[Sequence[Tuple[str, str]]]]] = {
   "system": simple(lambda: ("系统", SYSTEM)),
   "uptime": simple(lambda: ("系统在线", misc.format_time(time.time() - psutil.boot_time()))),
   "cpu": simple(lambda: ("CPU", CPU_MODEL)),
@@ -310,7 +312,7 @@ ITEMS: Dict[Items, Callable[[], Awaitable[List[Tuple[str, str]]]]] = {
   "idhagnbot": simple(lambda: ("IdhagnBot", IDHAGNBOT_VER)),
   "bot_uptime": simple(lambda: ("机器人在线", misc.format_time(time.time() - BOT_START_TIME))),
 }
-BAR_ITEMS: Dict[BarItems, Callable[[], Awaitable[Tuple[str, str, float]]]] = {
+BAR_ITEMS: Mapping[BarItems, Callable[[], Awaitable[Tuple[str, str, float]]]] = {
   "cpu": get_cpu_bar,
   "memory": get_memory_bar,
   "swap": get_swap_bar,
@@ -390,10 +392,9 @@ async def handle_idhagnfetch(bot: Bot):
     info_w, info_h = info_im.size
     im_w = 128
     im_h = 128
-    _bound: Any = None  # HACK
-    header_im = _bound
-    account_im = _bound
-    bar_im = _bound
+    header_im = Any
+    account_im = Any
+    bar_im = Any
     if config.enable_header:
       header_im = textutil.render(HEADER, "sans", 32, color=(255, 255, 255))
       im_w = max(im_w, header_im.width + 128)

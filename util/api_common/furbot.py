@@ -5,7 +5,7 @@ from typing import Dict, List, Literal, Optional, Protocol, Tuple
 
 import nonebot
 from aiohttp.client import _RequestContextManager
-from nonebot.adapters.onebot.v11 import Bot, Event, MessageEvent, Message
+from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageEvent
 from nonebot.params import EventMessage
 from pydantic import BaseModel, SecretStr
 

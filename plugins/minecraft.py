@@ -1,4 +1,4 @@
-from typing import List, Tuple, cast
+from typing import Any, Dict, List, Tuple, cast
 
 from mctools import PINGClient
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
@@ -39,7 +39,7 @@ async def handle_minecraft(bot: Bot):
   host, port = parse_server(config.stat_address)
   try:
     with PINGClient(host, port, format_method=PINGClient.REMOVE) as ping:
-      stats = cast(dict, ping.get_stats())
+      stats = cast(Dict[str, Any], ping.get_stats())
   except Exception:
     for user in misc.superusers():
       await bot.send_private_msg(user_id=user, message="Minecraft服务器异常，请及时检修！")

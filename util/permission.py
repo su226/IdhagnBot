@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import (
-  Any, Deque, Dict, Iterable, List, Literal, Optional, Set, Tuple, TypeVar, Union, cast
+  Any, Deque, Dict, Iterable, List, Literal, Mapping, Optional, Set, Tuple, TypeVar, Union, cast
 )
 
 from loguru import logger
@@ -32,7 +32,7 @@ class Entry(BaseModel):
   def node(self) -> Tuple[str, ...]:
     return self._node
 
-  def matches(self, time: datetime, context: Dict[str, str]) -> bool:
+  def matches(self, time: datetime, context: Mapping[str, Optional[str]]) -> bool:
     if self.expire and self.expire < time:
       return False
     for k, v in self.context.items():
@@ -62,7 +62,7 @@ V = TypeVar("V")
 
 
 class NodeTrie(StringTrie):
-  def __init__(self, *args, **kw):
+  def __init__(self, *args: Any, **kw: Any):
     super().__init__(separator=".", *args, **kw)
 
   def _path_from_key(self, key: Union[str, Node]) -> Iterable[str]:
