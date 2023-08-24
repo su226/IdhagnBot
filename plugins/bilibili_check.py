@@ -32,8 +32,9 @@ FOLLOW_API = "https://account.bilibili.com/api/member/getCardByMid?mid={}"
 MEDAL_API = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id={}"
 VTB_APIS = [
   "https://api.vtbs.moe/v1/short",
-  "https://api.tokyo.vtbs.moe/v1/short",
-  "https://vtbs.musedash.moe/v1/short",
+  "https://cfapi.vtbs.moe/v1/short",
+  "https://hkapi.vtbs.moe/v1/short",
+  "https://kr.vtbs.moe/v1/short",
 ]
 GRADIENT_45DEG_WH = 362.038671968  # 256 * sqrt(2)
 
@@ -143,11 +144,16 @@ def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
 def make_header(
   avatar: Image.Image, name: str, uid: int, fans: int, followings: int, vtbs: int
 ) -> Image.Image:
-  ratio = 0 if followings == 0 else vtbs / followings * 100
   name_im = textutil.render(name, "sans bold", 32)
   uid_im = textutil.render(str(uid), "sans", 28)
-  info_im = textutil.render(f"<b>粉丝:</b> {fans} <b>关注:</b> {followings}", "sans", 32, markup=True)
-  info2_im = textutil.render(f"<b>VTB:</b> {vtbs} ({ratio:.2f}%)", "sans", 32, markup=True)
+  info_im = textutil.render(
+    f"<b>粉丝:</b> {fans} <b>关注:</b> {followings}", "sans", 32, markup=True
+  )
+  if vtbs == -1:
+    info2_im = textutil.render("<b>VTB:</b> ??", "sans", 32, markup=True)
+  else:
+    ratio = 0 if followings == 0 else vtbs / followings * 100
+    info2_im = textutil.render(f"<b>VTB:</b> {vtbs} ({ratio:.2f}%)", "sans", 32, markup=True)
 
   avatar = avatar.convert("RGB").resize((144, 144), imutil.scale_resample())
   imutil.circle(avatar)
@@ -234,7 +240,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
   def make() -> MessageSegment:
     avatar = Image.open(BytesIO(avatar_data))
     items = [make_list_item(name, uid, medals.get(uid, None)) for uid, name in vtbs]
-    header = make_header(avatar, name, uid, fans, following, len(vtbs))
+    header = make_header(avatar, name, uid, fans, following, -1 if private else len(vtbs))
 
     if not items:
       if private:
