@@ -55,7 +55,7 @@ BarItems = Literal[
 
 class Config(BaseModel):
   avatar_size: int = 640
-  enable_header: bool = True
+  header: str = "IdhagnFetch - 绝对不是参考的screenfetch或者neofetch"
   enable_account: bool = True
   items: List[Items] = Field(default_factory=lambda: [
     "system",
@@ -150,7 +150,6 @@ def human_util(used: int, total: int) -> str:
 
 
 CONFIG = configs.SharedConfig("idhagnfetch", Config)
-HEADER = "IdhagnFetch - 绝对不是参考的screenfetch或者neofetch"
 _uname = platform.uname()
 SYSTEM = f"{_uname.system} {_uname.release}"
 CPU_MODEL = _uname.processor or _uname.machine
@@ -487,8 +486,8 @@ async def handle_idhagnfetch(bot: Bot):
     header_im = Any
     account_im = Any
     bar_im = Any
-    if config.enable_header:
-      header_im = textutil.render(HEADER, "sans", 32, color=(255, 255, 255))
+    if config.header:
+      header_im = textutil.render(config.header, "sans", 32, color=(255, 255, 255))
       im_w = max(im_w, header_im.width + 128)
       im_h += header_im.height + 16
     if config.enable_account:
@@ -509,7 +508,7 @@ async def handle_idhagnfetch(bot: Bot):
     im = Image.new("RGB", (im_w, im_h), colorutil.split_rgb(config.background_color))
     x = 64
     y = 64
-    if config.enable_header:
+    if config.header:
       im.paste(header_im, (x, y), header_im)
       y += header_im.height + 16
     if bar_items:
