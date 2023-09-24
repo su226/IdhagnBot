@@ -1,16 +1,19 @@
 import asyncio
 import html
+import itertools
 import platform
 import re
 import time
 from typing import (
-  Any, Awaitable, Callable, Iterable, List, Literal, Mapping, Sequence, Set, Tuple, TypeVar
+  Any, Awaitable, Callable, Generator, Iterable, List, Literal, Mapping, Sequence, Set, Tuple,
+  TypeVar
 )
 
 import nonebot
 import psutil
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 from PIL import Image
+from psutil._common import sdiskpart
 from pydantic import BaseModel, Field
 
 from util import colorutil, command, configs, imutil, misc, textutil
@@ -29,6 +32,7 @@ Items = Literal[
   "memory",
   "swap",
   "disks",
+  "disks_aggregate",
   "battery",
   "diskio",
   "network",
@@ -43,6 +47,9 @@ BarItems = Literal[
   "cpu",
   "memory",
   "swap",
+  "disks",
+  "disks_aggregate",
+  "battery",
 ]
 
 
@@ -70,6 +77,9 @@ class Config(BaseModel):
     "swap",
   ])
   columns: int = 3
+  ignore_loop_device: bool = True
+  ignore_bind_mount: bool = True
+  ignored_disks: Set[str] = Field(default_factory=set)
   background_color: int = 0x212121
   primary_color: int = 0x80d8ff
   secondary_color: int = 0xffffff
@@ -174,7 +184,7 @@ def simple(fn: Callable[[], T]) -> Callable[[Bot], Awaitable[List[T]]]:
   return get_simple
 
 
-async def get_cpu_bar(bot: Bot) -> BarItem:
+async def get_cpu_bar(bot: Bot) -> Sequence[BarItem]:
   psutil.cpu_percent()
   await asyncio.sleep(1)
   cpu_util = psutil.cpu_percent()
@@ -186,12 +196,11 @@ async def get_cpu_bar(bot: Bot) -> BarItem:
     cpu_temp = f" {round(temps['k10temp'][0].current)}°C"
   elif "coretemp" in temps:  # Intel
     cpu_temp = f" {round(temps['coretemp'][0].current)}°C"
-  return "CPU", f"{round(cpu_util)}% {cpu_freq}{cpu_temp}", cpu_util / 100
+  return [("CPU", f"{round(cpu_util)}% {cpu_freq}{cpu_temp}", cpu_util / 100)]
 
 
 async def get_cpu_usage(bot: Bot) -> List[Item]:
-  _, info, _ = await get_cpu_bar(bot)
-  return [("CPU占用", info)]
+  return [("CPU占用", (await get_cpu_bar(bot))[0][1])]
 
 
 async def get_gpus(bot: Bot) -> List[Item]:
@@ -218,12 +227,12 @@ async def get_gpus_and_usage(bot: Bot) -> List[Item]:
   return segments
 
 
-async def get_memory_bar(bot: Bot) -> BarItem:
+async def get_memory_bar(bot: Bot) -> List[BarItem]:
   mem_info = psutil.virtual_memory()
   info_str = (
     f"{human_util(mem_info.used, mem_info.total)} {round(mem_info.percent)}%"
   )
-  return "内存", info_str, mem_info.percent / 100
+  return [("内存", info_str, mem_info.percent / 100)]
 
 
 async def get_memory(bot: Bot) -> List[Item]:
@@ -234,12 +243,12 @@ async def get_memory(bot: Bot) -> List[Item]:
   return [("内存", info_str)]
 
 
-async def get_swap_bar(bot: Bot) -> BarItem:
+async def get_swap_bar(bot: Bot) -> List[BarItem]:
   swap_info = psutil.swap_memory()
   info_str = (
     f"{human_util(swap_info.used, swap_info.total)} {round(swap_info.percent)}%"
   )
-  return "交换", info_str, swap_info.percent / 100
+  return [("交换", info_str, swap_info.percent / 100)]
 
 
 async def get_swap(bot: Bot) -> List[Item]:
@@ -250,17 +259,57 @@ async def get_swap(bot: Bot) -> List[Item]:
   return [("交换", info_str)]
 
 
-async def get_disks(bot: Bot) -> List[Item]:
-  lines: List[Tuple[str, str]] = []
+def iter_disks() -> Generator[sdiskpart, Any, Any]:
+  config = CONFIG()
   shown: Set[str] = set()
   for partition in psutil.disk_partitions():
-    if partition.device.startswith("/dev/loop") or partition.device in shown:
-      continue  # 忽略回环设备和 mount --bind
+    if config.ignore_loop_device and partition.device.startswith("/dev/loop"):
+      continue
+    if config.ignore_bind_mount and partition.device in shown:
+      continue
     shown.add(partition.device)
+    if partition.device in config.ignored_disks:
+      continue
+    yield partition
+
+
+async def get_disks(bot: Bot) -> List[Item]:
+  lines: List[Item] = []
+  for partition in iter_disks():
     usage = psutil.disk_usage(partition.mountpoint)
     info_str = f"{human_util(usage.used, usage.total)} ({round(usage.percent)}%)"
     lines.append((partition.mountpoint, info_str))
   return lines
+
+
+async def get_disks_bar(bot: Bot) -> List[BarItem]:
+  lines: List[BarItem] = []
+  for partition in iter_disks():
+    usage = psutil.disk_usage(partition.mountpoint)
+    info_str = f"{human_util(usage.used, usage.total)} {round(usage.percent)}%"
+    lines.append((partition.mountpoint, info_str, usage.percent / 100))
+  return lines
+
+
+async def get_disks_aggregate(bot: Bot) -> List[Item]:
+  used = 0
+  total = 0
+  for partition in iter_disks():
+    usage = psutil.disk_usage(partition.mountpoint)
+    used += usage.used
+    total += usage.total
+  return [(("存储", f"{human_util(used, total)} ({round(used / total * 100)}%)"))]
+
+
+async def get_disks_aggregate_bar(bot: Bot) -> List[BarItem]:
+  used = 0
+  total = 0
+  for partition in iter_disks():
+    usage = psutil.disk_usage(partition.mountpoint)
+    used += usage.used
+    total += usage.total
+  ratio = used / total
+  return [("存储", f"{human_util(used, total)} {round(ratio * 100)}%", ratio)]
 
 
 async def get_battery(bot: Bot) -> List[Item]:
@@ -273,6 +322,18 @@ async def get_battery(bot: Bot) -> List[Item]:
   else:
     info_str = f"{percent}% (剩余 {misc.format_time(battery_info.secsleft)})"
   return [("电池", info_str)]
+
+
+async def get_battery_bar(bot: Bot) -> List[BarItem]:
+  battery_info = psutil.sensors_battery()
+  if not battery_info:
+    return []
+  percent = round(battery_info.percent, 1)
+  if battery_info.power_plugged:
+    info_str = f"充电中 {percent}%"
+  else:
+    info_str = f"{misc.format_time(battery_info.secsleft)} {percent}%"
+  return [("电池", info_str, battery_info.percent / 100)]
 
 
 async def get_diskio(bot: Bot) -> List[Item]:
@@ -329,6 +390,7 @@ ITEMS: Mapping[Items, Callable[[Bot], Awaitable[Sequence[Item]]]] = {
   "memory": get_memory,
   "swap": get_swap,
   "disks": get_disks,
+  "disks_aggregate": get_disks_aggregate,
   "battery": get_battery,
   "diskio": get_diskio,
   "network": get_network,
@@ -339,14 +401,17 @@ ITEMS: Mapping[Items, Callable[[Bot], Awaitable[Sequence[Item]]]] = {
   "idhagnbot": simple(lambda: ("IdhagnBot", IDHAGNBOT_VER)),
   "bot_uptime": simple(lambda: ("机器人在线", misc.format_time(time.time() - BOT_START_TIME))),
 }
-BAR_ITEMS: Mapping[BarItems, Callable[[Bot], Awaitable[BarItem]]] = {
+BAR_ITEMS: Mapping[BarItems, Callable[[Bot], Awaitable[Sequence[BarItem]]]] = {
   "cpu": get_cpu_bar,
   "memory": get_memory_bar,
   "swap": get_swap_bar,
+  "disks": get_disks_bar,
+  "disks_aggregate": get_disks_aggregate_bar,
+  "battery": get_battery_bar,
 }
 
 
-def render_bars(min_width: int, items: List[Tuple[str, str, float]]) -> Image.Image:
+def render_bars(min_width: int, items: Iterable[BarItem]) -> Image.Image:
   BAR_GAP = 32
   BAR_PADDING = 4
   BAR_HEIGHT = 4
@@ -437,7 +502,7 @@ async def handle_idhagnfetch(bot: Bot):
     im_w = max(im_w, info_w + 128)
     im_h += info_h
     if bar_items:
-      bar_im = render_bars(im_w - 128, bar_items)
+      bar_im = render_bars(im_w - 128, itertools.chain.from_iterable(bar_items))
       im_w = max(im_w, bar_im.width + 128)
       im_h += bar_im.height + 32
 
