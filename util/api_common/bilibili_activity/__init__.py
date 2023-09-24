@@ -57,7 +57,7 @@ async def grpc_fetch(uid: int, offset: str = "") -> Tuple[Sequence["DynamicItem"
   async with grpc.aio.secure_channel(GRPC_API, grpc.ssl_channel_credentials()) as channel:
     stub = cast("DynamicAsyncStub", DynamicStub(channel))
     req = DynSpaceReq(host_uid=uid, history_offset=offset)
-    res = await stub.DynSpace(req, metadata=GRPC_METADATA)
+    res = await stub.DynSpace(req)
   next_offset = res.history_offset if res.has_more else None
   return res.list, next_offset
 
