@@ -17,6 +17,8 @@ from util import colorutil, command, configs, imutil, misc, textutil
 
 from .gpu import get_gpu_info
 
+Item = Tuple[str, str]
+BarItem = Tuple[str, str, float]
 Items = Literal[
   "system",
   "uptime",
@@ -30,6 +32,8 @@ Items = Literal[
   "battery",
   "diskio",
   "network",
+  "backend",
+  "backend_stats",
   "python",
   "nonebot",
   "idhagnbot",
@@ -54,9 +58,10 @@ class Config(BaseModel):
     "disks",
     "diskio",
     "network",
+    "backend",
+    "backend_stats",
     "python",
     "nonebot",
-    "idhagnbot",
     "bot_uptime"
   ])
   bar_items: List[BarItems] = Field(default_factory=lambda: [
@@ -163,13 +168,13 @@ BOT_START_TIME = time.time()
 T = TypeVar("T")
 
 
-def simple(fn: Callable[[], T]) -> Callable[[], Awaitable[List[T]]]:
-  async def get_simple() -> List[T]:
+def simple(fn: Callable[[], T]) -> Callable[[Bot], Awaitable[List[T]]]:
+  async def get_simple(bot: Bot) -> List[T]:
     return [fn()]
   return get_simple
 
 
-async def get_cpu_bar():
+async def get_cpu_bar(bot: Bot) -> BarItem:
   psutil.cpu_percent()
   await asyncio.sleep(1)
   cpu_util = psutil.cpu_percent()
@@ -184,12 +189,12 @@ async def get_cpu_bar():
   return "CPU", f"{round(cpu_util)}% {cpu_freq}{cpu_temp}", cpu_util / 100
 
 
-async def get_cpu_usage():
-  _, info, _ = await get_cpu_bar()
+async def get_cpu_usage(bot: Bot) -> List[Item]:
+  _, info, _ = await get_cpu_bar(bot)
   return [("CPU占用", info)]
 
 
-async def get_gpus():
+async def get_gpus(bot: Bot) -> List[Item]:
   segments = []
   infos = get_gpu_info()
   for i, info in enumerate(infos, 1):
@@ -198,7 +203,7 @@ async def get_gpus():
   return segments
 
 
-async def get_gpus_and_usage():
+async def get_gpus_and_usage(bot: Bot) -> List[Item]:
   segments = []
   infos = get_gpu_info()
   for i, info in enumerate(infos, 1):
@@ -208,12 +213,12 @@ async def get_gpus_and_usage():
       freq = info.clk / 1000000
       freq = f"{int(freq)}MHz" if freq < 1000 else f"{freq / 1000:.1f}GHz"
       segments.append(
-        (f"{gpuid}占用", f"{info.percent}% {info.temp}°C {freq} (显存: {info.mem_percent}%)")
+        (f"{gpuid}占用", f"{info.percent}% {freq} {info.temp}°C (显存: {info.mem_percent}%)")
       )
   return segments
 
 
-async def get_memory_bar():
+async def get_memory_bar(bot: Bot) -> BarItem:
   mem_info = psutil.virtual_memory()
   info_str = (
     f"{human_util(mem_info.used, mem_info.total)} {round(mem_info.percent)}%"
@@ -221,7 +226,7 @@ async def get_memory_bar():
   return "内存", info_str, mem_info.percent / 100
 
 
-async def get_memory():
+async def get_memory(bot: Bot) -> List[Item]:
   mem_info = psutil.virtual_memory()
   info_str = (
     f"{human_util(mem_info.used, mem_info.total)} ({round(mem_info.percent)}%)"
@@ -229,7 +234,7 @@ async def get_memory():
   return [("内存", info_str)]
 
 
-async def get_swap_bar():
+async def get_swap_bar(bot: Bot) -> BarItem:
   swap_info = psutil.swap_memory()
   info_str = (
     f"{human_util(swap_info.used, swap_info.total)} {round(swap_info.percent)}%"
@@ -237,7 +242,7 @@ async def get_swap_bar():
   return "交换", info_str, swap_info.percent / 100
 
 
-async def get_swap():
+async def get_swap(bot: Bot) -> List[Item]:
   swap_info = psutil.swap_memory()
   info_str = (
     f"{human_util(swap_info.used, swap_info.total)} ({round(swap_info.percent)}%)"
@@ -245,7 +250,7 @@ async def get_swap():
   return [("交换", info_str)]
 
 
-async def get_disks():
+async def get_disks(bot: Bot) -> List[Item]:
   lines: List[Tuple[str, str]] = []
   shown: Set[str] = set()
   for partition in psutil.disk_partitions():
@@ -258,7 +263,7 @@ async def get_disks():
   return lines
 
 
-async def get_battery():
+async def get_battery(bot: Bot) -> List[Item]:
   battery_info = psutil.sensors_battery()
   if not battery_info:
     return []
@@ -270,7 +275,7 @@ async def get_battery():
   return [("电池", info_str)]
 
 
-async def get_diskio():
+async def get_diskio(bot: Bot) -> List[Item]:
   counter = psutil.disk_io_counters()
   if not counter:
     return []
@@ -283,7 +288,7 @@ async def get_diskio():
   return [("硬盘", f"读 {human_size(read)}/s 写 {human_size(write)}/s")]
 
 
-async def get_network():
+async def get_network(bot: Bot) -> List[Item]:
   before = psutil.net_io_counters(True)
   await asyncio.sleep(1)
   after = psutil.net_io_counters(True)
@@ -294,7 +299,27 @@ async def get_network():
   return [("网络", f"↓ {human_size(recv)}/s ↑ {human_size(sent)}/s")]
 
 
-ITEMS: Mapping[Items, Callable[[], Awaitable[Sequence[Tuple[str, str]]]]] = {
+async def get_backend(bot: Bot) -> List[Item]:
+  version = await bot.get_version_info()
+  return [("后端", f"{version['app_name']} {version['app_version']}")]
+
+
+async def get_backend_stats(bot: Bot) -> List[Item]:
+  status = await bot.get_status()
+  if "stat" not in status:
+    return []
+  stats = status["stat"]
+  lost_ratio = stats["packet_lost"] / (stats["packet_received"] + stats["packet_sent"])
+  return [("后端状态", " ".join([
+    f"收 {stats['message_received']}",
+    f"发 {stats['message_sent']}",
+    f"丢包 {round(lost_ratio * 100)}%",
+    f"断连 {stats['disconnect_times']}",
+    f"下线 {stats['lost_times']}",
+  ]))]
+
+
+ITEMS: Mapping[Items, Callable[[Bot], Awaitable[Sequence[Item]]]] = {
   "system": simple(lambda: ("系统", SYSTEM)),
   "uptime": simple(lambda: ("系统在线", misc.format_time(time.time() - psutil.boot_time()))),
   "cpu": simple(lambda: ("CPU", CPU_MODEL)),
@@ -307,12 +332,14 @@ ITEMS: Mapping[Items, Callable[[], Awaitable[Sequence[Tuple[str, str]]]]] = {
   "battery": get_battery,
   "diskio": get_diskio,
   "network": get_network,
+  "backend": get_backend,
+  "backend_stats": get_backend_stats,
   "python": simple(lambda: ("Python", PYTHON_VER)),
   "nonebot": simple(lambda: ("Nonebot", nonebot.__version__)),
   "idhagnbot": simple(lambda: ("IdhagnBot", IDHAGNBOT_VER)),
   "bot_uptime": simple(lambda: ("机器人在线", misc.format_time(time.time() - BOT_START_TIME))),
 }
-BAR_ITEMS: Mapping[BarItems, Callable[[], Awaitable[Tuple[str, str, float]]]] = {
+BAR_ITEMS: Mapping[BarItems, Callable[[Bot], Awaitable[BarItem]]] = {
   "cpu": get_cpu_bar,
   "memory": get_memory_bar,
   "swap": get_swap_bar,
@@ -378,8 +405,8 @@ async def handle_idhagnfetch(bot: Bot):
   )
   # 分开获取，防止干扰网络信息
   items, bar_items = await asyncio.gather(
-    asyncio.gather(*(ITEMS[name]() for name in config.items)),
-    asyncio.gather(*(BAR_ITEMS[name]() for name in config.bar_items)),
+    asyncio.gather(*(ITEMS[name](bot) for name in config.items)),
+    asyncio.gather(*(BAR_ITEMS[name](bot) for name in config.bar_items)),
   )
 
   def make() -> MessageSegment:
