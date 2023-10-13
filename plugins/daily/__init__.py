@@ -23,6 +23,7 @@ from .modules.news import NewsModule, news_cache
 from .modules.rank import RankModule
 from .modules.sentence import SentenceModule, sentence_cache
 from .modules.string import StringModule
+from .modules.unrealassets import UnrealAssetsModule
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
@@ -104,6 +105,14 @@ class EpicGamesModuleConfig(BaseModuleConfig):
     return EpicGamesModule(self.force)
 
 
+class UnrealAssetsModuleConfig(BaseModuleConfig):
+  type: Literal["unrealassets"]
+  force: bool = False
+
+  def create_module(self, group_id: int) -> Module:
+    return UnrealAssetsModule(self.force)
+
+
 AnyModuleConfig = Union[
   StringModuleConfig,
   CountdownModuleConfig,
@@ -113,7 +122,8 @@ AnyModuleConfig = Union[
   SentenceModuleConfig,
   RankModuleConfig,
   FurbotModuleConfig,
-  EpicGamesModuleConfig
+  EpicGamesModuleConfig,
+  UnrealAssetsModuleConfig
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
 

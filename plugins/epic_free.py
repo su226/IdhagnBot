@@ -3,19 +3,19 @@ from datetime import datetime, timezone
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
 from util import command
-from util.api_common import epicgames
+from util.api_common import epic_free as api
 
-epicfree = command.CommandBuilder("epicfree", "epicfree", "epic", "e宝", "喜加一") \
-  .brief("看看E宝又在送什么") \
+epic_free = command.CommandBuilder("epic_free", "epicgames", "epic", "e宝", "喜加一") \
+  .brief("看看E宝又在送什么游戏") \
   .usage('''\
-/epicfree - 查看现在的免费游戏
+/epicgames - 查看现在的免费游戏
 你送游戏你是我宝，你卖游戏翻脸不认（雾）''') \
   .build()
-@epicfree.handle()
+@epic_free.handle()
 async def handle_epicfree():
-  games = await epicgames.free_games()
+  games = await api.free_games()
   if not games:
-    await epicfree.finish("似乎没有可白嫖的游戏")
+    await epic_free.finish("似乎没有可白嫖的游戏")
   games.sort(key=lambda x: x.end_date)
   now_date = datetime.now(timezone.utc)
   message = Message()
@@ -29,7 +29,7 @@ async def handle_epicfree():
     if message:
       text = "\n" + text
     message.extend([
-      MessageSegment.text(text + f"\n{epicgames.URL_BASE}{game.slug}\n"),
+      MessageSegment.text(text + f"\n{api.URL_BASE}{game.slug}\n"),
       MessageSegment.image(game.image)
     ])
-  await epicfree.finish(Message(message))
+  await epic_free.finish(Message(message))
