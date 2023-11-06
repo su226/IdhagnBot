@@ -19,7 +19,9 @@ driver = nonebot.get_driver()
 
 
 def normalize_message(raw: Any) -> Message:
-  if isinstance(raw, MessageSegment):
+  if isinstance(raw, Message):
+    message = raw
+  elif isinstance(raw, MessageSegment):
     message = Message(raw)
   else:
     message = parse_obj_as(Message, raw)
