@@ -86,7 +86,7 @@ USAGE_BASE = f'''\
 USAGE_KEYWORD = "也可以使用关键词“{}”触发"
 
 
-async def ensure_login() -> SimpleCookie[str]:
+async def ensure_login() -> SimpleCookie:
   config = CONFIG()
   if not config.can_login:
     return SimpleCookie()
@@ -116,7 +116,7 @@ async def ensure_login() -> SimpleCookie[str]:
 
 
 async def send_pic(
-  bot: Bot, event: Event, data: Dict[str, Any], cookies: SimpleCookie[str]
+  bot: Bot, event: Event, data: Dict[str, Any], cookies: SimpleCookie
 ) -> None:
   status = int(data.get("examine", 1))  # 随机接口没有审核参数
   if status == 1:

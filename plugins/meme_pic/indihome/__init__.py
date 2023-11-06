@@ -1,7 +1,7 @@
 import random
 from argparse import Namespace
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, TypeVar, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -23,9 +23,10 @@ PRICE_FRAMES = 5
 PRICE_DURATION = 250
 
 
-def lerp(box1: Tuple[int, ...], box2: Tuple[int, ...], r2: float) -> Tuple[int, ...]:
+T = TypeVar("T", bound=Tuple[float, ...])
+def lerp(box1: T, box2: T, r2: float) -> T:
   r1 = 1 - r2
-  return tuple(int(i * r1 + j * r2) for i, j in zip(box1, box2))
+  return cast(T, tuple(int(i * r1 + j * r2) for i, j in zip(box1, box2)))
 
 
 def paste(im: Image.Image, im2: Image.Image, box: Tuple[int, int, int, int]) -> None:

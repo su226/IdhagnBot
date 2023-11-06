@@ -135,10 +135,10 @@ async def match_uid(
 @overload
 async def match_uid(
   bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = ...
-) -> Tuple[int]: ...
+) -> Tuple[int, ...]: ...
 async def match_uid(
   bot: Bot, event: Event, raw_pattern: str, multiple: bool = False
-) -> Union[int, Tuple[int]]:
+) -> Union[int, Tuple[int, ...]]:
   try:
     uid = int(raw_pattern)
     if multiple:

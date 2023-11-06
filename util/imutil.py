@@ -357,4 +357,4 @@ class RemapTransform:
     a = np.array(matrix)
     b = np.array(old_plane).reshape(8)
     res_ = np.linalg.inv(a.T @ a) @ a.T @ b
-    return tuple(res_)
+    return cast(PerspectiveData, tuple(res_))

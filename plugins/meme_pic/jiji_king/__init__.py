@@ -42,7 +42,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   def get_image(
-    g: AvatarGetter, pattern: str, default: int, size: int, prompt: str
+    g: AvatarGetter, pattern: str, default: DefaultType, size: int, prompt: str
   ) -> "asyncio.Task[Image.Image]":
     for left, right in BRACKETS:
       if pattern.startswith(left) and pattern.endswith(right):

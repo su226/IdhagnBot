@@ -32,7 +32,7 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
     if len(message) != 2:
       await fake_forward.finish(fake_forward.__doc__)
     match_tasks.append(asyncio.create_task(match(message[0])))
-    messages.append(tuple(message))
+    messages.append(cast(Tuple[str, str], tuple(message)))
   if not messages:
     await fake_forward.finish(fake_forward.__doc__)
   errors: List[str] = []
