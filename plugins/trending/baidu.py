@@ -8,7 +8,6 @@ from util import misc
 from .common import Item
 
 URL = "https://www.baidu.com"
-UA = "Mozilla/5.0 (X11; Linux x86_64; rv:97.0) Gecko/20100101 Firefox/97.0"
 
 
 class Parser(HTMLParser):
@@ -38,7 +37,7 @@ def extract_data(value: str):
 
 async def get_data() -> List[Item]:
   http = misc.http()
-  async with http.get(URL, headers={"User-Agent": UA}) as response:
+  async with http.get(URL, headers={"User-Agent": misc.BROWSER_UA}) as response:
     data = extract_data(await response.text())
   result = []
   for i in data["hotsearch"]:

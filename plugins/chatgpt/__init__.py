@@ -20,7 +20,7 @@ from util.api_common.openai_auth import AuthError, OpenAIAuth
 class Config(BaseModel):
   email: str = ""
   password: str = ""
-  user_agent: str = "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0"
+  user_agent: str = misc.BROWSER_UA
   proxy: Optional[str] = None
   login_proxy: Optional[str] = None
   timeout: Optional[float] = 360

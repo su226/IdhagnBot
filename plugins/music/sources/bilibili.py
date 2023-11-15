@@ -14,7 +14,6 @@ SEARCH_API = (
 )
 INFO_API = "https://www.bilibili.com/audio/music-service-c/web/song/info?sid={id}"
 URL_API = "https://www.bilibili.com/audio/music-service-c/web/url?sid={id}"
-USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:107.0) Gecko/20100101 Firefox/107.0"
 
 
 @dataclass
@@ -38,7 +37,7 @@ class BilibiliMusic(Music):
       "image": self.picture_url,
       "headers": {
         "Referer": referer,
-        "User-Agent": USER_AGENT,
+        "User-Agent": misc.BROWSER_UA,
       },
     })
 
@@ -67,7 +66,7 @@ class BilibiliMusic(Music):
       "image": data["data"]["cover"],
       "headers": {
         "Referer": referer,
-        "User-Agent": USER_AGENT,
+        "User-Agent": misc.BROWSER_UA,
       },
     })
 

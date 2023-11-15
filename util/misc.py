@@ -29,12 +29,12 @@ if TYPE_CHECKING:
 
 
 __all__ = [
-  "ADAPTER_NAME", "AggregateError", "AnyMessage", "CONFIG", "CairoAntialias", "CairoHintMetrics",
-  "CairoHintStyle", "CairoSubpixel", "Config", "EnableSet", "Font", "NotCommand", "PromptTimeout",
-  "Quantize", "Resample", "ScaleResample", "binomial_sample", "chunked", "command_start",
-  "format_time", "forward_node", "http", "is_command", "is_superuser", "launch_playwright",
-  "local", "prompt", "range_float", "range_int", "send_forward_msg", "superusers",
-  "weighted_choice"
+  "ADAPTER_NAME", "BROWSER_UA", "AggregateError", "AnyMessage", "CONFIG", "CairoAntialias",
+  "CairoHintMetrics", "CairoHintStyle", "CairoSubpixel", "Config", "EnableSet", "Font",
+  "NotCommand", "PromptTimeout", "Quantize", "Resample", "ScaleResample", "binomial_sample",
+  "chunked", "command_start", "format_time", "forward_node", "http", "is_command", "is_superuser",
+  "launch_playwright", "local", "prompt", "range_float", "range_int", "send_forward_msg",
+  "superusers", "weighted_choice"
 ]
 
 
@@ -129,6 +129,7 @@ class Config(BaseModel):
 
 CONFIG = SharedConfig("misc", Config)
 ADAPTER_NAME = Adapter.get_name().split(None, 1)[0].lower()
+BROWSER_UA = "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0"
 _http: Optional[aiohttp.ClientSession] = None
 _driver = nonebot.get_driver()
 
