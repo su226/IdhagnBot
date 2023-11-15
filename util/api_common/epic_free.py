@@ -57,6 +57,8 @@ async def free_games() -> List[Game]:
   for game in games:
     for i in promotions(game.get("promotions", {})):
       # Python不支持Z结束，须替换成+00:00
+      if i["startDate"] is None or i["endDate"] is None:
+        continue
       start_date = datetime.fromisoformat(i["startDate"].replace("Z", "+00:00"))
       end_date = datetime.fromisoformat(i["endDate"].replace("Z", "+00:00"))
       if i["discountSetting"] == FREE and start_date < end_date and now_date < end_date:
