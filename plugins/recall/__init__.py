@@ -1,14 +1,16 @@
 import asyncio
-from typing import cast
+from typing import Optional, cast
 
 import nonebot
 from loguru import logger
-from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent, GroupRecallNoticeEvent
+from nonebot.adapters.onebot.v11 import (
+  Bot, Event, GroupMessageEvent, GroupRecallNoticeEvent, Message
+)
 from nonebot.adapters.onebot.v11.event import Reply
-from nonebot.exception import ActionFailed
+from nonebot.exception import ActionFailed, MockApiException
 from nonebot.typing import T_State
 
-from util import context, permission
+from util import context, hook, permission
 
 from .common import has_keyword, recall_others_permission, schedule_delete, try_delete_msg
 
@@ -69,3 +71,12 @@ async def handle_auto_recall(bot: Bot, event: GroupRecallNoticeEvent, state: T_S
   async for message in record.get(event, state):
     coros.append(try_delete_msg(bot, message))
   await asyncio.gather(*coros)
+
+
+@hook.on_message_sending
+async def on_calling_api(
+  event: Optional[Event], is_group: bool, target_id: int, message: Message
+) -> None:
+  if isinstance(event, GroupMessageEvent):
+    if await record.is_deleted(event.message_id):
+      raise MockApiException({"message_id": 0})

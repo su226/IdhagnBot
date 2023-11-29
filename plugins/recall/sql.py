@@ -48,6 +48,13 @@ class Record:
       ))
     return result.scalar() == user_id
 
+  async def is_deleted(self, message_id: int) -> bool:
+    async with AsyncSession(record.engine) as session:
+      result = await session.execute(select(record.Received.deleted_by).where(
+        record.Received.message_id == message_id
+      ))
+      return result.scalar() is not None
+
 
 batch_recall_permission = context.build_permission(
   ("recall", "manual_recall", "batch"), permission.Level.MEMBER

@@ -5,14 +5,19 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Event, Message, MessageEvent, MessageSegment
-from nonebot.message import event_postprocessor
+from nonebot.adapters.onebot.v11 import (
+  Event, FriendRecallNoticeEvent, GroupRecallNoticeEvent, Message, MessageEvent, MessageSegment
+)
+from nonebot.message import event_preprocessor
 from pydantic.json import pydantic_encoder
+from sqlalchemy.engine import Connection, Inspector
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlmodel import Field as SQLField, MetaData, SQLModel as BaseSQLModel, select
+from sqlalchemy.sql.ddl import DDL
+from sqlalchemy.sql.elements import ColumnClause
+from sqlmodel import Field as SQLField, MetaData, SQLModel as BaseSQLModel, col, inspect, select
 
 from util import hook
 
@@ -28,6 +33,7 @@ class Received(SQLModel, table=True):
   user_id: int
   group_id: Optional[int]
   content: str
+  deleted_by: Optional[int] = None
 
 
 class Sent(SQLModel, table=True):
@@ -38,6 +44,7 @@ class Sent(SQLModel, table=True):
   target_id: int
   caused_by: Optional[int] = SQLField(foreign_key="received.message_id")
   content: str
+  deleted_by: Optional[int] = None
 
 
 class Cache(SQLModel, table=True):
@@ -45,6 +52,10 @@ class Cache(SQLModel, table=True):
   type: str
   created: datetime
   last_seen: datetime
+
+
+class Version(SQLModel, table=True):
+  version: int = SQLField(primary_key=True)
 
 
 @dataclass
@@ -56,12 +67,50 @@ class CacheEntry:
 os.makedirs("states/messages", exist_ok=True)
 engine = create_async_engine("sqlite+aiosqlite:///states/messages/messages.db")
 driver = nonebot.get_driver()
+CURRENT_VERSION = 1
+
+
+def _get_columns(inspector: Inspector, table: str) -> Dict[str, Dict[str, Any]]:
+  return {column.pop("name"): column for column in inspector.get_columns(table)}
+
+
+def _append_column(connection: Connection, column: ColumnClause[Any]) -> None:
+  connection.execute(DDL("ALTER TABLE %(table)s ADD %(column)s %(type)s", {
+    "table": column.table, "column": column.key, "type": column.type
+  }))
+
+
+def _upgrade_0to1(connection: Connection) -> None:
+  # 版本 0：无 Version 表，Received 和 Sent 表无 deleted_by 列
+  inspector = inspect(connection)
+  tables = set(inspector.get_table_names())
+  if cast(str, Version.__tablename__) in tables:
+    return
+  if (received := cast(str, Received.__tablename__)) in tables:
+    columns = _get_columns(inspector, received)
+    if (deleted_by := col(Received.deleted_by)).key not in columns:
+      _append_column(connection, deleted_by)
+  if (sent := cast(str, Sent.__tablename__)) in tables:
+    columns = _get_columns(inspector, sent)
+    if (deleted_by := col(Sent.deleted_by)).key not in columns:
+      _append_column(connection, deleted_by)
 
 
 @driver.on_startup
 async def on_startup():
   async with engine.begin() as connection:
-    await connection.run_sync(SQLModel.metadata.create_all)
+    await connection.run_sync(_upgrade_0to1)
+    await connection.run_sync(Received.metadata.create_all)
+    async with AsyncSession(connection) as session:
+      result = (await session.execute(select(Version))).scalars().all()
+      if result:
+        result[0].version = CURRENT_VERSION
+        session.add(result[0])
+        for i in result[1:]:
+          await session.delete(i)
+      else:
+        session.add(Version(version=CURRENT_VERSION))
+      await session.commit()
 
 
 def process_segment(segment: MessageSegment) -> List[CacheEntry]:
@@ -134,19 +183,57 @@ async def on_message_sent(
     await session.commit()
 
 
-@event_postprocessor
+@event_preprocessor
 async def on_message_event(event: Event) -> None:
   # 类型标注得是 Event，不然 DEBUG 日志会被 HeartbeatEvent 刷屏
-  if not isinstance(event, MessageEvent) or not event.message_id:
-    return
-  caches, segments = serialize_message(event.message)
-  async with AsyncSession(engine) as session:
-    await process_caches(session, caches)
-    session.add(Received(
-      message_id=event.message_id,
-      time=datetime.fromtimestamp(event.time),
-      user_id=event.user_id,
-      group_id=getattr(event, "group_id", None),
-      content=segments
-    ))
-    await session.commit()
+  if isinstance(event, GroupRecallNoticeEvent):
+    async with AsyncSession(engine) as session:
+      if event.user_id == event.self_id:
+        result = await session.execute(select(Sent).where(
+          Sent.message_id == event.message_id,
+          Sent.is_group == True,  # noqa
+          Sent.target_id == event.group_id,
+        ))
+      else:
+        result = await session.execute(select(Received).where(
+          Received.message_id == event.message_id,
+          Received.user_id == event.user_id,
+          Received.group_id == event.group_id,
+        ))
+      for record in result.scalars().all():
+        record.deleted_by = event.operator_id
+        session.add(record)
+      await session.commit()
+  elif isinstance(event, FriendRecallNoticeEvent):
+    async with AsyncSession(engine) as session:
+      result = await session.execute(select(Received).where(
+        Received.message_id == event.message_id,
+        Received.user_id == event.user_id,
+        Received.group_id == None,  # noqa
+      ))
+      for record in result.scalars().all():
+        record.deleted_by = event.user_id
+        session.add(record)
+      result = await session.execute(select(Sent).where(
+        Sent.message_id == event.message_id,
+        Sent.is_group == False,  # noqa
+        Sent.target_id == event.user_id,
+      ))
+      for record in result.scalars().all():
+        record.deleted_by = event.self_id
+        session.add(record)
+      await session.commit()
+  elif isinstance(event, MessageEvent):
+    if not event.message_id:
+      return
+    caches, segments = serialize_message(event.message)
+    async with AsyncSession(engine) as session:
+      await process_caches(session, caches)
+      session.add(Received(
+        message_id=event.message_id,
+        time=datetime.fromtimestamp(event.time),
+        user_id=event.user_id,
+        group_id=getattr(event, "group_id", None),
+        content=segments
+      ))
+      await session.commit()
