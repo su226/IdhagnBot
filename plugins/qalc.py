@@ -1,16 +1,26 @@
 import asyncio
+import os
 
 from nonebot.adapters.onebot.v11 import Message
 from nonebot.params import CommandArg
+from pydantic import BaseModel
 
-from util import command, misc
+from util import command, configs, misc
+
+
+class Config(BaseModel):
+  proxy: str = ""
+
+
+CONFIG = configs.SharedConfig("qalc", Config)
+
 
 qalc = (
   command.CommandBuilder("qalc", "qalc", "计算")
   .brief("强大的计算器")
   .usage('''\
 /qalc <表达式>
-基于Qalculator的，非常强大的计算器。
+基于Qalculate的，非常强大的计算器。
 
 基本用法：
 /qalc 16 - 9
@@ -31,9 +41,22 @@ async def handle_qalc(arg: Message = CommandArg()):
   expr = str(arg).rstrip()
   if not expr:
     await qalc.finish(qalc.__doc__)
+  read, write = os.pipe()
   proc = await asyncio.create_subprocess_exec(
-    "qalc", expr, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE)
-  result, _ = await proc.communicate(b"y")  # 更新汇率
-  if proc.returncode is None:
-    proc.terminate()
+    "qalc", expr, stdin=read, stdout=asyncio.subprocess.PIPE
+  )
+  os.write(write, b"n")
+  os.close(write)
+  await proc.wait()
+  # qalc 在需要更新汇率的时候会询问 y/n，如果 n 被 qalc 吞掉了就说明需要更新汇率了
+  if os.read(read, 1):
+    result, _ = await proc.communicate()
+  else:
+    await qalc.send("正在更新汇率，请稍候……")
+    config = CONFIG()
+    proc = await asyncio.create_subprocess_exec(
+      "qalc", "-exrates", expr, stdout=asyncio.subprocess.PIPE, env={"all_proxy": config.proxy}
+    )
+    result, _ = await proc.communicate()
+    await proc.wait()
   await qalc.finish(misc.removesuffix(result.decode(), "\n"))
