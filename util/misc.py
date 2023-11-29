@@ -425,7 +425,7 @@ def superusers() -> Generator[int, None, None]:
 # first_result -> Promise.any
 async def first_result(tasks: Iterable["asyncio.Future[T]"]) -> T:
   while tasks:
-    done, tasks = await asyncio.wait(tasks)
+    done, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
     has_result = False
     result: Any = None
     for i in done:

@@ -208,13 +208,17 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
   except ValueError:
     async with http.get(SEARCH_API.format(encodeuri(name)), headers=headers) as resp:
       search_data = await resp.json()
-    if "result" not in search_data.get("data", {}):
+    if search_data["code"] == -101:
+      await bilibili_check.finish("Cookies 过期或无效，查询失败")
+    elif "result" not in search_data.get("data", {}):
       await bilibili_check.finish(f"找不到B站用户：{name}")
     uid = search_data["data"]["result"][0]["mid"]
 
   async with http.get(FOLLOW_API.format(uid)) as resp:
     follow_data = await resp.json(content_type=None)
-  if follow_data["code"] == -626:
+  if follow_data["code"] == -101:
+    await bilibili_check.finish("Cookies 过期或无效，查询失败")
+  elif follow_data["code"] == -626:
     await bilibili_check.finish(f"UID 为 {uid} 的B站用户不存在")
   async with http.get(MEDAL_API.format(uid), headers=headers) as resp:
     medal_data = await resp.json()
@@ -229,24 +233,32 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
   vtbs = sorted((
     (uid, vtb_names[uid]) for uid in following_list if uid in vtb_names
   ), key=lambda x: x[1])
+  medals_available = medal_data["code"] != -101
   medals: Dict[int, Medal] = {}
-  for i in medal_data["data"]["list"]:
-    info = i["medal_info"]
-    medals[info["target_id"]] = Medal(
-      info["level"], info["medal_name"],
-      info["medal_color_start"], info["medal_color_end"], info["medal_color_border"]
-    )
+  if medals_available:
+    for i in medal_data["data"]["list"]:
+      info = i["medal_info"]
+      medals[info["target_id"]] = Medal(
+        info["level"], info["medal_name"],
+        info["medal_color_start"], info["medal_color_end"], info["medal_color_border"]
+      )
 
   def make() -> MessageSegment:
     avatar = Image.open(BytesIO(avatar_data))
-    items = [make_list_item(name, uid, medals.get(uid, None)) for uid, name in vtbs]
     header = make_header(avatar, name, uid, fans, following, -1 if private else len(vtbs))
 
-    if not items:
+    if not vtbs:
       if private:
-        items.append(textutil.render("关注列表不公开", "sans", 32))
+        items = [textutil.render("关注列表不公开", "sans", 32)]
       else:
-        items.append(textutil.render("什么都查不到", "sans", 32))
+        items = [textutil.render("什么都查不到", "sans", 32)]
+    else:
+      items = []
+      if not CONFIG().cookie.get_secret_value():
+        items.append(textutil.render("未设置 Cookies，无法获取粉丝团信息", "sans", 32))
+      elif not medals_available:
+        items.append(textutil.render("Cookies 过期或无效，无法获取粉丝团信息", "sans", 32))
+      items.extend(make_list_item(name, uid, medals.get(uid, None)) for uid, name in vtbs)
 
     margin = 32
     gap = 16
