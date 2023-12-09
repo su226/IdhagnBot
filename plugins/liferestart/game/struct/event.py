@@ -6,7 +6,7 @@ from ..typing.event import EventDict
 from .commons import Rarity
 
 
-@dataclass()
+@dataclass
 class Event:
   id: int
   event: str

@@ -81,6 +81,11 @@ def make_image(messages: Iterable[Union[Tuple[Rarity, str], str]]) -> MessageSeg
   return imutil.to_segment(im)
 
 
+def format_float(value: float) -> str:
+  # 处理唯一一个属性有浮点数的角色祖冲之
+  return f"{value:.7f}".rstrip(".0") or "0"
+
+
 def get_messages(game: Game) -> List[str]:
   messages = []
   prev_charm = -1
@@ -97,8 +102,9 @@ def get_messages(game: Game) -> List[str]:
     ):
       segments.append((
         Rarity.COMMON,
-        f"颜值 {progress.charm} 智力 {progress.intelligence} 体质 {progress.strength} "
-        f"家境 {progress.money} 快乐 {progress.spirit}"
+        f"颜值 {format_float(progress.charm)} 智力 {format_float(progress.intelligence)} "
+        f"体质 {format_float(progress.strength)}  家境 {format_float(progress.money)} "
+        f"快乐 {progress.spirit}"
       ))
     prev_charm = progress.charm
     prev_intelligence = progress.intelligence
@@ -124,22 +130,22 @@ def get_messages(game: Game) -> List[str]:
     "---- 总结 ----",
     (
       end.summary_charm.rarity,
-      f"颜值: {end.charm} - "
+      f"颜值: {format_float(end.charm)} - "
       + game.config.stat.rarity.messages[end.summary_charm.message_id]
     ),
     (
       end.summary_intelligence.rarity,
-      f"智力: {end.intelligence} - "
+      f"智力: {format_float(end.intelligence)} - "
       + game.config.stat.rarity.messages[end.summary_intelligence.message_id]
     ),
     (
       end.summary_strength.rarity,
-      f"体质: {end.strength} - "
+      f"体质: {format_float(end.strength)} - "
       + game.config.stat.rarity.messages[end.summary_strength.message_id]
     ),
     (
       end.summary_money.rarity,
-      f"家境: {end.money} - "
+      f"家境: {format_float(end.money)} - "
       + game.config.stat.rarity.messages[end.summary_money.message_id]
     ),
     (
@@ -299,7 +305,10 @@ def get_character_segments(ch: Character) -> List[str]:
   segments = [f"---- {ch.name} ----"]
   if isinstance(ch, GeneratedCharacter) and ch.seed != -1:
     segments.append(f"种子：{ch.seed}")
-  segments.append(f"颜值 {ch.charm} 智力 {ch.intelligence} 体质 {ch.strength} 家境 {ch.money}")
+  segments.append(
+    f"颜值 {format_float(ch.charm)} 智力 {format_float(ch.intelligence)} "
+    f"体质 {format_float(ch.strength)} 家境 {format_float(ch.money)}"
+  )
   for i in ch.talents:
     ta = TALENT[i]
     segments.append(f"{ta.name} - {ta.description}")
@@ -322,13 +331,16 @@ character_view.add_argument("name", nargs="?", metavar="名字")
 character_view.set_defaults(func=handle_character_view)
 
 async def handle_character_list(bot: Bot, event: MessageEvent, args: Namespace) -> None:
-  messages = [["---- 前世名人 ----", ""]]
+  messages = [["==== 前世名人 ====", ""]]
   for ch in CHARACTER.values():
     messages.append(get_character_segments(ch))
-  messages.append(["", "---- 自定义角色 ----", ""])
+  custom_messages = []
   for i in STATE().statistics.values():
     if ch := i.character:
-      messages.append(get_character_segments(ch))
+      custom_messages.append(get_character_segments(ch))
+  if custom_messages:
+    messages.append(["", "---- 自定义角色 ----", ""])
+    messages.extend(custom_messages)
   for part in misc.chunked(messages, CONFIG().character_group_by):
     await liferestart.send(await misc.to_thread(
       make_image, itertools.chain.from_iterable(part)
@@ -398,7 +410,10 @@ async def handle_character_play(bot: Bot, event: MessageEvent, args: Namespace) 
   segments.append(f"游戏种子：{seed}")
   if isinstance(ch, GeneratedCharacter) and ch.seed != -1:
     segments.append(f"角色种子：{ch.seed}")
-  segments.append(f"颜值 {ch.charm} 智力 {ch.intelligence} 体质 {ch.strength} 家境 {ch.money}")
+  segments.append(
+    f"颜值 {format_float(ch.charm)} 智力 {format_float(ch.intelligence)} "
+    f"体质 {format_float(ch.strength)} 家境 {format_float(ch.money)}"
+  )
   for talent, real in zip(talents, real_talents):
     segments.append(f"{talent.name} - {talent.description}")
     if talent is not real:

@@ -13,7 +13,7 @@ class Opportunity(Enum):
   END = 2
 
 
-@dataclass()
+@dataclass
 class Achievement:
   id: int
   name: str

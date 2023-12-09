@@ -30,17 +30,16 @@ class GeneratedCharacter(Character):
     return {
       "name": self.name,
       "talents": self.talents,
-      "charm": self.charm,
-      "intelligence": self.intelligence,
-      "strength": self.strength,
-      "money": self.money,
+      "charm": int(self.charm),
+      "intelligence": int(self.intelligence),
+      "strength": int(self.strength),
+      "money": int(self.money),
       "seed": self.seed,
     }
 
   @staticmethod
   def deserialize(serialized: SerializedGeneratedCharacter) -> "GeneratedCharacter":
     return GeneratedCharacter(
-      -1,
       name=serialized["name"],
       talents=serialized["talents"],
       charm=serialized["charm"],
@@ -60,7 +59,7 @@ class SerializedStatistics(TypedDict):
   character: Optional[SerializedGeneratedCharacter]
 
 
-@dataclass  # dirty hack
+@dataclass
 class Statistics:
   talents: Set[int] = field(default_factory=set)
   events: Set[int] = field(default_factory=set)
@@ -98,10 +97,10 @@ class Progress:
   talents: List[Talent]
   events: List[Tuple[Event, bool]]
   achievements: List[Achievement]
-  charm: int
-  intelligence: int
-  strength: int
-  money: int
+  charm: float
+  intelligence: float
+  strength: float
+  money: float
   spirit: int
 
 
@@ -110,10 +109,10 @@ class End:
   talents: List[Talent]
   achievements: List[Achievement]
   age: int
-  charm: int
-  intelligence: int
-  strength: int
-  money: int
+  charm: float
+  intelligence: float
+  strength: float
+  money: float
   spirit: int
   overall: int
   summary_age: StatRarityItem
@@ -133,20 +132,20 @@ class Game:
 
   _raw_talents: List[Talent]
   _talents: List[Talent]
-  _charm: int
-  _intelligence: int
-  _strength: int
-  _money: int
+  _charm: float
+  _intelligence: float
+  _strength: float
+  _money: float
   _spirit: int
-  _max_charm: int
-  _max_intelligence: int
-  _max_strength: int
-  _max_money: int
+  _max_charm: float
+  _max_intelligence: float
+  _max_strength: float
+  _max_money: float
   _max_spirit: int
-  _min_charm: int
-  _min_intelligence: int
-  _min_strength: int
-  _min_money: int
+  _min_charm: float
+  _min_intelligence: float
+  _min_strength: float
+  _min_money: float
   _min_spirit: int
 
   _age: int
@@ -262,7 +261,7 @@ class Game:
   def get_points(self) -> int:
     return self.config.stat.total + sum(i.points for i in self._talents)
 
-  def set_stats(self, charm: int, intelligence: int, strength: int, money: int):
+  def set_stats(self, charm: float, intelligence: float, strength: float, money: float):
     self._charm = self._max_charm = self._min_charm = charm
     self._intelligence = self._max_intelligence = self._min_intelligence = intelligence
     self._strength = self._max_strength = self._min_strength = strength
@@ -401,13 +400,13 @@ class Game:
     })
 
   def end(self) -> End:
-    overall = sum([
+    overall = int(sum([
       self._max_charm,
       self._max_intelligence,
       self._max_strength,
       self._max_money,
       self._max_spirit
-    ]) * 2 + self._max_age // 2
+    ])) * 2 + self._max_age // 2
     self.statistics.finished_games += 1
     self._condition_vars["SUM"] = overall
     self._condition_vars["TMS"] = self.statistics.finished_games
@@ -430,7 +429,7 @@ class Game:
       self.judge(overall, self.config.stat.rarity.overall))
 
   @staticmethod
-  def judge(value: int, standard: List[StatRarityItem]) -> StatRarityItem:
+  def judge(value: float, standard: List[StatRarityItem]) -> StatRarityItem:
     for i in reversed(standard):
       if value > i.min:
         return i
@@ -450,7 +449,7 @@ class Game:
     choices, weights = zip(*self.config.character.stat_value_weight.items())
     charm, intelligence, strength, money = random.choices(choices, weights, k=4)
     self.statistics.character = GeneratedCharacter(
-      -1, name, talents, charm, intelligence, strength, money, seed)
+      name, talents, charm, intelligence, strength, money, seed)
     return self.statistics.character
 
   def set_character(self, character: Character) -> Tuple[List[Talent], List[Talent]]:
