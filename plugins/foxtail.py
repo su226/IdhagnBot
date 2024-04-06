@@ -61,7 +61,7 @@ RANDOM_API = "https://cloud.foxtail.cn/api/function/random?name={}&type={}"
 INFO_API = "https://cloud.foxtail.cn/api/function/pullpic?picture={}&model={}"
 DOWNLOAD_API = "https://cloud.foxtail.cn/api/function/pictures?picture={}&model={}"
 SEARCH_API = "https://cloud.foxtail.cn/api/function/pulllist?name={}"
-SUBMIT_GUI_URL = "https://idhagnbot.su226.tk/docs/misc/foxtail-submit"
+SUBMIT_GUI_URL = "https://idhagnbot.su226.eu.org/docs/misc/foxtail-submit"
 UID_RE = re.compile(r"([A-Za-z0-9]{5}-){3}[A-Za-z0-9]{5}")
 STR_TO_TYPE = {
   "设定": 0,

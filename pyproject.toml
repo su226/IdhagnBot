@@ -30,9 +30,9 @@ grpc = ["protobuf<5,>=4.21.6", "grpcio<2,>=1.49.1"]
 playwright = ["playwright<2,>=1.27.1"]
 
 [project.urls]
-Homepage = "https://idhagnbot.su226.tk"
+Homepage = "https://idhagnbot.su226.eu.org"
 Repository = "https://github.com/su226/IdhagnBot"
-Documentation = "https://idhagnbot.su226.tk"
+Documentation = "https://idhagnbot.su226.eu.org"
 
 [build-system]
 requires = ["pdm-pep517<2,>=0.12.0"]

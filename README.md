@@ -4,15 +4,15 @@
 
 一个以娱乐功能为主的 QQ 机器人，基于 NoneBot2 开发
 
-[文档](https://idhagnbot.su226.tk/)
+[文档](https://idhagnbot.su226.eu.org/)
 
 </div>
 
-*本项目以[我的兽设](https://su226.tk/2021/07/24/my-fursona/)命名，主要服务我自己的[闲聊群](https://qm.qq.com/cgi-bin/qm/qr?k=USDC9Yc0PPxBHHIVp5KIoHYSmuBHJK2u)*
+*本项目以[我的兽设](https://legacy.su226.eu.org/2021/07/24/my-fursona/)命名，主要服务我自己的[闲聊群](https://qm.qq.com/cgi-bin/qm/qr?k=USDC9Yc0PPxBHHIVp5KIoHYSmuBHJK2u)*
 
 ## 功能
-~~详见[我的博客](https://su226.tk/2022/01/12/idhagn-bot/)~~
-已过时，[新文档](https://idhagnbot.su226.tk/)正在施工中
+~~详见[我的博客](https://legacy.su226.eu.org/2022/01/12/idhagn-bot/)~~
+已过时，[新文档](https://idhagnbot.su226.eu.org/)正在施工中
 
 部分功能需要可选依赖：
 * 离线维基百科：`libzim`（注意这个是 GPL 协议）、`playwright`（默认路径为 null，也就是使用 Playwright 附带的浏览器，可修改为其他路径）
