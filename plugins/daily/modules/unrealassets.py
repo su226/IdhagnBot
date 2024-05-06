@@ -22,14 +22,14 @@ class UnrealAssetsCache(DailyCache):
   async def update(self) -> None:
     assets = await unreal_free.free_assets()
     if os.path.exists(self.path):
-      model = State.parse_file(self.path)
+      with open(self.path) as f:
+        model = State.model_validate_json(f.read())
     else:
       model = State()
     model.prev_assets = model.assets
     model.assets = assets
-    json = model.json()
     with open(self.path, "w") as f:
-      f.write(json)
+      f.write(model.model_dump_json())
     self.write_date()
 
 
@@ -42,7 +42,8 @@ class UnrealAssetsModule(Module):
 
   async def format(self) -> List[Message]:
     await cache.ensure()
-    model = State.parse_file(cache.path)
+    with open(cache.path) as f:
+      model = State.model_validate_json(f.read())
     if self.force:
       assets = model.assets
     else:

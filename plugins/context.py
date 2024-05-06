@@ -29,7 +29,7 @@ alias = (
 @alias.handle()
 async def handle_alias(event: Event):
   config = CONFIG()
-  aliases = config.groups[get_event_context(event)].__root__
+  aliases = config.groups[get_event_context(event)].root
   await alias.finish("当前群聊上下文有以下别名:\n" + ", ".join(aliases))
 
 

@@ -4,7 +4,7 @@ from typing import Dict, List, Literal, Tuple
 
 from nonebot.adapters.onebot.v11 import MessageSegment
 from playwright.async_api import async_playwright
-from pydantic import BaseModel, parse_file_as
+from pydantic import BaseModel, TypeAdapter
 
 from util import command, misc
 
@@ -37,7 +37,8 @@ reborn = (
 )
 @reborn.handle()
 async def handle_reborn() -> None:
-  regions = parse_file_as(List[Region], DATA_FILE)
+  with open(DATA_FILE) as f:
+    regions = TypeAdapter(List[Region]).validate_json(f.read())
   region = random.choices(regions, [x.weight for x in regions])[0]
   msg = f"恭喜你投胎到了{CONTINENTS[region.continent]}的{region.display_name}"
   async with async_playwright() as p:

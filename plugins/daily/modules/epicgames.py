@@ -27,14 +27,14 @@ class EpicGamesCache(DailyCache):
       (x for x in games if now_date > x.start_date), key=lambda x: (x.end_date, x.slug)
     )
     if os.path.exists(self.path):
-      model = State.parse_file(self.path)
+      with open(self.path) as f:
+        model = State.model_validate_json(f.read())
     else:
       model = State()
     model.prev_games = model.games
     model.games = games
-    json = model.json()
     with open(self.path, "w") as f:
-      f.write(json)
+      f.write(model.model_dump_json())
     self.write_date()
 
 
@@ -47,7 +47,8 @@ class EpicGamesModule(Module):
 
   async def format(self) -> List[Message]:
     await cache.ensure()
-    model = State.parse_file(cache.path)
+    with open(cache.path) as f:
+      model = State.model_validate_json(f.read())
     if self.force:
       games = model.games
     else:

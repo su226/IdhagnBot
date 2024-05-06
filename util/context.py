@@ -15,7 +15,7 @@ from nonebot.message import event_preprocessor
 from nonebot.permission import Permission as BotPermission
 from nonebot.rule import Rule
 from nonebot.typing import T_DependencyCache, T_State
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, RootModel
 
 from . import configs, misc, permission
 
@@ -23,8 +23,7 @@ nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 
-class Group(BaseModel):
-  __root__: List[str]
+class Group(RootModel[List[str]]):
   _name: str = PrivateAttr("")
 
 
@@ -39,7 +38,7 @@ class Config(BaseModel):
   def __init__(self, **kw: Any) -> None:
     super().__init__(**kw)
     for id, info in self.groups.items():
-      for alias in info.__root__:
+      for alias in info.root:
         self._names[alias] = id
 
   async def fetch_names(self) -> None:

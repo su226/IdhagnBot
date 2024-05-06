@@ -68,25 +68,27 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     return self.cache[args].item
 
   def load(self, *args: Unpack[TParam]) -> None:
-    if args not in self.cache:
-      self.cache[args] = CacheItem(Any)
-    cache_item = self.cache[args]
-    old_config = cache_item.item
     file = self.get_file(*args)
     if os.path.exists(file):
       logger.info(f"加载{self.category}文件: {file}")
       with open(file) as f:
-        cache_item.item = self.model.parse_obj(yaml.load(f, SafeLoader))
+        new_config = self.model.model_validate(yaml.load(f, SafeLoader))
     else:
       logger.info(f"{self.category}文件不存在: {file}")
-      cache_item.item = self.model()
+      new_config = self.model()
+    if args not in self.cache:
+      old_config = None
+      self.cache[args] = CacheItem(new_config)
+    else:
+      old_config = self.cache[args].item
+      self.cache[args].item = new_config
     for handler in self.handlers:
-      handler(old_config, cache_item.item, *args)
+      handler(old_config, new_config, *args)
 
   def dump(self, *args: Unpack[TParam]) -> None:
     if args not in self.cache:
       return
-    data = encode(self.cache[args].item.dict())
+    data = encode(self.cache[args].item.model_dump())
     file = self.get_file(*args)
     os.makedirs(os.path.dirname(file), exist_ok=True)
     with open(file, "w") as f:

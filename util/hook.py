@@ -4,11 +4,11 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional, cast
 
 import nonebot
 from loguru import logger
-from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
-from nonebot.matcher import current_event
-from nonebot.exception import MockApiException
 from nonebot.adapters import Bot as BaseBot
-from pydantic import parse_obj_as
+from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
+from nonebot.exception import MockApiException
+from nonebot.matcher import current_event
+from pydantic import TypeAdapter
 
 from . import misc
 
@@ -28,7 +28,7 @@ def normalize_message(raw: Any) -> Message:
   elif isinstance(raw, MessageSegment):
     message = Message(raw)
   else:
-    message = parse_obj_as(Message, raw)
+    message = TypeAdapter(Message).validate_python(raw)
   for seg in message:
     if seg.type == "node" and "content" in seg.data:
       seg.data["content"] = normalize_message(seg.data["content"])

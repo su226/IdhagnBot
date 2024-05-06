@@ -105,7 +105,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
   image = await make_image(bot, format_data)
   coin = currency.get_coin(format_data.gid, format_data.uid)
   if format_data.coin == -1:
-    return f"今天你已经签到过了\n你目前有{coin}个金币" + image
+    return Message([f"今天你已经签到过了\n你目前有{coin}个金币", image])
 
   segments = [f"签到成功，获得{format_data.coin}个金币，共有{coin}个金币"]
   if format_data.combo_bonus:
@@ -117,4 +117,4 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
     f"今日排名第{rank + 1}，"
     f"连续签到{user_data.combo_days + 1}天，"
     f"总计签到{user_data.total_days}天")
-  return "\n".join(segments) + image
+  return Message(["\n".join(segments), image])

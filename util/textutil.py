@@ -251,10 +251,10 @@ def render(
   stroke_color: imutil.Color = (255, 255, 255), **kw: Any
 ) -> Image.Image:
   if isinstance(content, Layout):
-    l = content
+    l = cast(Layout, content)
   else:
     l = layout(content, *args, **kw)
-  _, rect = cast(Any, l).get_pixel_extents()
+  _, rect = l.get_pixel_extents()
   margin = math.ceil(stroke)
   x = -rect.x + margin
   y = -rect.y + margin

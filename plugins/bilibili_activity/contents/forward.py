@@ -265,10 +265,10 @@ async def format(activity: ActivityForward[object], can_ignore: bool) -> Message
     appender(card)
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)
-    return (
-      f"{activity.name} 转发了{title_label}\n"
-      + imutil.to_segment(im)
-      + f"\nhttps://t.bilibili.com/{activity.id}"
-    )
+    return Message([
+      f"{activity.name} 转发了{title_label}\n",
+      imutil.to_segment(im),
+      f"\nhttps://t.bilibili.com/{activity.id}"
+    ])
 
   return await misc.to_thread(make)

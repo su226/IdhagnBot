@@ -14,7 +14,7 @@ import aiohttp
 from nonebot.adapters.onebot.v11 import ActionFailed, Bot, Event, Message, MessageEvent
 from nonebot.exception import FinishedException
 from PIL import Image
-from pydantic import BaseModel, Field, ValidationError, parse_obj_as
+from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 from typing_extensions import Self
 
 from util import configs, context, imutil, misc, user_aliases
@@ -241,7 +241,7 @@ async def _get_image_and_user(
         try:
           reply_msg = await bot.get_msg(message_id=event.reply.message_id)
           reply_sender = reply_msg["sender"]["user_id"]
-          for seg in parse_obj_as(Message, reply_msg["message"]):
+          for seg in TypeAdapter(Message).validate_python(reply_msg["message"]):
             if seg.type == "image":
               return await get_image_from_link(seg.data["url"], **kw), None
         except (ActionFailed, ValidationError):

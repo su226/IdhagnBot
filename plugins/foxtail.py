@@ -5,7 +5,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from http.cookies import SimpleCookie
-from typing import Any, Dict, List, Literal, Tuple
+from typing import Any, ClassVar, Dict, List, Literal, Tuple
 from urllib.parse import quote as encodeuri
 
 import aiohttp
@@ -156,8 +156,8 @@ UID: {data["picture"]}
 
 
 class Source:
-  name = "兽云祭"
-  node: Tuple[str, ...] = ("foxtail", "picture", "keyword")
+  name: ClassVar[str] = "兽云祭"
+  node: ClassVar[Tuple[str, ...]] = ("foxtail", "picture", "keyword")
 
   @staticmethod
   def keyword() -> str:
@@ -353,7 +353,7 @@ async def handle_submit(state: T_State, arg: Message = CommandArg()) -> None:
     await submit.finish(f"请在此处生成投稿命令：{SUBMIT_GUI_URL}")
   try:
     raw = base64.b64decode(text)
-    data = SubmitData.parse_raw(raw)
+    data = SubmitData.model_validate_json(raw)
   except ValueError:
     await submit.finish(f"无效投稿命令，请重新生成：{SUBMIT_GUI_URL}")
   state["data"] = data

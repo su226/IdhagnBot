@@ -26,7 +26,8 @@ if TYPE_CHECKING:
   import grpc.aio  # noqa
 
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (  # noqa
-    AdditionalType, DescType, DynamicType, DynDetailReq, DynDetailsReq, DynSpaceReq, Module
+    AddButtonType, AdditionalType, DescType, DisableState, DynamicType, DynDetailReq,
+    DynDetailsReq, DynModuleType, DynSpaceReq, Module, VideoSubType
   )
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import (  # noqa
     DynamicAsyncStub, DynamicStub
@@ -612,7 +613,11 @@ class ContentPlaylist(ContentParser["ContentPlaylist"]):
       medialist.sub_title,
       medialist.cover,
     )
+
   # JSON API 获取不到转发合集，所以只有 grpc_parse
+  @staticmethod
+  def json_parse(item: Dict[Any, Any]) -> "ContentPlaylist":
+    raise NotImplementedError
 
 
 @dataclass

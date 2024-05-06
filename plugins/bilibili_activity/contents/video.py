@@ -51,10 +51,10 @@ async def format(activity: ActivityVideo[object], can_ignore: bool) -> Message:
     appender(card)
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)
-    return (
-      f"{activity.name} 发布了视频\n"
-      + imutil.to_segment(im)
-      + f"\nhttps://www.bilibili.com/video/{activity.content.bvid}"
-    )
+    return Message([
+      f"{activity.name} 发布了视频\n",
+      imutil.to_segment(im),
+      f"\nhttps://www.bilibili.com/video/{activity.content.bvid}"
+    ])
 
   return await misc.to_thread(make)

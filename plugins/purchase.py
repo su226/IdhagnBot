@@ -246,15 +246,15 @@ async def format_goods(bot: Bot, event: MessageEvent, id: int, goods: Goods) -> 
     single = f"{single_purchased}/{goods.single}"
   else:
     single = f"{single_purchased}"
-  return (
+  return Message(MessageSegment.text(
     f"{owner_name}（{goods.notify}）的商品\n"
     f"ID：{id:09}\n"
     f"名字：{name}\n"
     f"价格：{goods.price}金币\n"
     f"总计已购买：{total}\n"
     f"你已购买：{single}\n"
-    f"简介："
-  ) + Message(goods.description)
+    f"简介：{goods.description}"
+  ))
 
 
 show_goods = (

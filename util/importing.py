@@ -35,7 +35,7 @@ CONFIG = configs.SharedConfig("plugins", Config, False)
 ROOT_DIR = Path(__file__).resolve().parents[1]
 MODULES: Dict[str, bool] = {}
 with open(ROOT_DIR / "plugins" / "metadata.yaml") as f:
-  METADATA = Metadata.parse_obj(yaml.load(f, configs.SafeLoader))
+  METADATA = Metadata.model_validate(yaml.load(f, configs.SafeLoader))
 
 
 def children(parent: str) -> Tuple[List[str], List[Missing]]:

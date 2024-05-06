@@ -6,7 +6,7 @@ import re
 import time
 from typing import (
   Any, Awaitable, Callable, Generator, Iterable, List, Literal, Mapping, Sequence, Set, Tuple,
-  TypeVar
+  TypeVar, cast
 )
 
 import nonebot
@@ -483,9 +483,9 @@ async def handle_idhagnfetch(bot: Bot):
     info_w, info_h = info_im.size
     im_w = 128
     im_h = 128
-    header_im = Any
-    account_im = Any
-    bar_im = Any
+    header_im = cast(Any, None)
+    account_im = cast(Any, None)
+    bar_im = cast(Any, None)
     if config.header:
       header_im = textutil.render(config.header, "sans", 32, color=(255, 255, 255))
       im_w = max(im_w, header_im.width + 128)

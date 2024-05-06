@@ -85,9 +85,9 @@ class Command(BaseModel):
   sample_path: Optional[str] = None
 
   def to_site(self) -> Site:
-    preset = EMPTY_PRESET if self.preset is None else presets[self.preset].dict()
-    config = self.dict()
-    return Site.parse_obj({
+    preset = EMPTY_PRESET if self.preset is None else presets[self.preset].model_dump()
+    config = self.model_dump()
+    return Site.model_validate({
       key: value if config[key] is None else config[key] for key, value in preset.items()})
 
 

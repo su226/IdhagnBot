@@ -19,7 +19,7 @@ from nonebot.adapters.onebot.v11 import Adapter, Bot, Event, Message, MessageEve
 from nonebot.matcher import matchers
 from nonebot.params import Depends
 from nonebot.typing import T_State
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel
 from typing_extensions import ParamSpec
 
 from .configs import SharedConfig
@@ -78,27 +78,25 @@ class ExcludeSet(BaseModel):
   exclude: Set[int]
 
 
-class EnableSet(BaseModel):
-  __root__: Union[IncludeSet, ExcludeSet, bool]
-
+class EnableSet(RootModel[Union[IncludeSet, ExcludeSet, bool]]):
   def __getitem__(self, group: Union[Optional[int], Event]) -> bool:
     if isinstance(group, Event):
       group = getattr(group, "group_id", -1)
     elif group is None:
       group = -1
-    if isinstance(self.__root__, IncludeSet):
-      return group in self.__root__.include
-    elif isinstance(self.__root__, ExcludeSet):
-      return group not in self.__root__.exclude
-    return self.__root__
+    if isinstance(self.root, IncludeSet):
+      return group in self.root.include
+    elif isinstance(self.root, ExcludeSet):
+      return group not in self.root.exclude
+    return self.root
 
   @classmethod
   def false(cls) -> Any:
-    return Field(default_factory=lambda: EnableSet(__root__=False))
+    return Field(default_factory=lambda: EnableSet(False))
 
   @classmethod
   def true(cls) -> Any:
-    return Field(default_factory=lambda: EnableSet(__root__=True))
+    return Field(default_factory=lambda: EnableSet(True))
 
 
 class PromptTimeout(asyncio.TimeoutError):

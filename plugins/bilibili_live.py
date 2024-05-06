@@ -168,7 +168,11 @@ async def get_message(data: Dict[str, Any]) -> Message:
     return imutil.to_segment(im)
 
   url = f"https://live.bilibili.com/{data['room_id']}"
-  return f"{data['uname']} 开播了 {category}" + await misc.to_thread(make) + url
+  return Message([
+    MessageSegment.text(f"{data['uname']} 开播了 {category}"),
+    await misc.to_thread(make),
+    MessageSegment.text(url),
+  ])
 
 
 async def push_all(bot: Bot, data: Dict[str, Any], targets: List[Target]) -> None:

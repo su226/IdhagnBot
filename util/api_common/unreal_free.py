@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Literal, TypedDict
 
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 
 from util import misc
 
@@ -51,7 +51,7 @@ class Asset:
 async def free_assets() -> List[Asset]:
   http = misc.http()
   async with http.get(API, headers=HEADERS) as response:
-    data = parse_obj_as(ResRoot, await response.json())
+    data = TypeAdapter(ResRoot).validate_python(await response.json())
   return [Asset(
     asset["title"],
     asset["featured"],
