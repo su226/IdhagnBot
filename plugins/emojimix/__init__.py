@@ -1,12 +1,13 @@
+import json
 import os
 import random
 import re
-from typing import List, Tuple, Dict, cast
-import json
-from pygtrie import CharTrie
+from typing import Dict, List, Tuple, cast
+
 import aiohttp
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
 from nonebot.params import CommandArg
+from pygtrie import CharTrie
 
 from util import command, context, misc
 

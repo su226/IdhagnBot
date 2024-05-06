@@ -9,7 +9,7 @@ from nonebot.adapters import Bot
 from util import misc
 
 nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 driver = nonebot.get_driver()
 bot_crash_time: Optional[float] = None

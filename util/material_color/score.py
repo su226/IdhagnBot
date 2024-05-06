@@ -1,5 +1,5 @@
 # pyright: strict
-# pylama: ignore=E501 # noqa
+# ruff: noqa: E501
 from typing import List, Mapping, OrderedDict
 
 from .color_utils import lstar_from_argb

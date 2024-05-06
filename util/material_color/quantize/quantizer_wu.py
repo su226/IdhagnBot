@@ -1,5 +1,5 @@
 # pyright: strict
-# pylama: ignore=E501 # noqa
+# ruff: noqa: E501
 from dataclasses import dataclass
 from enum import Enum
 from typing import Iterable, List

@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from typing import Dict, Optional
 
 import nonebot
-from nonebot.message import event_preprocessor
 from nonebot.adapters.onebot.v11 import Event, GroupMessageEvent, Message
 from nonebot.exception import ActionFailed
+from nonebot.message import event_preprocessor
 from pydantic import BaseModel
 
 from util import configs, context, hook, misc, permission

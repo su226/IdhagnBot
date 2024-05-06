@@ -1,7 +1,7 @@
 import asyncio
 from typing import Callable
 
-from nonebot.adapters.onebot.v11 import Message
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from PIL import Image, ImageOps
 
 from util import imutil, misc, textutil
@@ -50,9 +50,9 @@ async def format(activity: ActivityCommonSquare[object], can_ignore: bool) -> Me
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)
     return Message([
-      f"{activity.name} 发布了动态\n",
+      MessageSegment.text(f"{activity.name} 发布了动态\n"),
       imutil.to_segment(im),
-      f"\nhttps://t.bilibili.com/{activity.id}"
+      MessageSegment.text(f"\nhttps://t.bilibili.com/{activity.id}"),
     ])
 
   return await misc.to_thread(make)

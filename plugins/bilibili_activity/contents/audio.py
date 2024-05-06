@@ -1,7 +1,7 @@
 import asyncio
 from typing import Callable
 
-from nonebot.adapters.onebot.v11 import Message
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from PIL import Image
 
 from util import imutil, misc
@@ -48,9 +48,9 @@ async def format(activity: ActivityAudio[object], can_ignore: bool) -> Message:
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)
     return Message([
-      f"{activity.name} 发布了音频\n",
+      MessageSegment.text(f"{activity.name} 发布了音频\n"),
       imutil.to_segment(im),
-      f"\nhttps://www.bilibili.com/audio/au{activity.content.id}"
+      MessageSegment.text(f"\nhttps://www.bilibili.com/audio/au{activity.content.id}"),
     ])
 
   return await misc.to_thread(make)

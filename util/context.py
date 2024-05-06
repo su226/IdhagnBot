@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field, PrivateAttr, RootModel
 from . import configs, misc, permission
 
 nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 
 class Group(RootModel[List[str]]):

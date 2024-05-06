@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from util import command, configs, context, misc
 
 nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 
 class Task(BaseModel):

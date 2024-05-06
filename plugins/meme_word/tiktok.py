@@ -12,7 +12,7 @@ from util import command, imutil, misc, textutil
 
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
-from gi.repository import Pango, PangoCairo  # type: ignore
+from gi.repository import Pango, PangoCairo  # noqa: E402  # type: ignore
 
 FONT_SIZE = 64
 SHEAR = FONT_SIZE * -0.32

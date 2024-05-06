@@ -1,5 +1,5 @@
 # pyright: strict
-# pylama: ignore=E501 # noqa
+# ruff: noqa: E501
 import math
 import random
 from dataclasses import dataclass

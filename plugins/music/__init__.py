@@ -142,7 +142,9 @@ def append_music_handler(matcher_t: Type[Matcher], music_t: Type[Music]) -> None
       await matcher_t.reject("只能输入数字，请重新输入，或发送“取”取消点歌")
     choices = state["choices"]
     if choice_int < 1 or choice_int > len(choices):
-      await matcher_t.reject(f"只能发送 1 和 {len(choices)} 之间的数字，请重新输入，或发送“取”取消点歌")
+      await matcher_t.reject(
+        f"只能发送 1 和 {len(choices)} 之间的数字，请重新输入，或发送“取”取消点歌"
+      )
     await finish_with(await choices[choice_int - 1].segment(), mode)
   matcher_t.got("choice")(got_choice)
 

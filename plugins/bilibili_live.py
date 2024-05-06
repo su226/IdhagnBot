@@ -17,7 +17,7 @@ from util import command, configs, context, imutil, misc
 from util.images.card import Card, CardAuthor, CardCover, CardText
 
 nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 
 class GroupTarget(BaseModel):

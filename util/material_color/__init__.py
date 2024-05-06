@@ -1,7 +1,7 @@
 # 修改自 https://github.com/avanisubbiah/material-color-utilities-python
 # 移除了不必要的 import，增加类型注解
 # pyright: strict
-from typing import List, cast, Tuple
+from typing import List, Tuple, cast
 
 from PIL import Image
 

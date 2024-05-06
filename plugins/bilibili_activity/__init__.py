@@ -17,7 +17,7 @@ from util.api_common import bilibili_activity
 from . import common, contents
 
 nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 driver = nonebot.get_driver()
 queue: Deque[common.User] = deque()

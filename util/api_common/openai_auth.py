@@ -1,5 +1,5 @@
 # pyright: strict
-# pylama: ignore=E501 # noqa
+# ruff: noqa: E501
 # https://github.com/acheong08/OpenAIAuth
 # 使用 AIOHTTP 重写
 import re
@@ -218,5 +218,5 @@ class OpenAIAuth:
           status_code=response.status,
           details=await response.text(),
         )
-      self.access_token = (await response.json())["accessToken"]
-      return self.access_token
+      self.access_token = access_token = (await response.json())["accessToken"]
+      return access_token

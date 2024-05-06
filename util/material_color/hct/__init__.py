@@ -1,5 +1,5 @@
 # pyright: strict
-# pylama: ignore=E501 # noqa
+# ruff: noqa: E501
 from typing import Optional
 
 from ..color_utils import argb_from_lstar, lstar_from_argb

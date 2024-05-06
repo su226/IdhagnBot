@@ -11,7 +11,7 @@ from util import colorutil, imutil, misc
 gi.require_version("GLib", "2.0")
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
-from gi.repository import GLib, Pango, PangoCairo  # type: ignore
+from gi.repository import GLib, Pango, PangoCairo  # noqa: E402  # type: ignore
 
 Layout: TypeAlias = Pango.Layout
 Wrap = Literal["word", "char", "word_char"]

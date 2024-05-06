@@ -11,7 +11,7 @@ from nonebot.exception import ActionFailed
 from util import context, permission
 
 nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 TKey = TypeVar("TKey")
 TValue = TypeVar("TValue")

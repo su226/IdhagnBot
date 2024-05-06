@@ -17,10 +17,10 @@ from nonebot.rule import TRIE_VALUE, ArgumentParser, CommandRule, Rule, TrieRule
 from nonebot.typing import T_RuleChecker, T_State
 from typing_extensions import Self
 
-nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
-
 from . import context, help, permission
+
+nonebot.require("nonebot_plugin_apscheduler")
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 IDHAGNBOT_KEY = "_idhagnbot"
 USAGE_KEY = "usage"

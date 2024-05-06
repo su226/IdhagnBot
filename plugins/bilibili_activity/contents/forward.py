@@ -2,7 +2,7 @@ import asyncio
 import time
 from typing import Any, Awaitable, Callable, List, Optional, Tuple, Type, TypeVar, Union
 
-from nonebot.adapters.onebot.v11 import Message
+from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from PIL import Image
 
 from util import imutil, misc
@@ -266,9 +266,9 @@ async def format(activity: ActivityForward[object], can_ignore: bool) -> Message
     im = Image.new("RGB", (card.get_width(), card.get_height()), (255, 255, 255))
     card.render(im, 0, 0)
     return Message([
-      f"{activity.name} 转发了{title_label}\n",
+      MessageSegment.text(f"{activity.name} 转发了{title_label}\n"),
       imutil.to_segment(im),
-      f"\nhttps://t.bilibili.com/{activity.id}"
+      MessageSegment.text(f"\nhttps://t.bilibili.com/{activity.id}"),
     ])
 
   return await misc.to_thread(make)

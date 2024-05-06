@@ -26,7 +26,7 @@ from .modules.string import StringModule
 from .modules.unrealassets import UnrealAssetsModule
 
 nonebot.require("nonebot_plugin_apscheduler")
-from nonebot_plugin_apscheduler import scheduler
+from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
 _time = time
 

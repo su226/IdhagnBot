@@ -9,11 +9,11 @@ from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
 from PIL import Image, ImageOps
 
-gi.require_version("Pango", "1.0")
-from gi.repository import Pango  # type: ignore
-
 from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter, DefaultType
+
+gi.require_version("Pango", "1.0")
+from gi.repository import Pango  # noqa: E402  # type: ignore
 
 DIR = Path(__file__).resolve().parent
 CHINESE_RE = re.compile(r"[\u4e00-\u9fa5]+")

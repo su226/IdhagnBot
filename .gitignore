@@ -3,6 +3,7 @@ __pycache__/
 /__pypackages__/
 /.venv*/
 /.pdm-python
+/.ruff_cache/
 
 # Nonebot2
 /.env*

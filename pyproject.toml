@@ -67,8 +67,8 @@ distribution = false
 
 [tool.pdm.dev-dependencies]
 lint = [
-    "pylama[eradicate,toml]~=8.4",
-    "isort~=5.13",
+    "ruff~=0.4",
+    "isort>=5.13.2",
 ]
 dev = [
     "grpc-stubs~=1.53",
@@ -89,9 +89,8 @@ indent = "  "
 
 [tool.pyright]
 typeCheckingMode = "strict"
-strict = ["plugins/liferestart/game"]
 ignore = ["util/api_common/*/protos", "archived"]
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 reportMissingTypeStubs = false
 reportConstantRedefinition = false
 reportPrivateUsage = false
@@ -101,12 +100,14 @@ reportUnknownMemberType = false
 reportUnknownParameterType = false
 reportUnknownVariableType = false
 
-[tool.pylama]
-linters = "eradicate,pycodestyle,pyflakes,isort"
-skip = ".venv*/*,util/api_common/*/protos/*"
-async = true
+[tool.ruff]
+extend-exclude = [
+    "util/api_common/*/protos/*"
+]
+line-length = 99
+indent-width = 2
 
-[tool.pylama.linter.pycodestyle]
-ignore = "E128,E302,E305,E402,E741,E704,W503"
-indent_size = 2
-max_line_length = 99
+[tool.ruff.lint]
+extend-select = ["E501"]
+# ruff 不支持 multi_line_output=5，使用 isort
+ignore = ["I", "E741"]

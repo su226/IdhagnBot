@@ -352,7 +352,10 @@ async def got_purchase(
     goods.single_purchased[event.user_id] = 1
   STATE.dump(ctx)
   if ctx == getattr(event, "group_id", -1):
-    await purchase.finish("你已成功购买该商品，请与商品的主人沟通：" + MessageSegment.at(goods.notify))
+    await purchase.finish(Message([
+      MessageSegment.text("你已成功购买该商品，请与商品的主人沟通："),
+      MessageSegment.at(goods.notify),
+    ]))
   else:
     info = await bot.get_group_member_info(group_id=ctx, user_id=event.user_id)
     username = info["card"] or info["nickname"]
