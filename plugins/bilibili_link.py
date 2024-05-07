@@ -103,7 +103,11 @@ async def check_bilibili_link(
       params = {"aid": video[2:]}
     else:
       params = {"bvid": video}
-    async with http.get(INFO_API, params=params) as response:
+    async with http.get(
+      INFO_API,
+      headers={"User-Agent": misc.BROWSER_UA},
+      params=params,
+    ) as response:
       data = await response.json()
     # 没有 data 说明视频失效
     if "data" in data:
