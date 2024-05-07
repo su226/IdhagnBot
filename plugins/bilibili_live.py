@@ -60,7 +60,10 @@ def onload(prev: Optional[Config], curr: Config) -> None:
     for user in curr.users:
       params.append(f"uids[]={user.uid}")
     http = misc.http()
-    async with http.get(API_URL + "?" + "&".join(params)) as response:
+    async with http.get(
+      API_URL + "?" + "&".join(params),
+      headers={"User-Agent": misc.BROWSER_UA},
+    ) as response:
       data = await response.json()
     for uid, detail in data["data"].items():
       streaming[uid] = current = detail["live_status"] == 1  # 0下播 1直播 2轮播
@@ -110,7 +113,10 @@ async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg())
   except ValueError:
     await force_push.finish(force_push.__doc__)
   http = misc.http()
-  async with http.get(API_URL + f"?uids[]={uid}") as response:
+  async with http.get(
+    API_URL + f"?uids[]={uid}",
+    headers={"User-Agent": misc.BROWSER_UA},
+  ) as response:
     data = await response.json()
   if not data["data"]:
     await force_push.finish("无法获取这个用户的直播间")
@@ -132,7 +138,10 @@ async def on_startup() -> None:
 
 async def get_message(data: Dict[str, Any]) -> Message:
   http = misc.http()
-  async with http.get(f"{INFO_API_URL}?uid={data['uid']}") as response:
+  async with http.get(
+    f"{INFO_API_URL}?uid={data['uid']}",
+    headers={"User-Agent": misc.BROWSER_UA},
+  ) as response:
     info = await response.json()
     fans: int = info["data"]["follower_num"]
     desc: str = info["data"]["room_news"]["content"]
@@ -213,7 +222,10 @@ async def check() -> bool:
 
   fetch_t = time.perf_counter()
   http = misc.http()
-  async with http.get(API_URL + "?" + "&".join(params)) as response:
+  async with http.get(
+    API_URL + "?" + "&".join(params),
+    headers={"User-Agent": misc.BROWSER_UA},
+  ) as response:
     data = await response.json()
   fetch_t = time.perf_counter() - fetch_t
 
