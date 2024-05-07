@@ -13,7 +13,7 @@ from util.user_aliases import AvatarGetter, DefaultType
 DIR = Path(__file__).resolve().parent
 BOXES = [
   (-222, 30, 695, 430), (-212, 30, 695, 430), (0, 30, 695, 430), (41, 26, 695, 430),
-  (-100, -67, 922, 570), (-172, -113, 1059, 655), (-273, -192, 1217, 753)
+  (-100, -67, 922, 570), (-172, -113, 1059, 655), (-273, -192, 1217, 753),
 ]
 BOX_IDS = [0, 0, 0, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 5, 6, 6, 6, 6]
 FRAMETIME = 200
@@ -26,11 +26,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.zoom", "放大")

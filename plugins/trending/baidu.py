@@ -45,6 +45,6 @@ async def get_data() -> List[Item]:
       url=decodeuri(i["linkurl"]),
       title=i["pure_title"],
       image="",
-      content="百度热搜|热度" + str(i["heat_score"])
+      content="百度热搜|热度" + str(i["heat_score"]),
     ))
   return result

@@ -64,7 +64,7 @@ async def free_games() -> List[Game]:
       if i["discountSetting"] == FREE and start_date < end_date and now_date < end_date:
         result.append(Game(
           start_date=start_date, end_date=end_date, title=game["title"], image=getimage(game),
-          slug=getslug(game)
+          slug=getslug(game),
         ))
         break
   return result

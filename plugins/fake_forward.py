@@ -52,7 +52,7 @@ async def handle_fake_forward(bot: Bot, event: MessageEvent, msg: Message = Comm
   if not is_superuser:
     nodes.append(misc.forward_node(
       event.self_id, uid_to_name[event.self_id],
-      "免责声明：本消息由机器人发送，仅供娱乐，切勿当真！"
+      "免责声明：本消息由机器人发送，仅供娱乐，切勿当真！",
     ))
   nodes.extend(
     misc.forward_node(match_to_uid[match], uid_to_name[match_to_uid[match]], content)

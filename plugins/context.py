@@ -5,7 +5,7 @@ from nonebot.params import CommandArg
 
 from util import command
 from util.context import (
-  ANY_GROUP, CONFIG, PRIVATE, STATE, enter_context, exit_context, get_event_context
+  ANY_GROUP, CONFIG, PRIVATE, STATE, enter_context, exit_context, get_event_context,
 )
 
 

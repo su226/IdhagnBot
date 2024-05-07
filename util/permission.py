@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import (
-  Any, Deque, Dict, Iterable, List, Literal, Mapping, Optional, Set, Tuple, TypeVar, Union, cast
+  Any, Deque, Dict, Iterable, List, Literal, Mapping, Optional, Set, Tuple, TypeVar, Union, cast,
 )
 
 from loguru import logger
@@ -189,7 +189,7 @@ def walk_most(trie: NodeTrie, key: Node) -> Iterable[NodeTrie._Step]:
 
 
 def check(
-  node: Node, user: int, group: int, level: Level, prefix: Optional[str] = None
+  node: Node, user: int, group: int, level: Level, prefix: Optional[str] = None,
 ) -> Optional[bool]:
   config = CONFIG()
   roles: Set[str] = set()

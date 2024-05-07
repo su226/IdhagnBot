@@ -12,7 +12,7 @@ parser = ArgumentParser(add_help=False)
 parser.add_argument("line1", metavar="第一行", help="第一行文本")
 parser.add_argument("line2", metavar="第二行", help="第二行文本，英文或日文请自行翻译")
 parser.add_argument(
-  "target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接"
+  "target", nargs="?", default="", metavar="目标", help="可使用@、QQ号、昵称、群名片或图片链接",
 )
 matcher = (
   command.CommandBuilder("meme_pic.dianzhongdian", "典中典")

@@ -19,7 +19,7 @@ AMPLITUDE = 120
 
 
 def wave(
-  im: Image.Image, freq: float, amp: float, i: int, resample: Image.Resampling
+  im: Image.Image, freq: float, amp: float, i: int, resample: Image.Resampling,
 ) -> Image.Image:
   im = ImageOps.contain(im.convert("RGBA"), (MAX_SIZE, MAX_SIZE), resample)
   out = Image.new("RGBA", im.size)
@@ -45,11 +45,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.wave", "波纹")

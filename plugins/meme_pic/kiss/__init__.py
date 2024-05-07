@@ -13,11 +13,11 @@ from util.user_aliases import AvatarGetter, DefaultType
 DIR = Path(__file__).resolve().parent
 TARGET_BOXES = [
   (58, 90), (62, 95), (42, 100), (50, 100), (56, 100), (18, 120), (28, 110), (54, 100), (46, 100),
-  (60, 100), (35, 115), (20, 120), (40, 96)
+  (60, 100), (35, 115), (20, 120), (40, 96),
 ]
 SOURCE_BOXES = [
   (92, 64), (135, 40), (84, 105), (80, 110), (155, 82), (60, 96), (50, 80), (98, 55), (35, 65),
-  (38, 100), (70, 80), (84, 65), (75, 65)
+  (38, 100), (70, 80), (84, 65), (75, 65),
 ]
 
 
@@ -29,11 +29,11 @@ parser.add_argument("--source", "-s", default="", metavar="源", help="同上")
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.kiss", "亲亲", "亲", "kiss")

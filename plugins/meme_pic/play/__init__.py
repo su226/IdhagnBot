@@ -16,7 +16,7 @@ BOXES = [
   (156, 194, 150, 48), (178, 136, 122, 69), (175, 66, 122, 85), (170, 42, 130, 96),
   (175, 34, 118, 95), (179, 35, 110, 93), (180, 54, 102, 93), (183, 58, 97, 92),
   (174, 35, 120, 94), (179, 35, 109, 93), (181, 54, 101, 92), (182, 59, 98, 92),
-  (183, 71, 90, 96), (180, 131, 92, 101)
+  (183, 71, 90, 96), (180, 131, 92, 101),
 ]
 
 
@@ -27,11 +27,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.play", "玩", "顶")

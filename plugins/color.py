@@ -136,7 +136,7 @@ hsl({h:.1f}deg, {s * 100:.1f}%, {l * 100:.1f}%)'''
     fg = (255, 255, 255) if colorutil.luminance(r, g, b) < 0.5 else (0, 0, 0)
     textutil.paste(
       im, (im.width // 2, im.height // 2), markup, "sans", 64,
-      markup=True, align="m", anchor="mm", color=fg
+      markup=True, align="m", anchor="mm", color=fg,
     )
     return imutil.to_segment(im)
 

@@ -19,7 +19,7 @@ async def get_data() -> List[Item]:
         url=i["short_link"],
         title=i["title"],
         image=i["pic"],
-        content=i["rcmd_reason"]["content"] + "|" + i["desc"]
+        content=i["rcmd_reason"]["content"] + "|" + i["desc"],
       ))
     if data["data"]["no_more"]:
       break

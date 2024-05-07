@@ -79,10 +79,10 @@ def parse_args(prog: str, msg: Message) -> List[Namespace]:
 
 
 def parse_message(
-  g: AvatarGetter, bot: Bot, event: MessageEvent, all_args: List[Namespace]
+  g: AvatarGetter, bot: Bot, event: MessageEvent, all_args: List[Namespace],
 ) -> List["asyncio.Task[ParsedMessage]"]:
   async def parse_one(
-    task: "asyncio.Task[Tuple[Image.Image, Optional[int]]]", args: Namespace
+    task: "asyncio.Task[Tuple[Image.Image, Optional[int]]]", args: Namespace,
   ) -> ParsedMessage:
     avatar, user = await task
     if args.name is not None:
@@ -100,7 +100,7 @@ def parse_message(
 
 
 def render(
-  messages: List[ParsedMessage], max_height: int = 10000, padding_bottom: int = 20
+  messages: List[ParsedMessage], max_height: int = 10000, padding_bottom: int = 20,
 ) -> Image.Image:
   rendered: List[RenderedMessage] = []
   width = 0

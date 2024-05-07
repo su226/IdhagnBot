@@ -40,7 +40,7 @@ async def on_message_received(event: GroupMessageEvent) -> None:
 
 @hook.on_message_sent
 async def on_message_sent(
-  event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int
+  event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int,
 ) -> None:
   if not is_group:
     return
@@ -85,7 +85,7 @@ async def can_repeat(event: GroupMessageEvent) -> bool:
 auto_repeat = nonebot.on_message(
   can_repeat,
   context.build_permission(("auto_repeat", "can_repeat"), permission.Level.MEMBER),
-  priority=2
+  priority=2,
 )
 @auto_repeat.handle()
 async def handle_auto_repeat(event: GroupMessageEvent):

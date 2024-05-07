@@ -24,7 +24,7 @@ class EpicGamesCache(DailyCache):
     games = await epic_free.free_games()
     now_date = datetime.now(timezone.utc)
     games = sorted(
-      (x for x in games if now_date > x.start_date), key=lambda x: (x.end_date, x.slug)
+      (x for x in games if now_date > x.start_date), key=lambda x: (x.end_date, x.slug),
     )
     if os.path.exists(self.path):
       with open(self.path) as f:
@@ -52,7 +52,7 @@ class EpicGamesModule(Module):
     if self.force:
       games = model.games
     else:
-      prev_slugs = set(game.slug for game in model.prev_games)
+      prev_slugs = {game.slug for game in model.prev_games}
       games = [game for game in model.games if game.slug not in prev_slugs]
     if not games:
       return []
@@ -62,6 +62,6 @@ class EpicGamesModule(Module):
       text = f"\n{game.title}，截止到 {end_str}\n{epic_free.URL_BASE}{game.slug}\n"
       message.extend([
         MessageSegment.text(text),
-        MessageSegment.image(game.image)
+        MessageSegment.image(game.image),
       ])
     return [message]

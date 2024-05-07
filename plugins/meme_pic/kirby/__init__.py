@@ -14,7 +14,7 @@ DIR = Path(__file__).resolve().parent
 BOXES = [
   (358, 163), (359, 173), (360, 183), (357, 193), (352, 199), (337, 212), (329, 218), (320, 224),
   (318, 223), (318, 220), (320, 215), (320, 213), (320, 210), (320, 206), (320, 201), (320, 192),
-  (320, 188), (320, 184), (320, 179)
+  (320, 188), (320, 184), (320, 179),
 ]
 DURATION = 50
 
@@ -27,11 +27,11 @@ parser.add_argument("--circle", "-c", action="store_true", help="让头像变圆
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.kirby", "卡比")

@@ -87,7 +87,7 @@ def decr_count(key: Tuple[int, int]):
 
 
 async def check_recall(
-  bot: Bot, event: MessageEvent, state: T_State, msg: Message = EventMessage()
+  bot: Bot, event: MessageEvent, state: T_State, msg: Message = EventMessage(),
 ) -> bool:
   if await SUPERUSER(bot, event):
     return False

@@ -11,12 +11,12 @@ from util import command, imutil, misc
 from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
-# RemapTransform((330, 330), ((0, 19), (236, 0), (287, 264), (66, 351)))  # noqa
-OLD_SIZE = 330, 330
-NEW_SIZE = 287, 351
+# RemapTransform((330, 330), ((0, 19), (236, 0), (287, 264), (66, 351)))  # noqa: ERA001
+OLD_SIZE = (330, 330)
+NEW_SIZE = (287, 351)
 TRANSFORM = (
   1.0952291221755943, -0.2177262712758823, 4.1367991542420945, 0.07837100517494805,
-  0.9734503800677476, -18.49555722128834, -0.0008652944018017274, 0.00014852909086833315
+  0.9734503800677476, -18.49555722128834, -0.0008652944018017274, 0.00014852909086833315,
 )
 
 
@@ -27,11 +27,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式（如果传入动图）"
+  help="使用WebP而非GIF格式（如果传入动图）",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式（如果传入动图）"
+  help="使用APNG而非GIF格式（如果传入动图）",
 )
 matcher = (
   command.CommandBuilder("meme_pic.prpr", "舔", "舔屏", "prpr")

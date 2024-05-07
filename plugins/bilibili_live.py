@@ -231,8 +231,8 @@ async def check() -> bool:
 
   total_t = time.perf_counter() - total_t
   if total_t > 10:
-    logger.warning(
+    logger.warning((
       f"检查直播时间过长，请检查网络: \n"
       f"准备 {prepare_t:.3f}s\n获取 {fetch_t:.3f}s\n发送 {send_t:.3f}s"
-    )
+    ))
   return bool(coros)

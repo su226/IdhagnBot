@@ -142,9 +142,9 @@ def append_music_handler(matcher_t: Type[Matcher], music_t: Type[Music]) -> None
       await matcher_t.reject("只能输入数字，请重新输入，或发送“取”取消点歌")
     choices = state["choices"]
     if choice_int < 1 or choice_int > len(choices):
-      await matcher_t.reject(
+      await matcher_t.reject((
         f"只能发送 1 和 {len(choices)} 之间的数字，请重新输入，或发送“取”取消点歌"
-      )
+      ))
     await finish_with(await choices[choice_int - 1].segment(), mode)
   matcher_t.got("choice")(got_choice)
 
@@ -159,7 +159,7 @@ append_music_handler(
 /网易云音乐 <id> 语音 - 同上，但发送语音''')
   .category("music")
   .build(),
-  NeteaseMusic
+  NeteaseMusic,
 )
 append_music_handler(
   CommandBuilder("music.kuwo", "酷我音乐", "酷我点歌", "酷我", "kuwo")
@@ -171,7 +171,7 @@ append_music_handler(
 /酷我音乐 <id> 语音 - 同上，但发送语音''')
   .category("music")
   .build(),
-  KuwoMusic
+  KuwoMusic,
 )
 append_music_handler(
   CommandBuilder("music.bilibili", "B站点歌", "b站点歌")
@@ -183,7 +183,7 @@ append_music_handler(
 /B站点歌 <id> 语音 - 同上，但发送语音''')
   .category("music")
   .build(),
-  BilibiliMusic
+  BilibiliMusic,
 )
 append_music_handler(
   CommandBuilder("music.kugou", "酷狗音乐", "酷狗点歌", "酷狗", "kugou")
@@ -195,7 +195,7 @@ append_music_handler(
 /酷狗音乐 <id> 语音 - 同上，但发送语音''')
   .category("music")
   .build(),
-  KugouMusic
+  KugouMusic,
 )
 append_music_handler(
   CommandBuilder("music.migu", "咪咕音乐", "咪咕点歌", "咪咕", "migu")
@@ -207,7 +207,7 @@ append_music_handler(
 /咪咕音乐 <id> 语音 - 同上，但发送语音''')
   .category("music")
   .build(),
-  MiguMusic
+  MiguMusic,
 )
 append_music_handler(
   CommandBuilder("music.qq", "QQ音乐", "QQ点歌", "qq音乐", "qq点歌")
@@ -220,7 +220,7 @@ append_music_handler(
 API来自第三方：api.f4team.cn''')
   .category("music")
   .build(),
-  QQOvooaMusic
+  QQOvooaMusic,
 )
 category = CategoryItem.find("music")
 category.brief = "点歌插件"

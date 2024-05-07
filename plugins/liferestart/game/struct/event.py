@@ -46,7 +46,7 @@ class Event:
       no_random=bool(data.get("NoRandom", 0)),
       branch=[
         (int(id), Condition.parse(cond))
-        for cond, id in map(lambda x: x.split(":"), data.get("branch", []))
+        for cond, id in (x.split(":") for x in data.get("branch", []))
       ],
       include=Condition.parse(include) if include else Condition.TRUE,
       exclude=Condition.parse(exclude) if exclude else Condition.FALSE,

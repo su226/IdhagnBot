@@ -11,12 +11,12 @@ from util import command, imutil, misc
 from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
-# RemapTransform((150, 150), ((0, -30), (135, 17), (135, 145), (0, 140)))  # noqa
-OLD_SIZE = 150, 150
-NEW_SIZE = 135, 145
+# RemapTransform((150, 150), ((0, -30), (135, 17), (135, 145), (0, 140)))  # noqa: ERA001
+OLD_SIZE = (150, 150)
+NEW_SIZE = (135, 145)
 TRANSFORM = (
   0.8366013071895618, 1.2128331252511345e-14, -3.561263629370086e-12, -0.3071895424836637,
-  0.8823529411764716, 26.47058823529454, -0.0018300653594771486, 3.1736140776801494e-17
+  0.8823529411764716, 26.47058823529454, -0.0018300653594771486, 3.1736140776801494e-17,
 )
 
 
@@ -27,11 +27,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.worship", "膜拜")
@@ -48,7 +48,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     target, _ = target_task.result()
     frames: List[Image.Image] = []
     target = target.resize(OLD_SIZE, imutil.scale_resample()).transform(
-      NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, imutil.resample()
+      NEW_SIZE, Image.Transform.PERSPECTIVE, TRANSFORM, imutil.resample(),
     )
     for i in range(10):
       template = Image.open(DIR / f"{i}.png")

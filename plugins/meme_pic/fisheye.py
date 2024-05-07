@@ -20,7 +20,7 @@ def distort(im: Image.Image, coefficients: DistortCoefficents) -> Image.Image:
   res = cv2.undistort(
     np.asarray(im),
     np.array([[100, 0, im.width / 2], [0, 100, im.height / 2], [0, 0, 1]]),
-    np.asarray(coefficients)
+    np.asarray(coefficients),
   )
   return Image.fromarray(np.array(res, dtype=np.uint8))
 
@@ -32,11 +32,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.fisheye", "鱼眼")

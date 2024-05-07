@@ -5,7 +5,7 @@ from .common import Info
 COMMAND = [
   "nvidia-smi",
   "--query-gpu=pci.bus_id,name,clocks.sm,temperature.gpu,utilization.gpu,utilization.memory",
-  "--format=csv"
+  "--format=csv",
 ]
 UEVENT_FILE = "uevent"
 

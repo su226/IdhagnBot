@@ -19,7 +19,8 @@ class Record:
     self._deleted = AutoDeleteDict[int, None](120)
 
   async def _on_message_sent(
-    self, event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int
+    self, event: Optional[Event], is_group: bool, target_id: int, message: Message,
+    message_id: int,
   ) -> None:
     if not (
       message_id

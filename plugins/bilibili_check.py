@@ -2,12 +2,12 @@ import asyncio
 import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional
 from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
-from PIL import Image, ImageDraw, ImageOps
+from PIL import Image, ImageDraw
 from pydantic import BaseModel, Field, SecretStr
 
 from util import colorutil, command, configs, imutil, misc, textutil
@@ -51,7 +51,7 @@ async def update_vtbs() -> bool:
     return True
   try:
     result = await asyncio.wait_for(misc.first_result(
-      [asyncio.create_task(get_single(api)) for api in VTB_APIS]
+      [asyncio.create_task(get_single(api)) for api in VTB_APIS],
     ), timeout=config.update_timeout)
   except Exception:
     return False
@@ -98,7 +98,7 @@ def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
   y = (im.height - uid_im.height) // 2
   rounded_im = Image.new("L", (uid_width * 2, uid_im.height * 2), 0)
   ImageDraw.Draw(rounded_im).rounded_rectangle(
-    (0, 0, uid_width * 2 - 1, uid_im.height * 2 - 1), 8, 255
+    (0, 0, uid_width * 2 - 1, uid_im.height * 2 - 1), 8, 255,
   )
   rounded_im = rounded_im.resize((uid_width, uid_im.height), imutil.scale_resample())
   im.paste((221, 221, 221), (x, y), rounded_im)
@@ -117,10 +117,10 @@ def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
 
   medal_name_bg_width = medal_name_im.width + padding * 2
   ratio = medal_name_bg_width / medal_name_im.height
-  gradient = ImageOps.colorize(
+  gradient = imutil.colorize(
     Image.linear_gradient("L"),
-    cast(str, colorutil.split_rgb(medal.color_start)),
-    cast(str, colorutil.split_rgb(medal.color_end))
+    colorutil.split_rgb(medal.color_start),
+    colorutil.split_rgb(medal.color_end),
   ).rotate(45, imutil.resample(), True)
   grad_h = int(GRADIENT_45DEG_WH / (1 + ratio))
   grad_w = int(ratio * grad_h)
@@ -135,19 +135,19 @@ def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
   medal_level_bg_width = medal_level_im.width + padding * 2
   im.paste(
     (255, 255, 255),
-    (x, y + border, x + medal_level_bg_width, y + border + medal_name_im.height)
+    (x, y + border, x + medal_level_bg_width, y + border + medal_name_im.height),
   )
   im.paste(medal_level_im, (x + padding, y + border), medal_level_im)
   return im
 
 
 def make_header(
-  avatar: Image.Image, name: str, uid: int, fans: int, followings: int, vtbs: int
+  avatar: Image.Image, name: str, uid: int, fans: int, followings: int, vtbs: int,
 ) -> Image.Image:
   name_im = textutil.render(name, "sans bold", 32)
   uid_im = textutil.render(str(uid), "sans", 28)
   info_im = textutil.render(
-    f"<b>粉丝:</b> {fans} <b>关注:</b> {followings}", "sans", 32, markup=True
+    f"<b>粉丝:</b> {fans} <b>关注:</b> {followings}", "sans", 32, markup=True,
   )
   if vtbs == -1:
     info2_im = textutil.render("<b>VTB:</b> ??", "sans", 32, markup=True)
@@ -163,7 +163,7 @@ def make_header(
   uid_width = uid_im.width + padding * 2
   im = Image.new("RGB", (
     avatar.width + 32 + max(name_im.width + margin + uid_width, info_im.width, info2_im.width),
-    max(avatar.height, name_im.height + info_im.height + info2_im.height)
+    max(avatar.height, name_im.height + info_im.height + info2_im.height),
   ), (255, 255, 255))
   im.paste(avatar, (0, 0), avatar)
 
@@ -173,7 +173,7 @@ def make_header(
   y = (name_im.height - uid_im.height) // 2
   rounded_im = Image.new("L", (uid_width * 2, uid_im.height * 2), 0)
   ImageDraw.Draw(rounded_im).rounded_rectangle(
-    (0, 0, rounded_im.width - 1, rounded_im.height - 1), 8, 255
+    (0, 0, rounded_im.width - 1, rounded_im.height - 1), 8, 255,
   )
   rounded_im = rounded_im.resize((uid_width, uid_im.height), imutil.scale_resample())
   im.paste((221, 221, 221), (x + name_im.width + margin, y), rounded_im)
@@ -240,7 +240,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
       info = i["medal_info"]
       medals[info["target_id"]] = Medal(
         info["level"], info["medal_name"],
-        info["medal_color_start"], info["medal_color_end"], info["medal_color_border"]
+        info["medal_color_start"], info["medal_color_end"], info["medal_color_border"],
       )
 
   def make() -> MessageSegment:
@@ -268,7 +268,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
     list_height = sum(im.height + y_padding * 2 for im in items) + border * 2
     im = Image.new("RGB", (
       max(header.width, max(im.width + x_padding * 2 for im in items) + border * 2) + margin * 2,
-      header.height + gap + list_height + margin * 2
+      header.height + gap + list_height + margin * 2,
     ), (255, 255, 255))
     im.paste(header, (margin, margin))
 

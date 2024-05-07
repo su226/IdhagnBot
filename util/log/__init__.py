@@ -108,7 +108,7 @@ def config_onload(_: Optional[Config], cur: Config) -> None:
       colorize=sink.colorize,
       diagnose=sink.diagnose,
       backtrace=sink.backtrace,
-      **kw
+      **kw,
     )
 
 

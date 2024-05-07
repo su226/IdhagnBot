@@ -74,7 +74,7 @@ def check_at_bot(event: MessageEvent) -> bool:
   return False
 at_bot = nonebot.on_message(
   check_at_bot,
-  context.build_permission(("chatgpt", "chat", "at_bot"), permission.Level.MEMBER)
+  context.build_permission(("chatgpt", "chat", "at_bot"), permission.Level.MEMBER),
 )
 chatgpt_cmd = (
   command.CommandBuilder("chatgpt.chat", "ChatGPT", "chatgpt")
@@ -93,7 +93,7 @@ async def handle_at_bot(event: MessageEvent, arg: Optional[Message] = CommandArg
   try:
     response, state.conversations[session_id] = await get_response(
       prompt.extract_plain_text(),
-      state.conversations.get(session_id, None)
+      state.conversations.get(session_id, None),
     )
     STATE.dump()
     msg = "以下回复来自 ChatGPT，与 IdhagnBot 无关\n" + await render_markdown(response)
@@ -101,7 +101,7 @@ async def handle_at_bot(event: MessageEvent, arg: Optional[Message] = CommandArg
     msg = "ChatGPT 响应超时"
   except AuthError as e:
     logger.exception(
-      f"ChatGPT 登录失败\nlocation: {e.location}\nstatus: {e.status_code}\ndetails: {e.details}"
+      f"ChatGPT 登录失败\nlocation: {e.location}\nstatus: {e.status_code}\ndetails: {e.details}",
     )
     msg = "ChatGPT 登录失败，请联系机器人开发者"
   await at_bot.finish(MessageSegment.at(event.user_id) + msg)
@@ -125,7 +125,7 @@ async def handle_reset_chatgpt(event: MessageEvent) -> None:
 
 
 async def get_response(
-  prompt: str, conversation: Optional[Conversation] = None
+  prompt: str, conversation: Optional[Conversation] = None,
 ) -> Tuple[str, Conversation]:
   config = CONFIG()
   state = STATE()
@@ -137,7 +137,7 @@ async def get_response(
         "id": id,
         "role": "user",
         "content": {"content_type": "text", "parts": [prompt]},
-      }
+      },
     ],
     "model": config.model,
   }
@@ -159,7 +159,7 @@ async def get_response(
     if state.logged_in:
       async with http.post(
         CHAT_API, headers=headers, cookies=cookies, json=payload,
-        proxy=config.proxy, timeout=config.timeout
+        proxy=config.proxy, timeout=config.timeout,
       ) as response:
         if response.status == 200:
           text = await response.text()
@@ -170,7 +170,7 @@ async def get_response(
     headers["Authorization"] = f"Bearer {state.access_token}"
     async with http.post(
       CHAT_API, headers=headers, cookies=cookies, json=payload,
-      proxy=config.proxy, timeout=config.timeout, raise_for_status=True
+      proxy=config.proxy, timeout=config.timeout, raise_for_status=True,
     ) as response:
       text = await response.text()
       break
@@ -187,7 +187,7 @@ async def render_markdown(content: str) -> MessageSegment:
     browser = await misc.launch_playwright(p)
     page = await browser.new_page(
       viewport={"width": config.image_width, "height": 1},
-      device_scale_factor=config.image_scale
+      device_scale_factor=config.image_scale,
     )
     await page.goto(URL)
     await page.evaluate("render", content)

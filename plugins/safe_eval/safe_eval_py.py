@@ -9,7 +9,7 @@ plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 async def safe_eval(
-  code: str, timeout: float, nproc: int, memory: int, output: int
+  code: str, timeout: float, nproc: int, memory: int, output: int,
 ) -> Tuple[bool, int, bytes, bytes]:
   version = f"{sys.version_info.major}.{sys.version_info.minor}"
   proc = await asyncio.subprocess.create_subprocess_exec(

@@ -64,8 +64,7 @@ class Cam16:
     dA = self.astar - other.astar
     dB = self.bstar - other.bstar
     dEPrime = math.sqrt(dJ * dJ + dA * dA + dB * dB)
-    dE = 1.41 * pow(dEPrime, 0.63)
-    return dE
+    return 1.41 * pow(dEPrime, 0.63)
 
   @staticmethod
   def from_argb(argb: int, viewing_conditions: ViewingConditions = ViewingConditions.DEFAULT) -> "Cam16":
@@ -178,5 +177,4 @@ class Cam16:
     x = 1.86206786 * rF - 1.01125463 * gF + 0.14918677 * bF
     y = 0.38752654 * rF + 0.62144744 * gF - 0.00897398 * bF
     z = -0.01584150 * rF - 0.03412294 * gF + 1.04996444 * bF
-    argb = argb_from_xyz(x, y, z)
-    return argb
+    return argb_from_xyz(x, y, z)

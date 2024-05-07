@@ -82,7 +82,7 @@ def onload(prev: Optional[Config], curr: Config) -> None:
       UserCategoryItem.find(item.category, True).add(UserStringItem(item.string, item))
     else:
       UserCategoryItem.find(item.category, True).add(
-        UserCommandItem(item.command, item.brief, item.usage, item)
+        UserCommandItem(item.command, item.brief, item.usage, item),
       )
 
 
@@ -172,7 +172,7 @@ class CommandItem(Item):
 
   def __init__(
     self, names: List[str] = [], brief: str = "", usage: Union[str, Callable[[], str]] = "",
-    data: Optional[CommonData] = None
+    data: Optional[CommonData] = None,
   ) -> None:
     super().__init__(data)
     self.names = names
@@ -260,7 +260,7 @@ class CategoryItem(Item):
 
   @classmethod
   def find(
-    cls, path: Union[str, List[str]], create: bool = False, check: Optional[ShowData] = None
+    cls, path: Union[str, List[str]], create: bool = False, check: Optional[ShowData] = None,
   ) -> "CategoryItem":
     cur = CategoryItem.ROOT
     if isinstance(path, str):
@@ -286,12 +286,12 @@ class CategoryItem(Item):
     self.items.append(item)
 
   def format(
-    self, show_data: ShowData, path: List[str], bot_id: int, bot_name: str
+    self, show_data: ShowData, path: List[str], bot_id: int, bot_name: str,
   ) -> List[MessageSegment]:
     config = CONFIG()
     vaild_items = sorted(
       ((x(), x) for x in self.items if x.can_show(show_data)),
-      key=lambda x: (-x[1].data.priority, x[1].get_order(), x[0])
+      key=lambda x: (-x[1].data.priority, x[1].get_order(), x[0]),
     )
     has_command = False
     has_category = False
@@ -307,16 +307,16 @@ class CategoryItem(Item):
       nodes.append(misc.forward_node(bot_id, bot_name, "\n".join(lines)))
     header_lines: List[str] = []
     if has_command:
-      header_lines.append(
+      header_lines.append((
         "ℹ 斜线「/」开头的是命令，发送「/help <命令名>」查看，"
         "比如假设有「/某个命令」，就需要发送「/help 某个命令」来查看"
-      )
+      ))
     if has_category:
       path_str = "".join(f" {i}" for i in path)
-      header_lines.append(
+      header_lines.append((
         f"ℹ 文件夹「📁」开头的是分类，发送「/help {path_str}<分类名>」查看，"
         f"比如假设有「📁某个分类」，就需要发送「/help {path_str}某个分类」来查看"
-      )
+      ))
     if header_lines:
       nodes.insert(0, misc.forward_node(bot_id, bot_name, "\n".join(header_lines)))
     return nodes

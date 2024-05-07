@@ -123,7 +123,7 @@ def state_onload(prev: Optional[State], curr: State) -> None:
   for user, context in curr.contexts.items():
     scheduler.add_job(
       timeout_exit, "date", (user,), id=f"{JOBSTORE}_{user}", replace_existing=True,
-      run_date=context.expire, jobstore=JOBSTORE
+      run_date=context.expire, jobstore=JOBSTORE,
     )
 
 
@@ -196,7 +196,7 @@ def refresh_context(uid: int):
   STATE.dump()
   return scheduler.add_job(
     timeout_exit, "date", (uid,), id=f"context_timeout_{uid}", replace_existing=True,
-    run_date=date, jobstore=JOBSTORE
+    run_date=date, jobstore=JOBSTORE,
   )
 
 
@@ -204,7 +204,7 @@ async def timeout_exit(uid: int):
   if exit_context(uid):
     await nonebot.get_bot().call_api(
       "send_private_msg", user_id=uid,
-      message=f"由于 {misc.format_time(CONFIG().timeout)}内未操作，已退出上下文"
+      message=f"由于 {misc.format_time(CONFIG().timeout)}内未操作，已退出上下文",
     )
 
 
@@ -250,7 +250,7 @@ _check_matcher_orig = nonebot.message._check_matcher
 _current_state: ContextVar[T_State] = ContextVar("_current_state")
 _current_stack: ContextVar[Optional[AsyncExitStack]] = ContextVar("_current_stack", default=None)
 _current_dependency_cache: ContextVar[Optional[T_DependencyCache]] = ContextVar(
-  "_current_dependency_cache", default=None
+  "_current_dependency_cache", default=None,
 )
 async def _check_matcher(
   Matcher: Type[Matcher],
@@ -280,7 +280,7 @@ def build_permission(node: permission.Node, default: permission.Level) -> BotPer
     state = _current_state.get(None)
     prefix = state["_prefix"]["command_start"] if state else None
     if (result := permission.check(
-      node, user_id, get_event_context(event), event_level, prefix
+      node, user_id, get_event_context(event), event_level, prefix,
     )) is not None:
       return result
     command_level = permission.get_node_level(node) or default

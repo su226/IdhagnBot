@@ -31,7 +31,7 @@ def request(api: str, **kw: str) -> _RequestContextManager:
     "qq": str(config.qq),
     "timestamp": t,
     "sign": sign,
-    **kw
+    **kw,
   }
   return http.get(f"{config.host}/{api}", params=params)
 
@@ -178,7 +178,7 @@ def available(source: Source, event: MessageEvent, event_level: permission.Level
 
 
 async def handle_universal_keyword(
-  bot: Bot, event: MessageEvent, msg: Message = EventMessage()
+  bot: Bot, event: MessageEvent, msg: Message = EventMessage(),
 ) -> None:
   config = CONFIG()
   args = misc.removeprefix(msg.extract_plain_text().lstrip(), config.universal_keyword).strip()
@@ -203,7 +203,7 @@ def register_universal_keyword() -> None:
     matcher = nonebot.on_message(
       check_universal_keyword,
       context.build_permission(("furbot", "universal_keyword"), permission.Level.MEMBER),
-      priority=2
+      priority=2,
     )
     matcher.handle()(handle_universal_keyword)
     universal_keyword_registered = True

@@ -47,7 +47,7 @@ class UnrealAssetsModule(Module):
     if self.force:
       assets = model.assets
     else:
-      prev_slugs = set(game.slug for game in model.prev_assets)
+      prev_slugs = {game.slug for game in model.prev_assets}
       assets = [game for game in model.assets if game.slug not in prev_slugs]
     if not assets:
       return []
@@ -55,11 +55,11 @@ class UnrealAssetsModule(Module):
     for asset in assets:
       wrap = "\n" if message else ""
       message.extend([
-        MessageSegment.text(
+        MessageSegment.text((
           f"{wrap}{asset.category}资产 {asset.title} 原价 {asset.price} 现在免费，"
           f"共 {asset.ratingCount} 条评价，平均 {asset.ratingScore}⭐\n"
           f"{unreal_free.URL_BASE}{asset.slug}\n"
-        ),
-        MessageSegment.image(asset.image)
+        )),
+        MessageSegment.image(asset.image),
       ])
     return [message]

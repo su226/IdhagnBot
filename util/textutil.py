@@ -174,14 +174,14 @@ class RichText:
 
   def render(
     self, color: imutil.Color = (0, 0, 0), stroke: float = 0,
-    stroke_color: imutil.Color = (255, 255, 255)
+    stroke_color: imutil.Color = (255, 255, 255),
   ) -> Image.Image:
     return render(self.unwrap(), color=color, stroke=stroke, stroke_color=stroke_color)
 
   def paste(
     self, im: Image.Image, xy: Tuple[float, float], anchor: imutil.Anchor = "lt",
     color: imutil.Color = (0, 0, 0), stroke: float = 0,
-    stroke_color: imutil.Color = (255, 255, 255)
+    stroke_color: imutil.Color = (255, 255, 255),
   ) -> Image.Image:
     src = render(self.unwrap(), color=color, stroke=stroke, stroke_color=stroke_color)
     imutil.paste(im, src, xy, anchor=anchor)
@@ -199,7 +199,7 @@ def special_font(name: str, fallback: str) -> str:
 
 
 def font_options(
-  context: Union[None, Pango.Context, "cairo.Context[Any]"] = None
+  context: Union[None, Pango.Context, "cairo.Context[Any]"] = None,
 ) -> cairo.FontOptions:
   config = misc.CONFIG()
   options = cairo.FontOptions()
@@ -217,7 +217,7 @@ def font_options(
 def layout(
   content: str, font: str, size: float, *, box: Optional[int] = None, wrap: Wrap = "word",
   ellipsize: Ellipsize = None, markup: bool = False, align: Align = "l", spacing: int = 0,
-  lines: int = 0
+  lines: int = 0,
 ) -> Layout:
   render = RichText().set_font(font, size).set_wrap(wrap).set_align(align).set_spacing(spacing)
   if box:
@@ -237,18 +237,18 @@ def layout(
 @overload
 def render(
   content: Layout, *, color: imutil.Color = ..., stroke: float = ...,
-  stroke_color: imutil.Color = ...
+  stroke_color: imutil.Color = ...,
 ) -> Image.Image: ...
 @overload
 def render(
   content: str, font: str, size: float, *, color: imutil.Color = ..., stroke: float = ...,
   stroke_color: imutil.Color = ..., box: Optional[int] = ..., wrap: Wrap = ...,
   ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
-  lines: int = ...
+  lines: int = ...,
 ) -> Image.Image: ...
 def render(
   content: Union[str, Layout], *args: Any, color: imutil.Color = (0, 0, 0), stroke: float = 0,
-  stroke_color: imutil.Color = (255, 255, 255), **kw: Any
+  stroke_color: imutil.Color = (255, 255, 255), **kw: Any,
 ) -> Image.Image:
   if isinstance(content, Layout):
     l = cast(Layout, content)
@@ -281,7 +281,7 @@ def render(
 @overload
 def paste(
   im: Image.Image, xy: Tuple[float, float], content: Layout, *, anchor: imutil.Anchor = ...,
-  color: imutil.Color = ..., stroke: float = ..., stroke_color: imutil.Color = ...
+  color: imutil.Color = ..., stroke: float = ..., stroke_color: imutil.Color = ...,
 ) -> Image.Image: ...
 @overload
 def paste(
@@ -289,10 +289,10 @@ def paste(
   anchor: imutil.Anchor = ..., color: imutil.Color = ..., stroke: float = ...,
   stroke_color: imutil.Color = ..., box: Optional[int] = ..., wrap: Wrap = ...,
   ellipsize: Ellipsize = ..., markup: bool = ..., align: Align = ..., spacing: int = ...,
-  lines: int = ...
+  lines: int = ...,
 ) -> Image.Image: ...
 def paste(
-  im: Image.Image, xy: Tuple[float, float], *args: Any, anchor: imutil.Anchor = "lt", **kw: Any
+  im: Image.Image, xy: Tuple[float, float], *args: Any, anchor: imutil.Anchor = "lt", **kw: Any,
 ) -> Image.Image:
   text = render(*args, **kw)
   imutil.paste(im, text, xy, anchor=anchor)

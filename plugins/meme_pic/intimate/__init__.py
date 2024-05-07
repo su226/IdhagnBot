@@ -13,11 +13,11 @@ from util.user_aliases import AvatarGetter, DefaultType
 DIR = Path(__file__).resolve().parent
 TARGET_BOXES = [
   (39, 91, 75, 75), (49, 101, 75, 75), (67, 98, 75, 75), (55, 86, 75, 75), (61, 109, 75, 75),
-  (65, 101, 75, 75)
+  (65, 101, 75, 75),
 ]
 SOURCE_BOXES = [
   (102, 95, 70, 80, 0), (108, 60, 50, 100, 0), (97, 18, 65, 95, 0), (65, 5, 75, 75, -20),
-  (95, 57, 100, 55, -70), (109, 107, 65, 75, 0)
+  (95, 57, 100, 55, -70), (109, 107, 65, 75, 0),
 ]
 
 
@@ -29,11 +29,11 @@ parser.add_argument("--source", "-s", default="", metavar="源", help="同上")
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.intimate", "贴贴")

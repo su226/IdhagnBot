@@ -55,7 +55,7 @@ add_goods = (
 )
 @add_goods.handle()
 async def handle_add_goods(
-  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()
+  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs(),
 ) -> None:
   if args.notify is None:
     notify = event.user_id
@@ -134,7 +134,7 @@ parser_modify_goods.add_argument("--single", "-s", metavar="新次数", type=int
 parser_modify_goods.add_argument("--reset-total", "-T", action="store_true", help="重置总限购")
 parser_modify_goods.add_argument(
   "--reset-single", "-S", metavar="用户", action="append", default=[],
-  help="重置某人的单人限购（可使用多次），也可使用\"全部\"指定全部人"
+  help="重置某人的单人限购（可使用多次），也可使用\"全部\"指定全部人",
 )
 parser_modify_goods.add_argument("--notify", "-N", metavar="新用户", help="设置购买商品后提醒谁")
 parser_modify_goods.add_argument("--delete", "-D", action="store_true", help=(
@@ -155,7 +155,7 @@ modify_goods = (
 )
 @modify_goods.handle()
 async def handle_modify_goods(
-  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()
+  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs(),
 ) -> None:
   ctx = context.get_event_context(event)
   try:
@@ -253,7 +253,7 @@ async def format_goods(bot: Bot, event: MessageEvent, id: int, goods: Goods) -> 
     f"价格：{goods.price}金币\n"
     f"总计已购买：{total}\n"
     f"你已购买：{single}\n"
-    f"简介：{goods.description}"
+    f"简介：{goods.description}",
   ))
 
 
@@ -300,7 +300,7 @@ purchase = (
 )
 @purchase.handle()
 async def handle_purchase(
-  bot: Bot, event: MessageEvent, bot_state: T_State, arg: Message = CommandArg()
+  bot: Bot, event: MessageEvent, bot_state: T_State, arg: Message = CommandArg(),
 ) -> None:
   name = arg.extract_plain_text().rstrip()
   ctx = context.get_event_context(event)
@@ -322,13 +322,13 @@ async def handle_purchase(
     await purchase.finish(formatted + f"\n余额：{balance}\n余额不足，无法购买")
   await purchase.send(
     formatted
-    + f"\n余额：{balance} → {new_balance}\n发送“确定”确定购买，发送“取消”或其他消息取消购买"
+    + f"\n余额：{balance} → {new_balance}\n发送“确定”确定购买，发送“取消”或其他消息取消购买",
   )
 
 
 @purchase.got("choice")
 async def got_purchase(
-  bot: Bot, event: MessageEvent, bot_state: T_State, choice: str = ArgPlainText()
+  bot: Bot, event: MessageEvent, bot_state: T_State, choice: str = ArgPlainText(),
 ) -> None:
   if choice.strip() != "确定":
     await purchase.finish("购买已取消")

@@ -46,7 +46,7 @@ class GeneratedCharacter(Character):
       intelligence=serialized["intelligence"],
       strength=serialized["strength"],
       money=serialized["money"],
-      seed=serialized["seed"]
+      seed=serialized["seed"],
     )
 
 
@@ -87,7 +87,7 @@ class Statistics:
       set(serialized["achievements"]),
       serialized["finished_games"],
       serialized["inherited_talent"],
-      GeneratedCharacter.deserialize(character) if character else None
+      GeneratedCharacter.deserialize(character) if character else None,
     )
 
 
@@ -241,8 +241,7 @@ class Game:
           weights.append(weight)
       if rarities:
         rarity = self._random.choices(rarities, weights)[0]
-        talent = self._random.choice(by_rarity[rarity])
-        return talent
+        return self._random.choice(by_rarity[rarity])
     elif current.replacement == "talent":
       choices: List[Talent] = []
       weights: List[float] = []
@@ -254,8 +253,7 @@ class Game:
           choices.append(talent)
           weights.append(weight)
       if choices:
-        talent = self._random.choices(choices, weights)[0]
-        return talent
+        return self._random.choices(choices, weights)[0]
     return None
 
   def get_points(self) -> int:
@@ -353,7 +351,7 @@ class Game:
     return achievements
 
   def _add_stats(
-    self, charm: int, intelligence: int, strength: int, money: int, spirit: int, random: int
+    self, charm: int, intelligence: int, strength: int, money: int, spirit: int, random: int,
   ):
     random_values = [0] * 5
     if random:
@@ -405,7 +403,7 @@ class Game:
       self._max_intelligence,
       self._max_strength,
       self._max_money,
-      self._max_spirit
+      self._max_spirit,
     ])) * 2 + self._max_age // 2
     self.statistics.finished_games += 1
     self._condition_vars["SUM"] = overall
@@ -436,7 +434,7 @@ class Game:
     return standard[0]
 
   def create_character(
-    self, seed: Optional[int] = None, name: str = "独一无二的我"
+    self, seed: Optional[int] = None, name: str = "独一无二的我",
   ) -> GeneratedCharacter:
     random = Random()
     if seed is None:

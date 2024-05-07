@@ -13,7 +13,7 @@ from util.user_aliases import AvatarGetter, DefaultType
 DIR = Path(__file__).resolve().parent
 BOXES = [
   (62, 143, 158, 113), (52, 177, 173, 105), (42, 192, 192, 92), (46, 182, 184, 100),
-  (54, 169, 174, 110), (69, 128, 144, 135), (65, 130, 152, 124)
+  (54, 169, 174, 110), (69, 128, 144, 135), (65, 130, 152, 124),
 ]
 
 
@@ -24,11 +24,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.hammer", "锤")

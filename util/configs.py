@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from threading import Lock
 from typing import (
   Any, Callable, ClassVar, Dict, Generic, Iterable, List, Literal, Optional, Tuple, Type, TypeVar,
-  cast
 )
 
 import yaml
@@ -47,7 +46,7 @@ class CacheItem(Generic[TModel]):
 
 class BaseConfig(Generic[TModel, Unpack[TParam]]):
   category: ClassVar = "配置"
-  all: ClassVar[List["BaseConfig[Any]"]] = []
+  all: ClassVar[List["BaseConfig[Any, Unpack[Tuple[Any, ...]]]"]] = []
 
   def __init__(self, model: Type[TModel], reloadable: Reloadable = "lazy") -> None:
     self.model = model
@@ -55,7 +54,7 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
     self.reloadable: Reloadable = reloadable
     self.handlers: List[LoadHandler[TModel, Unpack[TParam]]] = []
     self.lock = Lock()
-    self.all.append(cast(BaseConfig[Any], self))
+    self.all.append(self)
 
   def get_file(self, *args: Unpack[TParam]) -> str:
     raise NotImplementedError
@@ -95,10 +94,10 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
       yaml.dump(data, f, SafeDumper, allow_unicode=True)
 
   def onload(
-    self
+    self,
   ) -> "Callable[[LoadHandler[TModel, Unpack[TParam]]], LoadHandler[TModel, Unpack[TParam]]]":
     def decorator(  # 必须是 ForwardRef，否则会 KeyError: typing_extensions.Unpack[TParam]
-      handler: "LoadHandler[TModel, Unpack[TParam]]"
+      handler: "LoadHandler[TModel, Unpack[TParam]]",
     ) -> "LoadHandler[TModel, Unpack[TParam]]":
       self.handlers.append(handler)
       return handler
@@ -158,7 +157,7 @@ class GroupConfig(BaseConfig[TModel, int]):
   def get_all(self) -> Iterable[Tuple[int]]:
     from . import context
     for i in context.CONFIG().groups:
-      yield i,
+      yield (i,)
 
 
 class GroupState(GroupConfig[TModel]):

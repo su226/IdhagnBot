@@ -13,7 +13,7 @@ from util.user_aliases import AvatarGetter, DefaultType
 DIR = Path(__file__).resolve().parent
 BOXES = [
   (57, 136), (56, 117), (55, 99), (52, 113), (50, 126), (48, 139), (47, 112), (47, 85), (47, 57),
-  (48, 97), (50, 136), (51, 176), (52, 169), (55, 181), (58, 153)
+  (48, 97), (50, 136), (51, 176), (52, 169), (55, 181), (58, 153),
 ]
 
 
@@ -24,11 +24,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.kick_ball", "踢球")

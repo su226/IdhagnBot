@@ -14,7 +14,7 @@ DIR = Path(__file__).resolve().parent
 BOXES = [
   (39, 40), (39, 40), (39, 40), (39, 30), (39, 30), (39, 32), (39, 32), (39, 32), (39, 32),
   (39, 32), (39, 32), (39, 32), (39, 32), (39, 32), (39, 32), (39, 30), (39, 27), (39, 32),
-  (37, 49), (37, 64), (37, 67), (37, 67), (39, 69), (37, 70), (37, 70)
+  (37, 49), (37, 64), (37, 67), (37, 67), (39, 69), (37, 70), (37, 70),
 ]
 
 
@@ -25,11 +25,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.trash", "垃圾")

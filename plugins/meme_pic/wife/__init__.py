@@ -35,15 +35,15 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     textutil.paste(
       im, (325, 51),
-      "如果你的老婆长这样", "sans bold", 64, anchor="mm"
+      "如果你的老婆长这样", "sans bold", 64, anchor="mm",
     )
     textutil.paste(
       im, (325, target.height + 188),
-      "那么这就不是你的老婆\n这是我的老婆", "sans bold", 48, align="m", anchor="mm"
+      "那么这就不是你的老婆\n这是我的老婆", "sans bold", 48, align="m", anchor="mm",
     )
     textutil.paste(
       im, (214, target.height + 363),
-      "滚去找你\n自己的老婆去", "sans bold", 64, align="m", anchor="mm"
+      "滚去找你\n自己的老婆去", "sans bold", 64, align="m", anchor="mm",
     )
 
     template = Image.open(DIR / "template.png").resize((200, 200), imutil.scale_resample())

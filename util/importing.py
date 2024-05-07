@@ -68,7 +68,7 @@ def children(parent: str) -> Tuple[List[str], List[Missing]]:
         missing.append(module)
     if missing:
       missings.append(Missing(
-        child.name, missing, list({METADATA.groups[module] for module in missing})
+        child.name, missing, list({METADATA.groups[module] for module in missing}),
       ))
     else:
       availables.append(child.name)
@@ -81,16 +81,16 @@ def load_children(parent: str) -> None:
     logger.opt(depth=1).warning(
       f"子模块 {i.name} 因为缺失依赖 {'、'.join(i.requires)} 而不会被加载，"
       "你可以使用此命令来安装: pdm install"
-      + "".join(f" -G {group}" for group in i.groups)
+      + "".join(f" -G {group}" for group in i.groups),
     )
   count = 0
   for i in availables:
     try:
       importlib.import_module(f"{parent}.{i}")
     except Exception:
-      logger.opt(depth=1).exception(
+      logger.opt(depth=1).exception((
         f"子模块 {i} 加载失败，这可能是 IdhagnBot 的问题，你可以尝试反馈。"
-      )
+      ))
     else:
       count += 1
   logger.opt(depth=1).success(f"加载了 {count} 个子模块")
@@ -103,7 +103,7 @@ def load_plugins():
     logger.warning(
       f"插件 {i.name} 因为缺失依赖 {'、'.join(i.requires)} 而不会被加载，"
       "你可以使用此命令来安装: pdm install"
-      + "".join(f" -G {group}" for group in i.groups)
+      + "".join(f" -G {group}" for group in i.groups),
     )
   nonebot.load_all_plugins((f"plugins.{name}" for name in availables), ())
   nonebot.load_all_plugins(config.extra_plugins, config.extra_dirs)

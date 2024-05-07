@@ -18,6 +18,6 @@ async def get_data() -> List[Item]:
       url=URL.format(i["target"]["id"]),
       title=i["target"]["title"],
       image=i["children"][0]["thumbnail"],
-      content=i["detail_text"] + "|" + i["target"]["excerpt"]
+      content=i["detail_text"] + "|" + i["target"]["excerpt"],
     ))
   return result

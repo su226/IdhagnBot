@@ -14,11 +14,11 @@ DIR = Path(__file__).resolve().parent
 FRAMETIME = 50
 TARGET_BOXES = [
   (57, 4), (55, 5), (58, 7), (57, 5), (53, 8), (54, 9), (64, 5), (66, 8), (70, 9), (73, 8),
-  (81, 10), (77, 10), (72, 4), (79, 8), (50, 8), (60, 7), (67, 6), (60, 6), (50, 9)
+  (81, 10), (77, 10), (72, 4), (79, 8), (50, 8), (60, 7), (67, 6), (60, 6), (50, 9),
 ]
 SOURCE_BOXES = [
   (10, 6), (3, 6), (32, 7), (22, 7), (13, 4), (21, 6), (30, 6), (22, 2), (22, 3), (26, 8), (23, 8),
-  (27, 10), (30, 9), (17, 6), (12, 8), (11, 7), (8, 6), (-2, 10), (4, 9)
+  (27, 10), (30, 9), (17, 6), (12, 8), (11, 7), (8, 6), (-2, 10), (4, 9),
 ]
 
 
@@ -32,11 +32,11 @@ parser.add_argument("--source", "-s", default="", metavar="源", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.fencing", "击剑", "🤺")

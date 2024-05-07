@@ -9,7 +9,7 @@ from .common import Info, read as read_unknown
 VENDORS = {
   # 0x8086: intel,
   0x10de: nvidia,
-  0x1002: amd
+  0x1002: amd,
 }
 
 

@@ -4,17 +4,17 @@ from typing import Any, AsyncGenerator, Tuple, cast
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
-  ActionFailed, Bot, GroupMessageEvent, GroupRecallNoticeEvent
+  ActionFailed, Bot, GroupMessageEvent, GroupRecallNoticeEvent,
 )
 from nonebot.adapters.onebot.v11.event import Reply
 from nonebot.typing import T_State
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select
+from sqlmodel import select, col
 
 from util import context, permission, record
 
 from .common import (
-  AutoDeleteDict, has_keyword, recall_others_permission, schedule_delete, try_delete_msg
+  AutoDeleteDict, has_keyword, recall_others_permission, schedule_delete, try_delete_msg,
 )
 
 
@@ -23,8 +23,8 @@ class Record:
     async with AsyncSession(record.engine) as session:
       result = await session.execute(select(record.Sent.message_id).where(
         record.Sent.caused_by == event.message_id,
-        record.Sent.is_group == True,  # noqa
-        record.Sent.target_id == event.group_id
+        col(record.Sent.is_group).is_(True),
+        record.Sent.target_id == event.group_id,
       ))
     if (rows := result.scalars().all()):
       state["sql_result"] = rows
@@ -44,20 +44,20 @@ class Record:
       if caused_by is None:
         return False
       result = await session.execute(select(record.Received.user_id).where(
-        record.Received.message_id == caused_by
+        record.Received.message_id == caused_by,
       ))
     return result.scalar() == user_id
 
   async def is_deleted(self, message_id: int) -> bool:
     async with AsyncSession(record.engine) as session:
       result = await session.execute(select(record.Received.deleted_by).where(
-        record.Received.message_id == message_id
+        record.Received.message_id == message_id,
       ))
       return result.scalar() is not None
 
 
 batch_recall_permission = context.build_permission(
-  ("recall", "manual_recall", "batch"), permission.Level.MEMBER
+  ("recall", "manual_recall", "batch"), permission.Level.MEMBER,
 )
 recall_dates = AutoDeleteDict[Tuple[int, int], datetime](600)
 
@@ -70,7 +70,7 @@ recall_begin = nonebot.on_message(recall_begin_rule, batch_recall_permission)
 @recall_begin.handle()
 async def handle_recall_begin(bot: Bot, event: GroupMessageEvent) -> None:
   recall_dates[event.group_id, event.user_id] = datetime.fromtimestamp(
-    cast(Reply, event.reply).time
+    cast(Reply, event.reply).time,
   )
   await try_delete_msg(bot, event.message_id)
 

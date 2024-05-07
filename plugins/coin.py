@@ -33,7 +33,7 @@ FlipResult = Literal["front", "back", "stand"]
 def flip() -> FlipResult:
   config = CONFIG()
   result = random.choices(
-    get_args(FlipResult), [config.front_weight, config.back_weight, config.stand_weight]
+    get_args(FlipResult), [config.front_weight, config.back_weight, config.stand_weight],
   )[0]
   return cast(FlipResult, result)
 
@@ -56,10 +56,10 @@ def flip_multiple(count: int) -> Tuple[int, int, int]:
 def flip_binomial(count: int) -> Tuple[int, int, int]:
   config = CONFIG()
   stand = misc.binomial_sample(
-    count, config.stand_weight / (config.front_weight + config.back_weight + config.stand_weight)
+    count, config.stand_weight / (config.front_weight + config.back_weight + config.stand_weight),
   )
   front = misc.binomial_sample(
-    count - stand, config.front_weight / (config.front_weight + config.back_weight)
+    count - stand, config.front_weight / (config.front_weight + config.back_weight),
   )
   back = count - stand - front
   return front, back, stand

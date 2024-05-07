@@ -17,7 +17,7 @@ async def get_appender(activity: ActivityArticle[object]) -> Callable[[Card], No
   avatar, covers, append_extra = await asyncio.gather(
     fetch_image(activity.avatar),
     fetch_images(*activity.content.covers),
-    extras.format(activity.extra)
+    extras.format(activity.extra),
   )
 
   def appender(card: Card) -> None:

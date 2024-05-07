@@ -2,7 +2,7 @@ import asyncio
 import shlex
 from collections import deque
 from typing import (
-  Any, Callable, Deque, Dict, List, Literal, NoReturn, Optional, Tuple, Type, Union, cast
+  Any, Callable, Deque, Dict, List, Literal, NoReturn, Optional, Tuple, Type, Union, cast,
 )
 
 import nonebot
@@ -109,7 +109,7 @@ class TokenBucket:
 
 
 def add_throttle_handler(
-  matcher: Type[Matcher], capacity: int, frequency: Optional[float]
+  matcher: Type[Matcher], capacity: int, frequency: Optional[float],
 ) -> None:
   async def handle_throttle(state: T_State):
     estimated = token.estimate()
@@ -233,8 +233,8 @@ class CommandBuilder:
     permission = context.build_permission(tuple(self.node.split(".")), self._level)
     self._state.update({
       IDHAGNBOT_KEY: {
-        USAGE_KEY: self._usage
-      }
+        USAGE_KEY: self._usage,
+      },
     })
     command_start = nonebot.get_driver().config.command_start
     commands: List[Tuple[str, ...]] = []
@@ -245,7 +245,7 @@ class CommandBuilder:
         TrieRule.add_prefix(f"{start}{command[0]}", TRIE_VALUE(start, command))
     matcher = nonebot.on_message(
       SerialRule(CommandRule(commands), self._rule), permission, state=self._state, block=False,
-      _depth=1  # type: ignore
+      _depth=1,  # type: ignore
     )
     if isinstance(self._usage, str):  # 已弃用，使用 finish_with_usage
       matcher.__doc__ = self._usage.replace("__cmd__", self.names[0])

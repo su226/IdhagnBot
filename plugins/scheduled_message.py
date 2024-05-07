@@ -42,14 +42,14 @@ class Task(BaseModel):
       raw_message=str(msg),
       font=0,
       sender=Sender(),
-      group_id=group
+      group_id=group,
     ))
     del STATE(group).tasks[id]
 
   def schedule(self, ctx: int, id: str):
     scheduler.add_job(
       self.send, "date", (ctx, id), id=f"{JOBSTORE}_{id}", run_date=self.date,
-      jobstore=JOBSTORE
+      jobstore=JOBSTORE,
     )
 
 

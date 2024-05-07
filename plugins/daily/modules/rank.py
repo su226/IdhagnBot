@@ -23,7 +23,7 @@ class RankModule(Module):
       return []  # rank 模块在私聊上下文中不可用
     try:
       from sqlalchemy.ext.asyncio import AsyncSession
-      from sqlmodel import desc, func, select
+      from sqlmodel import col, desc, func, select
 
       from util import record
     except ImportError:
@@ -33,18 +33,18 @@ class RankModule(Module):
     yesterday = today - timedelta(1)
     async with AsyncSession(record.engine) as session:
       result = await session.execute(
-        select([
+        select(
           record.Received.user_id,
-          func.count(record.Received.user_id).label("count")
-        ])
+          count_func := func.count(col(record.Received.user_id)),
+        )
         .where(
           record.Received.group_id == self.group_id,
           record.Received.time >= yesterday,
-          record.Received.time < today
+          record.Received.time < today,
         )
-        .group_by(record.Received.user_id)
-        .order_by(desc("count"))
-        .limit(self.limit)
+        .group_by(col(record.Received.user_id))
+        .order_by(desc(count_func))
+        .limit(self.limit),
       )
     members = list(result)
     if not members:

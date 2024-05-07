@@ -145,7 +145,7 @@ async def handle_question(arg: Message = CommandArg()):
         .encode("utf-8")
         .decode("gbk", "replace")
         .encode("gbk", "replace")
-        .decode("utf-8", "ignore")
+        .decode("utf-8", "ignore"),
       ))
     else:
       output.append(seg)
@@ -170,7 +170,7 @@ async def handle_kjk(arg: Message = CommandArg()):
         .encode("gbk")
         .decode("utf-8", "replace")
         .encode("utf-8")
-        .decode("gbk", "replace")
+        .decode("gbk", "replace"),
       ))
     else:
       output.append(seg)

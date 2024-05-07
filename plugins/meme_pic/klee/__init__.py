@@ -15,7 +15,7 @@ BOXES = [
   (0, 174), (0, 174), (0, 174), (0, 174), (0, 174), (12, 160), (19, 152), (23, 148), (26, 145),
   (32, 140), (37, 136), (42, 131), (49, 127), (70, 126), (88, 128), (-30, 210), (-19, 207),
   (-14, 200), (-10, 188), (-7, 179), (-3, 170), (-3, 175), (-1, 174), (0, 174), (0, 174), (0, 174),
-  (0, 174), (0, 174), (0, 174), (0, 174), (0, 174)
+  (0, 174), (0, 174), (0, 174), (0, 174), (0, 174),
 ]
 
 
@@ -26,11 +26,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.klee", "可莉吃")

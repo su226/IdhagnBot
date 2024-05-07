@@ -13,7 +13,7 @@ from util.user_aliases import AvatarGetter, DefaultType
 DIR = Path(__file__).resolve().parent
 BOXES = [
   (60, 308, 210, 195), (60, 308, 210, 198), (45, 330, 250, 172), (58, 320, 218, 180),
-  (60, 310, 215, 193), (45, 327, 241, 171), (48, 308, 226, 192), (51, 301, 223, 200)
+  (60, 310, 215, 193), (45, 327, 241, 171), (48, 308, 226, 192), (51, 301, 223, 200),
 ]
 
 
@@ -27,7 +27,7 @@ group.add_argument(
   help="使用WebP而非GIF格式")
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.hit", "敲")

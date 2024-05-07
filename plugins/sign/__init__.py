@@ -2,7 +2,7 @@ import asyncio
 import random
 from argparse import Namespace
 from datetime import datetime
-from typing import List, Set, Tuple, cast
+from typing import List, Sequence, Set
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent
 from nonebot.params import ShellCommandArgs
@@ -10,7 +10,7 @@ from nonebot.rule import ArgumentParser
 
 from util import command, context, currency, misc, user_aliases
 
-from . import leaderboard as _  # noqa
+from . import leaderboard as _  # noqa: F401
 from .config import CONFIG, STATE, FormatData
 from .formatters.legacy import format as formatter_legacy
 from .formatters.ring import format as formatter_ring
@@ -80,7 +80,7 @@ async def handle_sign(bot: Bot, event: MessageEvent):
 
 
 async def match_all(bot: Bot, event: MessageEvent, patterns: List[str]) -> Set[int]:
-  async def do_match(pattern: str) -> Tuple[int, ...]:
+  async def do_match(pattern: str) -> Sequence[int]:
     if pattern in ("全部", "全体", "all"):
       ctx = context.get_event_context(event)
       return tuple(i["user_id"] for i in await bot.get_group_member_list(group_id=ctx))
@@ -89,10 +89,11 @@ async def match_all(bot: Bot, event: MessageEvent, patterns: List[str]) -> Set[i
   errors: List[misc.AggregateError] = []
   users = set()
   for i in await asyncio.gather(*coros, return_exceptions=True):
-    if isinstance(i, misc.AggregateError):
+    if isinstance(i, BaseException):
+      assert isinstance(i, misc.AggregateError)
       errors.append(i)
     else:
-      users.update(cast(Tuple[int, ...], i))
+      users.update(i)
   if errors:
     raise misc.AggregateError(*errors)
   return users

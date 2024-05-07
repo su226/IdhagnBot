@@ -27,7 +27,7 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
   config = CONFIG()
   group_data = STATE(format_data.gid)
   names, avatar, group_name = await asyncio.gather(
-    get_user_infos(group_data.rank), imutil.get_avatar(format_data.uid), get_group_name()
+    get_user_infos(group_data.rank), imutil.get_avatar(format_data.uid), get_group_name(),
   )
 
   def make() -> MessageSegment:
@@ -51,7 +51,7 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
     weeks = Calendar().monthdayscalendar(today.year, today.month)
     im = Image.new(
       "RGB", (656 + rank_im.width, max(264 + len(weeks) * 80, rank_im.height + 64)),
-      (255, 255, 255)
+      (255, 255, 255),
     )
     im.paste(rank_im, (624, 32), rank_im)
 
@@ -68,13 +68,13 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
 
     # 月份
     textutil.paste(
-      im, (584, 32), MONTHS[today.month - 1] + "月", "sans", 38, color=(0, 0, 0), anchor="rt"
+      im, (584, 32), MONTHS[today.month - 1] + "月", "sans", 38, color=(0, 0, 0), anchor="rt",
     )
 
     # 日历头
     for x, weekday in enumerate(WEEKDAYS):
       textutil.paste(
-        im, (32 + x * 80 + 40, 152 + 40), weekday, "sans", 28, color=(143, 143, 143), anchor="mm"
+        im, (32 + x * 80 + 40, 152 + 40), weekday, "sans", 28, color=(143, 143, 143), anchor="mm",
       )
 
     # 日历
@@ -91,7 +91,8 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
         else:
           color = (0, 0, 0)
         textutil.paste(
-          im, (32 + x * 80 + 40, 232 + y * 80 + 40), str(day), "sans", 28, color=color, anchor="mm"
+          im, (32 + x * 80 + 40, 232 + y * 80 + 40), str(day), "sans", 28, color=color,
+          anchor="mm",
         )
 
     return imutil.to_segment(im)

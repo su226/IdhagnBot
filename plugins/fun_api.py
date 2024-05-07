@@ -11,15 +11,17 @@ from util import command, misc
 ENGLISH_RE = re.compile(r"^[A-Za-z0-9]+$")
 SPACE_RE = re.compile(r"\s+")
 NBNHHSH_API = "https://lab.magiconch.com/api/nbnhhsh/guess"
-# COUPLET_API = "https://ai-backend.binwang.me/v0.2/couplet/" # 此为原地址，新地址如下
+# 此为原地址，新地址如下
+# COUPLET_API = "https://ai-backend.binwang.me/v0.2/couplet/"  # noqa: ERA001
 COUPLET_API = "https://seq2seq-couplet-model.rssbrain.com/v0.2/couplet/"
 ALIPAY_VOICE_API = "https://mm.cqu.cc/share/zhifubaodaozhang/?money={:.2f}"
-# DINGZHEN_API = "https://api.aya1.top/randomdj?r=0" # 接口早已停运
+# 接口早已停运
+# DINGZHEN_API = "https://api.aya1.top/randomdj?r=0"  # noqa: ERA001
 HITOKOTO_API = "https://v1.hitokoto.cn/?"
 HITOKOTO_LIKE_API = "https://hitokoto.cn/api/common/v1/like?sentence_uuid="
 HITOKOTO_TYPES = {
   "a": "动画", "b": "漫画", "c": "游戏", "d": "文学", "e": "原创", "f": "来自网络", "g": "其他",
-  "h": "影视", "i": "诗词", "j": "网易云", "k": "哲学", "l": "抖机灵"
+  "h": "影视", "i": "诗词", "j": "网易云", "k": "哲学", "l": "抖机灵",
 }
 
 
@@ -55,7 +57,7 @@ couplet_parser = ArgumentParser(add_help=False, epilog="接口来自https://ai.b
 couplet_parser.add_argument("text", metavar="上联内容")
 couplet_parser.add_argument(
   "--score", "-s", metavar="分值", type=float, default=float("-inf"),
-  help="下联的最小得分（默认：-∞）"
+  help="下联的最小得分（默认：-∞）",
 )
 couplet = (
   command.CommandBuilder("fun_api.couplet", "对联")

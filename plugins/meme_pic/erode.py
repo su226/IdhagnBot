@@ -39,11 +39,11 @@ parser.add_argument("-y", type=range_float(0), default=0, metavar="半径", help
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 
 
@@ -56,7 +56,7 @@ erode = (
 )
 @erode.handle()
 async def handle_erode(
-  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()
+  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs(),
 ) -> None:
   async with AvatarGetter(bot, event) as g:
     target_task = g(args.target, DefaultType.TARGET, raw=True)
@@ -87,7 +87,7 @@ dilate = (
 )
 @dilate.handle()
 async def handle_dilate(
-  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()
+  bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs(),
 ) -> None:
   async with AvatarGetter(bot, event) as g:
     target_task = g(args.target, DefaultType.TARGET, raw=True)

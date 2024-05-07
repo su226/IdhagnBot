@@ -10,12 +10,13 @@ from util import command, imutil, misc
 from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
-# RemapTransform((450, 450), ((15, 11), (448, 0), (445, 452), (0, 461)))  # noqa
-OLD_SIZE = 450, 450
-NEW_SIZE = 448, 461
+# RemapTransform((450, 450), ((15, 11), (448, 0), (445, 452), (0, 461)))  # noqa: ERA001
+OLD_SIZE = (450, 450)
+NEW_SIZE = (448, 461)
 TRANSFORM = (
   1.0462493084523434, 0.03487497694841008, -16.077364373214344, 0.026154227716037853,
-  1.029525509185637, -11.717094016783891, 1.3106774868236476e-05, 6.215553491345412e-05)
+  1.029525509185637, -11.717094016783891, 1.3106774868236476e-05, 6.215553491345412e-05,
+)
 
 
 parser = ArgumentParser(add_help=False)

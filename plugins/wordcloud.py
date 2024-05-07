@@ -1,12 +1,12 @@
 import json
 import re
 from datetime import timedelta
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, List, Optional, Sequence, cast
 
 import emoji
 import nonebot
 import wordcloud
-from jieba.analyse import TFIDF
+from jieba.analyse.tfidf import TFIDF
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.matcher import Matcher
 from nonebot.params import CommandArg
@@ -37,11 +37,11 @@ CONFIG = configs.SharedConfig("wordcloud", Config)
 # https://github.com/he0119/nonebot-plugin-wordcloud/blob/main/nonebot_plugin_wordcloud/data_source.py#L18
 # 这个又是从 https://stackoverflow.com/a/17773849/9212748 搬的
 # 二道贩子（雾）
-URL_RE = re.compile(r"(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})")  # noqa
+URL_RE = re.compile(r"(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})")  # noqa: E501
 
 driver = nonebot.get_driver()
 
-def format_wordcloud(messages: List[str]) -> MessageSegment:
+def format_wordcloud(messages: Sequence[str]) -> MessageSegment:
   config = CONFIG()
   texts: List[str] = []
   for i in messages:
@@ -60,15 +60,15 @@ def format_wordcloud(messages: List[str]) -> MessageSegment:
   tfidf = TFIDF(config.idf_path)
   if config.stopwords_path:
     tfidf.set_stop_words(config.stopwords_path)
-  tags = tfidf.extract_tags("\n".join(texts), 0, True)
+  tags = cast(Dict[str, float], tfidf.extract_tags("\n".join(texts), 0, True))
   wc = wordcloud.WordCloud(
     config.font,
     config.width,
     config.height,
     background_color=cast(str, config.bg),
-    colormap=config.fg
+    colormap=config.fg,
   )
-  im = wc.generate_from_frequencies({word: weight for word, weight in tags}).to_image()
+  im = wc.generate_from_frequencies(tags).to_image()
   return imutil.to_segment(im)
 
 
@@ -90,7 +90,7 @@ personal_wordcloud = (
 @group_wordcloud.handle()
 @personal_wordcloud.handle()
 async def handle_wordcloud(
-  bot: Bot, event: MessageEvent, state: T_State, arg: Message = CommandArg()
+  bot: Bot, event: MessageEvent, state: T_State, arg: Message = CommandArg(),
 ) -> None:
   start_datetime, end_datetime = await parse_date_range_args(arg)
   config = CONFIG()
@@ -107,20 +107,20 @@ async def handle_wordcloud(
     result = await session.execute(
       query.where(
         record.Received.time >= start_datetime,
-        record.Received.time < end_datetime
+        record.Received.time < end_datetime,
       )
       .order_by(func.random())
-      .limit(None if config.limit == 0 else config.limit)
+      .limit(None if config.limit == 0 else config.limit),
     )
-    messages: List[str] = result.scalars().all()
+    messages = result.scalars().all()
 
   end_datetime -= timedelta(seconds=1)  # 显示 23:59:59 而不是 00:00:00，以防误会
   try:
     seg = await misc.to_thread(format_wordcloud, messages)
   except ValueError:
-    await Matcher.finish(
+    await Matcher.finish((
       f"{start_datetime:%Y-%m-%d %H:%M:%S} 到 {end_datetime:%Y-%m-%d %H:%M:%S} 内没有数据"
-    )
+    ))
   title = f"{start_datetime:%Y-%m-%d %H:%M:%S} 到 {end_datetime:%Y-%m-%d %H:%M:%S} 的词云"
   if is_user:
     name = await context.get_card_or_name(bot, group_id, user_id)

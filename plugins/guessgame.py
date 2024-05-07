@@ -190,14 +190,14 @@ COLORS = [
 guessgame = (
   command.CommandBuilder("guessgame", "猜颜色")
   .brief("猜颜色小游戏")
-  .usage(
+  .usage((
     "/猜颜色 - 开始标准游戏\n"
     "/猜颜色 困难 - 开始困难游戏\n"
     "/猜颜色 放弃 - 放弃游戏\n"
     "标准为6种颜色4个珠子10次机会，困难为8种颜色5个珠子12次机会。\n"
     "一个群里只能同时有一局猜颜色小游戏，所有人都可以参与。\n"
     "参考自 Simon Tatham's Portable Puzzle Collection。"
-  )
+  ))
   .build()
 )
 @guessgame.handle()

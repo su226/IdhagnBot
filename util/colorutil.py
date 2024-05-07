@@ -925,5 +925,5 @@ def blend(fg: RGB, bg: RGB, r: float, gamma: float = 2) -> RGB:
   return (
     int(((fg[0] / 255) ** gamma * r + (bg[0] / 255) ** gamma * r2) ** igamma * 255),
     int(((fg[1] / 255) ** gamma * r + (bg[1] / 255) ** gamma * r2) ** igamma * 255),
-    int(((fg[2] / 255) ** gamma * r + (bg[2] / 255) ** gamma * r2) ** igamma * 255)
+    int(((fg[2] / 255) ** gamma * r + (bg[2] / 255) ** gamma * r2) ** igamma * 255),
   )

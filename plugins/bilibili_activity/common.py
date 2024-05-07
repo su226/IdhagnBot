@@ -34,9 +34,8 @@ class Config(BaseModel):
   interval_: Optional[int] = Field(None, alias="interval")
   concurrency_: Optional[int] = Field(None, alias="concurrency")
   users: List[User] = Field(default_factory=list)
-  # Pydantic 不识别 Pattern[str]
-  ignore_regexs: List[Pattern] = Field(default_factory=list)  # type: ignore
-  ignore_forward_regexs: List[Pattern] = Field(default_factory=list)  # type: ignore
+  ignore_regexs: List[Pattern[str]] = Field(default_factory=list)
+  ignore_forward_regexs: List[Pattern[str]] = Field(default_factory=list)
 
   @property
   def grpc(self) -> bool:

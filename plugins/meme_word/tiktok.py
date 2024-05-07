@@ -82,13 +82,13 @@ async def handle_tiktok(args: Message = CommandArg()):
         shift = random.randint(-SHIFT, SHIFT)
         im.paste(
           text_im.crop((0, last_y, text_im.width, y)),
-          (PADDING + shift, PADDING + last_y)
+          (PADDING + shift, PADDING + last_y),
         )
         last_y = y
       shift = random.randint(-SHIFT, SHIFT)
       im.paste(
         text_im.crop((0, last_y, text_im.width, text_im.height)),
-        (PADDING + shift, PADDING + last_y)
+        (PADDING + shift, PADDING + last_y),
       )
       frames.append(im)
 

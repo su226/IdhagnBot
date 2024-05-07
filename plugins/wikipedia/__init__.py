@@ -66,7 +66,7 @@ async def autostop(site: TCPSite) -> AsyncIterator[None]:
 
 
 async def screenshot(
-  path: str, format: Literal["png", "jpeg"] = "png", quality: Optional[int] = None
+  path: str, format: Literal["png", "jpeg"] = "png", quality: Optional[int] = None,
 ) -> bytes:
   config = CONFIG()
   server = Server(handler)
@@ -79,7 +79,7 @@ async def screenshot(
   async with autostop(site), async_playwright() as p:
     browser = await misc.launch_playwright(p)
     page = await browser.new_page(
-      viewport={"width": config.width, "height": 1}, device_scale_factor=config.scale
+      viewport={"width": config.width, "height": 1}, device_scale_factor=config.scale,
     )
     await page.goto(f"http://localhost:{port}/{path}")
     with open(COMMON_SCRIPT_PATH) as f:

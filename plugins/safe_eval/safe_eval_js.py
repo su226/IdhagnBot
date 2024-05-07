@@ -17,7 +17,7 @@ plugin_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 async def safe_eval(
-  code: str, timeout: float, nproc: int, memory: int, output: int
+  code: str, timeout: float, nproc: int, memory: int, output: int,
 ) -> Tuple[bool, int, bytes, bytes]:
   # TODO: 得有个办法自动获取这个
   proc = await asyncio.subprocess.create_subprocess_exec(

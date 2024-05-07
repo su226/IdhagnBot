@@ -29,12 +29,12 @@ async def handle_higheq(args: Message = CommandArg()):
     left, right = argv
     left_im = textutil.render(
       left, "sans", 100,
-      color=(255, 255, 255), stroke=5, stroke_color=(0, 0, 0), box=843, align="m"
+      color=(255, 255, 255), stroke=5, stroke_color=(0, 0, 0), box=843, align="m",
     )
     left_im = imutil.contain_down(left_im, 562, 600)
     right_im = textutil.render(
       right, "sans", 100,
-      color=(255, 255, 255), stroke=5, stroke_color=(0, 0, 0), box=843, align="m"
+      color=(255, 255, 255), stroke=5, stroke_color=(0, 0, 0), box=843, align="m",
     )
     right_im = imutil.contain_down(right_im, 562, 600)
     im = Image.open(DIR / "template.jpg")

@@ -10,7 +10,7 @@
 from typing import Any, Awaitable, Callable, List, Optional, Tuple, Type, TypeVar
 
 from util.api_common.bilibili_activity import (
-  Extra, ExtraGoods, ExtraReserve, ExtraVideo, ExtraVote
+  Extra, ExtraGoods, ExtraReserve, ExtraVideo, ExtraVote,
 )
 from util.images.card import Card, CardMargin, CardTab
 

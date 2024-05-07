@@ -12,7 +12,7 @@ from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
 BOXES = [
-  (14, 20, 98, 98), (12, 33, 101, 85), (8, 40, 110, 76), (10, 33, 102, 84), (12, 20, 98, 98)
+  (14, 20, 98, 98), (12, 33, 101, 85), (8, 40, 110, 76), (10, 33, 102, 84), (12, 20, 98, 98),
 ]
 
 
@@ -24,11 +24,11 @@ parser.add_argument("--circle", "-c", action="store_true", help="让头像变圆
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.petpet", "petpet", "pet", "rua", "摸头")

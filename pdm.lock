@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "cryptography", "dev", "grpc", "jieba", "libzim", "lint", "mctools", "opencv", "playwright", "psutil", "sql", "wordcloud"]
+groups = ["default", "cryptography", "dev", "grpc", "jieba", "libzim", "lint", "mctools", "opencv", "playwright", "psutil", "sql", "wordcloud", "stubs"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:620e5f35e587cc8a7fc095e635866c11b33a95f513fe015852f3d665fb695c17"
+content_hash = "sha256:a4bcab18f0a4e6c5ac170b6a5cdf32b678a07b7ece3e7134b06540a0f3a24f46"
 
 [[package]]
 name = "aiodns"
@@ -1794,6 +1794,35 @@ files = [
 ]
 
 [[package]]
+name = "types-emoji"
+version = "2.1.0.3"
+summary = "Typing stubs for emoji"
+files = [
+    {file = "types-emoji-2.1.0.3.tar.gz", hash = "sha256:98ddb0ff5f48622550c431206e4dbfcbde8ca8bc03fcfbb9962a778d2049aa13"},
+    {file = "types_emoji-2.1.0.3-py3-none-any.whl", hash = "sha256:32fe5cf02c4834bb59579380f600a89d1471571fb56e36465cbd0c7d95f669ca"},
+]
+
+[[package]]
+name = "types-jieba"
+version = "0.0.7"
+requires_python = ">=3"
+summary = "jieba 类型库"
+files = [
+    {file = "types-jieba-0.0.7.tar.gz", hash = "sha256:1c615917cf201cb7f196dc0ba1b613185b5021935f9e9f3199f3a1561a874451"},
+    {file = "types_jieba-0.0.7-py3-none-any.whl", hash = "sha256:4aa9e4d7b2587366ac9a6e116802c87bbc84f464c2c4ea6cd73f1689b357f9b0"},
+]
+
+[[package]]
+name = "types-pillow"
+version = "10.2.0.20240423"
+requires_python = ">=3.8"
+summary = "Typing stubs for Pillow"
+files = [
+    {file = "types-Pillow-10.2.0.20240423.tar.gz", hash = "sha256:696e68b9b6a58548fc307a8669830469237c5b11809ddf978ac77fafa79251cd"},
+    {file = "types_Pillow-10.2.0.20240423-py3-none-any.whl", hash = "sha256:bd12923093b96c91d523efcdb66967a307f1a843bcfaf2d5a529146c10a9ced3"},
+]
+
+[[package]]
 name = "types-protobuf"
 version = "5.26.0.20240422"
 requires_python = ">=3.8"
@@ -1801,6 +1830,26 @@ summary = "Typing stubs for protobuf"
 files = [
     {file = "types-protobuf-5.26.0.20240422.tar.gz", hash = "sha256:e6074178109f97efe9f0b20a035ba61d7c3b03e867eb47d254d2b2ab6a805e36"},
     {file = "types_protobuf-5.26.0.20240422-py3-none-any.whl", hash = "sha256:e4dc2554d342501d5aebc3c71203868b51118340e105fc190e3a64ca1be43831"},
+]
+
+[[package]]
+name = "types-psutil"
+version = "5.9.5.20240423"
+requires_python = ">=3.8"
+summary = "Typing stubs for psutil"
+files = [
+    {file = "types-psutil-5.9.5.20240423.tar.gz", hash = "sha256:1b976cf86308316c5ac22cec688015b04273c84f8e691c3dfb0c12318f32a6f3"},
+    {file = "types_psutil-5.9.5.20240423-py3-none-any.whl", hash = "sha256:93a5f61c05d36804ffaf008e4f4f56661e5ab2beb432645ce5789248f64b5d6f"},
+]
+
+[[package]]
+name = "types-pyyaml"
+version = "6.0.12.20240311"
+requires_python = ">=3.8"
+summary = "Typing stubs for PyYAML"
+files = [
+    {file = "types-PyYAML-6.0.12.20240311.tar.gz", hash = "sha256:a9e0f0f88dc835739b0c1ca51ee90d04ca2a897a71af79de9aec5f38cb0a5342"},
+    {file = "types_PyYAML-6.0.12.20240311-py3-none-any.whl", hash = "sha256:b845b06a1c7e54b8e5b4c683043de0d9caf205e7434b3edc678ff2411979b8f6"},
 ]
 
 [[package]]

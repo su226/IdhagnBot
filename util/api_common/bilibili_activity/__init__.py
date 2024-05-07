@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import (
   TYPE_CHECKING, Any, Dict, Generic, Iterable, List, Literal, Optional, Protocol, Sequence, Tuple,
-  Type, TypeVar, Union, cast, overload
+  Type, TypeVar, Union, cast, overload,
 )
 from urllib.parse import urlparse
 
@@ -13,7 +13,7 @@ try:
 
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     AddButtonType, AdditionalType, Description, DescType, DisableState, DynamicItem, DynamicType,
-    DynDetailReq, DynDetailsReq, DynModuleType, DynSpaceReq, ModuleAdditional, VideoSubType
+    DynDetailReq, DynDetailsReq, DynModuleType, DynSpaceReq, ModuleAdditional, VideoSubType,
   )
   from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicStub
 except ImportError:
@@ -23,14 +23,14 @@ else:
 
 
 if TYPE_CHECKING:
-  import grpc.aio  # noqa
+  import grpc.aio
 
-  from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (  # noqa
+  from .protos.bilibili.app.dynamic.v2.dynamic_pb2 import (
     AddButtonType, AdditionalType, DescType, DisableState, DynamicType, DynDetailReq,
-    DynDetailsReq, DynModuleType, DynSpaceReq, Module, VideoSubType
+    DynDetailsReq, DynModuleType, DynSpaceReq, Module, VideoSubType,
   )
-  from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import (  # noqa
-    DynamicAsyncStub, DynamicStub
+  from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import (
+    DynamicAsyncStub, DynamicStub,
   )
 
 Modules = Dict["DynModuleType.V", "Module"]
@@ -47,9 +47,9 @@ DETAIL_API_OLD = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dyn
   "?dynamic_id={id}"
 GRPC_API = "grpc.biliapi.net"
 GRPC_METADATA = (
-  ('x-bili-device-bin', b'\x10\x80\xe7\x8f\x03\x1a%XY5ADF45C6BF3BD3FAE8126774BD8E4E7DFC5"\x07android*\x07android2\x05phone:\x04bili'),  # noqa
+  ('x-bili-device-bin', b'\x10\x80\xe7\x8f\x03\x1a%XY5ADF45C6BF3BD3FAE8126774BD8E4E7DFC5"\x07android*\x07android2\x05phone:\x04bili'),  # noqa: E501
   ('x-bili-local-bin', b''),
-  ('x-bili-metadata-bin', b'\x12\x07android\x1a\x05phone \x80\xe7\x8f\x03*\x04bili2%XY5ADF45C6BF3BD3FAE8126774BD8E4E7DFC5:\x07android'),  # noqa
+  ('x-bili-metadata-bin', b'\x12\x07android\x1a\x05phone \x80\xe7\x8f\x03*\x04bili2%XY5ADF45C6BF3BD3FAE8126774BD8E4E7DFC5:\x07android'),  # noqa: E501
   ('x-bili-network-bin', b'\x08\x01'),
 )
 
@@ -90,7 +90,7 @@ async def grpc_get(id: Union[str, List[str]]) -> Union["DynamicItem", List["Dyna
 async def json_get(id: str) -> Dict[Any, Any]:
   http = misc.http()
   headers = {
-    "Referer": f"https://t.bilibili.com/{id}"
+    "Referer": f"https://t.bilibili.com/{id}",
   }
   async with http.get(DETAIL_API.format(id=id), headers=headers) as response:
     data = await response.json()
@@ -201,7 +201,7 @@ class ContentImage(ContentParser["ContentImage"]):
         image["width"],
         image["height"],
         image["size"],
-      ) for image in module["major"]["draw"]["items"]]
+      ) for image in module["major"]["draw"]["items"]],
     )
 
 
@@ -244,7 +244,7 @@ class ContentVideo(ContentParser["ContentVideo"]):
       video.dimension.width,
       video.dimension.height,
       misc.removesuffix(video.cover_left_text_2, "观看"),
-      misc.removesuffix(video.cover_left_text_3, "弹幕")
+      misc.removesuffix(video.cover_left_text_3, "弹幕"),
     )
 
   @staticmethod
@@ -306,7 +306,7 @@ class ContentArticle(ContentParser["ContentArticle"]):
       article.title,
       article.desc,
       list(article.covers),
-      article.label
+      article.label,
     )
 
   @staticmethod
@@ -631,7 +631,7 @@ class ContentForward(ContentParser["ContentForward"]):
   def grpc_parse(item: "DynamicItem", modules: Modules) -> "ContentForward":
     if DynModuleType.module_dynamic in modules:
       original = Activity.grpc_parse(
-        modules[DynModuleType.module_dynamic].module_dynamic.dyn_forward.item
+        modules[DynModuleType.module_dynamic].module_dynamic.dyn_forward.item,
       )
       error_text = ""
     else:
@@ -859,7 +859,7 @@ class ExtraGoods(ExtraParser["ExtraGoods"]):
 
   @staticmethod
   def json_parse(item: Dict[Any, Any]) -> "ExtraGoods":
-    goods: List[Goods] = [
+    goods = [
       Goods(int(i["id"]), i["name"], i["price"], i["url"], i["cover"])
       for i in item["goods"]["items"]
     ]
@@ -951,7 +951,7 @@ class Activity(Generic[TContent, TExtra]):
       additional_module = modules[DynModuleType.module_additional].module_additional
       extra = Extra(
         misc.removeprefix(AdditionalType.Name(additional_module.type).upper(), "ADDITIONAL_TYPE_"),
-        GRPC_EXTRA_TYPES.get(additional_module.type, ExtraUnknown).grpc_parse(additional_module)
+        GRPC_EXTRA_TYPES.get(additional_module.type, ExtraUnknown).grpc_parse(additional_module),
       )
     topic = None
     if DynModuleType.module_topic in modules:

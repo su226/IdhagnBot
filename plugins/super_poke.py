@@ -39,7 +39,7 @@ async def handle_super_poke(bot: Bot, event: Event, arg: Message = CommandArg())
       random.shuffle(cur_uids)
     coros.append(bot.send_group_msg(
       group_id=ctx,
-      message=f"[CQ:poke,qq={cur_uids.pop()}]"
+      message=f"[CQ:poke,qq={cur_uids.pop()}]",
     ))
   await asyncio.gather(*coros)
   await super_poke.finish("戳亿戳完成")

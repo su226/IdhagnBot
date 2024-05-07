@@ -34,7 +34,7 @@ USAGE_BASE = '''\
 USAGE_FAIL = "骰子数量必须是不超过 {} 的正整数\n超过 {} 的骰子将会使用二项分布估算"
 SPECIAL_NAMES = {
   1: "骰(dan)子(zhu)",
-  2: "骰(ying)子(bi)"
+  2: "骰(ying)子(bi)",
 }
 DICE_RE = re.compile(r"^(\d+)?(?:d(\d+))?$")
 
@@ -101,9 +101,9 @@ async def handle_dice(args: Message = CommandArg()):
   elif faces > config.max_faces:
     await dice.finish(f"最多只能扔出 {config.max_faces} 面的骰子")
   if count == 1:
-    await dice.finish(
+    await dice.finish((
       f"你扔出了一个 {faces} 面{SPECIAL_NAMES.get(faces, '骰子')}，{random.randint(1, faces)} 朝上"
-    )
+    ))
   elif count > config.limit:
     await dice.finish(format_dice(dice_binomial, count, faces))
   else:

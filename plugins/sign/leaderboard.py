@@ -26,7 +26,7 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
   async def fetch_data(uid: int) -> Tuple[Image.Image, str, str]:
     avatar, name = await asyncio.gather(
       imutil.get_avatar(uid),
-      context.get_card_or_name(bot, event, uid)
+      context.get_card_or_name(bot, event, uid),
     )
     user_data = group_data.get_user(uid)
     time = user_data.time.strftime("%H:%M:%S")
@@ -35,7 +35,7 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent) -> None:
   group_data = STATE(context.get_event_context(event))
   group_data.update()
   data: List[Tuple[Image.Image, str, str]] = await asyncio.gather(
-    *(fetch_data(uid) for uid in group_data.rank)
+    *(fetch_data(uid) for uid in group_data.rank),
   )
 
   def make() -> MessageSegment:

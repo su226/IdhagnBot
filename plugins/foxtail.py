@@ -116,7 +116,7 @@ async def ensure_login() -> SimpleCookie:
 
 
 async def send_pic(
-  bot: Bot, event: Event, data: Dict[str, Any], cookies: SimpleCookie
+  bot: Bot, event: Event, data: Dict[str, Any], cookies: SimpleCookie,
 ) -> None:
   status = int(data.get("examine", 1))  # 随机接口没有审核参数
   if status == 1:
@@ -222,7 +222,7 @@ class Source:
     if "picture" not in data:
       if type:
         await bot.send(
-          event, f"{HEADER}\n这只兽似乎不存在，或者没有指定类型的图片。"
+          event, f"{HEADER}\n这只兽似乎不存在，或者没有指定类型的图片。",
         )
       else:
         await bot.send(event, f"{HEADER}\n这只兽似乎不存在。")
@@ -259,7 +259,7 @@ async def keyword_rule(message: Message = EventMessage()) -> bool:
 keyword = nonebot.on_message(
   keyword_rule,
   context.build_permission(Source.node, permission.Level.MEMBER),
-  block=True
+  block=True,
 )
 @keyword.handle()
 async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()):
@@ -394,7 +394,7 @@ async def got_confirm(event: MessageEvent, state: T_State, confirm: str = ArgPla
   })
   form.add_field("file", image_data)
   async with http.post(
-    "https://cloud.foxtail.cn/api/function/upload", data=form, headers=await ensure_login()
+    "https://cloud.foxtail.cn/api/function/upload", data=form, headers=await ensure_login(),
   ) as response:
     result = await response.json()
   if result["code"] != "20000":

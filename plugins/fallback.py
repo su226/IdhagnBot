@@ -5,7 +5,7 @@ from typing import Any, Dict, Set, Tuple
 import nonebot
 from aiohttp.client_exceptions import ClientError
 from nonebot.adapters.onebot.v11 import (
-  ActionFailed, Bot, Event, GroupRecallNoticeEvent, Message, MessageEvent
+  ActionFailed, Bot, Event, GroupRecallNoticeEvent, Message, MessageEvent,
 )
 from nonebot.message import event_postprocessor, run_postprocessor, run_preprocessor
 from nonebot.params import CommandArg
@@ -115,7 +115,7 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
       )
       fallback += "\n群管理员可以发送 /suppress true 暂时禁用本群错误消息。"
     content = textutil.render(
-      markup, "span", 32, color=(255, 255, 255), box=max(640, header.width), markup=True
+      markup, "span", 32, color=(255, 255, 255), box=max(640, header.width), markup=True,
     )
 
     size = (max(header.width, content.width) + 64, header.height + content.height + 80)
@@ -178,7 +178,7 @@ async def post_event(bot: Bot, event: Event, bot_state: T_State) -> None:
     and event.user_id not in state.show_is_bot_disabled
   ):
     await bot.send(
-      event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）\n发送 /禁用提示 为你禁用本提示"
+      event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）\n发送 /禁用提示 为你禁用本提示",
     )
 
 

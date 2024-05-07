@@ -43,7 +43,7 @@ class BilibiliMusic(Music):
 
   @staticmethod
   async def from_id(id: str) -> MessageSegment:
-    if id.startswith("au") or id.startswith("AU") or id.startswith("Au"):
+    if id.startswith(("au", "AU", "Au")):
       id_int = int(id[2:])
     else:
       id_int = int(id)
@@ -75,7 +75,7 @@ class BilibiliMusic(Music):
     http = misc.http()
     keyword = encodeuri(keyword)
     async with http.get(
-      SEARCH_API.format(keyword=keyword, page=1, page_size=page_size)
+      SEARCH_API.format(keyword=keyword, page=1, page_size=page_size),
     ) as response:
       data = await response.json()
     pages = data["data"]["num_pages"]
@@ -98,7 +98,7 @@ class BilibiliMusic(Music):
         if page > pages:
           break
         async with http.get(
-          SEARCH_API.format(keyword=keyword, page=page, page_size=page_size)
+          SEARCH_API.format(keyword=keyword, page=page, page_size=page_size),
         ) as response:
           data = await response.json()
 

@@ -1,6 +1,5 @@
 from argparse import Namespace
 from pathlib import Path
-from typing import Any, cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -30,7 +29,7 @@ matcher = (
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
     target_task = g(args.target, DefaultType.TARGET, "目标")
-    source_task = cast(Any, None)
+    source_task = misc.any_v
     if args.source not in ("huaji", "滑稽", "panda", "熊猫", "熊猫头"):
       source_task = g(args.source, DefaultType.SOURCE, "源")
 

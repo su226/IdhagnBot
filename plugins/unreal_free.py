@@ -18,11 +18,11 @@ async def handle_unrealfree():
   for asset in assets:
     wrap = "\n" if message else ""
     message.extend([
-      MessageSegment.text(
+      MessageSegment.text((
         f"{wrap}{asset.category}资产 {asset.title} 原价 {asset.price} 现在免费，"
         f"共 {asset.ratingCount} 条评价，平均 {asset.ratingScore}⭐\n"
         f"{api.URL_BASE}{asset.slug}\n"
-      ),
-      MessageSegment.image(asset.image)
+      )),
+      MessageSegment.image(asset.image),
     ])
   await unreal_free.finish(Message(message))

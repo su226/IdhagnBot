@@ -19,7 +19,7 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
   "可使用@、QQ号、昵称、群名片或图片链接"
 ))
 parser.add_argument(
-  "--name", "-n", help="自定义名字，对于图片链接必须指定，对于QQ用户默认使用昵称"
+  "--name", "-n", help="自定义名字，对于图片链接必须指定，对于QQ用户默认使用昵称",
 )
 matcher = (
   command.CommandBuilder("meme_pic.police", "警察", "police")
@@ -47,7 +47,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     small = Image.new("RGBA", (120, 120))
     small.paste(pre_small, (1, 1), pre_small)
     small = small.transform(
-      (200, 200), Image.Transform.PERSPECTIVE, AVATAR_TRANSFORM, imutil.resample()
+      (200, 200), Image.Transform.PERSPECTIVE, AVATAR_TRANSFORM, imutil.resample(),
     )
     im = Image.new("RGB", (600, 600), (255, 255, 255))
     im.paste(large, (84, 114), large)
@@ -60,7 +60,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     else:
       text_im = ImageOps.pad(text_im, (120, 24), imutil.scale_resample())
     text_im = text_im.transform(
-      (123, 24), Image.Transform.AFFINE, NAME_TRANSFORM, imutil.resample()
+      (123, 24), Image.Transform.AFFINE, NAME_TRANSFORM, imutil.resample(),
     )
     im.paste(text_im, (90, 534), text_im)
     return imutil.to_segment(im)

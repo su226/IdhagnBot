@@ -98,7 +98,7 @@ def score(colors_to_population: Mapping[int, int]) -> List[int]:
   # list is the most suitable, and the last is the least suitable.
   colorsByScoreDescending = list(dedupedColorsToScore.items())
   colorsByScoreDescending.sort(reverse=True, key=lambda x: x[1])
-  answer = list(map(lambda x: x[0], colorsByScoreDescending))
+  answer = [x[0] for x in colorsByScoreDescending]
   # Ensure that at least one color is returned.
   if len(answer) == 0:
     answer.append(0xff4285f4)  # Google Blue

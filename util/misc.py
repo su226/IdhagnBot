@@ -7,9 +7,10 @@ import os
 import random
 import sys
 from datetime import timedelta
+from enum import Enum
 from typing import (
   TYPE_CHECKING, Any, Callable, Coroutine, Dict, Generator, Iterable, List, Literal, Optional,
-  Sequence, Set, Tuple, TypeVar, Union, overload
+  Sequence, Set, Tuple, TypeVar, Union, overload,
 )
 
 import aiohttp
@@ -31,10 +32,10 @@ if TYPE_CHECKING:
 __all__ = [
   "ADAPTER_NAME", "BROWSER_UA", "AggregateError", "AnyMessage", "CONFIG", "CairoAntialias",
   "CairoHintMetrics", "CairoHintStyle", "CairoSubpixel", "Config", "EnableSet", "Font",
-  "NotCommand", "PromptTimeout", "Quantize", "Resample", "ScaleResample", "binomial_sample",
-  "chunked", "command_start", "format_time", "forward_node", "http", "is_command", "is_superuser",
-  "launch_playwright", "local", "prompt", "range_float", "range_int", "send_forward_msg",
-  "superusers", "weighted_choice"
+  "NotCommand", "PromptTimeout", "Quantize", "Resample", "ScaleResample", "any_v",
+  "binomial_sample", "chunked", "command_start", "format_time", "forward_node", "http",
+  "is_command", "is_superuser", "launch_playwright", "local", "prompt", "range_float", "range_int",
+  "send_forward_msg", "superusers", "weighted_choice",
 ]
 
 
@@ -48,6 +49,7 @@ CairoAntialias = Literal["default", "none", "fast", "good", "best", "gray", "sub
 CairoSubpixel = Literal["default", "rgb", "bgr", "vrgb", "vbgr"]
 CairoHintMetrics = Literal["default", False, True]
 CairoHintStyle = Literal["default", "none", "slight", "medium", "full"]
+any_v: Any = None
 
 
 class AggregateError(Exception, Sequence[str]):
@@ -221,7 +223,7 @@ def forward_node(id: int, name: str = "", content: AnyMessage = "") -> MessageSe
 
 
 async def send_forward_msg(
-  bot: Bot, event: Event, *nodes: Union[MessageSegment, Dict[str, Any]]
+  bot: Bot, event: Event, *nodes: Union[MessageSegment, Dict[str, Any]],
 ) -> Any:
   if gid := getattr(event, "group_id", None):
     return await bot.call_api("send_group_forward_msg", group_id=gid, messages=nodes)
@@ -297,7 +299,7 @@ def range_int(min: Optional[int] = None, max: Optional[int] = None) -> Callable[
 
 
 def range_float(
-  min: Optional[float] = None, max: Optional[float] = None, inf: bool = False, nan: bool = False
+  min: Optional[float] = None, max: Optional[float] = None, inf: bool = False, nan: bool = False,
 ) -> Callable[[str], float]:
   info = ""
   if min is not None and max is not None:
@@ -419,18 +421,20 @@ def superusers() -> Generator[int, None, None]:
         pass
 
 
+class _Sentinel(Enum):
+  SENTINEL = "SENTINEL"
+
+
 # FIRST_COMPLETED -> Promise.race
 # first_result -> Promise.any
 async def first_result(tasks: Iterable["asyncio.Future[T]"]) -> T:
   while tasks:
     done, tasks = await asyncio.wait(tasks, return_when=asyncio.FIRST_COMPLETED)
-    has_result = False
-    result: Any = None
+    result: Union[T, _Sentinel] = _Sentinel.SENTINEL
     for i in done:
       if i.exception() is None:
-        has_result = True
         result = i.result()
-    if has_result:
+    if result is not _Sentinel.SENTINEL:
       for i in tasks:
         i.cancel()
       return result

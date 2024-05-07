@@ -32,7 +32,7 @@ class NeteaseMusic(Music):
       "audio": audio,
       "title": song["name"],
       "content": song["artists"][0]["name"],
-      "image": song["album"]["picUrl"]
+      "image": song["album"]["picUrl"],
     })
 
   @staticmethod
@@ -51,7 +51,7 @@ class NeteaseMusic(Music):
       "audio": "" if song["fee"] == 1 else f"http://music.163.com/song/media/outer/url?id={id}",
       "title": song["name"],
       "content": song["artists"][0]["name"],
-      "image": song["album"]["picUrl"]
+      "image": song["album"]["picUrl"],
     })
 
   @staticmethod
@@ -59,7 +59,7 @@ class NeteaseMusic(Music):
     http = misc.http()
     keyword = encodeuri(keyword)
     async with http.get(
-      SEARCH_API.format(keyword=keyword, offset=0, limit=page_size)
+      SEARCH_API.format(keyword=keyword, offset=0, limit=page_size),
     ) as response:
       data = await response.json(content_type=None)
     count = data["result"]["songCount"]
@@ -81,7 +81,7 @@ class NeteaseMusic(Music):
         if page >= pages:
           break
         async with http.get(
-          SEARCH_API.format(keyword=keyword, offset=page * page_size, limit=page_size)
+          SEARCH_API.format(keyword=keyword, offset=page * page_size, limit=page_size),
         ) as response:
           data = await response.json(content_type=None)
 

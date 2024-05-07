@@ -61,7 +61,7 @@ async def on_calling_api(bot: BaseBot, api: str, params: Dict[str, Any]) -> None
 
 @BaseBot.on_called_api
 async def on_called_api(
-  bot: BaseBot, e: Optional[Exception], api: str, params: Dict[str, Any], result: Any
+  bot: BaseBot, e: Optional[Exception], api: str, params: Dict[str, Any], result: Any,
 ) -> None:
   if not message_sent_hook or not isinstance(bot, Bot) or e is not None:
     return

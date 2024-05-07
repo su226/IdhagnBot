@@ -68,7 +68,7 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 ))
 parser.add_argument(
   "--yuv-loss", "-y", choices=["none", "green", "purple"], default="green",
-  help="YUV精度损失，可用: none (无)、green (发绿)、purple (发紫)，默认: green"
+  help="YUV精度损失，可用: none (无)、green (发绿)、purple (发紫)，默认: green",
 )
 parser.add_argument("--repeat", "-r", type=range_int(1, 20), default=12, metavar="次数", help=(
   "做旧次数，为 [1, 20] 之间的整数，默认: 12"
@@ -94,16 +94,16 @@ parser.add_argument("--offset", "-o", type=range_float(0, 100), default=0.5, met
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式（如果传入动图）"
+  help="使用WebP而非GIF格式（如果传入动图）",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式（如果传入动图）"
+  help="使用APNG而非GIF格式（如果传入动图）",
 )
 parser.epilog = "特别感谢: https://magiconch.com/patina/"
 matcher = (
   command.CommandBuilder(
-    "meme_pic.patina", "电子包浆", "赛博包浆", "电子做旧", "赛博做旧", "包浆", "做旧"
+    "meme_pic.patina", "电子包浆", "赛博包浆", "电子做旧", "赛博做旧", "包浆", "做旧",
   )
   .category("meme_pic")
   .brief("[动]")

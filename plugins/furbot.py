@@ -117,7 +117,7 @@ async def keyword_rule(message: Message = EventMessage()) -> bool:
 keyword = nonebot.on_message(
   keyword_rule,
   context.build_permission(Source.node, permission.Level.MEMBER),
-  block=True
+  block=True,
 )
 @keyword.handle()
 async def handle_regex(bot: Bot, event: Event, message: Message = EventMessage()):

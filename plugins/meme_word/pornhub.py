@@ -39,22 +39,23 @@ def register(node: str, names: List[str], brief: str, theme: Theme):
       h = max(lh, rh)
       im = Image.new("RGB", (
         lw + rw + theme.margin_text + theme.margin_outer * 2 + theme.padding_h * 2,
-        h + theme.padding_v * 2 + theme.margin_outer * 2
+        h + theme.padding_v * 2 + theme.margin_outer * 2,
       ), theme.bg1)
       rounded_w = rw + theme.padding_h * 2
       rounded_h = h + theme.padding_v * 2
       rounded_im = Image.new("L", (rounded_w * 2, rounded_h * 2))
       ImageDraw.Draw(rounded_im).rounded_rectangle(
-        (0, 0, rounded_w * 2 - 1, rounded_h * 2 - 1), theme.radius, 255
+        (0, 0, rounded_w * 2 - 1, rounded_h * 2 - 1), theme.radius, 255,
       )
       rounded_im = rounded_im.resize((rounded_w, rounded_h), imutil.scale_resample())
       im.paste(
-        theme.bg2, (lw + theme.margin_outer + theme.margin_text, theme.margin_outer), rounded_im
+        theme.bg2, (lw + theme.margin_outer + theme.margin_text, theme.margin_outer), rounded_im,
       )
       text_y = theme.margin_outer + theme.padding_v
       im.paste(left_im, (theme.margin_outer, text_y), left_im)
       im.paste(
-        right_im, (theme.margin_outer + lw + theme.margin_text + theme.padding_h, text_y), right_im
+        right_im, (theme.margin_outer + lw + theme.margin_text + theme.padding_h, text_y),
+        right_im,
       )
       return imutil.to_segment(im)
     await matcher.finish(await misc.to_thread(make))
@@ -69,8 +70,8 @@ def register(node: str, names: List[str], brief: str, theme: Theme):
 
 
 register("meme_word.pornhub", ["p站", "ph"], "生成你懂得的logo", Theme(
-  32, 8, 8, 8, 8, (0, 0, 0), (255, 153, 0), (255, 255, 255), (0, 0, 0)
+  32, 8, 8, 8, 8, (0, 0, 0), (255, 153, 0), (255, 255, 255), (0, 0, 0),
 ))
 register("meme_word.youtube", ["油管", "yt", "youtube"], "生成油管logo", Theme(
-  32, 6, 9, 9, 21, (255, 255, 255), (205, 32, 31), (0, 0, 0), (255, 255, 255)
+  32, 6, 9, 9, 21, (255, 255, 255), (205, 32, 31), (0, 0, 0), (255, 255, 255),
 ))

@@ -21,17 +21,17 @@ GENDERS = {
 
 @overload
 def vertical_gradient(
-  mode: str, top: int, bottom: int, width: int, height: int
+  mode: str, top: int, bottom: int, width: int, height: int,
 ) -> Image.Image: ...
 
 @overload
 def vertical_gradient(
-  mode: str, top: Tuple[int, ...], bottom: Tuple[int, ...], width: int, height: int
+  mode: str, top: Tuple[int, ...], bottom: Tuple[int, ...], width: int, height: int,
 ) -> Image.Image: ...
 
 def vertical_gradient(
   mode: str, top: Union[int, Tuple[int, ...]], bottom: Union[int, Tuple[int, ...]], width: int,
-  height: int
+  height: int,
 ) -> Image.Image:
   gradient = Image.new(mode, (1, height))
   px = gradient.load()
@@ -76,7 +76,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   if (name is None or gender is None) and target_id is not None:
     try:
       info = await bot.get_group_member_info(
-        group_id=context.get_event_context(event), user_id=target_id
+        group_id=context.get_event_context(event), user_id=target_id,
       )
       name = name or info["card"] or info["nickname"]
       gender = gender or info["sex"]
@@ -99,22 +99,22 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     text_y = padding_y + target.height - gradient_h
 
     im = Image.new(
-      "RGB", (target.width + padding_x * 2, target.height + padding_y * 2), (255, 255, 255)
+      "RGB", (target.width + padding_x * 2, target.height + padding_y * 2), (255, 255, 255),
     )
     im.paste(target, (padding_x, padding_y), target)
     im.paste(
-      (0, 0, 0), (padding_x, text_y), vertical_gradient("L", 192, 128, target.width, gradient_h)
+      (0, 0, 0), (padding_x, text_y), vertical_gradient("L", 192, 128, target.width, gradient_h),
     )
 
     textutil.paste(im, (padding_x, padding_y // 2), f"让{name}告诉你吧", "sans", 35, anchor="lm")
     text_im = textutil.paste(im, (text_x, text_y + 5), name, "sans bold", 25, color=(255, 165, 0))
     im.paste((255, 165, 0), (text_x - 5, text_y + 45, text_x + text_im.width + 5, text_y + 47))
     textutil.paste(
-      im, (text_x, text_y + 50), f"{name}不知道哦", "sans bold", 25, color=(255, 255, 255)
+      im, (text_x, text_y + 50), f"{name}不知道哦", "sans bold", 25, color=(255, 255, 255),
     )
     textutil.paste(
       im, (padding_x, target.height + padding_y + padding_y // 2),
-      f"啊这，{GENDERS[gender]}说不知道", "sans", 35, anchor="lm"
+      f"啊这，{GENDERS[gender]}说不知道", "sans", 35, anchor="lm",
     )
 
     return imutil.to_segment(im)

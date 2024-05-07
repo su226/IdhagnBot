@@ -5,19 +5,20 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, cast
+from typing import Any, Dict, List, Optional, Tuple, TypeVar, cast
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
-  Event, FriendRecallNoticeEvent, GroupRecallNoticeEvent, Message, MessageEvent, MessageSegment
+  Event, FriendRecallNoticeEvent, GroupRecallNoticeEvent, Message, MessageEvent, MessageSegment,
 )
 from nonebot.message import event_preprocessor
 from pydantic.json import pydantic_encoder
 from sqlalchemy.engine import Connection, Inspector
+from sqlalchemy.engine.interfaces import ReflectedColumn
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import InstrumentedAttribute
 from sqlalchemy.sql.ddl import DDL
-from sqlalchemy.sql.elements import ColumnClause
-from sqlmodel import Field as SQLField, MetaData, SQLModel as BaseSQLModel, col, inspect, select
+from sqlmodel import Field as SQLField, MetaData, SQLModel as BaseSQLModel, inspect, select, col
 
 from util import hook
 
@@ -67,17 +68,24 @@ class CacheEntry:
 os.makedirs("states/messages", exist_ok=True)
 engine = create_async_engine("sqlite+aiosqlite:///states/messages/messages.db")
 driver = nonebot.get_driver()
+T = TypeVar("T")
 CURRENT_VERSION = 1
 
 
-def _get_columns(inspector: Inspector, table: str) -> Dict[str, Dict[str, Any]]:
-  return {column.pop("name"): column for column in inspector.get_columns(table)}
+def _get_columns(inspector: Inspector, table: str) -> Dict[str, ReflectedColumn]:
+  return {column["name"]: column for column in inspector.get_columns(table)}
 
 
-def _append_column(connection: Connection, column: ColumnClause[Any]) -> None:
+def _append_column(connection: Connection, column: InstrumentedAttribute[Any]) -> None:
   connection.execute(DDL("ALTER TABLE %(table)s ADD %(column)s %(type)s", {
-    "table": column.table, "column": column.key, "type": column.type
+    "table": column.table, "column": column.key, "type": column.type,
   }))
+
+
+def _col(col: T) -> InstrumentedAttribute[T]:
+  if isinstance(col, InstrumentedAttribute):
+    return col
+  raise TypeError
 
 
 def _upgrade_0to1(connection: Connection) -> None:
@@ -88,11 +96,11 @@ def _upgrade_0to1(connection: Connection) -> None:
     return
   if (received := cast(str, Received.__tablename__)) in tables:
     columns = _get_columns(inspector, received)
-    if (deleted_by := col(Received.deleted_by)).key not in columns:
+    if (deleted_by := _col(Received.deleted_by)).key not in columns:
       _append_column(connection, deleted_by)
   if (sent := cast(str, Sent.__tablename__)) in tables:
     columns = _get_columns(inspector, sent)
-    if (deleted_by := col(Sent.deleted_by)).key not in columns:
+    if (deleted_by := _col(Sent.deleted_by)).key not in columns:
       _append_column(connection, deleted_by)
 
 
@@ -162,7 +170,7 @@ async def process_caches(session: AsyncSession, caches: List[CacheEntry]) -> Non
 
 @hook.on_message_sent
 async def on_message_sent(
-  event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int
+  event: Optional[Event], is_group: bool, target_id: int, message: Message, message_id: int,
 ) -> None:
   if not message_id:
     return
@@ -178,7 +186,7 @@ async def on_message_sent(
       is_group=is_group,
       target_id=target_id,
       content=segments,
-      caused_by=caused_by
+      caused_by=caused_by,
     ))
     await session.commit()
 
@@ -191,7 +199,7 @@ async def on_message_event(event: Event) -> None:
       if event.user_id == event.self_id:
         result = await session.execute(select(Sent).where(
           Sent.message_id == event.message_id,
-          Sent.is_group == True,  # noqa
+          col(Sent.is_group).is_(True),
           Sent.target_id == event.group_id,
         ))
       else:
@@ -209,14 +217,14 @@ async def on_message_event(event: Event) -> None:
       result = await session.execute(select(Received).where(
         Received.message_id == event.message_id,
         Received.user_id == event.user_id,
-        Received.group_id == None,  # noqa
+        col(Received.group_id).is_(None),
       ))
       for record in result.scalars().all():
         record.deleted_by = event.user_id
         session.add(record)
       result = await session.execute(select(Sent).where(
         Sent.message_id == event.message_id,
-        Sent.is_group == False,  # noqa
+        col(Sent.is_group).is_(False),
         Sent.target_id == event.user_id,
       ))
       for record in result.scalars().all():
@@ -234,6 +242,6 @@ async def on_message_event(event: Event) -> None:
         time=datetime.fromtimestamp(event.time),
         user_id=event.user_id,
         group_id=getattr(event, "group_id", None),
-        content=segments
+        content=segments,
       ))
       await session.commit()

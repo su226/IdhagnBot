@@ -40,7 +40,7 @@ class CardText(Render):
   @overload
   def __init__(
     self, content: textutil.Layout, *, color: imutil.Color = ..., stroke: float = ...,
-    stroke_color: imutil.Color = ...
+    stroke_color: imutil.Color = ...,
   ) -> None: ...
 
   @overload
@@ -48,13 +48,13 @@ class CardText(Render):
     self, content: str, font: str = ..., size: float = ..., *, color: imutil.Color = ...,
     stroke: float = ..., stroke_color: imutil.Color = ..., wrap: textutil.Wrap = ...,
     ellipsize: textutil.Ellipsize = ..., markup: bool = ..., align: textutil.Align = ...,
-    spacing: int = ..., lines: int = ...
+    spacing: int = ..., lines: int = ...,
   ) -> None: ...
 
   def __init__(
     self, content: Union[textutil.Layout, str], font: str = "sans-serif", size: float = 32,
     *args: Any, color: imutil.Color = (0, 0, 0), stroke: float = 0,
-    ellipsize: textutil.Ellipsize = "end", stroke_color: imutil.Color = (255, 255, 255), **kw: Any
+    ellipsize: textutil.Ellipsize = "end", stroke_color: imutil.Color = (255, 255, 255), **kw: Any,
   ) -> None:
     self.layout = (
       cast(textutil.Layout, content) if isinstance(content, textutil.Layout) else
@@ -74,7 +74,7 @@ class CardText(Render):
   def render(self, dst: Image.Image, x: int, y: int) -> None:
     textutil.paste(
       dst, (x + PADDING, y), self.layout, color=self.color, stroke=self.stroke,
-      stroke_color=self.stroke_color
+      stroke_color=self.stroke_color,
     )
 
 
@@ -174,7 +174,7 @@ class InfoCount(Render):
     icon_im = Image.open(PLUGIN_DIR / (self.icon + ".png"))
     dst.paste(icon_im, (x, y), icon_im)
     textutil.paste(
-      dst, (x + INFO_ICON_SIZE + INFO_ICON_MARGIN, y + self.height // 2), self.layout, anchor="lm"
+      dst, (x + INFO_ICON_SIZE + INFO_ICON_MARGIN, y + self.height // 2), self.layout, anchor="lm",
     )
 
 
@@ -246,7 +246,7 @@ class CardMargin(Render):
 
 class CardTab(Render):
   def __init__(
-    self, content: str = "", title: str = "", icon: Optional[Image.Image] = None
+    self, content: str = "", title: str = "", icon: Optional[Image.Image] = None,
   ) -> None:
     self.icon = icon
     box = CONTENT_WIDTH - 8

@@ -9,7 +9,7 @@ from util import imutil, misc
 from util.api_common.bilibili_activity import (
   Activity, ActivityCourse, ActivityForward, ActivityLive, ActivityLiveRcmd, ActivityPGC,
   ActivityPlaylist, ContentArticle, ContentAudio, ContentCommon, ContentCourse, ContentImage,
-  ContentLive, ContentLiveRcmd, ContentPGC, ContentPlaylist, ContentText, ContentVideo
+  ContentLive, ContentLiveRcmd, ContentPGC, ContentPlaylist, ContentText, ContentVideo,
 )
 from util.api_common.bilibili_activity.card import CardRichText, CardTopic, fetch_emotions
 from util.images.card import Card, CardAuthor, CardCover, CardLine, CardText

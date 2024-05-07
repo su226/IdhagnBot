@@ -41,7 +41,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async def get_one(
-    task: Awaitable[Tuple[Image.Image, Optional[int]]], i: int
+    task: Awaitable[Tuple[Image.Image, Optional[int]]], i: int,
   ) -> Tuple[Image.Image, str]:
     avatar, user = await task
     if i in default_names:
@@ -53,7 +53,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
   if len(args.targets) > 7:
     await matcher.finish("你个海王，最多只能有7个目标")
-  default_names: Dict[int, str] = {i: name for i, name in args.name}
+  default_names: Dict[int, str] = dict(args.name)
   async with AvatarGetter(bot, event) as g:
     tasks: List[asyncio.Task[Tuple[Image.Image, str]]] = [
       g.submit(get_one(g.get(pattern, DefaultType.TARGET, f"目标{i}"), i))

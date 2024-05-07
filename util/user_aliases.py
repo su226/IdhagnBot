@@ -7,7 +7,8 @@ from enum import Enum
 from io import BytesIO
 from types import TracebackType
 from typing import (
-  Any, Awaitable, Coroutine, Dict, List, Literal, Optional, Tuple, Type, TypeVar, Union, overload
+  Any, Awaitable, Coroutine, Dict, List, Literal, Optional, Sequence, Tuple, Type, TypeVar, Union,
+  overload,
 )
 
 import aiohttp
@@ -46,7 +47,7 @@ class MatchPattern:
 
 @dataclass
 class Match:
-  uids: Tuple[int, ...]
+  uids: Sequence[int]
   patterns: List[MatchPattern]
 
   def __str__(self) -> str:
@@ -102,7 +103,7 @@ async def get_aliases(bot: Bot, event: Event) -> AliasesDict:
       aliases[key] = Alias(names=[], users=users)
     aliases[key].names.extend(filter(len, {
       to_identifier(user["nickname"]),
-      to_identifier(user["card"])
+      to_identifier(user["card"]),
     }))
   return aliases
 
@@ -130,19 +131,19 @@ async def match(bot: Bot, event: Event, pattern: str) -> Tuple[Dict[int, Match],
 
 @overload
 async def match_uid(
-  bot: Bot, event: Event, raw_pattern: str, multiple: Literal[False] = ...
+  bot: Bot, event: Event, raw_pattern: str, multiple: Literal[False] = ...,
 ) -> int: ...
 @overload
 async def match_uid(
-  bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = ...
-) -> Tuple[int, ...]: ...
+  bot: Bot, event: Event, raw_pattern: str, multiple: Literal[True] = ...,
+) -> Sequence[int]: ...
 async def match_uid(
-  bot: Bot, event: Event, raw_pattern: str, multiple: bool = False
-) -> Union[int, Tuple[int, ...]]:
+  bot: Bot, event: Event, raw_pattern: str, multiple: bool = False,
+) -> Union[int, Sequence[int]]:
   try:
     uid = int(raw_pattern)
     if multiple:
-      return uid,
+      return (uid,)
     return uid
   except ValueError:
     pass
@@ -177,7 +178,7 @@ async def match_uid(
 
 
 async def download_image(
-  url: str, *, crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
+  url: str, *, crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False,
 ) -> Image.Image:
   async with misc.http().get(url) as response:
     data = await response.read()
@@ -221,12 +222,12 @@ class DefaultType(Enum):
 
 
 async def _get_image_and_user(
-  bot: Bot, event: MessageEvent, pattern: str, default: DefaultType, **kw: Any
+  bot: Bot, event: MessageEvent, pattern: str, default: DefaultType, **kw: Any,
 ) -> Tuple[Image.Image, Optional[int]]:
   if pattern in {"?", "那个", "它"}:
     if not event.reply:
       raise misc.AggregateError("它是什么？你得回复一张图片")
-    url: str = ""
+    url = ""
     for seg in event.reply.message:
       if seg.type == "image":
         if url:
@@ -292,7 +293,7 @@ class _Prompter:
       message = await misc.prompt(self.event)
     except misc.PromptTimeout as e:
       raise misc.AggregateError("等待回应超时") from e
-    url: str = ""
+    url = ""
     for seg in message:
       if seg.type == "image":
         if url:
@@ -319,7 +320,7 @@ class AvatarGetter:
 
   def get(
     self, pattern: str, default: DefaultType, prompt: str = "",
-    crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
+    crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False,
   ) -> Coroutine[Any, Any, Tuple[Image.Image, Optional[int]]]:
     if pattern in {"-", "这个"}:
       prompter = _Prompter(self.bot, self.event, prompt)
@@ -339,7 +340,7 @@ class AvatarGetter:
 
   def __call__(
     self, pattern: str, default: DefaultType, prompt: str = "",
-    crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False
+    crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False,
   ) -> "asyncio.Task[Tuple[Image.Image, Optional[int]]]":
     return self.submit(self.get(pattern, default, prompt, crop, raw, bg))
 
@@ -347,7 +348,7 @@ class AvatarGetter:
     return self
 
   async def __aexit__(
-    self, exc_type: Type[BaseException], exc: BaseException, tb: TracebackType
+    self, exc_type: Type[BaseException], exc: BaseException, tb: TracebackType,
   ) -> None:
     errors: List[str] = []
     for i in asyncio.as_completed(self.tasks):

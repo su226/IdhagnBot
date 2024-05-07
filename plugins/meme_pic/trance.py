@@ -31,7 +31,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     alpha = Image.new("L", im.size, 3)
     for i in range(0, int(im.height * -0.1), -1):
       im.paste(target, (0, i), alpha)
-    for i in range(0, int(im.height * 0.1)):
+    for i in range(int(im.height * 0.1)):
       im.paste(target, (0, i), alpha)
     return imutil.to_segment(im)
 

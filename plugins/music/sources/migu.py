@@ -97,7 +97,7 @@ class MiguMusic(Music):
     keyword = encodeuri(keyword)
     async with http.get(
       SEARCH_API.format(keyword=keyword, page=1, page_size=page_size),
-      headers=SEARCH_HEADERS
+      headers=SEARCH_HEADERS,
     ) as response:
       data = await response.json(content_type=None)
     count = data["data"]["songsData"]["total"]
@@ -121,7 +121,7 @@ class MiguMusic(Music):
           break
         async with http.get(
           SEARCH_API.format(keyword=keyword, page=page, page_size=page_size),
-          headers=SEARCH_HEADERS
+          headers=SEARCH_HEADERS,
         ) as response:
           data = await response.json(content_type=None)
 

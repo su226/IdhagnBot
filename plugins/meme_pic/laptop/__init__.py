@@ -11,12 +11,12 @@ from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter, DefaultType
 
 DIR = Path(__file__).resolve().parent
-# RemapTransform((220, 160), ((0, 39), (225, 0), (236, 145), (25, 197)))  # noqa
-OLD_SIZE = 220, 160
-NEW_SIZE = 236, 197
+# RemapTransform((220, 160), ((0, 39), (225, 0), (236, 145), (25, 197)))  # noqa: ERA001
+OLD_SIZE = (220, 160)
+NEW_SIZE = (236, 197)
 TRANSFORM = (
   0.8469606952031231, -0.13401276822833844, 5.226497960904075, 0.15932974592085844,
-  0.9192100726203283, -35.84919283219329, -0.0004890372852200551, -0.00027999415409538726
+  0.9192100726203283, -35.84919283219329, -0.0004890372852200551, -0.00027999415409538726,
 )
 
 
@@ -30,11 +30,11 @@ parser.add_argument("--text", "-t", metavar="文本", default="来玩休闲游�
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式（如果传入动图）"
+  help="使用WebP而非GIF格式（如果传入动图）",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式（如果传入动图）"
+  help="使用APNG而非GIF格式（如果传入动图）",
 )
 matcher = (
   command.CommandBuilder("meme_pic.laptop", "笔记本", "玩游戏")
@@ -52,7 +52,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     target, _ = target_task.result()
     template = Image.open(DIR / "template.png")
     text_im = textutil.render(
-      args.text, "sans", 40, color=(255, 255, 255), stroke=2, stroke_color=(0, 0, 0)
+      args.text, "sans", 40, color=(255, 255, 255), stroke=2, stroke_color=(0, 0, 0),
     )
     text_im = imutil.contain_down(text_im, template.width - 20, 100)
     imutil.paste(template, text_im, (template.width // 2, template.height - 20), anchor="mb")

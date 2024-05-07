@@ -53,7 +53,7 @@ class AutoDeleteDict(MutableMapping[TKey, TValue]):
 
 
 recall_others_permission = context.build_permission(
-  ("recall", "manual_recall", "others"), permission.Level.ADMIN
+  ("recall", "manual_recall", "others"), permission.Level.ADMIN,
 )
 
 
@@ -87,5 +87,5 @@ async def try_delete_msg(bot: Bot, id: int):
 
 def schedule_delete(bot: Bot, message_id: int, delay: float) -> Job:
   return scheduler.add_job(
-    try_delete_msg, "date", (bot, message_id), run_date=datetime.now() + timedelta(seconds=30)
+    try_delete_msg, "date", (bot, message_id), run_date=datetime.now() + timedelta(seconds=30),
   )

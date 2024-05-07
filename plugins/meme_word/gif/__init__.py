@@ -43,7 +43,7 @@ def register(id: LStr, name: LStr, subtitles: List[Tuple[int, int, LStr]]) -> No
           frame = raw.convert("RGB")
           text = argv[i] if argv else example
           text_im = textutil.render(
-            text, "sans", 20, color=(255, 255, 255), stroke=1, stroke_color=(0, 0, 0)
+            text, "sans", 20, color=(255, 255, 255), stroke=1, stroke_color=(0, 0, 0),
           )
           text_im = imutil.contain_down(text_im, im.width - 10, im.height - 10)
           imutil.paste(frame, text_im, (im.width // 2, im.height - 5), anchor="mb")

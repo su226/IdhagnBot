@@ -29,11 +29,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.shock", "震惊")
@@ -53,7 +53,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     for _ in range(30):
       frames.append(
         motion_blur(target, random.randint(-90, 90), random.randint(1, 50))
-        .rotate(random.randint(-20, 20), imutil.resample())
+        .rotate(random.randint(-20, 20), imutil.resample()),
       )
     return imutil.to_segment(frames, 10, afmt=args.format)
 

@@ -21,7 +21,7 @@ async def handle_goodnews(args: Message = CommandArg()):
     content = args.extract_plain_text().rstrip() or badnews.__doc__ or ""
     im = Image.open(DIR / "template.png")
     text_im = textutil.render(
-      content, "sans", 60, box=im.width * 2, stroke=4, stroke_color=(255, 255, 255), align="m"
+      content, "sans", 60, box=im.width * 2, stroke=4, stroke_color=(255, 255, 255), align="m",
     )
     text_im = imutil.contain_down(text_im, 480, 250)
     imutil.paste(im, text_im, (im.width // 2, 220), anchor="mm")

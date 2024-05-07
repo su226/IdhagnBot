@@ -35,7 +35,7 @@ class Data:
 
   @staticmethod
   def get_code(emoji: str) -> str:
-    return "-".join(map(lambda ch: "u{:x}".format(ord(ch)), emoji))
+    return "-".join(f"u{ord(ch):x}" for ch in emoji)
 
   async def get_image(self, first_id: int, second_id: int) -> bytes:
     revision = self.revisions[self.pairs[first_id, second_id]]

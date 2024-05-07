@@ -48,7 +48,7 @@ def quantize(input_pixels: Iterable[int], starting_clusters: List[int], max_colo
   pixels: List[int] = []
   pointCount = 0
   for inputPixel in input_pixels:
-    if inputPixel not in pixelToCount.keys():
+    if inputPixel not in pixelToCount:
       pointCount += 1
       points.append(lab_from_argb(inputPixel))
       pixels.append(inputPixel)
@@ -58,7 +58,7 @@ def quantize(input_pixels: Iterable[int], starting_clusters: List[int], max_colo
   counts: List[int] = []
   for i in range(pointCount):
     pixel = pixels[i]
-    if pixel in pixelToCount.keys():
+    if pixel in pixelToCount:
       counts.append(pixelToCount[pixel])
   clusterCount = min(max_colors, pointCount)
   if starting_clusters:
@@ -149,7 +149,7 @@ def quantize(input_pixels: Iterable[int], starting_clusters: List[int], max_colo
     if count == 0:
       continue
     possibleNewCluster = argb_from_lab(*clusters[i])
-    if possibleNewCluster in argbToPopulation.keys():
+    if possibleNewCluster in argbToPopulation:
       continue
     argbToPopulation[possibleNewCluster] = count
   return argbToPopulation

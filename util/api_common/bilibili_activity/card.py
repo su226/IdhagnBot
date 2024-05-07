@@ -16,14 +16,14 @@ async def fetch_emotion(url: str) -> Image.Image:
   async with misc.http().get(url) as response:
     data = await response.read()
   return await misc.to_thread(lambda:
-    Image.open(BytesIO(data)).resize((EMOTION_SIZE, EMOTION_SIZE), imutil.scale_resample())
+    Image.open(BytesIO(data)).resize((EMOTION_SIZE, EMOTION_SIZE), imutil.scale_resample()),
   )
 
 
 async def fetch_emotions(richtext: RichText) -> Dict[str, Image.Image]:
   urls = [node.url for node in richtext if isinstance(node, RichTextEmotion)]
   surfaces = await asyncio.gather(*[fetch_emotion(url) for url in urls])
-  return {url: surface for url, surface in zip(urls, surfaces)}
+  return dict(zip(urls, surfaces))
 
 
 class CardTopic(Render):
@@ -46,7 +46,7 @@ class CardTopic(Render):
 class CardRichText(Render):
   def __init__(
     self, richtext: RichText, emotions: Dict[str, Image.Image], size: int, lines: int,
-    topic: Optional[Topic] = None
+    topic: Optional[Topic] = None,
   ) -> None:
     render = textutil.RichText().set_font("sans", size)
     render.set_width(CONTENT_WIDTH).set_height(-lines).set_ellipsize("end")

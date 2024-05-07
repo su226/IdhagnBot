@@ -114,7 +114,7 @@ class Game(BaseModel):
               extents = cr.text_extents(str(count))
               cr.move_to(
                 cell_x + (CELL_SIZE - extents.x_advance) / 2,
-                cell_y + (CELL_SIZE + extents.height) / 2
+                cell_y + (CELL_SIZE + extents.height) / 2,
               )
               cr.set_source_rgb(*COLORS[count - 1])
               cr.show_text(str(count))
@@ -146,12 +146,12 @@ class Game(BaseModel):
         extents = cr.text_extents(x_str)
         cr.move_to(
           cell_x + (CELL_SIZE - extents.x_advance) / 2,
-          BOARD_MARGIN - BOARD_BORDER
+          BOARD_MARGIN - BOARD_BORDER,
         )
         cr.show_text(x_str)
         cr.move_to(
           cell_x + (CELL_SIZE - extents.x_advance) / 2,
-          BOARD_MARGIN + board_h + BOARD_BORDER + extents.height
+          BOARD_MARGIN + board_h + BOARD_BORDER + extents.height,
         )
         cr.show_text(x_str)
       for y in range(self.height):
@@ -263,7 +263,7 @@ def neighbors(board: List[List[int]], y0: int, x0: int) -> Generator[Tuple[int, 
 
 def draw_border(
   cr: "cairo.Context[Any]", x: float, y: float, w: float, h: float, b: float,
-  reverse: bool = False
+  reverse: bool = False,
 ) -> None:
   cr.move_to(x, y)
   cr.line_to(x + w, y)
@@ -345,7 +345,7 @@ def draw_mine(cr: "cairo.Context[Any]", x: float, y: float) -> None:
 
 
 def draw_pos(
-  cr: "cairo.Context[Any]", font: cairo.FontFace, y: int, x: int, cell_y: int, cell_x: int
+  cr: "cairo.Context[Any]", font: cairo.FontFace, y: int, x: int, cell_y: int, cell_x: int,
 ) -> None:
   xy_str = f"{to_base26(y + 1)}{x + 1}"
   cr.set_font_face(font)
@@ -353,7 +353,7 @@ def draw_pos(
   extents = cr.text_extents(xy_str)
   cr.move_to(
     cell_x + (CELL_SIZE - extents.x_advance) / 2,
-    cell_y + (CELL_SIZE + extents.height) / 2
+    cell_y + (CELL_SIZE + extents.height) / 2,
   )
   cr.set_source_rgb(*DARK_COLOR)
   cr.show_text(xy_str)
@@ -362,14 +362,14 @@ def draw_pos(
 minesweeper = (
   command.CommandBuilder("minesweeper", "扫雷")
   .brief("扫雷小游戏")
-  .usage(
+  .usage((
     "/扫雷 [难度] - 开始标准游戏（默认为初级）\n"
     "/扫雷 <宽度> <高度> <雷数> - 开始自定义游戏\n"
     "/扫雷 放弃 - 放弃游戏\n"
     "难度可以是“初级”（9x9，16个雷）、“中级”（16x16，40个雷）、“高级”（30x16，99个雷）\n"
     "一个群里只能同时有一局扫雷小游戏，所有人都可以参与。\n"
     "参考自 Simon Tatham's Portable Puzzle Collection。"
-  )
+  ))
   .build()
 )
 @minesweeper.handle()

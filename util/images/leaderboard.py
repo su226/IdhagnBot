@@ -31,11 +31,11 @@ def render(data: List[Tuple[Image.Image, str, str]]) -> Image.Image:
     if i >= len(data):
       textutil.paste(
         im, (line_h // 2, y + line_h // 2), "?", "sans", line_h * 0.5,
-        anchor="mm", color=(255, 255, 255)
+        anchor="mm", color=(255, 255, 255),
       )
       textutil.paste(
         im, (round(line_h * 1.2), y + line_h // 2), "虚位以待", "sans", line_h * 0.3,
-        anchor="lm", color=(255, 255, 255)
+        anchor="lm", color=(255, 255, 255),
       )
     else:
       avatar, name, info = data[i]
@@ -56,7 +56,7 @@ def render(data: List[Tuple[Image.Image, str, str]]) -> Image.Image:
         markup += f"\n<span size='66%'>{html.escape(info)}</span>"
       textutil.paste(
         im, (name_x, y + line_h // 2), markup, "sans", line_h * 0.3, anchor="lm", markup=True,
-        color=(255, 255, 255), box=WIDTH - name_x - 16, ellipsize="end"
+        color=(255, 255, 255), box=WIDTH - name_x - 16, ellipsize="end",
       )
 
     y += line_h

@@ -14,7 +14,7 @@ DIR = Path(__file__).resolve().parent
 FRAMETIME = 60
 BOXES = [
   (50, 73, 68, 92), (58, 60, 62, 95), (65, 10, 67, 118), (61, 20, 77, 97), (55, 44, 65, 106),
-  (66, 85, 60, 98)
+  (66, 85, 60, 98),
 ]
 
 
@@ -25,11 +25,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.hug_leg", "抱大腿")

@@ -4,7 +4,7 @@ from pprint import pformat
 import yaml
 from loguru import logger
 from nonebot.adapters.onebot.v11 import (
-  Bot, GroupMessageEvent, Message, MessageEvent, PrivateMessageEvent
+  Bot, GroupMessageEvent, Message, MessageEvent, PrivateMessageEvent,
 )
 from nonebot.exception import ActionFailed
 from nonebot.message import handle_event

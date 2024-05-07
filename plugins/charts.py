@@ -10,7 +10,7 @@ from nonebot.typing import T_State
 from PIL import Image, ImageOps
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import desc, func, select
+from sqlmodel import col, desc, func, select
 
 from util import colorutil, configs, context, imutil, misc, record, textutil
 from util.command import CommandBuilder
@@ -48,7 +48,7 @@ personal_statistics = (
 @group_statistics.handle()
 @personal_statistics.handle()
 async def handle_statistics(
-  bot: Bot, event: MessageEvent, state: T_State, arg: Message = CommandArg()
+  bot: Bot, event: MessageEvent, state: T_State, arg: Message = CommandArg(),
 ) -> None:
   group_id = context.get_event_context(event)
   user_id = event.user_id
@@ -75,10 +75,10 @@ async def handle_statistics(
     date_func = func.date(record.Received.time)
     begin_time = today - timedelta(31)
   async with AsyncSession(record.engine) as session:
-    query = select([
-      date_func.label("date"),
-      func.count("date")
-    ])
+    query = select(
+      date_func,
+      func.count(date_func),
+    )
     if group_id != -1:
       query = query.where(record.Received.group_id == group_id)
     if is_user:
@@ -86,7 +86,7 @@ async def handle_statistics(
     result = await session.execute(
       query
       .where(record.Received.time >= begin_time)
-      .group_by("date")
+      .group_by(date_func),
     )
     result = result.all()
 
@@ -96,19 +96,19 @@ async def handle_statistics(
       name, group, avatar = await asyncio.gather(
         context.get_card_or_name(bot, group_id, user_id),
         bot.get_group_info(group_id=group_id),
-        imutil.get_avatar(user_id)
+        imutil.get_avatar(user_id),
       )
       title = f"{name} 在 {group['group_name']} 群内的{title}"
     else:
       name, avatar = await asyncio.gather(
         context.get_card_or_name(bot, group_id, user_id),
-        imutil.get_avatar(user_id)
+        imutil.get_avatar(user_id),
       )
       title = f"{name} 的{title}"
   else:
     group, avatar = await asyncio.gather(
       bot.get_group_info(group_id=group_id),
-      imutil.get_avatar(gid=group_id)
+      imutil.get_avatar(gid=group_id),
     )
     title = f"{group['group_name']} 群内的{title}"
 
@@ -121,7 +121,7 @@ async def handle_statistics(
     title_im = textutil.render(title, "sans", 24, box=width - 16, align="m")
     months_im = [textutil.render(month, "sans", 24) for month in [
       "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月",
-      "十二月"
+      "十二月",
     ]]
     months_h = max(im.height for im in months_im)
     header_h = title_im.height + months_h
@@ -130,7 +130,7 @@ async def handle_statistics(
     max_im = textutil.render(str(maxcount), "sans", 24)
     minmax_h = max(22, min_im.height, max_im.height)
     im = Image.new("RGB", (
-      width, header_h + 7 * 30 + minmax_h + 8
+      width, header_h + 7 * 30 + minmax_h + 8,
     ), (255, 255, 255))
     imutil.paste(im, title_im, (im.width / 2, 0), anchor="mt")
     imutil.paste(im, mon_im, (weekdays_w - 8, header_h + 11), anchor="rm")
@@ -181,7 +181,7 @@ async def handle_statistics(
     while curtime <= today:
       labels_im.append(textutil.render(
         curtime.strftime("%m-%d" if style == "month" else "%Y-%m"),
-        "sans", 32, color=palette.fg
+        "sans", 32, color=palette.fg,
       ).transpose(Image.Transpose.ROTATE_90))
       if i < len(result) and result[i][0] == str(curtime):
         counts.append(result[i][1])
@@ -235,7 +235,7 @@ async def handle_statistics(
       imutil.paste(im, label_im, (x + bar_w / 2, header_h + 960 - 16), anchor="mb")
       imutil.paste(
         im, count_im, (x + bar_w / 2, header_h + 960 - max(height, label_im.height + 16) - 16),
-        anchor="mb"
+        anchor="mb",
       )
     return imutil.to_segment(im)
 
@@ -275,23 +275,24 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent, arg: Message = Comma
 
   async with AsyncSession(record.engine) as session:
     result = await session.execute(
-      select([
+      select(
         record.Received.user_id,
-        func.count(record.Received.user_id).label("count")
-      ])
-      .group_by(record.Received.user_id).where(
+        count_func := func.count(col(record.Received.user_id)),
+      )
+      .group_by(col(record.Received.user_id))
+      .where(
         record.Received.group_id == group_id,
         record.Received.time >= start_datetime,
-        record.Received.time < end_datetime
+        record.Received.time < end_datetime,
       )
-      .order_by(desc("count"))
-      .limit(config.leaderboard_limit)
+      .order_by(desc(count_func))
+      .limit(config.leaderboard_limit),
     )
     result = result.all()
   if not result:
-    await leaderboard.finish(
+    await leaderboard.finish((
       f"{start_datetime:%Y-%m-%d %H:%M:%S} 到 {end_datetime:%Y-%m-%d %H:%M:%S} 内没有数据"
-    )
+    ))
 
   names, avatars, group = await asyncio.gather(
     asyncio.gather(*(context.get_card_or_name(bot, event, uid) for uid, _ in result)),
@@ -312,7 +313,7 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent, arg: Message = Comma
     header_im = textutil.render(
       f"{group['group_name']}\n"
       f"{start_datetime:%Y-%m-%d %H:%M:%S} 到 {end_datetime:%Y-%m-%d %H:%M:%S} 的排行",
-      "sans", 32, align="m"
+      "sans", 32, align="m",
     )
     header_h = header_im.height + 16
     max_count = max(result[0][1], 1)
@@ -341,7 +342,7 @@ async def handle_leaderboard(bot: Bot, event: MessageEvent, arg: Message = Comma
       im.paste(palette.bar, (64, y, 64 + width, y + 64))
       name_im = textutil.paste(
         im, (80, y + 32), name, "sans", 32,
-        color=palette.fg, box=im.width - 112 - count_im.width, ellipsize="end", anchor="lm"
+        color=palette.fg, box=im.width - 112 - count_im.width, ellipsize="end", anchor="lm",
       )
       imutil.paste(im, count_im, (max(width, name_im.width + 16) + 80, y + 32), anchor="lm")
     return imutil.to_segment(im)

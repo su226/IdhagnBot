@@ -23,7 +23,7 @@ async def handle_goodnews(args: Message = CommandArg()):
     im = Image.open(DIR / "template.jpg")
     text_im = textutil.render(
       content, "sans", 60, box=im.width * 2, color=(238, 0, 0), stroke=4,
-      stroke_color=(255, 255, 153), align="m"
+      stroke_color=(255, 255, 153), align="m",
     )
     text_im = imutil.contain_down(text_im, 480, 250)
     imutil.paste(im, text_im, (im.width // 2, 240), anchor="mm")

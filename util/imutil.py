@@ -1,6 +1,9 @@
 import math
 from io import BytesIO
-from typing import Any, Generator, List, Literal, Optional, Sequence, Tuple, Union, cast, overload
+from typing import (
+  Any, Generator, List, Literal, Optional, Protocol, Sequence, Tuple, Type, TypeVar, Union, cast,
+  overload,
+)
 
 import cairo
 from loguru import logger
@@ -10,9 +13,10 @@ from PIL import Image, ImageChops, ImageDraw, ImageOps, ImageSequence, features 
 from util import colorutil, misc
 
 __all__ = [
-  "Anchor", "background", "from_cairo", "center_pad", "circle", "contain_down", "frames",
-  "get_avatar", "paste", "quantize", "to_segment", "resize_canvas", "resize_height",
-  "resize_width", "sample_frames", "Point", "Plane", "PerspectiveData", "RemapTransform"
+  'Anchor', 'AnyImage', 'Color', 'PasteColor', 'PerspectiveData', 'PixelAccess', 'Plane', 'Point',
+  'RemapTransform', 'Size', 'background', 'center_pad', 'circle', 'colorize', 'contain_down',
+  'frames', 'from_cairo', 'get_avatar', 'load', 'paste', 'quantize', 'resize_canvas',
+  'resize_height', 'resize_width', 'sample_frames', 'to_segment',
 ]
 
 Anchor = Literal["lt", "lm", "lb", "mt", "mm", "mb", "rt", "rm", "rb"]
@@ -23,6 +27,7 @@ Plane = Tuple[Point, Point, Point, Point]
 PerspectiveData = Tuple[float, float, float, float, float, float, float, float]
 PasteColor = Tuple[Color, Size]
 AnyImage = Union[Image.Image, cairo.ImageSurface]
+T = TypeVar("T")
 _LIBIMAGEQUANT_AVAILABLE: Optional[bool] = None
 _LIBIMAGEQUANT_WARNED: bool = False
 
@@ -74,8 +79,7 @@ def to_cairo(im: Image.Image) -> cairo.ImageSurface:
   return cairo.ImageSurface.create_for_data(data, cairo.FORMAT_ARGB32, im.width, im.height)
 
 
-def circle(im: AnyImage, antialias: Union[bool, int, float] = True):
-  im = from_cairo(im) if isinstance(im, cairo.ImageSurface) else im
+def circle(im: Image.Image, antialias: Union[bool, int, float] = True) -> None:
   if isinstance(antialias, bool):
     ratio = 2 if antialias else 1
   else:
@@ -154,7 +158,7 @@ def background(im: AnyImage, bg: Color = (255, 255, 255)) -> Image.Image:
 
 async def get_avatar(
   uid: Optional[int] = None, gid: Optional[int] = None, *, raw: bool = False,
-  bg: Union[Color, bool] = False
+  bg: Union[Color, bool] = False,
 ) -> Image.Image:
   # s 有 100, 160, 640, 1080 分别对应 4 个最大尺寸（可以小）和 0 对应原图（不能不填或者自定义）
   if uid is not None and gid is None:
@@ -204,7 +208,7 @@ def sample_frames(im: Image.Image, frametime: int) -> Generator[Image.Image, Non
 
 def paste(
   dst: Image.Image, src: Union[AnyImage, PasteColor], xy: Point = (0, 0),
-  mask: Union[AnyImage, None] = None, anchor: Anchor = "lt"
+  mask: Union[AnyImage, None] = None, anchor: Anchor = "lt",
 ) -> None:
   if isinstance(mask, cairo.ImageSurface):
     mask = from_cairo(mask)
@@ -245,10 +249,10 @@ def _check_libimagequant() -> bool:
   if _LIBIMAGEQUANT_AVAILABLE is None:
     _LIBIMAGEQUANT_AVAILABLE = cast(bool, PILFeatures.check("libimagequant"))
   if not _LIBIMAGEQUANT_AVAILABLE and not _LIBIMAGEQUANT_WARNED:
-    logger.warning(
+    logger.warning((
       "已启用 libimagequant，但没有安装 libimagequant 或者 Pillow 没有编译 libimagequant 支持，"
       "请参考 Pillow 和 IdhagnBot 的文档获取帮助。这条警告只会出现一次。"
-    )
+    ))
     _LIBIMAGEQUANT_WARNED = True
   return _LIBIMAGEQUANT_AVAILABLE
 
@@ -287,7 +291,7 @@ def quantize(im: AnyImage, palette: Optional[Image.Image] = None) -> Image.Image
       return palette
   # HACK: RGBA 图片的 quantize 方法不能用 palette 参数，因此只能使用 Pillow 的内部 API
   im = cast(
-    Image.Image, cast(Any, im)._new(im.im.convert("P", Image.Dither.FLOYDSTEINBERG, palette.im))
+    Image.Image, cast(Any, im)._new(im.im.convert("P", Image.Dither.FLOYDSTEINBERG, palette.im)),
   )
   im.palette = palette.palette.copy()
   _add_transparency(im)
@@ -300,12 +304,12 @@ def to_segment(im: AnyImage, *, fmt: str = ..., **kw: Any) -> MessageSegment: ..
 @overload
 def to_segment(
   im: Sequence[AnyImage], duration: Union[List[int], int, Image.Image], *, afmt: str = ...,
-  **kw: Any
+  **kw: Any,
 ) -> MessageSegment: ...
 
 def to_segment(
   im: Union[AnyImage, Sequence[AnyImage]], duration: Union[List[int], int, Image.Image] = 0, *,
-  fmt: str = "png", afmt: str = "gif", **kw: Any
+  fmt: str = "png", afmt: str = "gif", **kw: Any,
 ) -> MessageSegment:
   f = BytesIO()
   if isinstance(im, cairo.ImageSurface):
@@ -326,7 +330,7 @@ def to_segment(
         disposal = 2 if any("transparency" in x.info for x in frames) else 0
         frames[0].save(
           f, "GIF", append_images=im[1:], save_all=True, loop=0, disposal=disposal,
-          duration=duration, **kw
+          duration=duration, **kw,
         )
       return MessageSegment.image(f)
     im = frames[0]
@@ -344,7 +348,7 @@ class RemapTransform:
       old_plane = ((0, 0), (old_size[0], 0), (old_size[0], old_size[1]), (0, old_size[1]))
     self.data = self._find_coefficients(old_plane, new_plane)
 
-  def getdata(self) -> Tuple[int, Tuple[float, ...]]:
+  def getdata(self) -> Tuple[int, PerspectiveData]:
     return Image.Transform.PERSPECTIVE, self.data
 
   @staticmethod
@@ -358,3 +362,35 @@ class RemapTransform:
     b = np.array(old_plane).reshape(8)
     res_ = np.linalg.inv(a.T @ a) @ a.T @ b
     return cast(PerspectiveData, tuple(res_))
+
+
+class PixelAccess(Protocol[T]):
+  def __setitem__(self, xy: Tuple[int, int], color: T, /) -> None: ...
+  def __getitem__(self, xy: Tuple[int, int], /) -> T: ...
+  def putpixel(self, xy: Tuple[int, int], color: T, /) -> None: ...
+  def getpixel(self, xy: Tuple[int, int], /) -> T: ...
+
+
+def load(im: Image.Image, type: Type[T]) -> PixelAccess[T]:
+  return im.load()
+
+
+def colorize(
+  image: AnyImage,
+  black: Union[str, int, Tuple[int, ...]],
+  white: Union[str, int, Tuple[int, ...]],
+  mid: Union[str, int, Tuple[int, ...], None] = None,
+  blackpoint: int = 0,
+  whitepoint: int = 255,
+  midpoint: int = 127,
+) -> Image.Image:
+  # ImageOps.colorize 的参数 black、white、mid 类型缺失 Tuple[int, ...]
+  return ImageOps.colorize(
+    from_cairo(image) if isinstance(image, cairo.ImageSurface) else image,
+    cast(Any, black),
+    cast(Any, white),
+    cast(Any, mid),
+    blackpoint,
+    whitepoint,
+    midpoint,
+  )

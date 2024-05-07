@@ -1,6 +1,6 @@
 from argparse import Namespace
 from pathlib import Path
-from typing import Any, List, cast
+from typing import List
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
@@ -26,11 +26,11 @@ parser.add_argument("--text", "-t", default="采访大佬经验", metavar="文�
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式"
+  help="使用WebP而非GIF格式",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式"
+  help="使用APNG而非GIF格式",
 )
 matcher = (
   command.CommandBuilder("meme_pic.interview", "采访")
@@ -42,7 +42,7 @@ matcher = (
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   async with AvatarGetter(bot, event) as g:
     target_task = g(args.target, DefaultType.TARGET, "目标")
-    source_task = cast(Any, None)
+    source_task = misc.any_v
     if args.source not in ("", "huaji", "滑稽"):
       source_task = g(args.source, DefaultType.SOURCE, "源")
 

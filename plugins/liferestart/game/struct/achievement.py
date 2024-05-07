@@ -10,7 +10,7 @@ class Opportunity(Enum):
   START = 0
   TRAJECTORY = 1
   SUMMARY = 2
-  END = 2
+  END = 3
 
 
 @dataclass

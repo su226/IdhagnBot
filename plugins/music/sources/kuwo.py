@@ -41,7 +41,7 @@ class KuwoMusic(Music):
       "audio": audio_url,
       "title": self.name,
       "content": self.artists,
-      "image": self.picture_url
+      "image": self.picture_url,
     })
 
   @staticmethod
@@ -49,7 +49,7 @@ class KuwoMusic(Music):
     id_int = int(id)
     http = misc.http()
     async with http.get(
-      INFO_API.format(id=id_int), headers={"csrf": TOKEN}, cookies={"kw_token": TOKEN}
+      INFO_API.format(id=id_int), headers={"csrf": TOKEN}, cookies={"kw_token": TOKEN},
     ) as response:
       data = await response.json()
     if "data" not in data:
@@ -60,7 +60,7 @@ class KuwoMusic(Music):
       data["data"]["album"],
       data["data"]["isListenFee"],
       data["data"]["rid"],
-      data["data"]["pic"]
+      data["data"]["pic"],
     ).segment()
 
   @staticmethod
@@ -69,7 +69,7 @@ class KuwoMusic(Music):
     keyword = encodeuri(keyword)
     async with http.get(
       SEARCH_API.format(keyword=keyword, page=0, page_size=page_size),
-      headers={"csrf": TOKEN, "Referer": REFERER}, cookies={"kw_token": TOKEN}
+      headers={"csrf": TOKEN, "Referer": REFERER}, cookies={"kw_token": TOKEN},
     ) as response:
       data = await response.json()
     count = int(data["data"]["total"])
@@ -93,7 +93,7 @@ class KuwoMusic(Music):
           break
         async with http.get(
           SEARCH_API.format(keyword=keyword, page=page, page_size=page_size),
-          headers={"csrf": TOKEN, "Referer": REFERER}, cookies={"kw_token": TOKEN}
+          headers={"csrf": TOKEN, "Referer": REFERER}, cookies={"kw_token": TOKEN},
         ) as response:
           data = await response.json()
 

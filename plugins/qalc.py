@@ -43,7 +43,7 @@ async def handle_qalc(arg: Message = CommandArg()):
     await qalc.finish(qalc.__doc__)
   read, write = os.pipe()
   proc = await asyncio.create_subprocess_exec(
-    "qalc", expr, stdin=read, stdout=asyncio.subprocess.PIPE
+    "qalc", expr, stdin=read, stdout=asyncio.subprocess.PIPE,
   )
   os.write(write, b"n")
   os.close(write)
@@ -55,7 +55,7 @@ async def handle_qalc(arg: Message = CommandArg()):
     await qalc.send("正在更新汇率，请稍候……")
     config = CONFIG()
     proc = await asyncio.create_subprocess_exec(
-      "qalc", "-exrates", expr, stdout=asyncio.subprocess.PIPE, env={"all_proxy": config.proxy}
+      "qalc", "-exrates", expr, stdout=asyncio.subprocess.PIPE, env={"all_proxy": config.proxy},
     )
     result, _ = await proc.communicate()
     await proc.wait()

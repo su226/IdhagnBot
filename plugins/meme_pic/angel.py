@@ -45,7 +45,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   if (name is None or gender is None) and target_id is not None:
     try:
       info = await bot.get_group_member_info(
-        group_id=context.get_event_context(event), user_id=target_id
+        group_id=context.get_event_context(event), user_id=target_id,
       )
       name = name or info["card"] or info["nickname"]
       gender = gender or info["sex"]
@@ -71,11 +71,11 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
 
     textutil.paste(
       im, (300, 610), "非常可爱！简直就是小天使",
-      "sans bold", 48, anchor="mt"
+      "sans bold", 48, anchor="mt",
     )
     textutil.paste(
       im, (300, 680), f"{GENDERS[gender]}没失踪也没怎么样  我只是觉得你们都该看一下",
-      "sans bold", 26, anchor="mt"
+      "sans bold", 26, anchor="mt",
     )
 
     return imutil.to_segment(im)

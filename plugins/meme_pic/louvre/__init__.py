@@ -43,7 +43,7 @@ def make_mask(
   kernel: str = "normal",
   dark_cut: int = 118,  # 对应原网站线迹轻重
   shade_limit: int = 108,  # 对应原网站调子数量
-  denoise: bool = True  # 对应原网站降噪
+  denoise: bool = True,  # 对应原网站降噪
 ) -> Image.Image:
   shade = im.point(lambda v: 0 if v > shade_limit else 255, "L")
   shade = shade.filter(ImageFilter.BoxBlur(3))
@@ -97,11 +97,11 @@ parser.add_argument("--no-denoise", "-D", action="store_false", dest="denoise", 
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式（如果传入动图）"
+  help="使用WebP而非GIF格式（如果传入动图）",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式（如果传入动图）"
+  help="使用APNG而非GIF格式（如果传入动图）",
 )
 parser.epilog = "特别感谢: https://lab.magiconch.com/one-last-image/"
 matcher = (

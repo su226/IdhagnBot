@@ -21,11 +21,11 @@ parser.add_argument("target", nargs="?", default="", metavar="目标", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式（如果传入动图）"
+  help="使用WebP而非GIF格式（如果传入动图）",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式（如果传入动图）"
+  help="使用APNG而非GIF格式（如果传入动图）",
 )
 matcher = (
   command.CommandBuilder("meme_pic.protogen", "protogen")

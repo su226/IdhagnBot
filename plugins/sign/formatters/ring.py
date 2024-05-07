@@ -14,7 +14,7 @@ from ..config import STATE, FormatData
 
 
 def rounded_rect(
-  cr: "cairo.Context[Any]", x1: float, y1: float, x2: float, y2: float, r: float
+  cr: "cairo.Context[Any]", x1: float, y1: float, x2: float, y2: float, r: float,
 ) -> None:
   cr.move_to(x1 + r, y1)
   cr.line_to(x2 - r, y1)
@@ -43,7 +43,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
   avatar, name, hitokoto = await asyncio.gather(
     imutil.get_avatar(format_data.uid, bg=(255, 255, 255)),
     context.get_card_or_name(bot, format_data.gid, format_data.uid),
-    get_hitokoto()
+    get_hitokoto(),
   )
 
   def make() -> Message:
@@ -98,7 +98,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
 
     y += textutil.paste(
       im, (center_x, y), name, "sans bold", 28,
-      anchor="mt", box=content_w, ellipsize="middle", color=(255, 255, 255)
+      anchor="mt", box=content_w, ellipsize="middle", color=(255, 255, 255),
     ).height
 
     rank = group_data.rank.index(format_data.uid) + 1
@@ -107,7 +107,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
     else:
       s = f"#{rank} 签到成功"
     y += textutil.paste(
-      im, (center_x, y), s, "sans", 24, anchor="mt", box=box_w, color=(255, 255, 255)
+      im, (center_x, y), s, "sans", 24, anchor="mt", box=box_w, color=(255, 255, 255),
     ).height
 
     coin = currency.get_coin(format_data.gid, format_data.uid)
@@ -115,7 +115,7 @@ async def format(bot: Bot, format_data: FormatData) -> Message:
     if format_data.coin != -1:
       s += f"(+{format_data.coin})"
     y += textutil.paste(
-      im, (center_x, y), s, "sans", 24, anchor="mt", box=box_w, color=(255, 255, 255)
+      im, (center_x, y), s, "sans", 24, anchor="mt", box=box_w, color=(255, 255, 255),
     ).height
 
     hitokoto_h = box_y2 - BOX_PADDING - y

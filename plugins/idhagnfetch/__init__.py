@@ -6,7 +6,7 @@ import re
 import time
 from typing import (
   Any, Awaitable, Callable, Generator, Iterable, List, Literal, Mapping, Sequence, Set, Tuple,
-  TypeVar, cast
+  TypeVar,
 )
 
 import nonebot
@@ -41,7 +41,7 @@ Items = Literal[
   "python",
   "nonebot",
   "idhagnbot",
-  "bot_uptime"
+  "bot_uptime",
 ]
 BarItems = Literal[
   "cpu",
@@ -69,7 +69,7 @@ class Config(BaseModel):
     "backend_stats",
     "python",
     "nonebot",
-    "bot_uptime"
+    "bot_uptime",
   ])
   bar_items: List[BarItems] = Field(default_factory=lambda: [
     "cpu",
@@ -101,7 +101,7 @@ def _get_distro() -> str:
     return info
 
   _os_release_line = re.compile(
-    r"^(?P<name>[a-zA-Z0-9_]+)=(?P<quote>[\"\']?)(?P<value>.*)(?P=quote)$"
+    r"^(?P<name>[a-zA-Z0-9_]+)=(?P<quote>[\"\']?)(?P<value>.*)(?P=quote)$",
   )
   _os_release_unescape = re.compile(r"\\([\\\$\"\'`])")
   _os_release_candidates = ("/etc/os-release", "/usr/lib/os-release")
@@ -221,7 +221,7 @@ async def get_gpus_and_usage(bot: Bot) -> List[Item]:
       freq = info.clk / 1000000
       freq = f"{int(freq)}MHz" if freq < 1000 else f"{freq / 1000:.1f}GHz"
       segments.append(
-        (f"{gpuid}占用", f"{info.percent}% {freq} {info.temp}°C (显存: {info.mem_percent}%)")
+        (f"{gpuid}占用", f"{info.percent}% {freq} {info.temp}°C (显存: {info.mem_percent}%)"),
       )
   return segments
 
@@ -452,7 +452,7 @@ def render_bars(min_width: int, items: Iterable[BarItem]) -> Image.Image:
 
 idhagnfetch = (
   command.CommandBuilder(
-    "idhagnfetch", "idhagnfetch", "状态", "status", "state", "运行时间", "uptime"
+    "idhagnfetch", "idhagnfetch", "状态", "status", "state", "运行时间", "uptime",
   )
   .brief("显示机器人的状态")
   .usage('''\
@@ -483,9 +483,9 @@ async def handle_idhagnfetch(bot: Bot):
     info_w, info_h = info_im.size
     im_w = 128
     im_h = 128
-    header_im = cast(Any, None)
-    account_im = cast(Any, None)
-    bar_im = cast(Any, None)
+    header_im = misc.any_v
+    account_im = misc.any_v
+    bar_im = misc.any_v
     if config.header:
       header_im = textutil.render(config.header, "sans", 32, color=(255, 255, 255))
       im_w = max(im_w, header_im.width + 128)
@@ -522,7 +522,7 @@ async def handle_idhagnfetch(bot: Bot):
       im.paste(account_im, (x, y), account_im)
       im.paste(colorutil.split_rgb(config.secondary_color), (
         x, y + account_im.height + 6,
-        x + account_im.width, y + account_im.height + 10
+        x + account_im.width, y + account_im.height + 10,
       ))
       y += account_im.height + 16
     im.paste(info_im, (x, y), info_im)

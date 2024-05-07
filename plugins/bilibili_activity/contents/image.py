@@ -34,9 +34,7 @@ async def get_appender(activity: ActivityImage[object]) -> Callable[[Card], None
       rows = math.ceil(len(images) / columns)
       size = (640 - (columns - 1) * IMAGE_GAP) // columns
       height = size * rows + max(rows - 1, 0) * IMAGE_GAP
-      images = [ImageOps.fit(
-        image, (size, size), imutil.resample()
-      ) for image in images]
+      images = [ImageOps.fit(image, (size, size), imutil.resample()) for image in images]
       cover = Image.new("RGB", (640, height), (255, 255, 255))
       for i, v in enumerate(images):
         y, x = divmod(i, columns)

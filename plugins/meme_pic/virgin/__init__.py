@@ -39,7 +39,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     imutil.paste(im, template, im.size, anchor="rb")
 
     text_im = textutil.render(
-      args.text, "sans", 32, color=(255, 255, 255), stroke=2, stroke_color=(0, 0, 0)
+      args.text, "sans", 32, color=(255, 255, 255), stroke=2, stroke_color=(0, 0, 0),
     )
     text_im = imutil.contain_down(text_im, 460, 50)
     imutil.paste(im, text_im, (im.width // 2, im.height - 35), anchor="mm")

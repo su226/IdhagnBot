@@ -1,7 +1,7 @@
 import asyncio
 import itertools
 from dataclasses import dataclass
-from datetime import date, datetime, time
+from datetime import date, datetime, time as time_
 from typing import Awaitable, Dict, List, Literal, Optional, Union, cast
 
 import nonebot
@@ -28,18 +28,17 @@ from .modules.unrealassets import UnrealAssetsModule
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler  # noqa: E402
 
-_time = time
-
 
 class BaseModuleConfig(BaseModel):
-  type: str
+  # 整个类都 frozen 时能正确推断，但单字段 frozen 不能正确推断，只能忽略报错
+  type: str = Field(frozen=True)
 
   def create_module(self, group_id: int) -> Module:
     raise NotImplementedError
 
 
 class StringModuleConfig(BaseModuleConfig):
-  type: Literal["string"]
+  type: Literal["string"] = Field(frozen=True)  # type: ignore
   string: str = "七点几勒，起床先啦！各位兽受们早上好"
 
   def create_module(self, group_id: int) -> Module:
@@ -47,7 +46,7 @@ class StringModuleConfig(BaseModuleConfig):
 
 
 class CountdownModuleConfig(BaseModuleConfig):
-  type: Literal["countdown"]
+  type: Literal["countdown"] = Field(frozen=True)  # type: ignore
   countdowns: List[Countdown]
 
   def create_module(self, group_id: int) -> Module:
@@ -55,35 +54,35 @@ class CountdownModuleConfig(BaseModuleConfig):
 
 
 class NewsModuleConfig(BaseModuleConfig):
-  type: Literal["news"]
+  type: Literal["news"] = Field(frozen=True)  # type: ignore
 
   def create_module(self, group_id: int) -> Module:
     return NewsModule()
 
 
 class MoyuModuleConfig(BaseModuleConfig):
-  type: Literal["moyu"]
+  type: Literal["moyu"] = Field(frozen=True)  # type: ignore
 
   def create_module(self, group_id: int) -> Module:
     return MoyuModule()
 
 
 class HistoryModuleConfig(BaseModuleConfig):
-  type: Literal["history"]
+  type: Literal["history"] = Field(frozen=True)  # type: ignore
 
   def create_module(self, group_id: int) -> Module:
     return HistoryModule()
 
 
 class SentenceModuleConfig(BaseModuleConfig):
-  type: Literal["sentence"]
+  type: Literal["sentence"] = Field(frozen=True)  # type: ignore
 
   def create_module(self, group_id: int) -> Module:
     return SentenceModule()
 
 
 class RankModuleConfig(BaseModuleConfig):
-  type: Literal["rank"]
+  type: Literal["rank"] = Field(frozen=True)  # type: ignore
   limit: int = 10
 
   def create_module(self, group_id: int) -> Module:
@@ -91,14 +90,14 @@ class RankModuleConfig(BaseModuleConfig):
 
 
 class FurbotModuleConfig(BaseModuleConfig):
-  type: Literal["furbot"]
+  type: Literal["furbot"] = Field(frozen=True)  # type: ignore
 
   def create_module(self, group_id: int) -> Module:
     return FurbotModule()
 
 
 class EpicGamesModuleConfig(BaseModuleConfig):
-  type: Literal["epicgames"]
+  type: Literal["epicgames"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
@@ -106,7 +105,7 @@ class EpicGamesModuleConfig(BaseModuleConfig):
 
 
 class UnrealAssetsModuleConfig(BaseModuleConfig):
-  type: Literal["unrealassets"]
+  type: Literal["unrealassets"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
@@ -123,18 +122,18 @@ AnyModuleConfig = Union[
   RankModuleConfig,
   FurbotModuleConfig,
   EpicGamesModuleConfig,
-  UnrealAssetsModuleConfig
+  UnrealAssetsModuleConfig,
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
 
 
 class GroupConfig(BaseModel):
-  time: Optional[_time] = None
+  time: Optional[time_] = None
   modules: Optional[List[ModuleOrForward]] = None
 
 
 class Config(BaseModel):
-  default_time: _time = _time(7, 0, 0)
+  default_time: time_ = time_(7, 0, 0)
   default_modules: List[ModuleOrForward] = Field(default_factory=list)
   groups: Dict[int, GroupConfig] = Field(default_factory=dict)
 
@@ -159,7 +158,7 @@ def onload(prev: Optional[Config], curr: Config):
       continue
     time = group_config.time or curr.default_time
     job = scheduler.add_job(
-      check_daily, "cron", (group,), hour=time.hour, minute=time.minute, second=time.second
+      check_daily, "cron", (group,), hour=time.hour, minute=time.minute, second=time.second,
     )
     jobs.append(job)
     if datetime.now().time() > time:
@@ -185,7 +184,7 @@ async def format_one(group_id: int, module_config: BaseModuleConfig) -> List[Mes
 
 
 async def format_forward(
-  bot_id: int, bot_name: str, group_id: int, modules: List[AnyModuleConfig]
+  bot_id: int, bot_name: str, group_id: int, modules: List[AnyModuleConfig],
 ) -> Forward:
   coros = [format_one(group_id, module) for module in modules]
   messages = await asyncio.gather(*coros)
@@ -256,7 +255,7 @@ async def check_daily(group_id: int) -> None:
   if failed:
     try:
       await bot.send_group_msg(
-        group_id=group_id, message="发送部分每日推送失败，可运行 /今天 重新查看"
+        group_id=group_id, message="发送部分每日推送失败，可运行 /今天 重新查看",
       )
     except ActionFailed:
       pass

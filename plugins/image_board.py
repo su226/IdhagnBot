@@ -22,13 +22,14 @@ class Site(BaseModel):
 
 
 presets = {
-  "gelbooru": Site(  # Gelbooru (https://gelbooru.com)
+  # Gelbooru (https://gelbooru.com)
+  "gelbooru": Site(
     origin="https://gelbooru.com",
     post_url="/index.php?page=post&s=view&id={id}",
     api_url="/index.php?page=dapi&s=post&q=index&tags={tags}&limit={limit}&pid={page}&json=1",
     array_path="/array",
     id_path="/id",
-    sample_path="/sample_url"
+    sample_path="/sample_url",
   ),
   # Danbooru (https://danbooru.donmai.us), Safebooru (https://safebooru.donmai.us)
   "danbooru": Site(
@@ -37,7 +38,7 @@ presets = {
     api_url="/posts.json?tags={tags}&limit={limit}&page={page}",
     array_path="/",
     id_path="/id",
-    sample_path="/large_file_url"
+    sample_path="/large_file_url",
   ),
   # Konachan R18 (https://konachan.com), Konachan G (https://konachan.net)
   # Yandere (https://yande.re), Lolibooru (https://lolibooru.moe)
@@ -47,15 +48,16 @@ presets = {
     api_url="/post.json?tags={tags}&limit={limit}&page={page}",
     array_path="/",
     id_path="/id",
-    sample_path="/sample_url"
+    sample_path="/sample_url",
   ),
-  "e621": Site(  # e621 (https://e621.net), e926 (https://e926.net)
+  # e621 (https://e621.net), e926 (https://e926.net)
+  "e621": Site(
     origin="https://e621.net",
     post_url="/posts/{id}",
     api_url="/posts.json?tags={tags}&limit={limit}&page={page}",
     array_path="/posts",
     id_path="/id",
-    sample_path="/sample/url"
+    sample_path="/sample/url",
   ),
 }
 
@@ -119,7 +121,7 @@ def register(definition: Command):
     try:
       async with http.get(
         API_URL.format(tags=encodeuri(" ".join(args.tags)), limit=args.limit, page=args.page),
-        headers=HEADERS, proxy=definition.proxy
+        headers=HEADERS, proxy=definition.proxy,
       ) as response:
         if response.status != 200:
           if response.status == 503:
@@ -143,7 +145,7 @@ def register(definition: Command):
         url = "\n" + url
       try:
         async with http.get(
-          get_by_path(post, site.sample_path), proxy=definition.proxy, headers=HEADERS
+          get_by_path(post, site.sample_path), proxy=definition.proxy, headers=HEADERS,
         ) as response:
           img = await response.read()
       except aiohttp.ClientError:
@@ -161,7 +163,7 @@ def register(definition: Command):
   parser.add_argument("tags", nargs="+", metavar="标签")
   parser.add_argument(
     "--limit", "-l", type=int, default=config.default_limit, metavar="图片数",
-    help=f"每页的图片数，默认为{config.default_limit}，不能超过{config.max_limit}"
+    help=f"每页的图片数，默认为{config.default_limit}，不能超过{config.max_limit}",
   )
   parser.add_argument("-page", type=int, default=1, metavar="页码")
   builder = (

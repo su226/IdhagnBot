@@ -7,7 +7,7 @@ from typing import List, Optional, Set, Tuple, cast
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
-  Bot, Event, GroupIncreaseNoticeEvent, GroupRequestEvent, Message
+  Bot, Event, GroupIncreaseNoticeEvent, GroupRequestEvent, Message,
 )
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
@@ -265,7 +265,7 @@ kick_all = (
 
 @kick_all.handle()
 async def handle_kick_all(
-  bot: Bot, event: Event, state: T_State, arg: Message = CommandArg()
+  bot: Bot, event: Event, state: T_State, arg: Message = CommandArg(),
 ) -> None:
   config = CONFIG()
   group_id = context.get_event_context(event)
@@ -314,7 +314,7 @@ async def got_confirm(bot: Bot, event: Event, state: T_State, confirm: str = Arg
   done, _ = await asyncio.wait([
     asyncio.create_task(bot.set_group_kick(group_id=group_id, user_id=uid)) for uid in uids
   ])
-  success = sum([i.exception() is None for i in done])
+  success = sum(i.exception() is None for i in done)
   failed = len(uids) - success
   msg = f"成功踢出 {success} 个成员"
   if failed > 0:
@@ -375,7 +375,7 @@ async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
     detail = f"原因：{reason}\n详情请参考 {config.host}"
   if config.reject_request[event.group_id]:
     await bot.set_group_add_request(
-      flag=event.flag, sub_type=event.sub_type, approve=False, reason="云黑用户，机器人自动拒绝"
+      flag=event.flag, sub_type=event.sub_type, approve=False, reason="云黑用户，机器人自动拒绝",
     )
   info = await bot.get_stranger_info(user_id=event.user_id)
   name = info["nickname"]

@@ -30,6 +30,6 @@ async def handle_epicfree():
       text = "\n" + text
     message.extend([
       MessageSegment.text(text + f"\n{api.URL_BASE}{game.slug}\n"),
-      MessageSegment.image(game.image)
+      MessageSegment.image(game.image),
     ])
   await epic_free.finish(Message(message))

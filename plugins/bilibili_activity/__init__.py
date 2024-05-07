@@ -47,7 +47,7 @@ def schedule(date: datetime) -> None:
     except asyncio.CancelledError:
       pass  # 这里仅仅是防止在关闭机器人时日志出现 CancelledError
   scheduler.add_job(
-    check_activity, "date", id="bilibili_activity", replace_existing=True, run_date=date
+    check_activity, "date", id="bilibili_activity", replace_existing=True, run_date=date,
   )
 
 
@@ -63,7 +63,7 @@ async def on_bot_connect() -> None:
 
 
 async def new_activities(
-  user: common.User
+  user: common.User,
 ) -> AsyncGenerator[bilibili_activity.Activity[object, object], None]:
   offset = ""
   use_grpc = common.CONFIG().grpc
@@ -91,7 +91,7 @@ async def new_activities(
 async def try_check(bot: Bot, user: common.User) -> int:
   async def try_send(
     activity: bilibili_activity.Activity[object, object], message: Message,
-    target: common.AnyTarget
+    target: common.AnyTarget,
   ) -> None:
     kw: Dict[str, Any]
     if isinstance(target, common.GroupTarget):
@@ -101,10 +101,10 @@ async def try_check(bot: Bot, user: common.User) -> int:
     try:
       await bot.send_msg(message=message, **kw)
     except ActionFailed:
-      logger.exception(
+      logger.exception((
         f"推送 {user._name}({user.uid}) 的动态 {activity.id} 到目标 {target} 失败！\n"
         f"动态内容: {activity}"
-      )
+      ))
       try:
         await bot.send_msg(message=(
           f"{user._name} 更新了一条动态，但在推送时发送消息失败。"
@@ -121,14 +121,14 @@ async def try_check(bot: Bot, user: common.User) -> int:
       logger.info(f"已忽略 {user._name}({user.uid}) 的动态 {activity.id}")
       return
     except Exception:
-      logger.exception(
+      logger.exception((
         f"格式化 {user._name}({user.uid}) 的动态 {activity.id} 失败！\n"
         f"动态内容: {activity}"
-      )
-      message = Message(MessageSegment.text(
+      ))
+      message = Message(MessageSegment.text((
         f"{user._name} 更新了一条动态，但在推送时格式化消息失败。"
         f"https://t.bilibili.com/{activity.id}"
-      ))
+      )))
     await asyncio.gather(*[try_send(activity, message, target) for target in user.targets])
 
   if user._offset == "-1" and common.CONFIG().grpc:

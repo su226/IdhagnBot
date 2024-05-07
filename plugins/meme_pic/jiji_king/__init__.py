@@ -16,22 +16,22 @@ DIR = Path(__file__).resolve().parent
 BRACKETS = [  # 所有形式的大括号、中括号、小括号、尖括号，来自unicode-table.com（）
   "()", "[]", "{}", "<>", "〈〉", "❪❫", "❬❭", "❰❱", "❲❳", "❴❵", "⟦⟧", "⟨⟩", "⟮⟯", "⦃⦄", "⦅⦆",
   "⦗⦘", "⧼⧽", "⸨⸩", "❮❯", "⟪⟫", "⦇⦈", "⦉⦊", "⌈⌉", "⌊⌋", "「」", "『』", "〈〉", "【】", "《》",
-  "〔〕", "〖〗", "〚〛", "⁽⁾", "₍₎", "﹙﹚", "﹛﹜", "﹝﹞"
+  "〔〕", "〖〗", "〚〛", "⁽⁾", "₍₎", "﹙﹚", "﹛﹜", "﹝﹞",
 ]
 
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument(
   "targets", nargs="*", default=["<急>"], metavar="目标",
-  help="可使用@、QQ号、昵称、群名片或图片链接，或者用括号包起来的字符（最多10个）"
+  help="可使用@、QQ号、昵称、群名片或图片链接，或者用括号包起来的字符（最多10个）",
 )
 parser.add_argument(
   "--text", "-t", default="我是急急国王", metavar="文本",
-  help="默认为“我是急急国王”"
+  help="默认为“我是急急国王”",
 )
 parser.add_argument(
   "--source", "-s", default="", metavar="源",
-  help="可使用@、QQ号、昵称、群名片或图片链接，或者用括号包起来的字符"
+  help="可使用@、QQ号、昵称、群名片或图片链接，或者用括号包起来的字符",
 )
 matcher = (
   command.CommandBuilder("meme_pic.jiji_king", "急急国王")
@@ -42,7 +42,7 @@ matcher = (
 @matcher.handle()
 async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandArgs()) -> None:
   def get_image(
-    g: AvatarGetter, pattern: str, default: DefaultType, size: int, prompt: str
+    g: AvatarGetter, pattern: str, default: DefaultType, size: int, prompt: str,
   ) -> "asyncio.Task[Image.Image]":
     for left, right in BRACKETS:
       if pattern.startswith(left) and pattern.endswith(right):
@@ -50,7 +50,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     return g.submit(get_avatar(g.get(pattern, default, prompt), size))
 
   async def get_avatar(
-    task: Awaitable[Tuple[Image.Image, Optional[int]]], size: int
+    task: Awaitable[Tuple[Image.Image, Optional[int]]], size: int,
   ) -> Image.Image:
     avatar, _ = await task
     return await misc.to_thread(avatar.resize, (size, size), imutil.scale_resample())

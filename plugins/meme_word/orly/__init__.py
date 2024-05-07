@@ -16,7 +16,7 @@ DIR = Path(__file__).resolve().parent
 COLORS = [
   (97, 0, 94), (112, 112, 109), (137, 0, 41), (196, 0, 14), (109, 0, 29), (106, 0, 189),
   (241, 0, 0), (0, 113, 177), (249, 188, 0), (44, 0, 119), (186, 0, 154), (0, 144, 71),
-  (0, 157, 158), (34, 46, 133), (189, 0, 46), (0, 157, 26), (117, 165, 0)
+  (0, 157, 158), (34, 46, 133), (189, 0, 46), (0, 157, 26), (117, 165, 0),
 ]
 IMAGES = [
   "44412_rabbits.png", "44451_dog.png", "48582_common_frog.png", "51617_caribou.png",
@@ -29,7 +29,7 @@ IMAGES = [
   "dragonfly_1.png", "duckbill_7049.png", "electricray_13697.png", "gorilla_11100.png",
   "grizzly-bear_1.png", "horse_2.png", "oar-fish_27235.png", "ostrich_21849.png",
   "potato_21766.png", "rabbit4_21005.png", "sheepshead_11384.png", "shrimp_14982.png",
-  "speedhorse_12088.png"
+  "speedhorse_12088.png",
 ]
 IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
 
@@ -56,7 +56,8 @@ parser.add_argument("title2", nargs="?", default="", help="标题第二行")
 parser.add_argument("--header", "-h", default="", help="页眉")
 parser.add_argument("--subtitle", "-s", default="", help="副标题")
 parser.add_argument("--position", "-p",
-  choices=["左上", "左下", "右上", "右下", "lt", "lb", "rt", "rb"], default="rb", help="副标题方位"
+  choices=["左上", "左下", "右上", "右下", "lt", "lb", "rt", "rb"], default="rb",
+  help="副标题方位",
 )
 parser.add_argument("--author", "-a", default="", help="作者（默认为昵称）")
 parser.add_argument("--color", "-c", help=(

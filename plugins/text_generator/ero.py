@@ -20,7 +20,7 @@ def convert(src: str, ratio: float = 0.5) -> str:
       word = "〇" * len(word)
     return f"……{word}"
   import jieba.posseg as pseg
-  return "".join(convert_one(word, flag) for word, flag in pseg.cut(src))
+  return "".join(convert_one(pair.word, pair.flag) for pair in pseg.cut(src))
 
 
 ero = (

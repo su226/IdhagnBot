@@ -31,7 +31,7 @@ async def get_data() -> List[Item]:
     url=i["url"],
     title="置顶|" + i["word"].strip("#"),
     image=get_image(i),
-    content=strip_html(i["mblog"]["text"])
+    content=strip_html(i["mblog"]["text"]),
   ))
   for i in data["data"]["band_list"]:
     if i.get("is_ad", 0):
@@ -45,6 +45,6 @@ async def get_data() -> List[Item]:
       url=SEARCH.format(word),
       title=label + word,
       image=get_image(i),
-      content=f"{hot}万热度|" + strip_html(i["mblog"]["text"])
+      content=f"{hot}万热度|" + strip_html(i["mblog"]["text"]),
     ))
   return result

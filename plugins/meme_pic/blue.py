@@ -1,10 +1,8 @@
 from argparse import Namespace
-from typing import cast
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
 from nonebot.params import ShellCommandArgs
 from nonebot.rule import ArgumentParser
-from PIL import ImageOps
 
 from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter, DefaultType
@@ -30,18 +28,18 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
   def make() -> MessageSegment:
     target, _ = target_task.result()
     im = target.resize((500, 500), imutil.scale_resample()).convert("L")
-    im = ImageOps.colorize(im, "black", "white", cast(str, COLOR))
+    im = imutil.colorize(im, "black", "white", COLOR)
     textutil.paste(
       im, (400, 50), "群", "sans bold", 80,
-      color=(255, 255, 255), stroke=2, stroke_color=COLOR
+      color=(255, 255, 255), stroke=2, stroke_color=COLOR,
     )
     textutil.paste(
       im, (400, 150), "青", "sans bold", 80,
-      color=(255, 255, 255), stroke=2, stroke_color=COLOR
+      color=(255, 255, 255), stroke=2, stroke_color=COLOR,
     )
     textutil.paste(
       im, (310, 270), "YOASOBI", "sans bold", 40,
-      color=(255, 255, 255), stroke=2, stroke_color=COLOR
+      color=(255, 255, 255), stroke=2, stroke_color=COLOR,
     )
     return imutil.to_segment(im)
 

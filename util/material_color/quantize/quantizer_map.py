@@ -19,5 +19,5 @@ def quantize(pixels: Iterable[int]) -> OrderedDict[int, int]:
     alpha = alpha_from_argb(pixel)
     if alpha < 255:
       continue
-    countByColor[pixel] = (countByColor[pixel] if pixel in countByColor.keys() else 0) + 1
+    countByColor[pixel] = (countByColor[pixel] if pixel in countByColor else 0) + 1
   return countByColor

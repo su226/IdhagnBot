@@ -23,11 +23,11 @@ parser.add_argument("--text", "-t", metavar="内容", default="", help=(
 group = parser.add_mutually_exclusive_group()
 group.add_argument(
   "--webp", "-w", action="store_const", dest="format", const="webp", default="gif",
-  help="使用WebP而非GIF格式（如果传入动图）"
+  help="使用WebP而非GIF格式（如果传入动图）",
 )
 group.add_argument(
   "--png", "--apng", "-p", action="store_const", dest="format", const="png",
-  help="使用APNG而非GIF格式（如果传入动图）"
+  help="使用APNG而非GIF格式（如果传入动图）",
 )
 matcher = (
   command.CommandBuilder("meme_pic.teach", "讲课")
@@ -49,7 +49,7 @@ async def handler(bot: Bot, event: MessageEvent, args: Namespace = ShellCommandA
     if text_im.width > (w := template.width - 20):
       text_im = imutil.resize_width(text_im, w)
     template.paste(text_im, (
-      (template.width - text_im.width) // 2, template.height - text_im.height - 20
+      (template.width - text_im.width) // 2, template.height - text_im.height - 20,
     ), text_im)
     frames: List[Image.Image] = []
     for raw in imutil.frames(target):
