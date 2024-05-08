@@ -190,8 +190,6 @@ bilibili_check = (
   command.CommandBuilder("bilibili_check", "查成分")
   .brief("卧槽，□批！")
   .usage("/查成分 <B站用户名或ID>")
-  .rule(lambda: bool(CONFIG().cookie))
-  .help_condition(lambda _: bool(CONFIG().cookie))
   .build()
 )
 @bilibili_check.handle()
@@ -201,7 +199,11 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
     await bilibili_check.finish(bilibili_check.__doc__)
   if not await update_vtbs():
     await bilibili_check.finish("更新VTB数据失败")
-  headers = {"Cookie": CONFIG().cookie.get_secret_value()}
+  headers = {
+    "User-Agent": misc.BROWSER_UA,
+    # 2024-05-08: Cookie 为空时不能搜索，但任意非空字符串都可以搜索
+    "Cookie": CONFIG().cookie.get_secret_value() or "SESSDATA=",
+  }
   http = misc.http()
   try:
     uid = int(name)
