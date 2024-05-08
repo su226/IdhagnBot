@@ -7,6 +7,7 @@ from typing import (
 from urllib.parse import urlparse
 
 from util import misc
+from .. import bilibili_auth
 
 try:
   import grpc.aio
@@ -65,7 +66,11 @@ async def grpc_fetch(uid: int, offset: str = "") -> Tuple[Sequence["DynamicItem"
 
 async def json_fetch(uid: int, offset: str = "") -> Tuple[List[Dict[Any, Any]], Optional[str]]:
   http = misc.http()
-  async with http.get(LIST_API.format(uid=uid, offset=offset)) as response:
+  headers = {
+    "Cookie": bilibili_auth.get_cookie(),
+    "User-Agent": misc.BROWSER_UA,
+  }
+  async with http.get(LIST_API.format(uid=uid, offset=offset), headers=headers) as response:
     data = await response.json()
   next_offset = data["data"]["offset"] if data["data"]["has_more"] else None
   return data["data"]["items"], next_offset
@@ -87,10 +92,12 @@ async def grpc_get(id: Union[str, List[str]]) -> Union["DynamicItem", List["Dyna
     return res2.item
 
 
-async def json_get(id: str) -> Dict[Any, Any]:
+async def json_get(id: str, cookie: str = "") -> Dict[Any, Any]:
   http = misc.http()
   headers = {
     "Referer": f"https://t.bilibili.com/{id}",
+    "Cookie": bilibili_auth.get_cookie(),
+    "User-Agent": misc.BROWSER_UA,
   }
   async with http.get(DETAIL_API.format(id=id), headers=headers) as response:
     data = await response.json()
@@ -649,7 +656,7 @@ class ContentForward(ContentParser["ContentForward"]):
   def json_parse(item: Dict[Any, Any]) -> "ContentForward":
     if item["orig"]["type"] == "DYNAMIC_TYPE_NONE":
       original = None  # 源动态失效
-      error_text = item["orig"]["major"]["none"]["tips"]
+      error_text = item["orig"]["modules"]["module_dynamic"]["major"]["none"]["tips"]
     else:
       original = Activity.json_parse(item["orig"])
       error_text = ""

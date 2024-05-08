@@ -8,13 +8,13 @@ from urllib.parse import quote as encodeuri
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 from PIL import Image, ImageDraw
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field
 
 from util import colorutil, command, configs, imutil, misc, textutil
+from util.api_common import bilibili_auth
 
 
 class Config(BaseModel):
-  cookie: SecretStr = SecretStr("")
   update_interval: int = 86400
   update_timeout: int = 10
 
@@ -202,7 +202,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
   headers = {
     "User-Agent": misc.BROWSER_UA,
     # 2024-05-08: Cookie 为空时不能搜索，但任意非空字符串都可以搜索
-    "Cookie": CONFIG().cookie.get_secret_value() or "SESSDATA=",
+    "Cookie": bilibili_auth.get_cookie() or "SESSDATA=",
   }
   http = misc.http()
   try:
@@ -256,7 +256,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
         items = [textutil.render("什么都查不到", "sans", 32)]
     else:
       items = []
-      if not CONFIG().cookie.get_secret_value():
+      if not bilibili_auth.get_cookie():
         items.append(textutil.render("未设置 Cookies，无法获取粉丝团信息", "sans", 32))
       elif not medals_available:
         items.append(textutil.render("Cookies 过期或无效，无法获取粉丝团信息", "sans", 32))
