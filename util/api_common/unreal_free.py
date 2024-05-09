@@ -6,7 +6,7 @@ from pydantic import TypeAdapter
 from util import misc
 
 API = "https://www.unrealengine.com/marketplace/api/assets?lang=zh-CN&tag[]=4910"
-HEADERS = {"Accept-Language": "zh-CN"}
+HEADERS = {"Accept-Language": "zh-CN", "User-Agent": misc.BROWSER_UA, "Priority": "u=1"}
 URL_BASE = "https://www.unrealengine.com/marketplace/zh-CN/product/"
 
 
