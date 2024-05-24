@@ -79,8 +79,10 @@ class BaseConfig(Generic[TModel, Unpack[TParam]]):
       old_config = None
       self.cache[args] = CacheItem(new_config)
     else:
-      old_config = self.cache[args].item
-      self.cache[args].item = new_config
+      cache_item = self.cache[args]
+      old_config = cache_item.item
+      cache_item.item = new_config
+      cache_item.need_reload = False
     for handler in self.handlers:
       handler(old_config, new_config, *args)
 
