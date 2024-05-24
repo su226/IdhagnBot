@@ -6,8 +6,8 @@ from util import misc
 
 from . import DailyCache, Module
 
-# NEWS_API = "https://api.qqsuu.cn/api/dm-60s"  # noqa: ERA001  # 2022-12-16 此接口已挂
-NEWS_API = "https://api.vvhan.com/api/60s"
+NEWS_API = "https://api.qqsuu.cn/api/dm-60s"
+# NEWS_API = "https://api.vvhan.com/api/60s"  # noqa: ERA001  # 备用，只有 JSON 格式
 
 
 class NewsCache(DailyCache):
