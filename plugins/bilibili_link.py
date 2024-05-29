@@ -179,7 +179,8 @@ async def handle_bilibili_link(event: MessageEvent, state: T_State) -> None:
     if tags := data["Tags"]:
       infos = CardInfo(8)
       for tag in tags:
-        infos.add(InfoText("#" + tag["tag_name"], 26))
+        if tag["tag_type"] != "bgm":
+          infos.add(InfoText("#" + tag["tag_name"], 26))
       block.add(infos)
     card.add(block)
 
