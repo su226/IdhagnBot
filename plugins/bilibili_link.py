@@ -11,6 +11,7 @@ from nonebot.typing import T_State
 from PIL import Image
 
 from util import context, imutil, misc, permission
+from util.api_common import bilibili_auth
 from util.images.card import Card, CardAuthor, CardCover, CardInfo, CardText, InfoCount, InfoText
 
 VIDEO_RE = re.compile(r"av\d{1,9}|(BV|bv)[A-Za-z0-9]{10}")
@@ -109,9 +110,8 @@ async def check_bilibili_link(
       params=params,
     ) as response:
       data = await response.json()
-    # 没有 data 说明视频失效
-    if "data" in data:
-      first_valid = link, data["data"]
+    if data["code"] not in (-404, 62002, 62004):  # 不存在、不可见、审核中
+      first_valid = link, bilibili_auth.ApiError.check(data)
 
   if first_valid is not None:
     link, data = first_valid

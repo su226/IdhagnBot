@@ -5,6 +5,7 @@ from urllib.parse import quote as encodeuri
 from nonebot.adapters.onebot.v11 import MessageSegment
 
 from util import misc
+from util.api_common import bilibili_auth
 
 from .base import Music, SearchResult
 
@@ -50,20 +51,20 @@ class BilibiliMusic(Music):
     http = misc.http()
     async with http.get(INFO_API.format(id=id_int)) as response:
       data = await response.json()
-    if data["data"] is None:
-      raise ValueError("ID不存在")
+      if data["code"] == 4511001:
+        raise ValueError("ID不存在")
+      data = bilibili_auth.ApiError.check(data)
     async with http.get(URL_API.format(id=id_int)) as response:
-      urldata = await response.json()
-      urls = urldata["data"]["cdns"]
+      urls = bilibili_auth.ApiError.check(await response.json())["cdns"]
     referer = f"https://www.bilibili.com/audio/au{id_int}"
     return MessageSegment("music", {
       "type": "custom",
       "subtype": "bilibili",
       "url": referer,
       "audio": urls[0] if urls else "",
-      "title": data["data"]["title"],
-      "content": data['data']['author'],
-      "image": data["data"]["cover"],
+      "title": data["title"],
+      "content": data["author"],
+      "image": data["cover"],
       "headers": {
         "Referer": referer,
         "User-Agent": misc.BROWSER_UA,

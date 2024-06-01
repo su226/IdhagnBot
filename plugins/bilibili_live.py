@@ -14,6 +14,7 @@ from PIL import Image
 from pydantic import BaseModel
 
 from util import command, configs, context, imutil, misc
+from util.api_common import bilibili_auth
 from util.images.card import Card, CardAuthor, CardCover, CardText
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -64,8 +65,9 @@ def onload(prev: Optional[Config], curr: Config) -> None:
       API_URL + "?" + "&".join(params),
       headers={"User-Agent": misc.BROWSER_UA},
     ) as response:
-      data = await response.json()
-    for uid, detail in data["data"].items():
+      data = bilibili_auth.ApiError.check(await response.json())
+      data = {} if data == [] else data
+    for uid, detail in data.items():
       streaming[uid] = current = detail["live_status"] == 1  # 0下播 1直播 2轮播
       status = "已开播" if current else "未开播"
       logger.debug(f"B站直播: {detail['uname']} -> {status}")
@@ -117,10 +119,11 @@ async def handle_force_push(bot: Bot, event: Event, arg: Message = CommandArg())
     API_URL + f"?uids[]={uid}",
     headers={"User-Agent": misc.BROWSER_UA},
   ) as response:
-    data = await response.json()
-  if not data["data"]:
+    data = bilibili_auth.ApiError.check(await response.json())
+    data = {} if data == [] else data
+  if not data:
     await force_push.finish("无法获取这个用户的直播间")
-  message = await get_message(data["data"][str(uid)])
+  message = await get_message(data[str(uid)])
   ctx = context.get_event_context(event)
   real_ctx = getattr(event, "group_id", -1)
   if ctx != real_ctx:
@@ -142,9 +145,9 @@ async def get_message(data: Dict[str, Any]) -> Message:
     f"{INFO_API_URL}?uid={data['uid']}",
     headers={"User-Agent": misc.BROWSER_UA},
   ) as response:
-    info = await response.json()
-    fans: int = info["data"]["follower_num"]
-    desc: str = info["data"]["room_news"]["content"]
+    info = bilibili_auth.ApiError.check(await response.json())
+    fans: int = info["follower_num"]
+    desc: str = info["room_news"]["content"]
   async with http.get(data["face"]) as response:
     avatar_data = await response.read()
   if (cover_url := data["cover_from_user"]):
@@ -226,12 +229,13 @@ async def check() -> bool:
     API_URL + "?" + "&".join(params),
     headers={"User-Agent": misc.BROWSER_UA},
   ) as response:
-    data = await response.json()
+    data = bilibili_auth.ApiError.check(await response.json())
+    data = {} if data == [] else data
   fetch_t = time.perf_counter() - fetch_t
 
   send_t = time.perf_counter()
   coros: List[Awaitable[None]] = []
-  for uid, detail in data["data"].items():
+  for uid, detail in data.items():
     current = detail["live_status"] == 1
     status = "已开播" if current else "未开播"
     logger.debug(f"B站直播: {detail['uname']} -> {status}")

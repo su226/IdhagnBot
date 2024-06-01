@@ -7,6 +7,7 @@ from typing import (
 from urllib.parse import urlparse
 
 from util import misc
+
 from .. import bilibili_auth
 
 try:
@@ -30,9 +31,7 @@ if TYPE_CHECKING:
     AddButtonType, AdditionalType, DescType, DisableState, DynamicType, DynDetailReq,
     DynDetailsReq, DynModuleType, DynSpaceReq, Module, VideoSubType,
   )
-  from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import (
-    DynamicAsyncStub, DynamicStub,
-  )
+  from .protos.bilibili.app.dynamic.v2.dynamic_pb2_grpc import DynamicAsyncStub, DynamicStub
 
 Modules = Dict["DynModuleType.V", "Module"]
 TContent = TypeVar("TContent", covariant=True)
@@ -71,9 +70,9 @@ async def json_fetch(uid: int, offset: str = "") -> Tuple[List[Dict[Any, Any]], 
     "User-Agent": misc.BROWSER_UA,
   }
   async with http.get(LIST_API.format(uid=uid, offset=offset), headers=headers) as response:
-    data = await response.json()
-  next_offset = data["data"]["offset"] if data["data"]["has_more"] else None
-  return data["data"]["items"], next_offset
+    data = bilibili_auth.ApiError.check(await response.json())
+  next_offset = data["offset"] if data["has_more"] else None
+  return data["items"], next_offset
 
 
 @overload
@@ -100,8 +99,8 @@ async def json_get(id: str, cookie: str = "") -> Dict[Any, Any]:
     "User-Agent": misc.BROWSER_UA,
   }
   async with http.get(DETAIL_API.format(id=id), headers=headers) as response:
-    data = await response.json()
-  return data["data"]["item"]
+    data = bilibili_auth.ApiError.check(await response.json())
+  return data["item"]
 
 
 @dataclass
@@ -828,6 +827,7 @@ class ExtraReserve(ExtraParser["ExtraReserve"]):
         status = "expired" if "disable" in item["reserve"]["button"]["uncheck"] else "reserving"
     else:
       status = "expired" if item["reserve"]["button"]["type"] == 1 else "reserving"
+    desc3 = item["reserve"].get("desc3", None)
     return ExtraReserve(
       item["reserve"]["rid"],
       item["reserve"]["up_mid"],
@@ -835,8 +835,8 @@ class ExtraReserve(ExtraParser["ExtraReserve"]):
       item["reserve"]["desc1"]["text"],
       item["reserve"]["desc2"]["text"],
       item["reserve"]["reserve_total"],
-      item["reserve"]["desc3"]["text"],
-      item["reserve"]["desc3"]["jump_url"],
+      desc3["text"] if desc3 else "",
+      desc3["jump_url"] if desc3 else "",
       type,
       status,
       item["reserve"]["jump_url"],
