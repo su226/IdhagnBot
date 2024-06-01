@@ -43,7 +43,7 @@ async def get_data() -> List[Item]:
   for i in data["hotsearch"]:
     result.append(Item(
       url=decodeuri(i["linkurl"]),
-      title=i["pure_title"],
+      title=i["card_title"],
       image="",
       content="百度热搜|热度" + str(i["heat_score"]),
     ))
