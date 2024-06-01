@@ -1,7 +1,7 @@
 import asyncio
 import itertools
 from dataclasses import dataclass
-from datetime import date, datetime, time as time_
+from datetime import date, datetime, time as time_, timedelta
 from typing import Awaitable, Dict, List, Literal, Optional, Union, cast
 
 import nonebot
@@ -135,10 +135,12 @@ class GroupConfig(BaseModel):
 class Config(BaseModel):
   default_time: time_ = time_(7, 0, 0)
   default_modules: List[ModuleOrForward] = Field(default_factory=list)
+  grace_time: timedelta = timedelta(minutes=10)
   groups: Dict[int, GroupConfig] = Field(default_factory=dict)
 
 
 class State(BaseModel):
+  # 应该重命名为 last_check
   last_send: Dict[int, date] = Field(default_factory=dict)
 
 
@@ -153,15 +155,23 @@ def onload(prev: Optional[Config], curr: Config):
   for job in jobs:
     job.remove()
   jobs.clear()
+  now = datetime.now().time()
+  grace_time = int(curr.grace_time.total_seconds())
   for group, group_config in curr.groups.items():
     if group == -1:
       continue
-    time = group_config.time or curr.default_time
-    job = scheduler.add_job(
-      check_daily, "cron", (group,), hour=time.hour, minute=time.minute, second=time.second,
-    )
-    jobs.append(job)
-    if datetime.now().time() > time:
+    send_time = group_config.time or curr.default_time
+    jobs.append(scheduler.add_job(
+      check_daily,
+      "cron",
+      (group,),
+      hour=send_time.hour,
+      minute=send_time.minute,
+      second=send_time.second,
+      misfire_grace_time=grace_time,
+      coalesce=True,
+    ))
+    if now > send_time:
       asyncio.create_task(check_daily(group))
 
 
@@ -236,16 +246,30 @@ def clean_message(message: Union[Message, Forward]) -> None:
 
 async def check_daily(group_id: int) -> None:
   state = STATE()
-  today = date.today()
+  now = datetime.now()
+  today = now.date()
   if today <= state.last_send.get(group_id, date.min):
     return
-  logger.info(f"向 {group_id} 发送每日推送")
+  config = CONFIG()
+  today_end = datetime.combine(today, time_(23, 59, 59, 999999))
+  send_datetime = datetime.combine(today, config.groups[group_id].time or config.default_time)
+  send_datetime_max = min(send_datetime + config.grace_time, today_end)
+  if now > send_datetime_max:
+    logger.warning(f"超过最大发送时间，将不会向 {group_id} 发送每日推送")
+  else:
+    logger.info(f"向 {group_id} 发送每日推送")
+    await send_daily(group_id)
+  state.last_send[group_id] = today
+  STATE.dump()
+
+
+async def send_daily(group_id: int) -> None:
   bot = cast(Bot, nonebot.get_bot())
   failed = False
   for message in await format_all(group_id):
     try:
       if isinstance(message, Forward):
-        await bot.call_api("send_group_forward_msg", group_id=group_id, messages=message.nodes)
+        await bot.send_group_forward_msg(group_id=group_id, messages=message.nodes)
       else:
         await bot.send_group_msg(group_id=group_id, message=message)
     except ActionFailed:
@@ -259,8 +283,6 @@ async def check_daily(group_id: int) -> None:
       )
     except ActionFailed:
       pass
-  state.last_send[group_id] = today
-  STATE.dump()
 
 
 today = (
