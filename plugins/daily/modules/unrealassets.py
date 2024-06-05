@@ -54,10 +54,14 @@ class UnrealAssetsModule(Module):
     message = Message(MessageSegment.text("今天可以喜加一："))
     for asset in assets:
       wrap = "\n" if message else ""
+      rating = (
+        "暂无评价"
+        if asset.ratingCount == 0 else
+        f"共 {asset.ratingCount} 条评价，平均 {asset.ratingScore}⭐\n"
+      )
       message.extend([
         MessageSegment.text((
-          f"{wrap}{asset.category}资产 {asset.title} 原价 {asset.price} 现在免费，"
-          f"共 {asset.ratingCount} 条评价，平均 {asset.ratingScore}⭐\n"
+          f"{wrap}{asset.category}资产 {asset.title} 原价 {asset.price} 现在免费，{rating}"
           f"{unreal_free.URL_BASE}{asset.slug}\n"
         )),
         MessageSegment.image(asset.image),

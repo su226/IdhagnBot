@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Literal, TypedDict
+from typing_extensions import NotRequired
 
 from pydantic import TypeAdapter
 
@@ -25,7 +26,7 @@ class ResElement(TypedDict):
   categories: List[ResCategory]
   urlSlug: str
   featured: str
-  rating: ResRating
+  rating: NotRequired[ResRating]
 
 
 class ResData(TypedDict):
@@ -52,12 +53,16 @@ async def free_assets() -> List[Asset]:
   http = misc.http()
   async with http.get(API, headers=HEADERS) as response:
     data = TypeAdapter(ResRoot).validate_python(await response.json())
-  return [Asset(
-    asset["title"],
-    asset["featured"],
-    asset["urlSlug"],
-    asset["categories"][0]["name"],
-    asset["price"],
-    asset["rating"]["averageRating"],
-    asset["rating"]["total"],
-  ) for asset in data["data"]["elements"]]
+  assets: List[Asset] = []
+  for asset in data["data"]["elements"]:
+    rating = asset.get("rating")
+    assets.append(Asset(
+      asset["title"],
+      asset["featured"],
+      asset["urlSlug"],
+      asset["categories"][0]["name"],
+      asset["price"],
+      rating["averageRating"] if rating else 0,
+      rating["total"] if rating else 0,
+    ))
+  return assets
