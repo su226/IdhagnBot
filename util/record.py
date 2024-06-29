@@ -156,14 +156,13 @@ def serialize_message(message: Message) -> Tuple[List[CacheEntry], str]:
 
 
 async def process_caches(session: AsyncSession, caches: List[CacheEntry]) -> None:
-  selections = (session.execute(select(Cache).where(Cache.md5 == cache.md5)) for cache in caches)
-  for cache, result in zip(caches, await asyncio.gather(*selections)):
-    row = result.one_or_none()
+  for cache in caches:
+    result = await session.execute(select(Cache).where(Cache.md5 == cache.md5))
+    item = result.scalar_one_or_none()
     now = datetime.now()
-    if not row:
+    if not item:
       item = Cache(md5=cache.md5, type=cache.type, created=now, last_seen=now)
     else:
-      item, = row
       item.last_seen = now
     session.add(item)
 
