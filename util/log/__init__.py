@@ -4,12 +4,15 @@ import sys
 import warnings
 from datetime import time, timedelta
 from io import StringIO
-from typing import Any, Dict, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 
 from loguru import logger
 from pydantic import BaseModel, Field
 
 from util import configs
+
+if TYPE_CHECKING:
+  from loguru import Message
 
 Level = Literal["TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL"]
 
@@ -67,6 +70,10 @@ CONFIG = configs.SharedConfig("log", Config, "eager")
 showwarning_orig = warnings._showwarnmsg_impl  # type: ignore
 
 
+def _dummy_handler(message: "Message") -> None:
+  pass
+
+
 @CONFIG.onload()
 def config_onload(_: Optional[Config], cur: Config) -> None:
   if cur.warnings_as_log:
@@ -84,12 +91,15 @@ def config_onload(_: Optional[Config], cur: Config) -> None:
   for sink in cur.sinks:
     if isinstance(sink, SpecialTarget):
       if sink.type == "stdout":
-        real_sink = sys.__stdout__
+        real_sink = sys.__stdout__ or _dummy_handler
       elif sink.type == "stderr":
-        real_sink = sys.__stderr__
+        real_sink = sys.__stderr__ or _dummy_handler
       else:
-        from .syslog import syslog_handler
-        real_sink = syslog_handler
+        try:
+          from .syslog import syslog_handler
+          real_sink = syslog_handler
+        except ImportError:
+          real_sink = _dummy_handler
       kw = {}
     else:
       real_sink = sink.file
