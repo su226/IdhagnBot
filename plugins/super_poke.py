@@ -4,7 +4,7 @@ import random
 from nonebot.adapters.onebot.v11 import Bot, Event, Message
 from nonebot.params import CommandArg
 
-from util import command, context, misc, user_aliases
+from util import command, context, misc, user_aliases, implementations
 
 super_poke = (
   command.CommandBuilder("super_poke", "戳亿戳", "poke")
@@ -37,9 +37,6 @@ async def handle_super_poke(bot: Bot, event: Event, arg: Message = CommandArg())
     if len(cur_uids) == 0:
       cur_uids = all_uids[:]
       random.shuffle(cur_uids)
-    coros.append(bot.send_group_msg(
-      group_id=ctx,
-      message=f"[CQ:poke,qq={cur_uids.pop()}]",
-    ))
+    coros.append(implementations.send_group_poke(bot, ctx, cur_uids.pop()))
   await asyncio.gather(*coros)
   await super_poke.finish("戳亿戳完成")

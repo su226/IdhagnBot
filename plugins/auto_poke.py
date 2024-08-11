@@ -1,11 +1,11 @@
 from typing import Dict, Set
 
 import nonebot
-from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
+from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent
 from nonebot.params import CommandArg
 from nonebot.rule import Rule
 
-from util import command, context, misc, user_aliases
+from util import command, context, implementations, misc, user_aliases
 
 uids: Dict[int, Set[str]] = {}
 
@@ -52,5 +52,5 @@ do_auto_poke = nonebot.on_message(Rule(has_uid), priority=2)
 
 
 @do_auto_poke.handle()
-async def do_handle_auto_poke(event: MessageEvent):
-  await do_auto_poke.finish(MessageSegment("poke", {"qq": event.user_id}))
+async def do_handle_auto_poke(bot: Bot, event: MessageEvent):
+  await implementations.send_poke(bot, event)

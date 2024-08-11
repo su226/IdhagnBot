@@ -1,7 +1,7 @@
 import nonebot
-from nonebot.adapters.onebot.v11 import MessageSegment, PokeNotifyEvent
+from nonebot.adapters.onebot.v11 import Bot, PokeNotifyEvent
 
-from util import context, permission
+from util import context, implementations, permission
 
 
 async def is_poke(event: PokeNotifyEvent) -> bool:
@@ -12,5 +12,5 @@ auto_repoke = nonebot.on(
   context.build_permission(("auto_repoke",), permission.Level.MEMBER),
 )
 @auto_repoke.handle()
-async def handle_auto_repoke(event: PokeNotifyEvent):
-  await auto_repoke.finish(MessageSegment("poke", {"qq": event.user_id}))
+async def handle_auto_repoke(bot: Bot, event: PokeNotifyEvent):
+  await implementations.send_poke(bot, event)
