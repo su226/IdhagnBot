@@ -219,7 +219,7 @@ async def prompt(event: MessageEvent, timeout: Optional[float] = 0) -> Message:
 def forward_node(id: int, name: str = "", content: AnyMessage = "") -> MessageSegment:
   if not name:
     return MessageSegment("node", {"id": id})
-  return MessageSegment("node", {"uin": id, "name": name, "content": content})
+  return MessageSegment("node", {"uin": str(id), "name": name, "content": content})
 
 
 async def send_forward_msg(
