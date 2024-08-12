@@ -22,10 +22,10 @@ parser.add_argument("--original", "-o", action="store_true", help=(
   "使用原图，可能出现文件过大发送失败"
 ))
 group = parser.add_mutually_exclusive_group()
-group.add_argument("--ccw", "-c", dest="acw", action="store_false", default=None, help=(
+group.add_argument("--clockwise", "-c", dest="acw", action="store_false", default=None, help=(
   "始终使用顺时针而非随机"
 ))
-group.add_argument("--acw", "-a", dest="acw", action="store_true", help=(
+group.add_argument("--anticlockwise", "-a", dest="acw", action="store_true", help=(
   "始终使用逆时针而非随机"
 ))
 group = parser.add_mutually_exclusive_group()
