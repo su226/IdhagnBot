@@ -13,7 +13,7 @@ from util import command, imutil, misc, textutil
 from util.user_aliases import AvatarGetter, DefaultType
 
 gi.require_version("Pango", "1.0")
-from gi.repository import Pango  # noqa: E402  # type: ignore
+from gi.repository import Pango  # noqa: E402
 
 DIR = Path(__file__).resolve().parent
 CHINESE_RE = re.compile(r"[\u4e00-\u9fa5]+")
@@ -44,6 +44,8 @@ def render_vertical_text(content: str, font: str, size: int, **kw: Any) -> Image
 
       layout = textutil.layout(match[0], font, size)
       desc = layout.get_font_description()
+      if desc is None:
+        raise RuntimeError
       desc.set_gravity(Pango.Gravity.EAST)
       layout.set_font_description(desc)
       im = textutil.render(layout, **kw)

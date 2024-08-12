@@ -2,7 +2,7 @@ import asyncio
 import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -79,9 +79,9 @@ def make_list_item(name: str, uid: int, medal: Optional[Medal]) -> Image.Image:
   margin = 12
   uid_width = uid_im.width + padding * 2
   im_width = name_im.width + margin + uid_width
-  medal_name_layout = Any
-  medal_level_layout = Any
-  medal_width = Any
+  medal_name_layout = cast(Any, None)
+  medal_level_layout = cast(Any, None)
+  medal_width = cast(Any, None)
   if medal:
     medal_name_layout = textutil.layout(medal.name, "sans", 28)
     medal_level_layout = textutil.layout(str(medal.level), "sans", 28)

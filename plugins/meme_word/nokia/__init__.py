@@ -24,7 +24,7 @@ async def handle_nokia(args: Message = CommandArg()):
     content = misc.removeprefix(args.extract_plain_text().rstrip(), ".") or nokia.__doc__ or ""
     font = textutil.special_font("pixel", "sans")
     layout = textutil.layout(content, font, 32, box=320)
-    if layout.get_pixel_size().height > 224:
+    if layout.get_pixel_size()[1] > 224:
       layout = textutil.layout("文本不能超过 7 行", font, 32, box=320)
     layer = textutil.render(layout, color=(24, 53, 4))
     layer = ImageOps.expand(layer, (0, 0, 320 - layer.width, 224 - layer.height))

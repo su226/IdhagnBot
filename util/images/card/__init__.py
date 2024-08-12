@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, List, Optional, Tuple, Union, cast, overload
+from typing import Any, List, Optional, Tuple, Union, overload
 
 from PIL import Image, ImageOps
 from typing_extensions import Self
@@ -57,7 +57,7 @@ class CardText(Render):
     ellipsize: textutil.Ellipsize = "end", stroke_color: imutil.Color = (255, 255, 255), **kw: Any,
   ) -> None:
     self.layout = (
-      cast(textutil.Layout, content) if isinstance(content, textutil.Layout) else
+      content if isinstance(content, textutil.Layout) else
       textutil.layout(content, font, size, *args, box=CONTENT_WIDTH, ellipsize=ellipsize, **kw)
     )
     self.width, self.height = self.layout.get_pixel_size()
@@ -123,7 +123,7 @@ class CardAuthor(Render):
     else:
       self.fans_layout = None
     self.name_layout = textutil.layout(name, "sans", 32, box=name_max, ellipsize="end")
-    name_height = self.name_layout.get_pixel_size().height
+    name_height = self.name_layout.get_pixel_size()[1]
     self.height = max(self.height, name_height)
 
   def get_width(self) -> int:

@@ -11,7 +11,7 @@ from util import colorutil, imutil, misc
 gi.require_version("GLib", "2.0")
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
-from gi.repository import GLib, Pango, PangoCairo  # noqa: E402  # type: ignore
+from gi.repository import GLib, Pango, PangoCairo  # noqa: E402
 
 Layout: TypeAlias = Pango.Layout
 Wrap = Literal["word", "char", "word_char"]
@@ -75,7 +75,7 @@ class RichText:
     self._utf8 = bytearray()
     self._attrs = Pango.AttrList()
     self._images: Dict[int, cairo.ImageSurface] = {}
-    self._layout = Layout(self._context)
+    self._layout = cast(Any, Layout)(self._context)
     self._frozen = False
 
   def _render_images(self, cr: "cairo.Context[Any]", attr: Pango.AttrShape, do_path: bool) -> None:
@@ -83,7 +83,7 @@ class RichText:
       return
     x, y = cr.get_current_point()
     y += attr.ink_rect.y / Pango.SCALE
-    surface = self._images[attr.data]
+    surface = self._images[cast(Any, attr.data)]
     cr.set_source_surface(surface, x, y)
     cr.rectangle(x, y, surface.get_width(), surface.get_height())
     cr.fill()
@@ -117,7 +117,7 @@ class RichText:
       rect.y = -im.height * Pango.SCALE
     rect.width = im.width * Pango.SCALE
     rect.height = im.height * Pango.SCALE
-    attr = Pango.AttrShape.new_with_data(rect, rect, image_id)
+    attr = Pango.AttrShape.new_with_data(rect, rect, cast(Any, image_id))
     attr.start_index = len(self._utf8)
     attr.end_index = len(self._utf8) + len(self._IMAGE_REPLACEMENT)
     self._utf8.extend(self._IMAGE_REPLACEMENT)
@@ -156,7 +156,7 @@ class RichText:
       self._layout.set_spacing(0)
     else:
       self._layout.set_line_spacing(0)
-      self._layout.set_spacing(spacing * Pango.SCALE)
+      self._layout.set_spacing(int(spacing * Pango.SCALE))
     return self
 
   def set_align(self, align: Align) -> Self:
@@ -165,7 +165,7 @@ class RichText:
 
   def size(self) -> Tuple[int, int]:
     _, rect = self._layout.get_pixel_extents()
-    return rect
+    return (rect.width, rect.height)
 
   def unwrap(self) -> Layout:
     self._layout.set_text(self._utf8.decode())
@@ -251,7 +251,7 @@ def render(
   stroke_color: imutil.Color = (255, 255, 255), **kw: Any,
 ) -> Image.Image:
   if isinstance(content, Layout):
-    l = cast(Layout, content)
+    l = content
   else:
     l = layout(content, *args, **kw)
   _, rect = l.get_pixel_extents()

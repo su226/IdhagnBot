@@ -1,5 +1,5 @@
 from io import BytesIO
-from typing import Any, cast
+from typing import Any
 
 import cairo
 import gi
@@ -10,7 +10,7 @@ from util import command, misc, textutil
 
 gi.require_version("Pango", "1.0")
 gi.require_version("PangoCairo", "1.0")
-from gi.repository import Pango, PangoCairo  # noqa: E402  # type: ignore
+from gi.repository import Pango, PangoCairo  # noqa: E402
 
 TOP_X = 70
 TOP_Y = 0
@@ -159,8 +159,8 @@ def render_bottom(cr: "cairo.Context[Any]", layout: Pango.Layout):
 def render(top: str, bottom: str) -> MessageSegment:
   top_layout = textutil.layout(top, "sans bold", 100)
   bottom_layout = textutil.layout(bottom, "serif bold", 100)
-  top_width = cast(int, top_layout.get_pixel_size()[0])
-  bottom_width = cast(int, bottom_layout.get_pixel_size()[0])
+  top_width = top_layout.get_pixel_size()[0]
+  bottom_width = bottom_layout.get_pixel_size()[0]
   width = max(top_width + TOP_X, bottom_width + BOTTOM_X - 60)
   if bottom:
     height = 290
