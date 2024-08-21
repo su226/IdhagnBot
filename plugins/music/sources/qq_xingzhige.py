@@ -9,17 +9,17 @@ from util import misc
 
 from .base import Music, SearchResult
 
-SEARCH_API = "https://api.f4team.cn/API/QQ_Music_new/?msg={keyword}&limit=50"
-ID_API = "https://api.f4team.cn/API/QQ_Music_new/?mid={id}&br={quality}"
+SEARCH_API = "https://api.xingzhige.com/API/QQmusicVIP/?name={keyword}&max=60"
+ID_API = "https://api.xingzhige.com/API/QQmusicVIP/?mid={id}&br={quality}"
 ID_RE = re.compile(r"[0-9A-Za-z]{14}")
 QUALITY_MASTERTAPE = 14  # 母带
 QUALITY_LOSSLESS = 11  # 无损
-QUALITY_HIGH = 8  # 高
-QUALITY_MEDIUM = 4  # 标准
+QUALITY_HIGH = 8  # 高(320k)
+QUALITY_MEDIUM = 4  # 标准(128k)
 
 
 @dataclass
-class QQOvooaMusic(Music):
+class QQXinzhigeMusic(Music):
   mid: str
 
   @staticmethod
@@ -27,7 +27,8 @@ class QQOvooaMusic(Music):
     http = misc.http()
     async with http.get(ID_API.format(id=mid, quality=QUALITY_MASTERTAPE)) as response:
       lossless_data = await response.json()
-    return lossless_data["data"]["music"] if lossless_data["data"]["size"]["bit"] is None else None
+    kbps = int(misc.removesuffix(lossless_data["data"]["kbps"], "kbps"))
+    return lossless_data["data"]["src"] if kbps > 320 else None
 
   async def segment(self) -> MessageSegment:
     http = misc.http()
@@ -37,11 +38,11 @@ class QQOvooaMusic(Music):
       "type": "custom",
       "subtype": "qq",
       "url": f"https://y.qq.com/n/ryqq/songDetail/{data['data']['mid']}",
-      "audio": data["data"]["music"],
+      "audio": data["data"]["src"],
       "lossless": await self._get_lossless_url(self.mid),
       "title": self.name,
       "content": self.artists,
-      "image": data["data"]["picture"],
+      "image": data["data"]["cover"],
     })
 
   @staticmethod
@@ -55,29 +56,29 @@ class QQOvooaMusic(Music):
       "type": "custom",
       "subtype": "qq",
       "url": f"https://y.qq.com/n/ryqq/songDetail/{data['data']['mid']}",
-      "audio": data["data"]["music"],
-      "lossless": await QQOvooaMusic._get_lossless_url(id),
-      "title": data["data"]["song"],
-      "content": data["data"]["singer"],
-      "image": data["data"]["picture"],
+      "audio": data["data"]["src"],
+      "lossless": await QQXinzhigeMusic._get_lossless_url(id),
+      "title": data["data"]["songname"],
+      "content": data["data"]["name"],
+      "image": data["data"]["cover"],
     })
 
   @staticmethod
-  async def search(keyword: str, page_size: int) -> SearchResult["QQOvooaMusic"]:
+  async def search(keyword: str, page_size: int) -> SearchResult["QQXinzhigeMusic"]:
     http = misc.http()
     keyword = encodeuri(keyword)
     async with http.get(SEARCH_API.format(keyword=keyword)) as response:
       data = await response.json()
-    count = len(data["data"])
+    songs = data.get("data", [])
 
-    async def _musics() -> AsyncGenerator[QQOvooaMusic, None]:
-      for song in data["data"]:
-        yield QQOvooaMusic(
-          song["song"],
-          "/".join(song["singers"]),
+    async def _musics() -> AsyncGenerator[QQXinzhigeMusic, None]:
+      for song in songs:
+        yield QQXinzhigeMusic(
+          song["songname"],
+          song["name"],
           song["album"],
           False,
           song["mid"],
         )
 
-    return SearchResult(count, _musics())
+    return SearchResult(len(songs), _musics())

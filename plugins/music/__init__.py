@@ -16,7 +16,7 @@ from .sources.kugou import KugouMusic
 from .sources.kuwo import KuwoMusic
 from .sources.migu import MiguMusic
 from .sources.netease import NeteaseMusic
-from .sources.qq_ovooa import QQOvooaMusic
+from .sources.qq_xingzhige import QQXinzhigeMusic
 
 LIMIT = 10
 
@@ -217,10 +217,10 @@ append_music_handler(
 /QQ音乐 <id> - 发送指定ID的歌
 /QQ音乐 <id> 直链 - 同上，但获取直链
 /QQ音乐 <id> 语音 - 同上，但发送语音
-API来自第三方：api.f4team.cn''')
+API来自第三方：api.xingzhige.com''')
   .category("music")
   .build(),
-  QQOvooaMusic,
+  QQXinzhigeMusic,
 )
 category = CategoryItem.find("music")
 category.brief = "点歌插件"
