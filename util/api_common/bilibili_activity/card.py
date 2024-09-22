@@ -7,7 +7,7 @@ from PIL import Image
 from util import imutil, misc, textutil
 from util.images.card import CONTENT_WIDTH, PADDING, WIDTH, Render
 
-from . import RichText, RichTextEmotion, RichTextLink, Topic
+from . import RichText, RichTextEmotion, RichTextText, Topic
 
 EMOTION_SIZE = 48
 
@@ -53,12 +53,12 @@ class CardRichText(Render):
     if topic:
       render.append_markup(f"<span color='#008ac5'>#{textutil.escape(topic.name)}</span>\n")
     for node in richtext:
-      if isinstance(node, RichTextEmotion):
+      if isinstance(node, RichTextText):
+        render.append(node.text)
+      elif isinstance(node, RichTextEmotion):
         render.append_image(emotions[node.url])
-      elif isinstance(node, RichTextLink):
-        render.append_markup(f"<span color='#008ac5'>{textutil.escape(node.text)}</span>")
       else:
-        render.append(node)
+        render.append_markup(f"<span color='#008ac5'>{textutil.escape(node.text)}</span>")
     self._im = render.render()
 
   def get_width(self) -> int:

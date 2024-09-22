@@ -10,12 +10,13 @@ from util.api_common.bilibili_activity import (
   Activity, ActivityCourse, ActivityForward, ActivityLive, ActivityLiveRcmd, ActivityPGC,
   ActivityPlaylist, ContentArticle, ContentAudio, ContentCommon, ContentCourse, ContentImage,
   ContentLive, ContentLiveRcmd, ContentPGC, ContentPlaylist, ContentText, ContentVideo,
+  RichTextLottery,
 )
 from util.api_common.bilibili_activity.card import CardRichText, CardTopic, fetch_emotions
 from util.images.card import Card, CardAuthor, CardCover, CardLine, CardText
 
 from .. import extras
-from ..common import check_ignore, fetch_image
+from ..common import CONFIG, IgnoredException, check_ignore, fetch_image
 from . import article, audio, common, image, text, video
 
 TContent = TypeVar("TContent")
@@ -30,7 +31,7 @@ def make_title_formatter(label: str) -> Callable[[Activity[object, object]], str
   return title_formatter
 
 
-def pgc_title(activity: ActivityPGC[object]) -> str:
+def pgc_title_formatter(activity: ActivityPGC[object]) -> str:
   if activity.content.label:
     prefix = activity.content.label
   else:
@@ -39,7 +40,14 @@ def pgc_title(activity: ActivityPGC[object]) -> str:
 
 
 def checker(activity: Union[text.ActivityText[object], image.ActivityImage[object]]) -> None:
-  check_ignore(True, activity.content.text)
+  config = CONFIG()
+  if config.ignore_forward_lottery:
+    for node in activity.content.richtext:
+      if isinstance(node, RichTextLottery):
+        raise IgnoredException(node)
+  for regex in config.ignore_forward_regexs:
+    if regex.search(activity.content.text):
+      raise IgnoredException(regex)
 
 
 async def get_pgc_appender(activity: ActivityPGC[object]) -> Callable[[Card], None]:
@@ -196,7 +204,7 @@ TITLE_FORMATTERS: List[TitleFormatter[Any]] = [
   (ContentVideo, make_title_formatter("视频")),
   (ContentAudio, make_title_formatter("音频")),
   (ContentArticle, make_title_formatter("专栏")),
-  (ContentPGC, pgc_title),
+  (ContentPGC, pgc_title_formatter),
   (ContentLive, make_title_formatter("直播")),
   (ContentLiveRcmd, make_title_formatter("直播")),
   (ContentCourse, make_title_formatter("课程")),
@@ -219,7 +227,7 @@ CARD_APPENDERS: List[AppenderGetter[Any]] = [
 
 async def format(activity: ActivityForward[object], can_ignore: bool) -> Message:
   if can_ignore:
-    check_ignore(False, activity.content.text)
+    check_ignore(activity.content.text)
 
   if activity.content.activity is None:
     title_label = "失效动态"

@@ -53,7 +53,7 @@ async def get_appender(activity: ActivityImage[object]) -> Callable[[Card], None
 
 async def format(activity: ActivityImage[object], can_ignore: bool) -> Message:
   if can_ignore:
-    check_ignore(False, activity.content.text)
+    check_ignore(activity.content.text)
   appender = await get_appender(activity)
 
   def make() -> Message:

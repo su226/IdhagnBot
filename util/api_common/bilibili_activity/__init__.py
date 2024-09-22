@@ -104,16 +104,28 @@ async def json_get(id: str, cookie: str = "") -> Dict[Any, Any]:
 
 
 @dataclass
-class RichTextEmotion:
+class RichTextNode:
+  text: str
+
+
+class RichTextText(RichTextNode):
+  pass
+
+
+class RichTextOther(RichTextNode):
+  pass
+
+
+@dataclass
+class RichTextEmotion(RichTextNode):
   url: str
 
 
 @dataclass
-class RichTextLink:
-  text: str
+class RichTextLottery(RichTextNode):
+  rid: int
 
 
-RichTextNode = Union[str, RichTextEmotion, RichTextLink]
 RichText = List[RichTextNode]
 
 
@@ -121,11 +133,13 @@ def grpc_parse_richtext(desc: Iterable["Description"]) -> RichText:
   nodes: RichText = []
   for node in desc:
     if node.type == DescType.desc_type_text:
-      nodes.append(node.text)
+      nodes.append(RichTextText(node.text))
     elif node.type == DescType.desc_type_emoji:
-      nodes.append(RichTextEmotion(node.uri))
+      nodes.append(RichTextEmotion(node.text, node.uri))
+    elif node.type == DescType.desc_type_lottery:
+      nodes.append(RichTextLottery(node.text, int(node.rid)))
     else:
-      nodes.append(RichTextLink(node.text))
+      nodes.append(RichTextOther(node.text))
   return nodes
 
 
@@ -133,11 +147,13 @@ def json_parse_richtext(text: List[Dict[Any, Any]]) -> RichText:
   nodes: RichText = []
   for node in text:
     if node["type"] == "RICH_TEXT_NODE_TYPE_TEXT":
-      nodes.append(node["text"])
+      nodes.append(RichTextText(node["text"]))
     elif node["type"] == "RICH_TEXT_NODE_TYPE_EMOJI":
-      nodes.append(RichTextEmotion(node["emoji"]["icon_url"]))
+      nodes.append(RichTextEmotion(node["text"], node["emoji"]["icon_url"]))
+    elif node["type"] == "RICH_TEXT_NODE_TYPE_LOTTERY":
+      nodes.append(RichTextLottery(node["text"], int(node["rid"])))
     else:
-      nodes.append(RichTextLink(node["text"]))
+      nodes.append(RichTextOther(node["text"]))
   return nodes
 
 

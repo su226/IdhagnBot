@@ -36,6 +36,7 @@ class Config(BaseModel):
   users: List[User] = Field(default_factory=list)
   ignore_regexs: List[Pattern[str]] = Field(default_factory=list)
   ignore_forward_regexs: List[Pattern[str]] = Field(default_factory=list)
+  ignore_forward_lottery: bool = False
 
   @property
   def grpc(self) -> bool:
@@ -62,10 +63,8 @@ class IgnoredException(Exception):
   pass
 
 
-def check_ignore(forward: bool, content: str):
-  config = CONFIG()
-  regexs = config.ignore_forward_regexs if forward else config.ignore_regexs
-  for regex in regexs:
+def check_ignore(content: str):
+  for regex in CONFIG().ignore_regexs:
     if regex.search(content):
       raise IgnoredException(regex)
 

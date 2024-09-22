@@ -117,8 +117,8 @@ async def try_check(bot: Bot, user: common.User) -> int:
     logger.info(f"推送 {user._name}({user.uid}) 的动态 {activity.id}")
     try:
       message = await contents.format(activity)
-    except common.IgnoredException:
-      logger.info(f"已忽略 {user._name}({user.uid}) 的动态 {activity.id}")
+    except common.IgnoredException as e:
+      logger.info(f"已忽略 {user._name}({user.uid}) 的动态 {activity.id}: {e}")
       return
     except Exception:
       logger.exception((
