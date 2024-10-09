@@ -6,8 +6,7 @@ from util import misc
 
 from . import DailyCache, Module
 
-NEWS_API = "https://api.qqsuu.cn/api/dm-60s"
-# NEWS_API = "https://api.vvhan.com/api/60s"  # noqa: ERA001  # 备用，只有 JSON 格式
+NEWS_API = "https://api.tangdouz.com/60.php"
 
 
 class NewsCache(DailyCache):
@@ -18,6 +17,8 @@ class NewsCache(DailyCache):
     http = misc.http()
     with open(self.path, "wb") as f:
       async with http.get(NEWS_API) as response:
+        url = await response.text()
+      async with http.get(url) as response:
         f.write(await response.read())
     self.write_date()
 
