@@ -8,6 +8,8 @@ import random
 import sys
 from datetime import timedelta
 from enum import Enum
+from html.parser import HTMLParser
+from io import StringIO
 from typing import (
   TYPE_CHECKING, Any, Callable, Coroutine, Dict, Generator, Iterable, List, Literal, Optional,
   Sequence, Set, Tuple, TypeVar, Union, overload,
@@ -32,7 +34,7 @@ if TYPE_CHECKING:
 __all__ = [
   "ADAPTER_NAME", "BROWSER_UA", "AggregateError", "AnyMessage", "CONFIG", "CairoAntialias",
   "CairoHintMetrics", "CairoHintStyle", "CairoSubpixel", "Config", "EnableSet", "Font",
-  "NotCommand", "PromptTimeout", "Quantize", "Resample", "ScaleResample", "any_v",
+  "HTMLStripper", "NotCommand", "PromptTimeout", "Quantize", "Resample", "ScaleResample", "any_v",
   "binomial_sample", "chunked", "command_start", "format_time", "forward_node", "http",
   "is_command", "is_superuser", "launch_playwright", "local", "prompt", "range_float", "range_int",
   "send_forward_msg", "superusers", "weighted_choice",
@@ -108,6 +110,25 @@ class PromptTimeout(asyncio.TimeoutError):
 class Font(BaseModel):
   path: str
   index: int
+
+
+class HTMLStripper(HTMLParser):
+  def __init__(self):
+    super().__init__()
+    self.f = StringIO()
+
+  def handle_data(self, data: str) -> None:
+    self.f.write(data)
+
+  def getvalue(self) -> str:
+    return self.f.getvalue()
+  
+  @staticmethod
+  def strip(text: str) -> str:
+    stripper = HTMLStripper()
+    stripper.feed(text)
+    stripper.close()
+    return stripper.getvalue()
 
 
 class Config(BaseModel):

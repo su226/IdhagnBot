@@ -341,7 +341,7 @@ async def handle_sentence() -> None:
 history = (
   command.CommandBuilder("daily.history", "历史")
   .brief("看看历史上的今天")
-  .usage("接口来自https://www.ipip5.com/today/")
+  .usage("接口来自https://baike.baidu.com/calendar/")
   .build()
 )
 @history.handle()

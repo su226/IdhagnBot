@@ -8,7 +8,7 @@ from util import misc
 
 from . import DailyCache, Module
 
-HISTORY_API = "https://www.ipip5.com/today/api.php?type=json"
+HISTORY_API = "https://baike.baidu.com/cms/home/eventsOnHistory/{month}.json"
 
 
 class HistoryCache(DailyCache):
@@ -17,9 +17,14 @@ class HistoryCache(DailyCache):
 
   async def update(self) -> None:
     http = misc.http()
-    async with http.get(HISTORY_API) as response:
-      data = await response.json()
-    data["result"].pop()
+    today = date.today()
+    month = f"{today.month:02}"
+    day = f"{month}{today.day:02}"
+    async with http.get(HISTORY_API.format(month=month)) as response:
+      data = await response.json(content_type="text/json")
+      data = data[month][day]
+      for i in data:
+        i["title"] = misc.HTMLStripper.strip(i["title"])
     with open(self.path, "w") as f:
       json.dump(data, f, ensure_ascii=False)
     self.write_date()
@@ -35,7 +40,7 @@ class HistoryModule(Module):
     lines = [f"今天是{today.month}月{today.day}日，历史上的今天是："]
     with open(cache.path) as f:
       data = json.load(f)
-    for i in data["result"]:
+    for i in data:
       lines.append(f"{i['year']} - {i['title']}")
     return "\n".join(lines)
 
