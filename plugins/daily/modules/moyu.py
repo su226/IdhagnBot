@@ -18,7 +18,7 @@ class MoyuCache(DailyCache):
     async with http.get(MOYU_API) as response:
       data = await response.json()
     with open(self.path, "wb") as f:
-      async with http.get(data["data"]["moyu_url"]) as response:
+      async with http.get(data["data"]["img_url"]) as response:
         f.write(await response.read())
     self.write_date()
 
