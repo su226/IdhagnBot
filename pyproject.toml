@@ -25,7 +25,7 @@ jieba = [
 ]
 # 维基百科也需要 playwright
 libzim = [
-    "libzim~=3.4; python_version < \"3.13\"",
+    "libzim~=3.4; python_version < \"3.14\"",
 ]
 mctools = [
     "mctools~=1.3",
