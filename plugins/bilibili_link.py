@@ -17,7 +17,7 @@ from util.images.card import Card, CardAuthor, CardCover, CardInfo, CardText, In
 VIDEO_RE = re.compile(r"av\d{1,9}|(BV|bv)[A-Za-z0-9]{10}")
 LINK_RE = re.compile(
   r"bilibili\.com/video/(av\d{1,9}|(BV|bv)[A-Za-z0-9]{10})"
-  r"|b23\.tv/(av\d{1,9}|BV[A-Za-z0-9]{10}|[A-Za-z0-9]{7})",
+  r"|(b23\.tv|bili2233\.cn)/(av\d{1,9}|BV[A-Za-z0-9]{10}|[A-Za-z0-9]{7})",
 )
 INFO_API = "https://api.bilibili.com/x/web-interface/view/detail"
 ParseRequest = Tuple[str, str, int]
