@@ -17,6 +17,7 @@ dependencies = [
     "Pillow~=10.4",
     "pycairo~=1.26",
     "PyGObject~=3.48",
+    "meme-generator>=0.1.10",
 ]
 
 [project.optional-dependencies]
