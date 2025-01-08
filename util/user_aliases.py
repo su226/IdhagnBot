@@ -63,7 +63,7 @@ CONFIG = configs.SharedConfig("user_aliases", Config)
 CACHE: Dict[int, Tuple[float, AliasesDict]] = {}
 IDENTIFIER_RE = re.compile(r"[a-zA-Z0-9\u4e00-\u9fa5]+")
 AMBIGUOUS_LIMIT = 5
-AT_RE = re.compile(r"^\[CQ:at,qq=(\d+|all)\]$")
+AT_RE = re.compile(r"^\[CQ:at,qq=(\d+|all)(?:,[^\]]+)?\]$")
 LINK_RE = re.compile(r"^https?://.+$")
 IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
 
@@ -73,7 +73,9 @@ def onload(prev: Optional[Config], curr: Config) -> None:
   CACHE.clear()
 
 
-def to_identifier(data: str) -> str:
+def to_identifier(data: Optional[str]) -> str:
+  if not data:
+    return ""
   return "".join(IDENTIFIER_RE.findall(data)).lower()
 
 
