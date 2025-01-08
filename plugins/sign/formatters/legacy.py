@@ -1,5 +1,4 @@
 import asyncio
-import html
 from calendar import Calendar
 from datetime import date
 from typing import Dict, List
@@ -40,7 +39,7 @@ async def make_image(bot: Bot, format_data: FormatData) -> MessageSegment:
         prefix = config.first_prefix[i]
       else:
         prefix = f"{i + 1}. "
-      name = html.escape(name)
+      name = textutil.escape(name)
       if user == format_data.uid:
         name = f"<b>{name}</b>"
       time = group_data.users[user].time.strftime("%H:%M:%S")

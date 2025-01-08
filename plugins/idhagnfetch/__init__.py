@@ -1,5 +1,4 @@
 import asyncio
-import html
 import itertools
 import platform
 import re
@@ -87,8 +86,8 @@ class Config(BaseModel):
 
   def format(self, primary: str, secondary: str) -> str:
     return (
-      f"<span color='#{self.primary_color:06x}' weight='bold'>{html.escape(primary)}</span>"
-      f"<span color='#{self.secondary_color:06x}'>{html.escape(secondary)}</span>"
+      f"<span color='#{self.primary_color:06x}' weight='bold'>{textutil.escape(primary)}</span>"
+      f"<span color='#{self.secondary_color:06x}'>{textutil.escape(secondary)}</span>"
     )
 
 

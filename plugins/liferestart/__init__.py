@@ -1,4 +1,3 @@
-import html
 import itertools
 import random
 from argparse import Namespace
@@ -72,7 +71,7 @@ def make_image(messages: Iterable[Union[Tuple[Rarity, str], str]]) -> MessageSeg
     else:
       rarity = Rarity.COMMON
       content = line
-    lines.append(f"<span color=\"#{RARITY_COLOR[rarity]}\">{html.escape(content)}</span>")
+    lines.append(f"<span color=\"#{RARITY_COLOR[rarity]}\">{textutil.escape(content)}</span>")
   text_im = textutil.render(
     "\n".join(lines), "sans", 32, box=576, color=(255, 255, 255), markup=True,
   )

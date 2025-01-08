@@ -1,4 +1,3 @@
-import html
 from typing import List, Tuple
 
 from PIL import Image, ImageChops, ImageFilter, ImageOps
@@ -51,9 +50,9 @@ def render(data: List[Tuple[Image.Image, str, str]]) -> Image.Image:
       im.paste(avatar, (0, y), avatar)
 
       name_x = round(line_h * 1.2)
-      markup = html.escape(name)
+      markup = textutil.escape(name)
       if info:
-        markup += f"\n<span size='66%'>{html.escape(info)}</span>"
+        markup += f"\n<span size='66%'>{textutil.escape(info)}</span>"
       textutil.paste(
         im, (name_x, y + line_h // 2), markup, "sans", line_h * 0.3, anchor="lm", markup=True,
         color=(255, 255, 255), box=WIDTH - name_x - 16, ellipsize="end",
