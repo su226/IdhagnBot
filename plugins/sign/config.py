@@ -11,7 +11,7 @@ class Config(BaseModel):
   coin: Union[Tuple[int, int], int] = (80, 120)
   combo_each: float = 0.1
   combo_max: float = 1.0
-  first_award: List[int] = Field(default_factory=lambda: [0.5, 0.25, 0.1])
+  first_award: List[float] = Field(default_factory=lambda: [0.5, 0.25, 0.1])
   first_prefix: List[str] = Field(default_factory=lambda: ["🥇", "🥈", "🥉"])
   max_rank: int = 10
   formatter: Literal["legacy", "ring"] = "ring"

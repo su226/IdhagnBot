@@ -28,7 +28,7 @@ class Config(BaseModel):
   @property
   def archive(self) -> Archive:
     if not self._archive:
-      self._archive = Archive(self.zim)
+      self._archive = Archive(Path(self.zim))
     return self._archive
 
 
