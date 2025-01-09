@@ -21,7 +21,7 @@ class Config(BaseModel):
   # 从网页查询有上黑等级、上黑时间、上黑原因和登记人，但使用 API 查询只有上黑原因
   # 并且没有批量查询，没法写查询全群
   # 对不起绮梦老师了
-  host: str = "https://yunhei.furrynet.top"
+  host: str = "https://fz.qimeng.fun"
   api: str = "http://yunhei.qimeng.fun:12301/OpenAPI.php"
   token: SecretStr = SecretStr("")
   check_join: misc.EnableSet = misc.EnableSet.false()
@@ -31,11 +31,46 @@ class Config(BaseModel):
   ignore: Set[int] = Field(default_factory=lambda: {2854196310})
 
   @property
-  def use_spider(self) -> bool:
-    return self.token.get_secret_value() == "spider"
+  def spider_version(self) -> int:
+    if self.token.get_secret_value() in ("spider", "spider_v2"):
+      return 2
+    if self.token.get_secret_value() == "spider_v1":
+      return 1
+    return 0
 
 
-class SingleParser(HTMLParser):
+class SingleV2Parser(HTMLParser):
+  def __init__(self) -> None:
+    super().__init__()
+    self.level = 0
+    self.in_script = False
+    self.text = StringIO()
+
+  def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+    if self.level:
+      if tag == "script":
+        self.in_script = True
+      self.level += 1
+    elif ("class", "header-img") in attrs:
+      self.level = 2
+
+  def handle_data(self, data: str) -> None:
+    if self.level and not self.in_script:
+      self.text.write(data.strip())
+
+  def handle_endtag(self, tag: str) -> None:
+    if self.level:
+      if tag in ("h4", "h5", "p"):
+        self.text.write("\n")
+      elif tag == "script":
+        self.in_script = False
+      self.level -= 1
+
+  def getvalue(self) -> str:
+    return self.text.getvalue().lstrip("◈").rstrip("\n◈")
+
+
+class SingleV1Parser(HTMLParser):
   def __init__(self) -> None:
     super().__init__()
     self.level = 0
@@ -61,6 +96,9 @@ class SingleParser(HTMLParser):
     if self.level and tag == "center":
       self.text.write("\n")
 
+  def getvalue(self) -> str:
+    return self.text.getvalue().rstrip()
+
 
 class BatchParser(HTMLParser):
   def __init__(self) -> None:
@@ -83,27 +121,62 @@ INT_RE = re.compile(r"\d+")
 CONFIG = configs.SharedConfig("qimeng", Config)
 
 
-async def query_openapi(uid: int) -> Optional[str]:
+async def query_openapi(uid: int) -> Tuple[int, str]:
   config = CONFIG()
   http = misc.http()
   params = {"key": config.token.get_secret_value(), "id": uid}
   async with http.get(config.api, params=params) as response:
     data = await response.json(content_type=None)  # text/html
   data = data["info"][0]
-  if data["yh"] == "false":
-    return None
-  return data["note"]
+  if data["type"] == "bilei":
+    type = 2
+    detail = f'''\
+账号为避雷/前科
+登记老师:{data["admin"]}
+避雷时间:{data["date"]}
+避雷原因:{data["note"]}'''
+  elif data["type"] == "yunhei":
+    type = 1
+    detail = f'''\
+帐号为云黑
+登记老师:{data["admin"]}
+云黑等级:{data["level"]}
+上黑时间:{data["date"]}
+云黑原因:{data["note"]}'''
+  else:
+    type = 0
+    detail = "账号暂无云黑"
+  return type, detail
 
 
-async def query_spider(uid: int) -> Tuple[int, str]:
+async def query_spider_single_v2(uid: int) -> Tuple[int, str]:
   config = CONFIG()
   http = misc.http()
-  data = {"qq": uid}
-  async with http.post(config.host, data=data) as response:
-    parser = SingleParser()
+  async with http.get(
+    # 非浏览器UA排版有问题
+    config.host, params={"user": uid}, headers={"User-Agent": misc.BROWSER_UA},
+  ) as response:
+    parser = SingleV2Parser()
     parser.feed(await response.text())
     parser.close()
-  value = parser.text.getvalue().rstrip()
+    value = parser.getvalue()
+  if "避雷时间" in value:
+    type = 2
+  elif "上黑时间" in value:
+    type = 1
+  else:
+    type = 0
+  return type, value
+
+
+async def query_spider_single_v1(uid: int) -> Tuple[int, str]:
+  config = CONFIG()
+  http = misc.http()
+  async with http.post(config.host + "/oldindex.php", data={"qq": uid}) as response:
+    parser = SingleV1Parser()
+    parser.feed(await response.text())
+    parser.close()
+    value = parser.getvalue()
   if "避雷起始时间" in value:
     type = 2
   elif "上黑等级" in value:
@@ -170,10 +243,10 @@ async def handle_query(args: Message = CommandArg()) -> None:
   if not uids:
     await query.finish(query.__doc__)
   config = CONFIG()
-  if config.use_spider:
+  if config.spider_version:
     if len(uids) > CHUNK_SIZE:
       await query.finish(f"查询数量过多，最多 {CHUNK_SIZE} 个")
-    elif len(uids) > 1:
+    if len(uids) > 1:
       result = await query_spider_batch(uids)
       lines = []
       for uid, type in result:
@@ -184,17 +257,16 @@ async def handle_query(args: Message = CommandArg()) -> None:
         else:
           lines.append(f"✅ {uid} 无记录。")
       await query.finish("\n".join(lines))
-    else:
-      _, detail = await query_spider(uids[0])
+    if config.spider_version == 2:
+      _, detail = await query_spider_single_v2(uids[0])
       await query.finish(detail)
+    _, detail = await query_spider_single_v1(uids[0])
+    await query.finish(detail)
   else:
     if len(uids) > 1:
       await query.finish("抱歉，由于上游限制，OpenAPI 模式暂不支持批量查询。")
-    uid = uids[0]
-    reason = await query_openapi(uid)
-    if reason is None:
-      await query.finish(f"查询账号：{uid}\n该用户未上黑，但并不保证绝对安全。")
-    await query.finish(f"查询账号：{uid}\n该用户已上黑，原因为：" + reason)
+    _, detail = await query_openapi(uids[0])
+    await query.finish(detail)
 
 
 def query_all_usage() -> str:
@@ -210,8 +282,8 @@ query_all = (
   .usage(query_all_usage)
   .throttle(1, 10)
   .in_group()
-  .help_condition(lambda _: CONFIG().use_spider)
-  .rule(lambda: CONFIG().use_spider)
+  .help_condition(lambda _: CONFIG().spider_version != 0)
+  .rule(lambda: CONFIG().spider_version != 0)
   .build()
 )
 
@@ -258,8 +330,8 @@ kick_all = (
   .throttle(1, 10)
   .in_group()
   .level("admin")
-  .help_condition(lambda _: CONFIG().use_spider)
-  .rule(lambda: CONFIG().use_spider)
+  .help_condition(lambda _: CONFIG().spider_version != 0)
+  .rule(lambda: CONFIG().spider_version != 0)
   .build()
 )
 
@@ -335,15 +407,14 @@ on_member_join = nonebot.on_notice(check_member_join)
 @on_member_join.handle()
 async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
   config = CONFIG()
-  if config.use_spider:
-    type, detail = await query_spider(event.user_id)
-    if type == 0:
-      return
+  if config.spider_version == 2:
+    type, detail = await query_spider_single_v2(event.user_id)
+  elif config.spider_version == 1:
+    type, detail = await query_spider_single_v1(event.user_id)
   else:
-    reason = await query_openapi(event.user_id)
-    if reason is None:
-      return
-    detail = f"原因：{reason}\n详情请参考 {config.host}"
+    type, detail = await query_openapi(event.user_id)
+  if type == 0:
+    return
   name = await context.get_card_or_name(bot, event, event.user_id)
   await on_member_join.finish(f'''⚠️ 警告 ⚠️
 刚刚加群的用户 {name}({event.user_id}) 已上黑，请注意。
@@ -364,15 +435,14 @@ on_group_request = nonebot.on_notice(check_group_request)
 @on_group_request.handle()
 async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
   config = CONFIG()
-  if config.use_spider:
-    type, detail = await query_spider(event.user_id)
-    if type == 0:
-      return
+  if config.spider_version == 2:
+    type, detail = await query_spider_single_v2(event.user_id)
+  elif config.spider_version == 1:
+    type, detail = await query_spider_single_v1(event.user_id)
   else:
-    reason = await query_openapi(event.user_id)
-    if reason is None:
-      return
-    detail = f"原因：{reason}\n详情请参考 {config.host}"
+    type, detail = await query_openapi(event.user_id)
+  if type == 0:
+    return
   if config.reject_request[event.group_id]:
     await bot.set_group_add_request(
       flag=event.flag, sub_type=event.sub_type, approve=False, reason="云黑用户，机器人自动拒绝",
