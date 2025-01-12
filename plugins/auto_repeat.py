@@ -65,8 +65,14 @@ def is_same(msg1: Message, msg2: Message) -> bool:
     if seg1.type != seg2.type:
       return False
     if seg1.type == "image":
-      if seg1.data["file"] != seg2.data["file"]:
-        return False
+      if "filename" in seg1.data and "filename" in seg2.data:
+        # Lagrange.OneBot
+        if seg1.data["filename"] != seg2.data["filename"]:
+          return False
+      else:
+        # 其他
+        if seg1.data["file"] != seg2.data["file"]:
+          return False
     elif seg1.data != seg2.data:
       return False
   return True
