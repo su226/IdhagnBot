@@ -35,7 +35,7 @@ def getslug(game: Dict[str, Any]) -> str:
   if slug and slug != "[]":
     return slug.removesuffix("/home")
   for i in game["offerMappings"]:
-    if i.get("pageType", "") == "productHome":
+    if i.get("pageType", "") in ("productHome", "offer"):
       return i["pageSlug"]
   return ""
 

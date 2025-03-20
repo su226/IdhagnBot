@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 
@@ -29,7 +30,7 @@ async def handle_epicfree():
     if message:
       text = "\n" + text
     message.extend([
-      MessageSegment.text(text + f"\n{api.URL_BASE}{game.slug}\n"),
+      MessageSegment.text(text + f"\n{api.URL_BASE}{encodeuri(game.slug)}\n"),
       MessageSegment.image(game.image),
     ])
   await epic_free.finish(Message(message))
