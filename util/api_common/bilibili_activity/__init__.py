@@ -883,7 +883,7 @@ class ExtraGoods(ExtraParser["ExtraGoods"]):
   @staticmethod
   def json_parse(item: Dict[Any, Any]) -> "ExtraGoods":
     goods = [
-      Goods(int(i["id"]), i["name"], i["price"], i["url"], i["cover"])
+      Goods(int(i["id"]), i["name"], i["price"], i["jump_url"], i["cover"])
       for i in item["goods"]["items"]
     ]
     return ExtraGoods(item["goods"]["head_text"], goods)
