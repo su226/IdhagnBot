@@ -16,6 +16,7 @@ from util import command, configs, context, misc
 from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
 from .modules.epicgames import EpicGamesModule
+from .modules.epicgames_android import EpicGamesAndroidModule
 from .modules.furbot import FurbotModule
 from .modules.history import HistoryModule
 from .modules.moyu import MoyuModule, moyu_cache
@@ -104,6 +105,14 @@ class EpicGamesModuleConfig(BaseModuleConfig):
     return EpicGamesModule(self.force)
 
 
+class EpicGamesAndroidModuleConfig(BaseModuleConfig):
+  type: Literal["epicgames_android"] = Field(frozen=True)  # type: ignore
+  force: bool = False
+
+  def create_module(self, group_id: int) -> Module:
+    return EpicGamesAndroidModule(self.force)
+
+
 class UnrealAssetsModuleConfig(BaseModuleConfig):
   type: Literal["unrealassets"] = Field(frozen=True)  # type: ignore
   force: bool = False
@@ -122,6 +131,7 @@ AnyModuleConfig = Union[
   RankModuleConfig,
   FurbotModuleConfig,
   EpicGamesModuleConfig,
+  EpicGamesAndroidModuleConfig,
   UnrealAssetsModuleConfig,
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
