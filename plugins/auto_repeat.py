@@ -25,7 +25,7 @@ class LastMessage:
 
 last_messages: Dict[int, LastMessage] = {}
 CONFIG = configs.SharedConfig("auto_repeat", Config)
-ORIGINAL_EMOTE_RE = re.compile(r"^&#91;[A-Za-z0-9\u4e00-\u9fa5]+&#93;$")
+SUPER_EMOTE_RE = re.compile(r"^\[CQ:face,id=\d+\]/[A-Za-z0-9\u4e00-\u9fa5]+$")
 
 
 @event_preprocessor
@@ -51,9 +51,13 @@ async def on_message_sent(
     last_messages[target_id] = LastMessage(message, 0, 1)
 
 
-def is_original_emote(msg: Message) -> bool:
-  # 找不到更好的解决方案，只能正则表达式匹配，虽然理论上不会漏判，但是会误判
-  return ORIGINAL_EMOTE_RE.match(str(msg)) is not None
+def is_super_emote(msg: Message) -> bool:
+  # 针对 Lagrange.OneBot 收到超级表情时有 text 消息段的缓解方案
+  return SUPER_EMOTE_RE.match(str(msg)) is not None
+
+
+def normalize_filename(filename: str) -> str:
+  return filename.split(".", 1)[0].replace("-", "").removeprefix("{").removesuffix("}").lower()
 
 
 def is_same(msg1: Message, msg2: Message) -> bool:
@@ -67,7 +71,7 @@ def is_same(msg1: Message, msg2: Message) -> bool:
     if seg1.type == "image":
       if "filename" in seg1.data and "filename" in seg2.data:
         # Lagrange.OneBot
-        if seg1.data["filename"] != seg2.data["filename"]:
+        if normalize_filename(seg1.data["filename"]) != normalize_filename(seg2.data["filename"]):
           return False
       else:
         # 其他
@@ -85,7 +89,7 @@ async def can_repeat(event: GroupMessageEvent) -> bool:
       last.sent_count < last.received_count // config.repeat_every
       and last.sent_count < config.max_repeat
       and not misc.is_command(event.message)
-      and not is_original_emote(event.message)
+      and not is_super_emote(event.message)
     )
   return False
 auto_repeat = nonebot.on_message(
