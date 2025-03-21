@@ -18,6 +18,7 @@ from .modules.countdown import Countdown, CountdownModule
 from .modules.epicgames import EpicGamesModule
 from .modules.epicgames_android import EpicGamesAndroidModule
 from .modules.furbot import FurbotModule
+from .modules.geometrydash import GeometryDashModule, daily_cache, event_cache, weekly_cache
 from .modules.history import HistoryModule
 from .modules.moyu import MoyuModule, moyu_cache
 from .modules.news import NewsModule, news_cache
@@ -121,6 +122,21 @@ class UnrealAssetsModuleConfig(BaseModuleConfig):
     return UnrealAssetsModule(self.force)
 
 
+class GeometryDashModuleConfig(BaseModuleConfig):
+  type: Literal["geometrydash"] = Field(frozen=True)  # type: ignore
+  subtype: Literal["daily", "weekly", "event"] = "daily"
+  force: bool = False
+
+  def create_module(self, group_id: int) -> Module:
+    if self.subtype == "daily":
+      cache = daily_cache
+    elif self.subtype == "weekly":
+      cache = weekly_cache
+    else:
+      cache = event_cache
+    return GeometryDashModule(cache, self.force)
+
+
 AnyModuleConfig = Union[
   StringModuleConfig,
   CountdownModuleConfig,
@@ -133,6 +149,7 @@ AnyModuleConfig = Union[
   EpicGamesModuleConfig,
   EpicGamesAndroidModuleConfig,
   UnrealAssetsModuleConfig,
+  GeometryDashModuleConfig,
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
 
