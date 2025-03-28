@@ -14,7 +14,7 @@ epic_android_free = command.CommandBuilder(
 你送游戏你是我宝，你卖游戏翻脸不认（雾）''') \
   .build()
 @epic_android_free.handle()
-async def handle_epicfree():
+async def handle_epic_android_free():
   games = await api.free_games()
   if not games:
     await epic_android_free.finish("似乎没有可白嫖的游戏")

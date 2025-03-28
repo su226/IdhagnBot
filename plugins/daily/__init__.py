@@ -17,6 +17,7 @@ from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
 from .modules.epicgames import EpicGamesModule
 from .modules.epicgames_android import EpicGamesAndroidModule
+from .modules.fab import FabModule
 from .modules.furbot import FurbotModule
 from .modules.geometrydash import GeometryDashModule, daily_cache, event_cache, weekly_cache
 from .modules.history import HistoryModule
@@ -25,7 +26,6 @@ from .modules.news import NewsModule, news_cache
 from .modules.rank import RankModule
 from .modules.sentence import SentenceModule, sentence_cache
 from .modules.string import StringModule
-from .modules.unrealassets import UnrealAssetsModule
 
 nonebot.require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler  # noqa: E402
@@ -114,12 +114,12 @@ class EpicGamesAndroidModuleConfig(BaseModuleConfig):
     return EpicGamesAndroidModule(self.force)
 
 
-class UnrealAssetsModuleConfig(BaseModuleConfig):
-  type: Literal["unrealassets"] = Field(frozen=True)  # type: ignore
+class FabModuleConfig(BaseModuleConfig):
+  type: Literal["fab"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
-    return UnrealAssetsModule(self.force)
+    return FabModule(self.force)
 
 
 class GeometryDashModuleConfig(BaseModuleConfig):
@@ -148,7 +148,7 @@ AnyModuleConfig = Union[
   FurbotModuleConfig,
   EpicGamesModuleConfig,
   EpicGamesAndroidModuleConfig,
-  UnrealAssetsModuleConfig,
+  FabModuleConfig,
   GeometryDashModuleConfig,
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]

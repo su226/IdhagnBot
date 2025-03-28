@@ -55,7 +55,7 @@ class EpicGamesModule(Module):
       games = [game for game in model.games if game.slug not in prev_slugs]
     if not games:
       return []
-    message = Message(MessageSegment.text("今天可以喜加一："))
+    message = Message(MessageSegment.text("Epic Games 今天可以喜加一："))
     for game in games:
       end_str = game.end_date.astimezone().strftime("%Y-%m-%d %H:%M")
       text = f"\n{game.title}，截止到 {end_str}\n{epic_free.URL_BASE}{game.slug}\n"
