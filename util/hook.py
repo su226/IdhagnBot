@@ -17,8 +17,10 @@ __all__ = ["on_message_sending", "on_message_sent", "MessageSendingHook", "Messa
 send_event: ContextVar[Optional[Event]] = ContextVar("send_event", default=None)
 MessageSendingHook = Callable[[Optional[Event], bool, int, Message], Awaitable[None]]
 MessageSentHook = Callable[[Optional[Event], bool, int, Message, int], Awaitable[None]]
+MessageSendFailedHook = Callable[[Optional[Event], bool, int, Message, Exception], Awaitable[None]]
 message_sending_hook: List[MessageSendingHook] = []
 message_sent_hook: List[MessageSentHook] = []
+message_send_failed_hook: List[MessageSendFailedHook] = []
 driver = nonebot.get_driver()
 
 
@@ -63,7 +65,13 @@ async def on_calling_api(bot: BaseBot, api: str, params: Dict[str, Any]) -> None
 async def on_called_api(
   bot: BaseBot, e: Optional[Exception], api: str, params: Dict[str, Any], result: Any,
 ) -> None:
-  if not message_sent_hook or not isinstance(bot, Bot) or e is not None:
+  if e is None:
+    if not message_sent_hook:
+      return
+  else:
+    if not message_send_failed_hook:
+      return
+  if not isinstance(bot, Bot):
     return
   if api in ("send_private_msg", "send_group_msg", "send_msg"):
     message = params["message"]
@@ -77,13 +85,19 @@ async def on_called_api(
   target_id = params["group_id" if is_group else "user_id"]
   message_id = result["message_id"]
   try:
-    await asyncio.gather(*(
-      x(event, is_group, target_id, message, message_id) for x in message_sent_hook
-    ))
+    if e is None:
+      await asyncio.gather(*(
+        x(event, is_group, target_id, message, message_id) for x in message_sent_hook
+      ))
+    else:
+      await asyncio.gather(*(
+        x(event, is_group, target_id, message, e) for x in message_send_failed_hook
+      ))
   except MockApiException:
     raise
   except Exception:
-    logger.exception("执行 on_message_sent 失败！")
+    name = "on_message_sent" if e is None else "on_message_send_failed"
+    logger.exception(f"执行 {name} 失败！")
 
 
 async def bot_send(self: Bot, event: Event, message: misc.AnyMessage, **kw: Any) -> Any:
@@ -103,4 +117,9 @@ def on_message_sending(hook: MessageSendingHook) -> MessageSendingHook:
 
 def on_message_sent(hook: MessageSentHook) -> MessageSentHook:
   message_sent_hook.append(hook)
+  return hook
+
+
+def on_message_send_failed(hook: MessageSendFailedHook) -> MessageSendFailedHook:
+  message_send_failed_hook.append(hook)
   return hook

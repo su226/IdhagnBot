@@ -20,6 +20,7 @@ class Config(BaseModel):
 class LastMessage:
   message: Message
   received_count: int
+  pending_count: int
   sent_count: int
 
 
@@ -33,9 +34,35 @@ async def on_message_received(event: GroupMessageEvent) -> None:
   group_id = event.group_id
   last = last_messages.get(group_id)
   if last and is_same(event.message, last.message):
-    last_messages[group_id] = LastMessage(event.message, last.received_count + 1, last.sent_count)
+    last_messages[group_id] = LastMessage(
+      message=event.message,
+      received_count=last.received_count + 1,
+      pending_count=last.pending_count,
+      sent_count=last.sent_count,
+    )
   else:
-    last_messages[group_id] = LastMessage(event.message, 1, 0)
+    last_messages[group_id] = LastMessage(
+      message=event.message,
+      received_count=1,
+      pending_count=0,
+      sent_count=0,
+    )
+
+
+@hook.on_message_sending
+async def on_message_sending(
+  event: Optional[Event], is_group: bool, target_id: int, message: Message,
+) -> None:
+  if not is_group:
+    return
+  last = last_messages.get(target_id)
+  if last and is_same(message, last.message):
+    last_messages[target_id] = LastMessage(
+      message=message,
+      received_count=last.received_count,
+      pending_count=last.pending_count + 1,
+      sent_count=last.sent_count,
+    )
 
 
 @hook.on_message_sent
@@ -46,9 +73,35 @@ async def on_message_sent(
     return
   last = last_messages.get(target_id)
   if last and is_same(message, last.message):
-    last_messages[target_id] = LastMessage(message, last.received_count, last.sent_count + 1)
+    last_messages[target_id] = LastMessage(
+      message=message,
+      received_count=last.received_count,
+      pending_count=last.pending_count - 1,
+      sent_count=last.sent_count + 1,
+    )
   else:
-    last_messages[target_id] = LastMessage(message, 0, 1)
+    last_messages[target_id] = LastMessage(
+      message=message,
+      received_count=0,
+      pending_count=0,
+      sent_count=1,
+    )
+
+
+@hook.on_message_send_failed
+async def on_message_send_failed(
+  event: Optional[Event], is_group: bool, target_id: int, message: Message, e: Exception,
+) -> None:
+  if not is_group:
+    return
+  last = last_messages.get(target_id)
+  if last and is_same(message, last.message):
+    last_messages[target_id] = LastMessage(
+      message=message,
+      received_count=last.received_count,
+      pending_count=last.pending_count - 1,
+      sent_count=last.sent_count,
+    )
 
 
 def is_super_emote(msg: Message) -> bool:
@@ -85,12 +138,14 @@ def is_same(msg1: Message, msg2: Message) -> bool:
 async def can_repeat(event: GroupMessageEvent) -> bool:
   if (last := last_messages.get(event.group_id)) and is_same(last.message, event.message):
     config = CONFIG()
-    return (
-      last.sent_count < last.received_count // config.repeat_every
-      and last.sent_count < config.max_repeat
+    send_count = last.sent_count + last.pending_count
+    if (
+      send_count < last.received_count // config.repeat_every
+      and send_count < config.max_repeat
       and not misc.is_command(event.message)
       and not is_super_emote(event.message)
-    )
+    ):
+      return True
   return False
 auto_repeat = nonebot.on_message(
   can_repeat,
