@@ -1,11 +1,13 @@
 import json
 import re
 from datetime import timedelta
-from typing import Any, Dict, List, Optional, Sequence, cast
+from typing import Any, Optional, Sequence, cast
 
 import emoji
 import nonebot
 import wordcloud
+from jieba import Tokenizer
+from jieba.analyse import default_tfidf
 from jieba.analyse.tfidf import TFIDF
 from nonebot.adapters.onebot.v11 import Bot, Message, MessageEvent, MessageSegment
 from nonebot.matcher import Matcher
@@ -29,12 +31,27 @@ class Config(BaseModel):
   # https://matplotlib.org/stable/tutorials/colors/colormaps.html
   fg: str = "viridis"
   limit: int = 0
-  idf_path: str = ""
+  userdict_path: str = ""
   stopwords_path: str = ""
+  _tfidf: Optional[TFIDF] = None
+
+  @property
+  def tfidf(self) -> TFIDF:
+    if self._tfidf is None:
+      if self.userdict_path or self.stopwords_path:
+        self._tfidf = TFIDF()
+        if self.userdict_path:
+          self._tfidf.tokenizer = Tokenizer()
+          self._tfidf.tokenizer.load_userdict(self.userdict_path)
+        if self.stopwords_path:
+          self._tfidf.set_stop_words(self.stopwords_path)
+      else:
+        self._tfidf = default_tfidf
+    return self._tfidf
 
 CONFIG = configs.SharedConfig("wordcloud", Config)
 
-# https://github.com/he0119/nonebot-plugin-wordcloud/blob/main/nonebot_plugin_wordcloud/data_source.py#L18
+# https://github.com/he0119/nonebot-plugin-wordcloud/blob/main/nonebot_plugin_wordcloud/data_source.py#L23
 # 这个又是从 https://stackoverflow.com/a/17773849/9212748 搬的
 # 二道贩子（雾）
 URL_RE = re.compile(r"(https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|www\.[a-zA-Z0-9][a-zA-Z0-9-]+[a-zA-Z0-9]\.[^\s]{2,}|https?:\/\/(?:www\.|(?!www))[a-zA-Z0-9]+\.[^\s]{2,}|www\.[a-zA-Z0-9]+\.[^\s]{2,})")  # noqa: E501
@@ -43,9 +60,9 @@ driver = nonebot.get_driver()
 
 def format_wordcloud(messages: Sequence[str]) -> MessageSegment:
   config = CONFIG()
-  texts: List[str] = []
+  texts: list[str] = []
   for i in messages:
-    data: List[Dict[str, Any]] = json.loads(i)
+    data: list[dict[str, Any]] = json.loads(i)
     plain = " ".join([x["data"]["text"] for x in data if x["type"] == "text"]).strip()
     is_command = False
     for start in driver.config.command_start:
@@ -54,13 +71,10 @@ def format_wordcloud(messages: Sequence[str]) -> MessageSegment:
         break
     if is_command:
       continue
-    plain = URL_RE.sub("", plain)
-    plain = emoji.replace_emoji(plain)
+    plain = URL_RE.sub(" ", plain)
+    plain = emoji.replace_emoji(plain, " ")
     texts.append(plain)
-  tfidf = TFIDF(config.idf_path)
-  if config.stopwords_path:
-    tfidf.set_stop_words(config.stopwords_path)
-  tags = cast(Dict[str, float], tfidf.extract_tags("\n".join(texts), 0, True))
+  tags = dict(cast(list[tuple[str, float]], config.tfidf.extract_tags("\n".join(texts), 0, True)))
   wc = wordcloud.WordCloud(
     config.font,
     config.width,
