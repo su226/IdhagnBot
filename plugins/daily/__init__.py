@@ -25,6 +25,7 @@ from .modules.moyu import MoyuModule, moyu_cache
 from .modules.news import NewsModule, news_cache
 from .modules.rank import RankModule
 from .modules.sentence import SentenceModule, sentence_cache
+from .modules.steam import SteamModule
 from .modules.string import StringModule
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -122,6 +123,14 @@ class FabModuleConfig(BaseModuleConfig):
     return FabModule(self.force)
 
 
+class SteamModuleConfig(BaseModuleConfig):
+  type: Literal["steam"] = Field(frozen=True)  # type: ignore
+  force: bool = False
+
+  def create_module(self, group_id: int) -> Module:
+    return SteamModule(self.force)
+
+
 class GeometryDashModuleConfig(BaseModuleConfig):
   type: Literal["geometrydash"] = Field(frozen=True)  # type: ignore
   subtype: Literal["daily", "weekly", "event"] = "daily"
@@ -149,6 +158,7 @@ AnyModuleConfig = Union[
   EpicGamesModuleConfig,
   EpicGamesAndroidModuleConfig,
   FabModuleConfig,
+  SteamModuleConfig,
   GeometryDashModuleConfig,
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
