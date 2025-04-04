@@ -20,6 +20,7 @@ from .modules.epicgames_android import EpicGamesAndroidModule
 from .modules.fab import FabModule
 from .modules.furbot import FurbotModule
 from .modules.geometrydash import GeometryDashModule, daily_cache, event_cache, weekly_cache
+from .modules.gog import GogModule
 from .modules.history import HistoryModule
 from .modules.moyu import MoyuModule, moyu_cache
 from .modules.news import NewsModule, news_cache
@@ -131,6 +132,14 @@ class SteamModuleConfig(BaseModuleConfig):
     return SteamModule(self.force)
 
 
+class GogModuleConfig(BaseModuleConfig):
+  type: Literal["gog"] = Field(frozen=True)  # type: ignore
+  force: bool = False
+
+  def create_module(self, group_id: int) -> Module:
+    return GogModule(self.force)
+
+
 class GeometryDashModuleConfig(BaseModuleConfig):
   type: Literal["geometrydash"] = Field(frozen=True)  # type: ignore
   subtype: Literal["daily", "weekly", "event"] = "daily"
@@ -159,6 +168,7 @@ AnyModuleConfig = Union[
   EpicGamesAndroidModuleConfig,
   FabModuleConfig,
   SteamModuleConfig,
+  GogModuleConfig,
   GeometryDashModuleConfig,
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]
