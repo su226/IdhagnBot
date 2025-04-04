@@ -83,9 +83,9 @@ async def on_called_api(
   event = cast(Event, current_event.get(None)) or send_event.get()
   is_group = "group_id" in params
   target_id = params["group_id" if is_group else "user_id"]
-  message_id = result["message_id"]
   try:
     if e is None:
+      message_id = result["message_id"]
       await asyncio.gather(*(
         x(event, is_group, target_id, message, message_id) for x in message_sent_hook
       ))
