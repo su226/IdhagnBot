@@ -28,7 +28,7 @@ from typing_extensions import ParamSpec
 from .configs import SharedConfig
 
 if TYPE_CHECKING:
-  from playwright.async_api._generated import Browser, Playwright as AsyncPlaywright
+  from playwright.async_api import Browser, Playwright as AsyncPlaywright
 
 
 __all__ = [

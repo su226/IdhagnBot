@@ -12,7 +12,7 @@ import nonebot
 import psutil
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 from PIL import Image
-from psutil._common import sdiskpart
+from psutil._common import sdiskpart  # type: ignore
 from pydantic import BaseModel, Field
 
 from util import colorutil, command, configs, imutil, misc, textutil

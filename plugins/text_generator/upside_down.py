@@ -1,3 +1,5 @@
+from typing import cast
+
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import CommandArg
 
@@ -48,7 +50,7 @@ async def handle_upside_down(arg: Message = CommandArg()):
   output = Message()
   for seg in reversed(arg):
     if seg.type == "text":
-      text = "".join(DATA.get(i, i) for i in reversed(seg.data["text"]))
+      text = "".join(DATA.get(i, i) for i in reversed(cast(str, seg.data["text"])))
       output.append(MessageSegment.text(text))
     else:
       output.append(seg)
