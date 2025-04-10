@@ -53,6 +53,9 @@ grpc = [
 playwright = [
     "playwright~=1.46",
 ]
+liferestart = [
+    "liferestart @ git+https://github.com/su226/LifeRestartPy.git",
+]
 
 [project.urls]
 Homepage = "https://idhagnbot.su226.eu.org"

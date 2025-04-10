@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "cryptography", "dev", "grpc", "jieba", "libzim", "lint", "mctools", "opencv", "playwright", "psutil", "sql", "stubs", "wordcloud"]
+groups = ["default", "cryptography", "dev", "grpc", "jieba", "libzim", "liferestart", "lint", "mctools", "opencv", "playwright", "psutil", "sql", "stubs", "wordcloud"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:ace8d3d908ae98c335c16ff1fc5aedb838b22d73ebdbe66069e5332d6c455b04"
+content_hash = "sha256:0d6bebf2c94139ba71493672a1f4b292b58a6331af4174757dad2a9b912767f2"
 
 [[metadata.targets]]
 requires_python = "~=3.9"
@@ -1305,6 +1305,17 @@ files = [
     {file = "libzim-3.6.0-cp39-cp39-musllinux_1_2_x86_64.whl", hash = "sha256:e0fa53504e96c3e60b61979f0fc766939eea0f7bca32d37ad708aa0e99273b77"},
     {file = "libzim-3.6.0-cp39-cp39-win_amd64.whl", hash = "sha256:dc0c3cc24038e9a1dfb79e215f9430ef10ba7a81235f301648e544810193a876"},
     {file = "libzim-3.6.0.tar.gz", hash = "sha256:4dfc3a73e9e3c6e8f60a3b134f27069d74e96c4949c5aa20bb2ba994b00120be"},
+]
+
+[[package]]
+name = "liferestart"
+version = "0.1.0"
+requires_python = "~=3.8"
+git = "https://github.com/su226/LifeRestartPy.git"
+revision = "945aec1204d2f2d65c20d2d3477da6534d32659c"
+summary = "人生重开模拟器，Python移植版"
+dependencies = [
+    "typing-extensions>=4.13.1",
 ]
 
 [[package]]
@@ -2936,12 +2947,12 @@ files = [
 
 [[package]]
 name = "typing-extensions"
-version = "4.12.2"
+version = "4.13.2"
 requires_python = ">=3.8"
 summary = "Backported and Experimental Type Hints for Python 3.8+"
 files = [
-    {file = "typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d"},
-    {file = "typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"},
+    {file = "typing_extensions-4.13.2-py3-none-any.whl", hash = "sha256:a439e7c04b49fec3e5d3e2beaa21755cadbbdc391694e28ccdd36ca4a1408f8c"},
+    {file = "typing_extensions-4.13.2.tar.gz", hash = "sha256:e6c81219bd689f51865d9e372991c540bda33a0379d5573cddb9a3a23f7caaef"},
 ]
 
 [[package]]

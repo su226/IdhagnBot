@@ -11,12 +11,12 @@ from pydantic import BaseModel, Field
 
 from util import command, configs, context, imutil, misc, textutil
 
-from .game import Config as GameConfig, Game, GeneratedCharacter, Statistics
-from .game.config import StatRarityItem
-from .game.data import ACHIEVEMENT, CHARACTER, EVENT, TALENT
-from .game.struct.character import Character
-from .game.struct.commons import Rarity
-from .game.struct.talent import Talent
+from liferestart import Config as GameConfig, Game, GeneratedCharacter, Statistics
+from liferestart.config import StatRarityItem
+from liferestart.data import ACHIEVEMENT, CHARACTER, EVENT, TALENT
+from liferestart.struct.character import Character
+from liferestart.struct.commons import Rarity
+from liferestart.struct.talent import Talent
 
 
 class Config(BaseModel):
