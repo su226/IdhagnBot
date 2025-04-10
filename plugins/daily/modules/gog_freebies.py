@@ -4,39 +4,38 @@ from typing import List
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from pydantic import BaseModel, Field
 
-from util.api_common import fab_free
+from util.api_common import gog_freebies as api
 
 from . import DailyCache, Module
 
 
 class State(BaseModel):
-  prev_assets: List[fab_free.Asset] = Field(default_factory=list)
-  assets: List[fab_free.Asset] = Field(default_factory=list)
+  prev_games: List[api.Game] = Field(default_factory=list)
+  games: List[api.Game] = Field(default_factory=list)
 
 
-class FabCache(DailyCache):
+class GogFreebiesCache(DailyCache):
   def __init__(self) -> None:
-    super().__init__("fab.json")
-    self.image_path = os.path.splitext(self.path)[0] + ".jpg"
+    super().__init__("gog_freebies.json")
 
   async def update(self) -> None:
-    assets = await fab_free.free_assets()
+    games = await api.get_freebies()
     if os.path.exists(self.path):
       with open(self.path) as f:
         model = State.model_validate_json(f.read())
     else:
       model = State()
-    model.prev_assets = model.assets
-    model.assets = assets
+    model.prev_games = model.games
+    model.games = games
     with open(self.path, "w") as f:
       f.write(model.model_dump_json())
     self.write_date()
 
 
-cache = FabCache()
+cache = GogFreebiesCache()
 
 
-class FabModule(Module):
+class GogFreebiesModule(Module):
   def __init__(self, force: bool) -> None:
     self.force = force
 
@@ -45,17 +44,17 @@ class FabModule(Module):
     with open(cache.path) as f:
       model = State.model_validate_json(f.read())
     if self.force:
-      assets = model.assets
+      games = model.games
     else:
-      prev_uids = {asset.uid for asset in model.prev_assets}
-      assets = [asset for asset in model.assets if asset.uid not in prev_uids]
-    if not assets:
+      prev_slugs = {game.slug for game in model.prev_games}
+      games = [game for game in model.games if game.slug not in prev_slugs]
+    if not games:
       return []
-    message = Message(MessageSegment.text("Fab 今天可以喜加一："))
-    for asset in assets:
+    message = Message(MessageSegment.text("GOG 今天可以喜加一："))
+    for game in games:
       wrap = "\n" if message else ""
       message.extend([
-        MessageSegment.text(f"{wrap}{asset.title}\n{fab_free.URL_BASE}{asset.uid}\n"),
-        MessageSegment.image(asset.image),
+        MessageSegment.text(f"{wrap}{game.name}\n{api.URL_BASE}{game.slug}\n"),
+        MessageSegment.image(game.image),
       ])
     return [message]

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from util import misc
 
+__all__ = ["Asset", "URL_BASE", "get_freebies"]
 API = "https://www.fab.com/i/layouts/homepage"
 HEADERS = {"Accept-Language": "zh-CN", "User-Agent": misc.BROWSER_UA, "Priority": "u=0, i"}
 URL_BASE = "https://www.fab.com/zh-cn/listings/"
@@ -36,11 +37,11 @@ class ApiResult(BaseModel):
 @dataclass
 class Asset:
   uid: str
-  title: str
+  name: str
   image: str
 
 
-async def free_assets() -> list[Asset]:
+async def get_freebies() -> list[Asset]:
   async with misc.http().get(API, headers=HEADERS) as response:
     data = ApiResult.model_validate(await response.json())
   for blade in data.blades:

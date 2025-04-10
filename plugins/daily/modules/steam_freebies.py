@@ -1,30 +1,25 @@
 import os
-from datetime import datetime, timezone
 from typing import List
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from pydantic import BaseModel, Field
 
-from util.api_common import epic_free
+from util.api_common import steam_freebies as api
 
 from . import DailyCache, Module
 
 
 class State(BaseModel):
-  prev_games: List[epic_free.Game] = Field(default_factory=list)
-  games: List[epic_free.Game] = Field(default_factory=list)
+  prev_games: List[api.Game] = Field(default_factory=list)
+  games: List[api.Game] = Field(default_factory=list)
 
 
-class EpicGamesCache(DailyCache):
+class SteamFreebiesCache(DailyCache):
   def __init__(self) -> None:
-    super().__init__("epicgames.json")
+    super().__init__("steam_freebies.json")
 
   async def update(self) -> None:
-    games = await epic_free.free_games()
-    now_date = datetime.now(timezone.utc)
-    games = sorted(
-      (x for x in games if now_date > x.start_date), key=lambda x: (x.end_date, x.slug),
-    )
+    games = await api.get_freebies()
     if os.path.exists(self.path):
       with open(self.path) as f:
         model = State.model_validate_json(f.read())
@@ -37,10 +32,10 @@ class EpicGamesCache(DailyCache):
     self.write_date()
 
 
-cache = EpicGamesCache()
+cache = SteamFreebiesCache()
 
 
-class EpicGamesModule(Module):
+class SteamFreebiesModule(Module):
   def __init__(self, force: bool) -> None:
     self.force = force
 
@@ -51,16 +46,15 @@ class EpicGamesModule(Module):
     if self.force:
       games = model.games
     else:
-      prev_slugs = {game.slug for game in model.prev_games}
-      games = [game for game in model.games if game.slug not in prev_slugs]
+      prev_appids = {game.appid for game in model.prev_games}
+      games = [game for game in model.games if game.appid not in prev_appids]
     if not games:
       return []
-    message = Message(MessageSegment.text("Epic Games 今天可以喜加一："))
+    message = Message(MessageSegment.text("Steam 今天可以喜加一："))
     for game in games:
-      end_str = game.end_date.astimezone().strftime("%Y-%m-%d %H:%M")
-      text = f"\n{game.title}，截止到 {end_str}\n{epic_free.URL_BASE}{game.slug}\n"
+      wrap = "\n" if message else ""
       message.extend([
-        MessageSegment.text(text),
+        MessageSegment.text(f"{wrap}{game.name}\n{api.URL_BASE}{game.appid}\n"),
         MessageSegment.image(game.image),
       ])
     return [message]

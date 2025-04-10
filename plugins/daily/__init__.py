@@ -15,18 +15,18 @@ from util import command, configs, context, misc
 
 from .modules import Module
 from .modules.countdown import Countdown, CountdownModule
-from .modules.epicgames import EpicGamesModule
-from .modules.epicgames_android import EpicGamesAndroidModule
-from .modules.fab import FabModule
+from .modules.epicgames_freebies import EpicGamesFreebiesModule
+from .modules.epicgames_android_freebies import EpicGamesAndroidFreebiesModule
+from .modules.fab_freebies import FabFreebiesModule
 from .modules.furbot import FurbotModule
 from .modules.geometrydash import GeometryDashModule, daily_cache, event_cache, weekly_cache
-from .modules.gog import GogModule
+from .modules.gog_freebies import GogFreebiesModule
 from .modules.history import HistoryModule
 from .modules.moyu import MoyuModule, moyu_cache
 from .modules.news import NewsModule, news_cache
 from .modules.rank import RankModule
 from .modules.sentence import SentenceModule, sentence_cache
-from .modules.steam import SteamModule
+from .modules.steam_freebies import SteamFreebiesModule
 from .modules.string import StringModule
 
 nonebot.require("nonebot_plugin_apscheduler")
@@ -100,44 +100,44 @@ class FurbotModuleConfig(BaseModuleConfig):
     return FurbotModule()
 
 
-class EpicGamesModuleConfig(BaseModuleConfig):
-  type: Literal["epicgames"] = Field(frozen=True)  # type: ignore
+class EpicGamesFreebiesModuleConfig(BaseModuleConfig):
+  type: Literal["epicgames_freebies"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
-    return EpicGamesModule(self.force)
+    return EpicGamesFreebiesModule(self.force)
 
 
-class EpicGamesAndroidModuleConfig(BaseModuleConfig):
-  type: Literal["epicgames_android"] = Field(frozen=True)  # type: ignore
+class EpicGamesAndroidFreebiesModuleConfig(BaseModuleConfig):
+  type: Literal["epicgames_android_freebies"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
-    return EpicGamesAndroidModule(self.force)
+    return EpicGamesAndroidFreebiesModule(self.force)
 
 
-class FabModuleConfig(BaseModuleConfig):
-  type: Literal["fab"] = Field(frozen=True)  # type: ignore
+class FabFreebiesModuleConfig(BaseModuleConfig):
+  type: Literal["fab_freebies"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
-    return FabModule(self.force)
+    return FabFreebiesModule(self.force)
 
 
-class SteamModuleConfig(BaseModuleConfig):
-  type: Literal["steam"] = Field(frozen=True)  # type: ignore
+class SteamFreebiesModuleConfig(BaseModuleConfig):
+  type: Literal["steam_freebies"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
-    return SteamModule(self.force)
+    return SteamFreebiesModule(self.force)
 
 
-class GogModuleConfig(BaseModuleConfig):
-  type: Literal["gog"] = Field(frozen=True)  # type: ignore
+class GogFreebiesModuleConfig(BaseModuleConfig):
+  type: Literal["gog_freebies"] = Field(frozen=True)  # type: ignore
   force: bool = False
 
   def create_module(self, group_id: int) -> Module:
-    return GogModule(self.force)
+    return GogFreebiesModule(self.force)
 
 
 class GeometryDashModuleConfig(BaseModuleConfig):
@@ -164,11 +164,11 @@ AnyModuleConfig = Union[
   SentenceModuleConfig,
   RankModuleConfig,
   FurbotModuleConfig,
-  EpicGamesModuleConfig,
-  EpicGamesAndroidModuleConfig,
-  FabModuleConfig,
-  SteamModuleConfig,
-  GogModuleConfig,
+  EpicGamesFreebiesModuleConfig,
+  EpicGamesAndroidFreebiesModuleConfig,
+  FabFreebiesModuleConfig,
+  SteamFreebiesModuleConfig,
+  GogFreebiesModuleConfig,
   GeometryDashModuleConfig,
 ]
 ModuleOrForward = Union[AnyModuleConfig, List[AnyModuleConfig]]

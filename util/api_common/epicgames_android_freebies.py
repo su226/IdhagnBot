@@ -1,53 +1,52 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import TypedDict
+from typing import Optional
 
-from pydantic import TypeAdapter
-from typing_extensions import NotRequired
+from pydantic import BaseModel
 
 from util import misc
 
-__all__ = ["free_games"]
+__all__ = ["Game", "get_freebies"]
 API = (
   "https://egs-platform-service.store.epicgames.com/api/v2/public/discover/home"
   "?count=10&country=CN&locale=zh-CN&platform=android&start=0&store=EGS"
 )
 
 
-class ApiMediaItem(TypedDict):
+class ApiMediaItem(BaseModel):
   imageSrc: str
 
 
-class ApiMedia(TypedDict):
+class ApiMedia(BaseModel):
   card16x9: ApiMediaItem
 
 
-class ApiDiscount(TypedDict):
+class ApiDiscount(BaseModel):
   discountAmountDisplay: str
   discountEndDate: str
 
 
-class ApiPurchase(TypedDict):
+class ApiPurchase(BaseModel):
   purchaseStateEffectiveDate: str
-  discount: NotRequired[ApiDiscount]
+  discount: Optional[ApiDiscount] = None
 
 
-class ApiContent(TypedDict):
+class ApiContent(BaseModel):
   title: str
   media: ApiMedia
   purchase: list[ApiPurchase]
 
 
-class ApiOffer(TypedDict):
+class ApiOffer(BaseModel):
   content: ApiContent
 
 
-class ApiData(TypedDict):
+class ApiData(BaseModel):
   offers: list[ApiOffer]
   type: str
 
 
-class ApiRoot(TypedDict):
+class ApiResult(BaseModel):
   data: list[ApiData]
 
 
@@ -55,35 +54,35 @@ class ApiRoot(TypedDict):
 class Game:
   start_date: datetime
   end_date: datetime
-  title: str
+  name: str
   image: str
 
 
-async def free_games() -> list[Game]:
+async def get_freebies() -> list[Game]:
   http = misc.http()
   async with http.get(API, headers={"User-Agent": misc.BROWSER_UA}) as Apiponse:
-    data = TypeAdapter(ApiRoot).validate_python(await Apiponse.json())
-  for topic in data["data"]:
-    if topic["type"] == "freeGame":
-      offers = topic["offers"]
+    data = ApiResult.model_validate(await Apiponse.json())
+  for topic in data.data:
+    if topic.type == "freeGame":
+      offers = topic.offers
       break
   else:
     return []
   games: list[Game] = []
   now_date = datetime.now(timezone.utc)
   for offer in offers:
-    for purchase in offer["content"]["purchase"]:
-      if "discount" in purchase and purchase["discount"]["discountAmountDisplay"] == "-100%":
-        start_date = purchase["purchaseStateEffectiveDate"]
-        end_date = purchase["discount"]["discountEndDate"]
+    for purchase in offer.content.purchase:
+      if purchase.discount and purchase.discount.discountAmountDisplay == "-100%":
+        start_date = purchase.purchaseStateEffectiveDate
+        end_date = purchase.discount.discountEndDate
         start_date = datetime.fromisoformat(start_date.replace("Z", "+00:00"))
         end_date = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
         if start_date < end_date and now_date < end_date:
           games.append(Game(
             start_date=start_date,
             end_date=end_date,
-            title=offer["content"]["title"],
-            image=offer["content"]["media"]["card16x9"]["imageSrc"],
+            name=offer.content.title,
+            image=offer.content.media.card16x9.imageSrc,
           ))
           break
   return games

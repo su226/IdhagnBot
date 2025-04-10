@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from util import misc
 
+__all__ = ["Game", "URL_BASE", "get_freebies"]
 API = "https://store.steampowered.com/search/results/?query&maxprice=free&specials=1&infinite=1"
 URL_BASE = "https://store.steampowered.com/app/"
 
@@ -74,7 +75,7 @@ class Parser(HTMLParser):
     return parser.games
 
 
-async def free_games() -> list[Game]:
+async def get_freebies() -> list[Game]:
   async with misc.http().get(API) as response:
     data = ApiResult.model_validate(await response.json())
   return Parser.parse(data.results_html)
