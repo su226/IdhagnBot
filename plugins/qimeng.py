@@ -1,9 +1,10 @@
 import asyncio
 import math
 import re
+from datetime import datetime
 from html.parser import HTMLParser
 from io import StringIO
-from typing import List, Optional, Set, Tuple, cast
+from typing import Any, Iterable, Literal, Optional, Union, cast
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
@@ -11,7 +12,7 @@ from nonebot.adapters.onebot.v11 import (
 )
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
-from pydantic import BaseModel, Field, SecretStr
+from pydantic import BaseModel, Field, SecretStr, field_validator
 
 from util import command, configs, context, misc
 
@@ -22,24 +23,19 @@ class Config(BaseModel):
   # 并且没有批量查询，没法写查询全群
   # 对不起绮梦老师了
   host: str = "https://fz.qimeng.fun"
-  api: str = "http://yunhei.qimeng.fun:12301/OpenAPI.php"
   token: SecretStr = SecretStr("")
   check_join: misc.EnableSet = misc.EnableSet.false()
   check_request: misc.EnableSet = misc.EnableSet.false()
   reject_request: misc.EnableSet = misc.EnableSet.false()
   # 默认忽略Q群管家
-  ignore: Set[int] = Field(default_factory=lambda: {2854196310})
+  ignore: set[int] = Field(default_factory=lambda: {2854196310})
 
   @property
-  def spider_version(self) -> int:
-    if self.token.get_secret_value() in ("spider", "spider_v2"):
-      return 2
-    if self.token.get_secret_value() == "spider_v1":
-      return 1
-    return 0
+  def use_spider(self) -> bool:
+    return self.token.get_secret_value() == "spider"
 
 
-class SingleV2Parser(HTMLParser):
+class SingleParser(HTMLParser):
   def __init__(self) -> None:
     super().__init__()
     self.level = 0
@@ -52,7 +48,7 @@ class SingleV2Parser(HTMLParser):
         self.in_script = True
       self.level += 1
     elif ("class", "header-img") in attrs:
-      self.level = 2
+      self.level = 3
 
   def handle_data(self, data: str) -> None:
     if self.level and not self.in_script:
@@ -70,131 +66,163 @@ class SingleV2Parser(HTMLParser):
     return self.text.getvalue().lstrip("◈").rstrip("\n◈")
 
 
-class SingleV1Parser(HTMLParser):
-  def __init__(self) -> None:
-    super().__init__()
-    self.level = 0
-    self.text = StringIO()
-
-  def handle_starttag(self, tag: str, attrs: List[Tuple[str, Optional[str]]]) -> None:
-    if self.level:
-      if tag == "br":
-        self.text.write("\n")
-      else:
-        self.level += 1
-    elif attrs == [("id", "CheckText")]:
-      self.level = 1
-
-  def handle_data(self, data: str) -> None:
-    if self.level:
-      self.text.write(data.strip())
-
-  def handle_endtag(self, tag: str) -> None:
-    if self.level and tag != "br":
-      self.level -= 1
-    # center 是块级元素
-    if self.level and tag == "center":
-      self.text.write("\n")
-
-  def getvalue(self) -> str:
-    return self.text.getvalue().rstrip()
-
-
 class BatchParser(HTMLParser):
   def __init__(self) -> None:
     super().__init__()
     self.begin = False
-    self.lines: List[str] = []
+    self.lines: list[str] = []
 
   def handle_data(self, data: str) -> None:
     data = data.strip()
-    if data == "---------查询结果---------":
+    if data == "qiehuan('PiLiang')":
       self.begin = True
-    elif data == "------------------------------":
+    elif data == "功能按钮":
       self.begin = False
     elif self.begin and data:
       self.lines.append(data)
 
 
+class ApiBasicInfo(BaseModel):
+  user: int
+  tel: bool
+  wx: bool
+  zfb: bool
+  shiming: bool
+
+
+class ApiStatInfo(BaseModel):
+  group_num: int
+  m_send_num: int
+  send_num: int
+  first_send: Optional[datetime]
+  last_send: Optional[datetime]
+
+  @field_validator("first_send", "last_send", mode="before")
+  @staticmethod
+  def vaildate_date(value: Any) -> Optional[datetime]:
+    if value == "":
+      return None
+    match = SEND_DATE_RE.match(value)
+    if not match:
+      raise ValueError("Invalid date")
+    return datetime(
+      int(match[1]),
+      int(match[2]),
+      int(match[3]),
+      int(match[4]),
+      int(match[5]),
+      int(match[6]),
+    )
+
+
+class ApiBanInfoNone(BaseModel):
+  yh: bool
+  type: Literal["none"]
+  note: None
+  admin: None
+  level: None
+  date: None
+
+  @field_validator("note", "admin", "level", "date", mode="before")
+  @staticmethod
+  def vaildate_info(value: Any) -> Any:
+    if value == "":
+      return None
+
+
+class ApiBanInfoSome(BaseModel):
+  yh: bool
+  type: Literal["yunhei", "bilei"]
+  note: str
+  admin: str
+  level: int
+  date: datetime
+
+
+class ApiResult(BaseModel):
+  info: tuple[ApiBasicInfo, ApiStatInfo, Union[ApiBanInfoNone, ApiBanInfoSome]]
+
+
 CHUNK_SIZE = 200
 INT_RE = re.compile(r"\d+")
 CONFIG = configs.SharedConfig("qimeng", Config)
+SEND_DATE_RE = re.compile(r"^(\d+)年(\d+)月(\d+)日(\d+)时(\d+)分(\d+)秒$")
 
 
-async def query_openapi(uid: int) -> Tuple[int, str]:
+def format_date(date: Optional[datetime]) -> str:
+  return f"{date:%Y-%m-%d %H:%M:%S} 距今 {(datetime.now() - date).days} 天" if date else "无记录"
+
+
+async def query_openapi(uid: int) -> tuple[int, str]:
   config = CONFIG()
   http = misc.http()
   params = {"key": config.token.get_secret_value(), "id": uid}
-  async with http.get(config.api, params=params) as response:
-    data = await response.json(content_type=None)  # text/html
-  data = data["info"][0]
-  if data["type"] == "bilei":
+  async with http.get(config.host + "/OpenAPI/all_f.php", params=params) as response:
+    data = ApiResult.model_validate(await response.json(content_type=None))
+  data = data.info
+  basic_info = f'''\
+手机{'✓' if data[0].tel else '✗'} \
+实名{'✓' if data[0].shiming else '✗'} \
+微信{'✓' if data[0].wx else '✗'} \
+支付宝{'✓' if data[0].zfb else '✗'}
+所在群数：{data[1].group_num}
+本月活跃：{data[1].m_send_num}
+总计活跃：{data[1].send_num}
+首次活跃：{format_date(data[1].first_send)}
+最后活跃：{format_date(data[1].last_send)}'''
+  if data[2].type == "bilei":
     type = 2
     detail = f'''\
 账号为避雷/前科
-登记老师:{data["admin"]}
-避雷时间:{data["date"]}
-避雷原因:{data["note"]}'''
-  elif data["type"] == "yunhei":
+登记老师：{data[2].admin}
+避雷时间：{data[2].date:%Y-%m-%d %H:%M:%S}
+避雷原因：{data[2].note}
+{basic_info}'''
+  elif data[2].type == "yunhei":
     type = 1
     detail = f'''\
 帐号为云黑
-登记老师:{data["admin"]}
-云黑等级:{data["level"]}
-上黑时间:{data["date"]}
-云黑原因:{data["note"]}'''
+登记老师：{data[2].admin}
+云黑等级：{data[2].level}
+上黑时间：{data[2].date:%Y-%m-%d %H:%M:%S}
+云黑原因：{data[2].note}
+{basic_info}'''
   else:
     type = 0
-    detail = "账号暂无云黑"
+    detail = f"账号暂无云黑\n{basic_info}"
   return type, detail
 
 
-async def query_spider_single_v2(uid: int) -> Tuple[int, str]:
+async def query_spider_single(uid: int) -> tuple[int, str]:
   config = CONFIG()
   http = misc.http()
-  async with http.get(
+  async with http.post(
     # 非浏览器UA排版有问题
-    config.host, params={"user": uid}, headers={"User-Agent": misc.BROWSER_UA},
+    config.host, data={"cxtype": "DanYi", "user": uid}, headers={"User-Agent": misc.BROWSER_UA},
   ) as response:
-    parser = SingleV2Parser()
+    parser = SingleParser()
     parser.feed(await response.text())
     parser.close()
     value = parser.getvalue()
-  if "避雷时间" in value:
+  lines = value.splitlines()
+  if lines[2] == "账号为避雷/前科,请谨慎交易":
     type = 2
-  elif "上黑时间" in value:
+  elif lines[2] == "警告!请立即请终止交易!!!":
     type = 1
   else:
     type = 0
   return type, value
 
 
-async def query_spider_single_v1(uid: int) -> Tuple[int, str]:
+async def query_spider_batch(uids: Iterable[int]) -> list[tuple[int, int]]:
   config = CONFIG()
   http = misc.http()
-  async with http.post(config.host + "/oldindex.php", data={"qq": uid}) as response:
-    parser = SingleV1Parser()
-    parser.feed(await response.text())
-    parser.close()
-    value = parser.getvalue()
-  if "避雷起始时间" in value:
-    type = 2
-  elif "上黑等级" in value:
-    type = 1
-  else:
-    type = 0
-  return type, value
-
-
-async def query_spider_batch(uids: List[int]) -> List[Tuple[int, int]]:
-  config = CONFIG()
-  http = misc.http()
-  data = {"qq": "\n".join(str(x) for x in uids)}
-  async with http.post(config.host + "/Piliang.php", data=data) as response:
+  data = {"cxtype": "PiLiang", "user": "\n".join(str(x) for x in uids)}
+  async with http.post(config.host, data=data) as response:
     parser = BatchParser()
     parser.feed(await response.text())
     parser.close()
-  result: List[Tuple[int, int]] = []
+  result: list[tuple[int, int]] = []
   for line in parser.lines:
     uid = int(cast(re.Match[str], INT_RE.search(line))[0])
     if line.endswith("避雷."):
@@ -225,7 +253,7 @@ query = (
 
 @query.handle()
 async def handle_query(args: Message = CommandArg()) -> None:
-  uids: List[int] = []
+  uids: list[int] = []
   for seg in args:
     if seg.type == "text":
       for i in seg.data["text"].split():
@@ -243,7 +271,7 @@ async def handle_query(args: Message = CommandArg()) -> None:
   if not uids:
     await query.finish(query.__doc__)
   config = CONFIG()
-  if config.spider_version:
+  if config.use_spider:
     if len(uids) > CHUNK_SIZE:
       await query.finish(f"查询数量过多，最多 {CHUNK_SIZE} 个")
     if len(uids) > 1:
@@ -257,10 +285,7 @@ async def handle_query(args: Message = CommandArg()) -> None:
         else:
           lines.append(f"✅ {uid} 无记录。")
       await query.finish("\n".join(lines))
-    if config.spider_version == 2:
-      _, detail = await query_spider_single_v2(uids[0])
-      await query.finish(detail)
-    _, detail = await query_spider_single_v1(uids[0])
+    _, detail = await query_spider_single(uids[0])
     await query.finish(detail)
   else:
     if len(uids) > 1:
@@ -282,8 +307,8 @@ query_all = (
   .usage(query_all_usage)
   .throttle(1, 10)
   .in_group()
-  .help_condition(lambda _: CONFIG().spider_version != 0)
-  .rule(lambda: CONFIG().spider_version != 0)
+  .help_condition(lambda _: CONFIG().use_spider)
+  .rule(lambda: CONFIG().use_spider)
   .build()
 )
 
@@ -299,12 +324,12 @@ async def handle_query_all(bot: Bot, event: Event) -> None:
   chunks = math.ceil(len(members) / CHUNK_SIZE)
   if chunks > 1:
     await query_all.send(f"群员较多，需要分为 {chunks} 批次查询，请稍等。")
-  result: List[Tuple[int, int]] = []
+  result: list[tuple[int, int]] = []
   for chunk in misc.chunked(members, CHUNK_SIZE):
     if result:
       await asyncio.sleep(1)
     result.extend(await query_spider_batch(chunk))
-  lines: List[str] = []
+  lines: list[str] = []
   for uid, type in result:
     if type == 2:
       lines.append(f"⚠️ {members[uid]}({uid}) 位于避雷名单中。")
@@ -330,8 +355,8 @@ kick_all = (
   .throttle(1, 10)
   .in_group()
   .level("admin")
-  .help_condition(lambda _: CONFIG().spider_version != 0)
-  .rule(lambda: CONFIG().spider_version != 0)
+  .help_condition(lambda _: CONFIG().use_spider)
+  .rule(lambda: CONFIG().use_spider)
   .build()
 )
 
@@ -349,13 +374,13 @@ async def handle_kick_all(
   chunks = math.ceil(len(members) / CHUNK_SIZE)
   if chunks > 1:
     await kick_all.send(f"群员较多，需要分为 {chunks} 批次查询，请稍等。")
-  result: List[Tuple[int, int]] = []
+  result: list[tuple[int, int]] = []
   for chunk in misc.chunked(members, CHUNK_SIZE):
     if result:
       await asyncio.sleep(1)
     result.extend(await query_spider_batch(chunk))
-  uids: List[int] = []
-  lines: List[str] = []
+  uids: list[int] = []
+  lines: list[str] = []
   include_type2 = "避雷" in arg.extract_plain_text()
   for uid, type in result:
     if type == 2 and include_type2:
@@ -382,7 +407,7 @@ async def got_confirm(bot: Bot, event: Event, state: T_State, confirm: str = Arg
   if confirm != "是":
     await kick_all.finish("操作取消")
   group_id = context.get_event_context(event)
-  uids: List[int] = state["uids"]
+  uids: list[int] = state["uids"]
   done, _ = await asyncio.wait([
     asyncio.create_task(bot.set_group_kick(group_id=group_id, user_id=uid)) for uid in uids
   ])
@@ -407,10 +432,8 @@ on_member_join = nonebot.on_notice(check_member_join)
 @on_member_join.handle()
 async def handle_member_join(bot: Bot, event: GroupIncreaseNoticeEvent) -> None:
   config = CONFIG()
-  if config.spider_version == 2:
-    type, detail = await query_spider_single_v2(event.user_id)
-  elif config.spider_version == 1:
-    type, detail = await query_spider_single_v1(event.user_id)
+  if config.use_spider:
+    type, detail = await query_spider_single(event.user_id)
   else:
     type, detail = await query_openapi(event.user_id)
   if type == 0:
@@ -435,10 +458,8 @@ on_group_request = nonebot.on_notice(check_group_request)
 @on_group_request.handle()
 async def handle_group_request(bot: Bot, event: GroupRequestEvent) -> None:
   config = CONFIG()
-  if config.spider_version == 2:
-    type, detail = await query_spider_single_v2(event.user_id)
-  elif config.spider_version == 1:
-    type, detail = await query_spider_single_v1(event.user_id)
+  if config.use_spider:
+    type, detail = await query_spider_single(event.user_id)
   else:
     type, detail = await query_openapi(event.user_id)
   if type == 0:
