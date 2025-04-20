@@ -4,7 +4,7 @@ import re
 from datetime import datetime
 from html.parser import HTMLParser
 from io import StringIO
-from typing import Any, Iterable, Literal, Optional, Union, cast
+from typing import Any, Collection, Literal, Optional, Union
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
@@ -209,12 +209,14 @@ async def query_spider_single(uid: int) -> tuple[int, str]:
     type = 2
   elif lines[2] == "警告!请立即请终止交易!!!":
     type = 1
-  else:
+  elif lines[2] == "账号暂无云黑,请谨慎判断":
     type = 0
+  else:
+    raise ValueError("无效数据")
   return type, value
 
 
-async def query_spider_batch(uids: Iterable[int]) -> list[tuple[int, int]]:
+async def query_spider_batch(uids: Collection[int]) -> list[tuple[int, int]]:
   config = CONFIG()
   http = misc.http()
   data = {"cxtype": "PiLiang", "user": "\n".join(str(x) for x in uids)}
@@ -224,13 +226,16 @@ async def query_spider_batch(uids: Iterable[int]) -> list[tuple[int, int]]:
     parser.close()
   result: list[tuple[int, int]] = []
   for line in parser.lines:
-    uid = int(cast(re.Match[str], INT_RE.search(line))[0])
-    if line.endswith("避雷."):
-      result.append((uid, 2))
-    elif line.endswith("云黑."):
-      result.append((uid, 1))
-    else:
-      result.append((uid, 0))
+    if match := INT_RE.search(line):
+      uid = int(match[0])
+      if line.endswith("避雷."):
+        result.append((uid, 2))
+      elif line.endswith("云黑."):
+        result.append((uid, 1))
+      elif line.endswith("未记录"):
+        result.append((uid, 0))
+  if len(result) != len(uids):
+    raise ValueError("数据不足")
   return result
 
 
