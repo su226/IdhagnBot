@@ -238,7 +238,7 @@ async def get_event_level(bot: Bot, event: Event) -> permission.Level:
   if (user_id := getattr(event, "user_id", None)) is None:
     return permission.Level.MEMBER
   group_id = get_event_context(event)
-  if (result := permission.get_override_level(bot, user_id, group_id)) is not None:
+  if (result := permission.get_override_level(user_id)) is not None:
     return result
   if isinstance(event, GroupMessageEvent) and event.sender.role is not None:
     return permission.Level.parse(event.sender.role)

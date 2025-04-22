@@ -153,8 +153,8 @@ class Level(Enum):
     return LEVELS[value]
 
 
-def get_override_level(bot: Bot, user: int, group: int = -1) -> Optional[Level]:
-  if misc.is_superuser(bot, user):
+def get_override_level(user: int) -> Optional[Level]:
+  if misc.is_superuser(user):
     return Level.SUPER
   config = CONFIG()
   if user in config.users and (level := config.users[user].level) is not None:

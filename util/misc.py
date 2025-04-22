@@ -426,8 +426,12 @@ def binomial_sample(n: int, p: float, random: random.Random = random._inst) -> i
         return k
 
 
-def is_superuser(bot: Bot, user: int) -> bool:
-  return f"{ADAPTER_NAME}:{user}" in bot.config.superusers or str(user) in bot.config.superusers
+def is_superuser(user: int) -> bool:
+  driver = nonebot.get_driver()
+  return (
+    f"{ADAPTER_NAME}:{user}" in driver.config.superusers
+    or str(user) in driver.config.superusers
+  )
 
 
 def superusers() -> Generator[int, None, None]:
