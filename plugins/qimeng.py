@@ -46,7 +46,8 @@ class SingleParser(HTMLParser):
     if self.level:
       if tag == "script":
         self.in_script = True
-      self.level += 1
+      if tag != "br":
+        self.level += 1
     elif ("class", "header-img") in attrs:
       self.level = 3
 
