@@ -145,7 +145,7 @@ class ApiResult(BaseModel):
 
 
 CHUNK_SIZE = 200
-INT_RE = re.compile(r"\d+")
+BATCH_RE = re.compile(r"^(?:√|×)(\d+)(是云黑\.|是避雷\.|未记录)$")
 CONFIG = configs.SharedConfig("qimeng", Config)
 SEND_DATE_RE = re.compile(r"^(\d+)年(\d+)月(\d+)日(\d+)时(\d+)分(\d+)秒$")
 
@@ -227,16 +227,18 @@ async def query_spider_batch(uids: Collection[int]) -> list[tuple[int, int]]:
     parser.close()
   result: list[tuple[int, int]] = []
   for line in parser.lines:
-    if match := INT_RE.search(line):
-      uid = int(match[0])
-      if line.endswith("避雷."):
+    if match := BATCH_RE.match(line):
+      uid = int(match[1])
+      if match[2] == "是避雷.":
         result.append((uid, 2))
-      elif line.endswith("云黑."):
+      elif match[2] == "是云黑.":
         result.append((uid, 1))
-      elif line.endswith("未记录"):
+      else:
         result.append((uid, 0))
+    else:
+      raise ValueError("无效数据")
   if len(result) != len(uids):
-    raise ValueError("数据不足")
+    raise ValueError("数据数量不匹配")
   return result
 
 
