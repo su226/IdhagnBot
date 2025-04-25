@@ -1,7 +1,5 @@
 import random
-import re
 from argparse import Namespace
-from io import BytesIO
 from pathlib import Path
 
 from nonebot.adapters.onebot.v11 import Bot, MessageEvent, MessageSegment
@@ -31,24 +29,6 @@ IMAGES = [
   "potato_21766.png", "rabbit4_21005.png", "sheepshead_11384.png", "shrimp_14982.png",
   "speedhorse_12088.png",
 ]
-IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
-
-
-async def download_image(url: str, grayscale: bool) -> Image.Image:
-  http = misc.http()
-  async with http.get(url) as response:
-    data = await response.read()
-
-  def process() -> Image.Image:
-    im = Image.open(BytesIO(data))
-    if grayscale:
-      im2 = Image.new("L", im.size, 255)
-    else:
-      im2 = Image.new("RGB", im.size, (255, 255, 255))
-    imutil.paste(im2, im)
-    return im2
-  return await misc.to_thread(process)
-
 
 parser = ArgumentParser(add_help=False)
 parser.add_argument("title1", help="标题第一行")
@@ -64,7 +44,7 @@ parser.add_argument("--color", "-c", help=(
   "颜色，0-16为内置颜色，也可是颜色代码，默认为内置颜色中随机"
 ))
 parser.add_argument("--image", "-i", help=(
-  "图片，0-41为内置图片，也可是链接，默认为内置图片中随机"
+  "图片，0-41为内置图片，也可是@、QQ号、昵称、群名片或图片链接，默认为内置图片中随机"
 ))
 parser.add_argument("--no-grayscale", "-G", action="store_true", help="不对下载的图片去色")
 orly = (
@@ -106,6 +86,8 @@ async def handle_orly(bot: Bot, event: MessageEvent, args: Namespace = ShellComm
     else:
       cover, _ = cover_task.result()
     cover = ImageOps.contain(cover, (920, 707), imutil.scale_resample())
+    if not args.no_grayscale:
+      cover = cover.convert("L")
     im = Image.new("RGB", (1000, 1400), (255, 255, 255))
     im.paste(cover, (960 - cover.width, 802 - cover.height))
     rect_y = 802
