@@ -1,6 +1,7 @@
 import asyncio
 import itertools
 import re
+import ssl
 import time
 from dataclasses import dataclass
 from enum import Enum
@@ -66,6 +67,8 @@ AMBIGUOUS_LIMIT = 5
 AT_RE = re.compile(r"^\[CQ:at,qq=(\d+|all)(?:,[^\]]+)?\]$")
 LINK_RE = re.compile(r"^https?://.+$")
 IMAGE_RE = re.compile(r"^\[CQ:image[^\]]+\]$")
+SSL_CONTEXT = ssl.create_default_context()
+SSL_CONTEXT.set_ciphers("DEFAULT")
 
 
 @CONFIG.onload()
@@ -182,7 +185,7 @@ async def match_uid(
 async def download_image(
   url: str, *, crop: bool = True, raw: bool = False, bg: Union[Tuple[int, int, int], bool] = False,
 ) -> Image.Image:
-  async with misc.http().get(url) as response:
+  async with misc.http().get(url, ssl_context=SSL_CONTEXT) as response:
     data = await response.read()
 
   def process() -> Image.Image:
