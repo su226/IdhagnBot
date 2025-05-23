@@ -8,7 +8,9 @@ import nonebot
 import nonebot.message
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.base import JobLookupError
-from nonebot.adapters.onebot.v11 import Bot, Event, GroupMessageEvent
+from nonebot.adapters.onebot.v11 import (
+  Bot, Event, GroupIncreaseNoticeEvent, GroupMessageEvent, GroupRequestEvent,
+)
 from nonebot.exception import ActionFailed, IgnoredException
 from nonebot.matcher import Matcher
 from nonebot.message import event_preprocessor
@@ -141,7 +143,10 @@ async def on_bot_connect(bot: Bot) -> None:
 @event_preprocessor
 async def pre_event(event: Event, state: T_State):
   config = CONFIG()
-  if (group_id := getattr(event, "group_id", None)) is not None:
+  if (
+    not isinstance(event, (GroupRequestEvent, GroupIncreaseNoticeEvent))
+    and (group_id := getattr(event, "group_id", None)) is not None
+  ):
     if group_id not in config.groups:
       raise IgnoredException("机器人在当前上下文不可用")
   elif (user_id := getattr(event, "user_id", None)) is not None:
