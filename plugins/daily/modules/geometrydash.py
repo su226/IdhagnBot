@@ -9,8 +9,7 @@ from util import misc
 from . import DailyCache, Module
 
 
-# SERVER = "https://www.boomlings.com/database"  # noqa: ERA001
-SERVER = "https://endless-services.zhazha120.cn/api/EndlessProxy/GeometryDash"
+SERVER = "https://www.boomlings.com/database"
 
 
 class Level(BaseModel):
@@ -118,7 +117,7 @@ class State(BaseModel):
 class GeometryDashCache(DailyCache):
   def __init__(self, name: str, id: int) -> None:
     super().__init__(f"geometrydash{name}.json")
-    self.image_path = os.path.splitext(self.path)[0] + ".png"
+    self.image_path = os.path.splitext(self.path)[0] + ".webp"
     self.id = id
 
   async def update(self) -> None:
@@ -127,9 +126,7 @@ class GeometryDashCache(DailyCache):
       data={"secret": "Wmfd2893gb7", "levelID": self.id},
     ) as response:
       level = Level.parse(await response.text())
-    async with misc.http().get(
-      f"https://raw.githubusercontent.com/cdc-sys/level-thumbnails/main/thumbs/{level.id}.png",
-    ) as response:
+    async with misc.http().get(f"https://levelthumbs.prevter.me/thumbnail/{level.id}") as response:
       if response.status == 200:
         with open(self.image_path, "wb") as f:
           f.write(await response.read())
