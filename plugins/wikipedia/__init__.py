@@ -3,16 +3,17 @@ import re
 import socket
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import AsyncIterator, Literal, Optional
+from typing import AsyncIterator, Literal, Optional, cast
 
 from aiohttp.web import BaseRequest, Response, Server, ServerRunner, TCPSite
-from libzim.reader import Archive  # type: ignore
-from libzim.search import Query, Searcher  # type: ignore
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
 from playwright.async_api import async_playwright
 from pydantic import BaseModel, PrivateAttr
+from pyzim.archive import Zim
+from pyzim.entry import ContentEntry
+from pyzim.exceptions import EntryNotFound
 
 from util import command, configs, misc
 
@@ -23,20 +24,32 @@ class Config(BaseModel):
   width: int = 800
   scale: float = 1
   use_opencc: bool = True
-  _archive: Optional[Archive] = PrivateAttr(None)
+  _archive: Optional[Zim] = PrivateAttr(None)
 
   @property
-  def archive(self) -> Archive:
+  def archive(self) -> Zim:
     if not self._archive:
-      self._archive = Archive(Path(self.zim))
+      self._archive = Zim.open(self.zim)
     return self._archive
 
 
 CONFIG = configs.SharedConfig("wikipedia", Config)
 DIR = Path(__file__).resolve().parent
 COMMON_SCRIPT_PATH = DIR / "common.js"
-OPENCC_SCRIPT_PATH = DIR / "opencc.t2cn.js"
+OPENCC_SCRIPT_PATH = DIR / "opencc.js"
 CHARSET_RE = re.compile(r";\s*charset=([^;]*)")
+
+
+def get_entry(archive: Zim, url: str) -> Optional[ContentEntry]:
+  try:
+    return cast(ContentEntry, archive.get_entry_by_full_url(url).resolve())
+  except EntryNotFound:
+    pass
+  try:
+    return cast(ContentEntry, archive.get_content_entry_by_url(url).resolve())
+  except EntryNotFound:
+    pass
+  return None
 
 
 async def handler(request: BaseRequest):
@@ -45,15 +58,13 @@ async def handler(request: BaseRequest):
     charset = match[1]
     return ""
   config = CONFIG()
-  try:
-    entry = config.archive.get_entry_by_path(request.path[1:])
-  except KeyError:
+  entry = get_entry(config.archive, request.path[1:])
+  if not entry: 
     return Response(status=404, text="Not Found")
-  item = entry.get_item()
   charset = None
   # AIOHTTP要求charset是独立的参数……
-  mime = CHARSET_RE.sub(got_charset, item.mimetype)
-  return Response(body=item.content, content_type=mime, charset=charset)
+  mime = CHARSET_RE.sub(got_charset, entry.mimetype)
+  return Response(body=entry.read(), content_type=mime, charset=charset)
 
 
 @asynccontextmanager
@@ -105,8 +116,8 @@ def format_choices(state: T_State) -> str:
   page = state["page"]
   begin = page * config.page_size
   segments = []
-  for i, v in enumerate(search.getResults(begin, config.page_size), begin + 1):
-    segments.append(f"{i}: {v[2:]}")
+  for i, v in enumerate(search.iter_in_range(begin, config.page_size), begin + 1):
+    segments.append(f"{i}: {v.title}")
   pages = math.ceil(count / config.page_size)
   segments.append(f"第 {page + 1} 页，共 {pages} 页，{count} 个结果")
   segments.append("- 发送数字查看页面")
@@ -124,8 +135,8 @@ async def handle_wikipedia(state: T_State, msg: Message = CommandArg()) -> None:
   if not query:
     await wikipedia.finish(wikipedia.__doc__)
   config = CONFIG()
-  state["search"] = search = Searcher(config.archive).search(Query().set_query(query))
-  state["count"] = count = search.getEstimatedMatches()
+  state["search"] = search = config.archive.get_search().search(query)
+  state["count"] = count = search.n_estimated
   state["page"] = 0
   state["end"] = False
   if count == 0:
@@ -150,5 +161,5 @@ async def got_choice(state: T_State, choice: str = ArgStr()) -> None:
   count = state["count"]
   if choice_int < 1 or choice_int > count:
     await wikipedia.reject(f"只能发送 1 和 {count} 之间的数字，请重新输入，或发送“退”退出")
-  path = next(iter(search.getResults(choice_int - 1, 1)))
+  path = next(iter(search.iter_in_range(choice_int - 1, 1))).full_url
   await wikipedia.finish(MessageSegment.image(await screenshot(path)))
