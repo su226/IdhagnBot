@@ -55,10 +55,8 @@ class UserCategory(UserData):
 
 
 class Config(BaseModel):
-  __file__ = "help"
   page_size: int = 10
   user_helps: List[Union[str, UserString, UserCommand, UserCategory]] = Field(default_factory=list)
-  category_brief: Dict[str, str] = Field(default_factory=dict)
 
 
 CONFIG = configs.SharedConfig("help", Config)
