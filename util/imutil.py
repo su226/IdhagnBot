@@ -79,11 +79,11 @@ def to_cairo(im: Image.Image) -> cairo.ImageSurface:
   return cairo.ImageSurface.create_for_data(data, cairo.FORMAT_ARGB32, im.width, im.height)
 
 
-def circle(im: Image.Image, antialias: Union[bool, int, float] = True) -> None:
+def circle(im: Image.Image, antialias: Union[bool, float] = True) -> None:
   if isinstance(antialias, bool):
     ratio = 2 if antialias else 1
   else:
-    ratio = round(antialias)
+    ratio = antialias
   if ratio > 1:
     mask = Image.new("L", (round(im.width * ratio), round(im.height * ratio)))
     draw = ImageDraw.Draw(mask)
@@ -93,6 +93,48 @@ def circle(im: Image.Image, antialias: Union[bool, int, float] = True) -> None:
     mask = Image.new("L", im.size)
     draw = ImageDraw.Draw(mask)
     draw.ellipse((0, 0, mask.width - 1, mask.height - 1), 255)
+  if "A" in im.getbands():
+    mask = ImageChops.multiply(im.getchannel("A"), mask)
+  im.putalpha(mask)
+
+
+def rounded_rectangle(
+  im: Image.Image, radius: int, antialias: Union[bool, float] = True,
+) -> None:
+  if isinstance(antialias, bool):
+    ratio = 2 if antialias else 1
+  else:
+    ratio = antialias
+  if ratio > 1:
+    circle = Image.new("L", (round(radius * 2 * ratio), round(radius * 2 * ratio)))
+    draw = ImageDraw.Draw(circle)
+    draw.ellipse((0, 0, circle.width - 1, circle.height - 1), 255)
+    circle = circle.resize((radius * 2, radius * 2), scale_resample())
+  else:
+    circle = Image.new("L", (radius * 2, radius * 2))
+    draw = ImageDraw.Draw(circle)
+    draw.ellipse((0, 0, circle.width - 1, circle.height - 1), 255)
+  mask = Image.new("L", im.size)
+  mask.paste(
+    circle.crop((0, 0, radius, radius)),
+    (0, 0),
+  )
+  mask.paste(
+    circle.crop((radius, 0, radius * 2, radius)),
+    (mask.width - radius, 0),
+  )
+  mask.paste(
+    circle.crop((0, radius, radius, radius * 2)),
+    (0, mask.height - radius),
+  )
+  mask.paste(
+    circle.crop((radius, radius, radius * 2, radius * 2)),
+    (mask.width - radius, mask.height - radius),
+  )
+  draw = ImageDraw.Draw(mask)
+  draw.rectangle((radius, 0, mask.width - radius - 1, radius - 1), 255)
+  draw.rectangle((0, radius, mask.width - 1, mask.height - radius - 1), 255)
+  draw.rectangle((radius, mask.height - radius, mask.width - radius - 1, mask.height - 1), 255)
   if "A" in im.getbands():
     mask = ImageChops.multiply(im.getchannel("A"), mask)
   im.putalpha(mask)
@@ -207,23 +249,17 @@ def sample_frames(im: Image.Image, frametime: int) -> Generator[Image.Image, Non
 
 
 def paste(
-  dst: Image.Image, src: Union[AnyImage, PasteColor], xy: Point = (0, 0),
-  mask: Union[AnyImage, None] = None, anchor: Anchor = "lt",
+  dst: Image.Image,
+  src: Union[AnyImage, PasteColor],
+  xy: Point = (0, 0),
+  anchor: Anchor = "lt",
 ) -> None:
-  if isinstance(mask, cairo.ImageSurface):
-    mask = from_cairo(mask)
   if isinstance(src, cairo.ImageSurface):
-    src = from_cairo(src)
-  if isinstance(src, Image.Image):
-    if src.mode == "P" and "A" in src.palette.mode:
-      src = src.convert(src.palette.mode)  # RGBA (也可能是LA？)
-    if "A" in src.getbands():
-      if mask:
-        mask = ImageChops.multiply(mask, src.getchannel("A"))
-      else:
-        mask = src.getchannel("A")
+    paste_src = from_cairo(src)
+    width, height = paste_src.size
+  elif isinstance(src, Image.Image):
     paste_src = src
-    width, height = src.size
+    width, height = paste_src.size
   else:
     paste_src, (width, height) = src
     paste_src = colorutil.split_rgb(paste_src) if isinstance(paste_src, int) else paste_src
@@ -239,9 +275,56 @@ def paste(
     y1 -= height
   x1 = round(x1)
   y1 = round(y1)
-  x2 = x1 + width
-  y2 = y1 + height
-  dst.paste(paste_src, (x1, y1, x2, y2), mask)
+  if (
+    dst.mode in ("RGBA", "LA")
+    and isinstance(paste_src, Image.Image)
+    and paste_src.has_transparency_data
+  ):
+    if paste_src.mode != dst.mode:
+      paste_src = paste_src.convert(dst.mode)
+    dst.alpha_composite(paste_src, (x1, y1))
+  else:
+    paste_mask = None
+    if isinstance(paste_src, Image.Image):
+      if "transparency" in paste_src.info:
+        paste_src = paste_src.copy()
+        paste_src.apply_transparency()
+      if paste_src.palette and paste_src.palette.mode.endswith("A"):
+        paste_src = paste_src.convert(paste_src.palette.mode)
+        paste_mask = paste_src
+      elif paste_src.mode.endswith(("A", "a")):
+        paste_mask = paste_src
+    dst.paste(paste_src, (x1, y1, x1 + width, y1 + height), paste_mask)
+
+
+def replace(
+  dst: Image.Image,
+  src: Union[AnyImage, PasteColor],
+  xy: Point = (0, 0),
+  anchor: Anchor = "lt",
+) -> None:
+  if isinstance(src, cairo.ImageSurface):
+    paste_src = from_cairo(src)
+    width, height = paste_src.size
+  elif isinstance(src, Image.Image):
+    paste_src = src
+    width, height = paste_src.size
+  else:
+    paste_src, (width, height) = src
+    paste_src = colorutil.split_rgb(paste_src) if isinstance(paste_src, int) else paste_src
+  x1, y1 = xy
+  xa, ya = anchor
+  if xa == "m":
+    x1 -= width / 2
+  elif xa == "r":
+    x1 -= width
+  if ya == "m":
+    y1 -= height / 2
+  elif ya == "b":
+    y1 -= height
+  x1 = round(x1)
+  y1 = round(y1)
+  dst.paste(paste_src, (x1, y1, x1 + width, y1 + height))
 
 
 def _check_libimagequant() -> bool:
@@ -257,13 +340,10 @@ def _check_libimagequant() -> bool:
   return _LIBIMAGEQUANT_AVAILABLE
 
 
-def _add_transparency(im: Image.Image) -> None:
-  if im.palette.mode != "RGBA":
-    return
-  for i in range(0, len(im.palette.palette), 4):
-    if im.palette.palette[i + 3] == 0:
-      im.info["transparency"] = i // 4
-      break
+def flatten(im: Image.Image, bg: colorutil.RGB = (255, 255, 255)) -> Image.Image:
+  out_im = Image.new("RGB", im.size, bg)
+  out_im.paste(im, mask=im)
+  return out_im
 
 
 def quantize(im: AnyImage, palette: Optional[Image.Image] = None) -> Image.Image:
@@ -272,30 +352,42 @@ def quantize(im: AnyImage, palette: Optional[Image.Image] = None) -> Image.Image
   if config.libimagequant is True and _check_libimagequant():
     # Image.new 在 RGB 模式下不带 color 参数会给隐藏的 Alpha 通道填充 0 而非 255
     # 也就是颜色实际上是 (0, 0, 0, 0) 而非 (0, 0, 0, 255)
-    # 这会导致 libimagequant 产生的图片变绿
+    # 这会导致 libimagequant 产生的图片变绿（新版 libimagequant 似乎已经修复了这个问题）
     # 所以要么给所有的 Image.new 都显式加上 (0, 0, 0) 作为 color 参数
     # 要么 quantize 前先转换成 RGBA
-    im = im.convert("RGBA").quantize(method=Image.Quantize.LIBIMAGEQUANT, palette=palette)
-    _add_transparency(im)
-    return im
+    p = im.quantize(method=Image.Quantize.LIBIMAGEQUANT)
+    assert p.palette
+    if p.palette.mode != "RGBA":
+      return p
+    for i in range(0, len(p.palette.palette), 4):
+      if p.palette.palette[i + 3] == 0:
+        p.info["transparency"] = i // 4
+        break
+    return p
+  method = Image.Quantize[config.quantize.upper()]
   if im.mode == "RGBA":
-    method = Image.Quantize.FASTOCTREE
-  else:
-    method = Image.Quantize[config.quantize.upper()]
+    # RGBA 图片的 quantize 方法不能用 palette 参数，使用内部 API 强行量化有奇怪的问题
+    # 我们手搓一个
+    a = ImageChops.invert(im.getchannel("A").convert("1"))
+    rgb = flatten(im)
+    if config.dither:
+      palette = rgb.quantize(255, method=method)
+      p = rgb.quantize(method=method, palette=palette)
+    else:
+      p = rgb.quantize(255, method=method, dither=Image.Dither.NONE)
+    assert p.palette
+    palette_data = p.palette.tobytes()
+    pos = len(palette_data) // 3
+    p.palette.palette = palette_data + b"\0\0\0"
+    p.info["transparency"] = pos
+    p.paste(pos, mask=a)
+    return p
   # 必须要量化两次才有抖动仿色（除非用 libimagequant）
   # 参见 https://github.com/python-pillow/Pillow/issues/5836
-  if not palette:
-    palette = im.quantize(method=method)
-    if not config.dither:
-      _add_transparency(palette)
-      return palette
-  # HACK: RGBA 图片的 quantize 方法不能用 palette 参数，因此只能使用 Pillow 的内部 API
-  im = cast(
-    Image.Image, cast(Any, im)._new(im.im.convert("P", Image.Dither.FLOYDSTEINBERG, palette.im)),
-  )
-  im.palette = palette.palette.copy()
-  _add_transparency(im)
-  return im
+  palette = im.quantize(method=method)
+  if not config.dither:
+    return palette
+  return im.quantize(method=method, palette=palette)
 
 
 @overload
