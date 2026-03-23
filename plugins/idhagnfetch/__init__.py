@@ -4,7 +4,18 @@ import platform
 import re
 import time
 from typing import (
-  Any, Awaitable, Callable, Generator, Iterable, List, Literal, Mapping, Sequence, Set, Tuple,
+  TYPE_CHECKING,
+  Any,
+  Awaitable,
+  Callable,
+  Generator,
+  Iterable,
+  List,
+  Literal,
+  Mapping,
+  Sequence,
+  Set,
+  Tuple,
   TypeVar,
 )
 
@@ -12,12 +23,14 @@ import nonebot
 import psutil
 from nonebot.adapters.onebot.v11 import Bot, MessageSegment
 from PIL import Image
-from psutil._common import sdiskpart  # type: ignore
 from pydantic import BaseModel, Field
 
 from util import colorutil, command, configs, imutil, misc, textutil
 
 from .gpu import get_gpu_info
+
+if TYPE_CHECKING:
+  from psutil._ntuples import sdiskpart
 
 Item = Tuple[str, str]
 BarItem = Tuple[str, str, float]
@@ -227,37 +240,29 @@ async def get_gpus_and_usage(bot: Bot) -> List[Item]:
 
 async def get_memory_bar(bot: Bot) -> List[BarItem]:
   mem_info = psutil.virtual_memory()
-  info_str = (
-    f"{human_util(mem_info.used, mem_info.total)} {round(mem_info.percent)}%"
-  )
+  info_str = f"{human_util(mem_info.used, mem_info.total)} {round(mem_info.percent)}%"
   return [("内存", info_str, mem_info.percent / 100)]
 
 
 async def get_memory(bot: Bot) -> List[Item]:
   mem_info = psutil.virtual_memory()
-  info_str = (
-    f"{human_util(mem_info.used, mem_info.total)} ({round(mem_info.percent)}%)"
-  )
+  info_str = f"{human_util(mem_info.used, mem_info.total)} ({round(mem_info.percent)}%)"
   return [("内存", info_str)]
 
 
 async def get_swap_bar(bot: Bot) -> List[BarItem]:
   swap_info = psutil.swap_memory()
-  info_str = (
-    f"{human_util(swap_info.used, swap_info.total)} {round(swap_info.percent)}%"
-  )
+  info_str = f"{human_util(swap_info.used, swap_info.total)} {round(swap_info.percent)}%"
   return [("交换", info_str, swap_info.percent / 100)]
 
 
 async def get_swap(bot: Bot) -> List[Item]:
   swap_info = psutil.swap_memory()
-  info_str = (
-    f"{human_util(swap_info.used, swap_info.total)} ({round(swap_info.percent)}%)"
-  )
+  info_str = f"{human_util(swap_info.used, swap_info.total)} ({round(swap_info.percent)}%)"
   return [("交换", info_str)]
 
 
-def iter_disks() -> Generator[sdiskpart, Any, Any]:
+def iter_disks() -> Generator["sdiskpart", Any, Any]:
   config = CONFIG()
   shown: Set[str] = set()
   for partition in psutil.disk_partitions():
@@ -365,9 +370,9 @@ async def get_backend(bot: Bot) -> List[Item]:
 
 async def get_backend_stats(bot: Bot) -> List[Item]:
   status = await bot.get_status()
-  if "stat" not in status:
+  stats = status.get("stat")
+  if not stats:
     return []
-  stats = status["stat"]
   lost_ratio = stats["packet_lost"] / (stats["packet_received"] + stats["packet_sent"])
   return [("后端状态", " ".join([
     f"收 {stats['message_received']}",
