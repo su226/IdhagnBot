@@ -12,30 +12,31 @@
 
 ## 功能
 ~~详见[我的博客](https://legacy.su226.eu.org/2022/01/12/idhagn-bot/)~~
-已过时，[新文档](https://idhagnbot.su226.eu.org/)正在施工中
+~~已过时，[新文档](https://idhagnbot.su226.eu.org/)正在施工中~~
+我得了一种不想写文档的病（被打）
 
 部分功能需要可选依赖：
-* 离线维基百科：`libzim`（注意这个是 GPL 协议）、`playwright`（默认路径为 null，也就是使用 Playwright 附带的浏览器，可修改为其他路径）
-* [wttr.in](https://wttr.in)天气：playwright（因为使用了[xterm.js](https://xtermjs.org)来本地渲染终端）
+* 离线维基百科：`libzim`（由于协议原因，改用 pyzim，但依赖分组名不变）、`playwright`（默认路径为 null，也就是使用 Playwright 附带的浏览器，可修改为其他路径）
+* [wttr.in](https://wttr.in)天气：`playwright`（因为使用了[xterm.js](https://xtermjs.org)来本地渲染终端）
 * Minecraft 服务器状态：`mctools`
 * IdhagnFetch（仿[neofetch](https://github.com/dylanaraps/neofetch)的状态信息）：`psutil`
   * 注：显卡信息直接从 `/sys/class/drm` 读取，因此只支持 Linux
 * text_generator 的部分功能：`jieba`
 * meme_pic 的部分功能：`opencv`
 * 词云、排行和统计：`wordcloud`、`jieba`、`sql`
-* B 站动态推送的 gRPC 模式（更快）：`grpc`
+* ~~B 站动态推送的 gRPC 模式（更快）：`grpc`~~（已失效）
 * auto_recall 的 SQL 模式：`sql`
 
 你可以使用 `pdm install -G <上述提到的名称>` 来安装上述依赖，如：`pdm install -G opencv`
 
 部分功能需安装第三方软件：
-* 沙箱执行 Python：bubblewrap（虽然这个也是 GPL，但是是 subprocess 调用的）
-* 沙箱执行 JavaScript: bubblewrap、nodejs、npm
+* ~~沙箱执行 Python：bubblewrap（虽然这个也是 GPL，但是是 subprocess 调用的）~~（已失效）
+* ~~沙箱执行 JavaScript: bubblewrap、nodejs、npm~~（已失效）
 * 配置文件使用 PyYAML 解析，安装 libyaml 以使用 C 语言解析器（否则将使用纯 Python 解析器）
 * qalc 计算器：libqalculate
 
 ## 安装
-本项目使用 Linux + Python 3.11 开发，未在 Windows 或 MacOS 上测试过，理论上也兼容 3.8、3.9 和 3.10。
+本项目使用 Linux + Python 3.14 开发，未在 Windows 或 MacOS 上测试过，理论上也兼容 3.11、3.12 和 3.13。
 ```shell
 # 以 ArchLinux 为例，请自行换成你的发行版的包管理器
 sudo pacman -S cairo pango gobject-introspection python-pdm
@@ -122,4 +123,5 @@ IdhagnBot 的诞生离不开以下项目带来的启发和参考。
 * 部分资源来自 [nonebot-plugin-petpet](https://github.com/MeetWq/nonebot-plugin-petpet)、[nonebot-plugin-memes](https://github.com/noneplugin/nonebot-plugin-memes)等
 * [stdlib-js/random-base-binomial](https://github.com/stdlib-js/random-base-binomial)（因为我觉得为了一个随机数生成器就引入 NumPy 有些杀鸡用牛刀就把这个移植到了 Python）
 * 电子包浆、卢浮宫等的原作者：[神奇海螺](https://lab.magiconch.com/)
-* 以及其他参考过的 NoneBot2 插件和用到的在线 API，如 [emojimix](https://tikolu.net/emojimix/)
+* [Emoji Kitchen](https://github.com/xsalazar/emoji-kitchen)
+* 以及其他参考过的 NoneBot2 插件和用到的在线 API。
