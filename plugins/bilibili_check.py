@@ -1,8 +1,9 @@
 import asyncio
+import itertools
 import time
 from dataclasses import dataclass
 from io import BytesIO
-from typing import Any, Dict, List, Optional, cast
+from typing import Any, Dict, Optional, cast
 from urllib.parse import quote as encodeuri
 
 from nonebot.adapters.onebot.v11 import Message, MessageSegment
@@ -28,7 +29,8 @@ CONFIG = configs.SharedConfig("bilibili_check", Config)
 STATE = configs.SharedState("bilibili_check", State)
 
 SEARCH_API = "http://api.bilibili.com/x/web-interface/search/type?search_type=bili_user&keyword={}"
-FOLLOW_API = "https://account.bilibili.com/api/member/getCardByMid?mid={}"
+INFO_API = "http://api.bilibili.com/x/web-interface/card?mid={}"
+FOLLOW_API = "https://line3-h5-mobile-api.biligame.com/game/center/h5/user/relationship/following_list?vmid={vmid}&ps=50&pn={pn}"
 MEDAL_API = "https://api.live.bilibili.com/xlive/web-ucenter/user/MedalWall?target_id={}"
 VTB_APIS = [
   "https://api.vtbs.moe/v1/short",
@@ -199,10 +201,11 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
     await bilibili_check.finish(bilibili_check.__doc__)
   if not await update_vtbs():
     await bilibili_check.finish("更新VTB数据失败")
+  cookie = bilibili_auth.get_cookie()
   headers = {
     "User-Agent": misc.BROWSER_UA,
     # 2024-05-08: Cookie 为空时不能搜索，但任意非空字符串都可以搜索
-    "Cookie": bilibili_auth.get_cookie() or "SESSDATA=",
+    "Cookie": cookie or "SESSDATA=",
   }
   http = misc.http()
   try:
@@ -216,20 +219,31 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
       await bilibili_check.finish(f"找不到B站用户：{name}")
     uid = search_data["data"]["result"][0]["mid"]
 
-  async with http.get(FOLLOW_API.format(uid)) as resp:
-    follow_data = await resp.json(content_type=None)
-  if follow_data["code"] == -101:
+  async with http.get(INFO_API.format(uid), headers=headers) as resp:
+    info_data = await resp.json()
+  if info_data["code"] == -101:
     await bilibili_check.finish("Cookies 过期或无效，查询失败")
-  elif follow_data["code"] == -626:
+  elif info_data["code"] == -404:
     await bilibili_check.finish(f"UID 为 {uid} 的B站用户不存在")
+  name = info_data["data"]["card"]["name"]
+  fans = info_data["data"]["card"]["fans"]
+  following = info_data["data"]["card"]["attention"]
+  avatar = info_data["data"]["card"]["face"]
+
+  following_list = list[int]()
+  for pn in itertools.count(1):
+    async with http.get(FOLLOW_API.format(vmid=uid, pn=pn), headers=headers) as resp:
+      follow_data = await resp.json()
+    if follow_data["code"] == -101:
+      await bilibili_check.finish("Cookies 过期或无效，查询失败")
+    following_list.extend(int(x["mid"]) for x in follow_data["data"]["list"])
+    if len(follow_data["data"]["list"]) < 50:
+      break
+  assert len(following_list) in (0, following)
   async with http.get(MEDAL_API.format(uid), headers=headers) as resp:
     medal_data = await resp.json()
-  async with http.get(follow_data["card"]["face"]) as resp:
+  async with http.get(avatar) as resp:
     avatar_data = await resp.read()
-  name: str = follow_data["card"]["name"]
-  fans: int = follow_data["card"]["fans"]
-  following: int = follow_data["card"]["attention"]
-  following_list: List[int] = follow_data["card"]["attentions"]
   private = following != 0 and not following_list
   vtb_names = STATE().name_cache
   vtbs = sorted((
@@ -256,7 +270,7 @@ async def handle_bilibili_check(arg: Message = CommandArg()):
         items = [textutil.render("什么都查不到", "sans", 32)]
     else:
       items = []
-      if not bilibili_auth.get_cookie():
+      if not cookie:
         items.append(textutil.render("未设置 Cookies，无法获取粉丝团信息", "sans", 32))
       elif not medals_available:
         items.append(textutil.render("Cookies 过期或无效，无法获取粉丝团信息", "sans", 32))

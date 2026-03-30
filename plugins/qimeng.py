@@ -8,7 +8,11 @@ from typing import Any, Collection, Literal, Optional, Union
 
 import nonebot
 from nonebot.adapters.onebot.v11 import (
-  Bot, Event, GroupIncreaseNoticeEvent, GroupRequestEvent, Message,
+  Bot,
+  Event,
+  GroupIncreaseNoticeEvent,
+  GroupRequestEvent,
+  Message,
 )
 from nonebot.params import ArgStr, CommandArg
 from nonebot.typing import T_State
@@ -21,7 +25,7 @@ class Config(BaseModel):
   # 公共 API 提供的接口和数据似乎有点少
   # 从网页查询有上黑等级、上黑时间、上黑原因和登记人，但使用 API 查询只有上黑原因
   # 并且没有批量查询，没法写查询全群
-  # 对不起绮梦老师了
+  # 对不起幻梦老师了
   host: str = "https://fz.qimeng.fun"
   token: SecretStr = SecretStr("")
   check_join: misc.EnableSet = misc.EnableSet.false()
@@ -220,7 +224,7 @@ async def query_spider_single(uid: int) -> tuple[int, str]:
 async def query_spider_batch(uids: Collection[int]) -> list[tuple[int, int]]:
   config = CONFIG()
   http = misc.http()
-  data = {"cxtype": "PiLiang", "user": "\n".join(str(x) for x in uids)}
+  data = {"cxtype": "PiLiang", "user": "|".join(str(x) for x in uids)}
   async with http.post(config.host, data=data) as response:
     parser = BatchParser()
     parser.feed(await response.text())

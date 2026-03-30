@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from typing import Any, AsyncGenerator, Deque, Dict, List, Optional, Tuple, cast
 
 import nonebot
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_MISSED, JobEvent
+from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED, JobEvent
 from loguru import logger
 from nonebot.adapters.onebot.v11 import Bot, Event, Message, MessageSegment
 from nonebot.exception import ActionFailed
@@ -29,11 +29,7 @@ def onload(prev: Optional[common.Config], curr: common.Config) -> None:
   queue = deque()
   for i in curr.users:
     queue.append(i)
-  if curr.grpc:
-    delta = timedelta(seconds=1)
-  else:
-    delta = timedelta(seconds=curr.interval)
-  schedule(datetime.now() + delta)
+  schedule(datetime.now() + timedelta(seconds=curr.interval))
 
 
 def schedule(date: datetime) -> None:
@@ -54,7 +50,7 @@ def schedule(date: datetime) -> None:
 def schedule_next(event: JobEvent) -> None:
   if event.job_id == "bilibili_activity":
     schedule(datetime.now() + timedelta(seconds=common.CONFIG().interval))
-scheduler.add_listener(schedule_next, EVENT_JOB_EXECUTED | EVENT_JOB_MISSED)
+scheduler.add_listener(schedule_next, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
 
 
 @driver.on_bot_connect

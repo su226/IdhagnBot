@@ -5,7 +5,12 @@ from typing import Any, Dict, Set, Tuple
 import nonebot
 from aiohttp.client_exceptions import ClientError
 from nonebot.adapters.onebot.v11 import (
-  ActionFailed, Bot, Event, GroupRecallNoticeEvent, Message, MessageEvent,
+  ActionFailed,
+  Bot,
+  Event,
+  GroupRecallNoticeEvent,
+  Message,
+  MessageEvent,
 )
 from nonebot.message import event_postprocessor, run_postprocessor, run_preprocessor
 from nonebot.params import CommandArg
@@ -30,24 +35,31 @@ class State(BaseModel):
 
 
 class Config(BaseModel):
-  show_invaild_command: misc.EnableSet = misc.EnableSet.true()
-  invaild_command_ignore: Dict[int, Set[str]] = Field(default_factory=dict)
+  show_invalid_command: misc.EnableSet = misc.EnableSet.true()
   show_is_bot: misc.EnableSet = misc.EnableSet.true()
   show_exception: misc.EnableSet = misc.EnableSet.true()
   send_exception_to_superuser: misc.EnableSet = misc.EnableSet.true()
-  _invaild_command_ignore: Dict[int, Trie] = PrivateAttr()
+  ignore_prefix_global: set[str] = Field(default_factory=set)
+  _ignore_prefix_global: Trie = PrivateAttr()
+  ignore_prefix_local: Dict[int, Set[str]] = Field(default_factory=dict)
+  _ignore_prefix_local: Dict[int, Trie] = PrivateAttr()
+  ignore_user: set[int] = Field(default_factory=set)
 
   def __init__(self, **data: Any) -> None:
     super().__init__(**data)
-    self._invaild_command_ignore = {}
-    for group_id, prefixes in self.invaild_command_ignore.items():
-      self._invaild_command_ignore[group_id] = Trie((x, None) for x in prefixes)
+    self._ignore_prefix_global = Trie((x, None) for x in self.ignore_prefix_global)
+    self._ignore_prefix_local = {}
+    for group_id, prefixes in self.ignore_prefix_local.items():
+      self._ignore_prefix_local[group_id] = Trie((x, None) for x in prefixes)
 
   def has_ignored_prefix(self, group_id: int, message: Message) -> bool:
-    return (
-      message[0].is_text()
-      and group_id in self.invaild_command_ignore
-      and bool(self._invaild_command_ignore[group_id].shortest_prefix(str(message[0])))
+    segment = message[0]
+    if not segment.is_text():
+      return False
+    text = str(segment)
+    return bool(self._ignore_prefix_global.shortest_prefix(text)) or (
+      group_id in self.ignore_prefix_local
+      and bool(self._ignore_prefix_local[group_id].shortest_prefix(text))
     )
 
 
@@ -92,21 +104,24 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
   elif isinstance(e, misc.PromptTimeout):
     reason = "等待回应超时"
     explain = "请及时发送消息回应机器人。"
+  elif isinstance(e, Image.DecompressionBombError):
+    reason = "图片过大"
+    explain = "发送的图片或链接中的图片过大。"
   else:
     reason = "未知错误"
     explain = "这可能是 IdhagnBot 的设计缺陷，请向开发者寻求帮助。"
 
   group_id = getattr(event, "group_id", None)
   if config.show_exception[group_id] and group_id not in suppressed:
-    markup = '''\
+    markup = """\
   <span weight='heavy' size='200%'>这个要慌，问题很大</span>
-  <span color='#ffffff88'>Something really bad happens. Panic!</span>'''
+  <span color='#ffffff88'>Something really bad happens. Panic!</span>"""
     header = textutil.render(markup, "sans", 32, color=(255, 255, 255), align="m", markup=True)
 
-    markup = f'''\
+    markup = f"""\
 <b>IdhagnBot 遇到了一个内部错误。</b>
 <span color='#f5f543'>可能原因: </span>{reason}
-{explain}'''
+{explain}"""
     fallback = f"IdhagnBot 遇到了一个内部错误。\n可能原因：{reason}\n{explain}"
     if group_id is not None:
       markup += (
@@ -115,7 +130,12 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
       )
       fallback += "\n群管理员可以发送 /suppress true 暂时禁用本群错误消息。"
     content = textutil.render(
-      markup, "span", 32, color=(255, 255, 255), box=max(640, header.width), markup=True,
+      markup,
+      "span",
+      32,
+      color=(255, 255, 255),
+      box=max(640, header.width),
+      markup=True,
     )
 
     size = (max(header.width, content.width) + 64, header.height + content.height + 80)
@@ -141,7 +161,7 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
   exc_typename = exc_type.__qualname__
   exc_mod = exc_type.__module__
   if exc_mod not in ("__main__", "builtins"):
-    exc_typename = exc_mod + '.' + exc_typename
+    exc_typename = exc_mod + "." + exc_typename
   try:
     exc_info = str(e)
   except Exception:
@@ -159,33 +179,39 @@ async def post_run(bot: Bot, event: MessageEvent, e: Exception) -> None:
 
 @event_postprocessor
 async def post_event(bot: Bot, event: Event, bot_state: T_State) -> None:
-  if not isinstance(event, MessageEvent) or event.user_id == QQBOT_ID:
+  if (
+    not isinstance(event, MessageEvent)
+    or event.user_id == QQBOT_ID
+    or "run" in bot_state["_prefix"]
+  ):
     return
   group_id = getattr(event, "group_id", -1)
-  if group_id in suppressed or "run" in bot_state["_prefix"]:
-    return
   config = CONFIG()
-  if (
-    misc.is_command(event.message)
-    and config.show_invaild_command[group_id]
-    and not config.has_ignored_prefix(group_id, event.message)
-  ):
+  if event.user_id in config.ignore_user or config.has_ignored_prefix(group_id, event.message):
+    return
+  if misc.is_command(event.message) and config.show_invalid_command[group_id]:
     await bot.send(event, "命令不存在、权限不足或不适用于当前上下文")
     return
   state = STATE()
   if (
-    event.is_tome() and config.show_is_bot[group_id]
+    event.is_tome()
+    and config.show_is_bot[group_id]
     and event.user_id not in state.show_is_bot_disabled
   ):
     await bot.send(
-      event, "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）\n发送 /禁用提示 为你禁用本提示",
+      event,
+      "本帐号为机器人，请发送 /帮助 查看可用命令（可以不@）\n发送 /禁用提示 为你禁用本提示",
     )
 
 
 # 使用 nonebot.on_command 是为了不显示在帮助里
 async def check_disable_show_is_bot(event: Event) -> bool:
   return CONFIG().show_is_bot[event]
+
+
 disable_show_is_bot = nonebot.on_command("禁用提示", check_disable_show_is_bot)
+
+
 @disable_show_is_bot.handle()
 async def handle_disable_show_is_bot(event: MessageEvent) -> None:
   state = STATE()
@@ -199,16 +225,19 @@ async def handle_disable_show_is_bot(event: MessageEvent) -> None:
 
 
 suppress = (
-  command.CommandBuilder("fallback.suppress", "suppress")
+  command
+  .CommandBuilder("fallback.suppress", "suppress")
   .in_group()
   .level("admin")
   .brief("暂时禁用错误消息")
-  .usage('''\
+  .usage("""\
 /suppress - 查看是否已禁用本群错误消息
 /suppress true - 禁用本群错误消息
-/suppress false - 重新启用本群错误消息''')
+/suppress false - 重新启用本群错误消息""")
   .build()
 )
+
+
 @suppress.handle()
 async def handle_suppress(bot: Bot, event: MessageEvent, args: Message = CommandArg()) -> None:
   value = str(args).rstrip()
@@ -226,12 +255,15 @@ async def handle_suppress(bot: Bot, event: MessageEvent, args: Message = Command
 
 
 raise_ = (
-  command.CommandBuilder("fallback.raise", "raise")
+  command
+  .CommandBuilder("fallback.raise", "raise")
   .level("admin")
   .in_group()
   .brief("手动触发一个错误")
   .build()
 )
+
+
 @raise_.handle()
 async def handle_raise(args: Message = CommandArg()) -> None:
   if str(args).rstrip() == "confirm":
@@ -241,7 +273,11 @@ async def handle_raise(args: Message = CommandArg()) -> None:
 
 def check_group_recall(event: GroupRecallNoticeEvent):
   return event.self_id == event.user_id and event.operator_id == QQBOT_ID
+
+
 on_group_recall = nonebot.on_notice(check_group_recall)
+
+
 @on_group_recall.handle()
 def handle_group_recall(event: GroupRecallNoticeEvent) -> None:
   state = STATE()
@@ -263,10 +299,13 @@ def handle_group_recall(event: GroupRecallNoticeEvent) -> None:
 
 
 query_recall = (
-  command.CommandBuilder("fallback.query_recall", "今天被Q群管家针对了吗", "今天被q群管家针对了吗")
+  command
+  .CommandBuilder("fallback.query_recall", "今天被Q群管家针对了吗", "今天被q群管家针对了吗")
   .brief("IdhagnBot今天被Q群管家撤了几次？")
   .build()
 )
+
+
 @query_recall.handle()
 async def handle_query_recall(event: Event) -> None:
   ctx = context.get_event_context(event)

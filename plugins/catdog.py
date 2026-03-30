@@ -20,7 +20,7 @@ class Config(BaseModel):
 
 CONFIG = configs.SharedConfig("catdog", Config)
 WARN_STR = "（翻译：API在国外，该命令缓慢或出错是正常现象）"
-CAT_API = "https://aws.random.cat/meow"
+CAT_API = "https://api.thecatapi.com/v1/images/search"
 CAT_GIF_API = "https://edgecats.net"
 DOG_API = "https://random.dog/woof.json?filter=gif,mp4,webm"
 DOG_GIF_API = "https://random.dog/woof.json?include=gif"
@@ -48,7 +48,7 @@ async def handle_cat() -> None:
     http = misc.http()
     try:
       async with http.get(CAT_API, proxy=config.proxy) as response:
-        url = (await response.json())["file"]
+        url = (await response.json())[0]["url"]
       async with http.get(url, proxy=config.proxy) as response:
         return await response.read()
     except aiohttp.ClientProxyConnectionError as e:
