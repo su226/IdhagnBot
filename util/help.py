@@ -287,14 +287,14 @@ class CategoryItem(Item):
     self, show_data: ShowData, path: List[str], bot_id: int, bot_name: str,
   ) -> List[MessageSegment]:
     config = CONFIG()
-    vaild_items = sorted(
+    valid_items = sorted(
       ((x(), x) for x in self.items if x.can_show(show_data)),
       key=lambda x: (-x[1].data.priority, x[1].get_order(), x[0]),
     )
     has_command = False
     has_category = False
     nodes: List[MessageSegment] = []
-    for chunk in misc.chunked(vaild_items, config.page_size):
+    for chunk in misc.chunked(valid_items, config.page_size):
       lines: List[str] = []
       for formatted, item in chunk:
         if isinstance(item, CommandItem):

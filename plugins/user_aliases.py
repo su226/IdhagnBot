@@ -7,11 +7,11 @@ from nonebot.params import CommandArg
 from util import command, user_aliases
 
 
-async def check_invaildate(event: NoticeEvent) -> bool:
+async def check_invalidate(event: NoticeEvent) -> bool:
   return event.notice_type in {"group_card", "group_increase", "group_decrease"}
-invaildate = nonebot.on_notice(check_invaildate)
-@invaildate.handle()
-async def handle_invaildate(event: NoticeEvent) -> None:
+invalidate = nonebot.on_notice(check_invalidate)
+@invalidate.handle()
+async def handle_invalidate(event: NoticeEvent) -> None:
   group_id: int = getattr(event, "group_id")
   if group_id in user_aliases.CACHE:
     del user_aliases.CACHE[group_id]

@@ -104,7 +104,7 @@ class ApiStatInfo(BaseModel):
 
   @field_validator("first_send", "last_send", mode="before")
   @staticmethod
-  def vaildate_date(value: Any) -> Optional[datetime]:
+  def validate_date(value: Any) -> Optional[datetime]:
     if value == "":
       return None
     match = SEND_DATE_RE.match(value)
@@ -130,7 +130,7 @@ class ApiBanInfoNone(BaseModel):
 
   @field_validator("note", "admin", "level", "date", mode="before")
   @staticmethod
-  def vaildate_info(value: Any) -> Any:
+  def validate_info(value: Any) -> Any:
     if value == "":
       return None
 
