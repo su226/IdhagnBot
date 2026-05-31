@@ -92,12 +92,12 @@ async def handle_orly(bot: Bot, event: MessageEvent, args: Namespace = ShellComm
     im.paste(cover, (960 - cover.width, 802 - cover.height))
     rect_y = 802
     if args.position in ("左上", "lt"):
-      text_im = textutil.paste(im, (40, 801), args.subtitle, "sans medium", 39, anchor="lb")
+      text_im = textutil.paste(im, (40, 801), args.subtitle, "sans medium", 39, anchor="lt")
       rect_y += text_im.height
     elif args.position in ("左下", "lb"):
       textutil.paste(im, (40, 1072), args.subtitle, "sans medium", 39, anchor="lt")
     elif args.position in ("右上", "rt"):
-      text_im = textutil.paste(im, (959, 801), args.subtitle, "sans medium", 39, anchor="rb")
+      text_im = textutil.paste(im, (959, 801), args.subtitle, "sans medium", 39, anchor="rt")
       rect_y += text_im.height
     else:
       textutil.paste(im, (959, 1072), args.subtitle, "sans medium", 39, anchor="rt")
